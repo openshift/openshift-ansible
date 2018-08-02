@@ -43,7 +43,7 @@
     - restart node
 
 - name: Enable Pod to Pod communication
-  command: /sbin/iptables --wait -I FORWARD -d {{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }} -i {{ flannel_interface }} -j ACCEPT -m comment --comment "Pod to Pod communication"
+  command: /sbin/iptables --wait -I FORWARD -d {{ openshift_cluster_network_cidr }} -i {{ flannel_interface }} -j ACCEPT -m comment --comment "Pod to Pod communication"
   notify:
     - save iptable rules
 

@@ -29,16 +29,18 @@
     - openshift_deployment_type is undefined
     - deployment_type is defined
 
+  - name: check for node already bootstrapped
+    stat:
+      path: "/etc/origin/node/bootstrap-node-config.yaml"
+    register: bootstrap_node_config_path_check
+  - name: initialize_facts set fact openshift_is_bootstrapped
+    set_fact:
+      openshift_is_bootstrapped: "{{ openshift_is_bootstrapped|default(False) or bootstrap_node_config_path_check.stat.exists }}"
+
   - name: initialize_facts set fact openshift_is_atomic and openshift_is_containerized
     set_fact:
       openshift_is_atomic: "{{ ostree_booted.stat.exists }}"
       openshift_is_containerized: "{{ ostree_booted.stat.exists or (containerized | default(false) | bool) }}"
-
-  - name: Set use_crio to True if cri-o rpm is requested
-    set_fact:
-      openshift_use_crio: True
-    when:
-    - openshift_crio_use_rpm | default(False) | bool
 
   # TODO: Should this be moved into health checks??
   # Seems as though any check that happens with a corresponding fail should move into health_checks
@@ -62,6 +64,31 @@
         - l_atomic_docker_version.stdout | replace('"', '') is version_compare('1.12','>=')
         msg: Installation on Atomic Host requires Docker 1.12 or later. Please upgrade and restart the Atomic Host.
 
+- name: Retrieve existing master configs and validate
+  hosts: oo_masters_to_config
+  gather_facts: no
+  any_errors_fatal: true
+  roles:
+  - openshift_facts
+  tasks:
+  - import_role:
+      name: openshift_control_plane
+      tasks_from: check_existing_config.yml
+
+  - when:
+    - l_existing_config_master_config is defined
+    - l_existing_config_master_config.networkConfig is defined
+    block:
+    - set_fact:
+        openshift_portal_net: "{{ l_existing_config_master_config.networkConfig.serviceNetworkCIDR }}"
+
+    - set_fact:
+        osm_cluster_network_cidr: "{{ l_existing_config_master_config.networkConfig.clusterNetworks[0].cidr }}"
+        osm_host_subnet_length: "{{ l_existing_config_master_config.networkConfig.clusterNetworks[0].hostSubnetLength }}"
+      when:
+      - l_existing_config_master_config.networkConfig.clusterNetworks is defined
+      # End block
+
 - name: Initialize special first-master variables
   hosts: oo_first_master
   roles:
@@ -69,21 +96,11 @@
   tasks:
   - when: not (osm_default_node_selector is defined)
     block:
-    - stat:
-        path: "/etc/origin/master/master-config.yaml"
-      register: master_config_path_check
-
-    - slurp:
-        src: "/etc/origin/master/master-config.yaml"
-      register: openshift_master_config_encoded_contents
-      when: master_config_path_check.stat.exists
-
     - set_fact:
+        # l_existing_config_master_config is set in openshift_control_plane/tasks/check_existing_config.yml
         openshift_master_config_node_selector: "{{ l_existing_config_master_config.projectConfig.defaultNodeSelector }}"
-      vars:
-        l_existing_config_master_config: "{{ (openshift_master_config_encoded_contents.content | b64decode | from_yaml) }}"
       when:
-      - master_config_path_check.stat.exists
+      - l_existing_config_master_config is defined
       - l_existing_config_master_config.projectConfig is defined
       - l_existing_config_master_config.projectConfig.defaultNodeSelector is defined
       - l_existing_config_master_config.projectConfig.defaultNodeSelector != ''

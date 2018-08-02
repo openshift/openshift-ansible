@@ -77,7 +77,7 @@ def find_playbooks():
     exclude_dirs = ('adhoc', 'tasks')
     for yaml_file in find_files(
             os.path.join(os.getcwd(), 'playbooks'),
-            exclude_dirs, None, r'\.ya?ml$'):
+            exclude_dirs, None, r'^[^\.].*\.ya?ml$'):
         with open(yaml_file, 'r') as contents:
             for task in yaml.safe_load(contents) or {}:
                 if not isinstance(task, dict):
@@ -151,7 +151,7 @@ class OpenShiftAnsibleYamlLint(Command):
         else:
             format_method = Format.standard_color
 
-        for yaml_file in find_files(os.getcwd(), self.excludes, None, r'\.ya?ml$'):
+        for yaml_file in find_files(os.getcwd(), self.excludes, None, r'^[^\.].*\.ya?ml$'):
             first = True
             with open(yaml_file, 'r') as contents:
                 for problem in linter.run(contents, config):
@@ -179,7 +179,7 @@ class OpenShiftAnsiblePylint(PylintCommand):
     # pylint: disable=no-self-use
     def find_all_modules(self):
         ''' find all python files to test '''
-        exclude_dirs = ('.tox', 'utils', 'test', 'tests', 'git')
+        exclude_dirs = ('.tox', 'test', 'tests', 'git')
         modules = []
         for match in find_files(os.getcwd(), exclude_dirs, None, r'\.py$'):
             package = os.path.basename(match).replace('.py', '')
@@ -222,8 +222,7 @@ class OpenShiftAnsibleGenerateValidation(Command):
         generate_files = find_files('roles',
                                     ['inventory',
                                      'test',
-                                     'playbooks',
-                                     'utils'],
+                                     'playbooks'],
                                     None,
                                     'generate.py$')
 
@@ -276,12 +275,15 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         failed_items = []
 
         search_results = recursive_search(yaml_contents, 'when')
+        search_results.append(recursive_search(yaml_contents, 'failed_when'))
         for item in search_results:
             if isinstance(item, str):
                 if '{{' in item or '{%' in item:
                     failed_items.append(item)
             else:
                 for sub_item in item:
+                    if isinstance(sub_item, bool):
+                        continue
                     if '{{' in sub_item or '{%' in sub_item:
                         failed_items.append(sub_item)
 
@@ -322,7 +324,7 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         print('Ansible Deprecation Checks')
         exclude_dirs = ('adhoc', 'files', 'meta', 'vars', 'defaults', '.tox')
         for yaml_file in find_files(
-                os.getcwd(), exclude_dirs, None, r'\.ya?ml$'):
+                os.getcwd(), exclude_dirs, None, r'^[^\.].*\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
                 yaml_contents = yaml.safe_load(contents)
                 if not isinstance(yaml_contents, list):
@@ -348,13 +350,13 @@ class OpenShiftAnsibleSyntaxCheck(Command):
             # Ignore imported playbooks in 'common', 'private' and 'init'. It is
             # expected that these locations would be imported by entry point
             # playbooks.
-            # Ignore playbooks in 'aws', 'gcp' and 'openstack' because these
+            # Ignore playbooks in 'aws', 'azure', 'gcp' and 'openstack' because these
             # playbooks do not follow the same component entry point structure.
             # Ignore deploy_cluster.yml and prerequisites.yml because these are
             # entry point playbooks but are imported by playbooks in the cloud
             # provisioning playbooks.
             ignored = ('common', 'private', 'init',
-                       'aws', 'gcp', 'openstack',
+                       'aws', 'azure', 'gcp', 'openstack',
                        'deploy_cluster.yml', 'prerequisites.yml')
             if any(x in playbook for x in ignored):
                 continue

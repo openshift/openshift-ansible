@@ -60,6 +60,9 @@ class OCService(OpenShiftCLI):
         elif 'services \"%s\" not found' % self.config.name  in result['stderr']:
             result['clusterip'] = ''
             result['returncode'] = 0
+        elif 'namespaces \"%s\" not found' % self.config.namespace  in result['stderr']:
+            result['clusterip'] = ''
+            result['returncode'] = 0
 
         return result
 
@@ -87,7 +90,7 @@ class OCService(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode):
-        '''Run the idempotent ansible code'''
+        '''Run the oc_service module'''
         oc_svc = OCService(params['name'],
                            params['namespace'],
                            params['labels'],

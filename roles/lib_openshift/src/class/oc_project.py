@@ -95,7 +95,7 @@ class OCProject(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run the oc_project module'''
 
         node_selector = None
         if params['node_selector'] is not None:

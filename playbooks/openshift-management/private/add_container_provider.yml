@@ -5,4 +5,4 @@
   - name: Run the Management Integration Tasks
     import_role:
       name: openshift_management
-      tasks_from: add_container_provider
+      tasks_from: add_container_provider.yml

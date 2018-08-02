@@ -93,7 +93,7 @@ spec:
                   key: cni_yaml_config
             # Nuage cluster network CIDR for iptables configuration
             - name: NUAGE_CLUSTER_NW_CIDR
-              value: "{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
+              value: "{{ openshift_cluster_network_cidr }}"
           volumeMounts:
             - mountPath: /host/opt/cni/bin
               name: cni-bin-dir

@@ -1,0 +1,98 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: ensure libraries are available
+    import_role:
+      name: lib_utils
+
+  - name: set expire date
+    set_fact:
+      sas_expire: "{{ lookup('pipe', 'date -d \"14 days\" +\"%Y-%m-%dT%H:%M:00Z\"') }}"
+      disk: "{{ image_name }}.vhd"
+
+  - name: fetch the image for the tags
+    command: |
+      az image list --resource-group images  -o json --query "[?name=='{{ image_name }}'].tags"
+    register: imagetags
+
+  - name: generate storage blob url
+    command: |
+      az storage blob url -c {{ openshift_azure_container }} --account-name {{ openshift_azure_storage_account }} -n {{ disk }} --output=json
+    register: bloburl
+
+  - name: generate sas url for the container
+    command: |
+      az storage container generate-sas --name {{ openshift_azure_container }} --account-name {{ openshift_azure_storage_account }} --permissions rl --expiry {{ sas_expire }} --output=json
+    register: sasurl
+
+  - name: set the sas URLS
+    set_fact:
+      openshift_azure_sas_url: "{{ bloburl.stdout|from_json + '?' + sasurl.stdout|from_json }}"
+
+  - name: set the image tags
+    set_fact:
+      image_tags: "{{ (imagetags.stdout | from_json)[0] }}"
+
+  - name: set the image_type
+    set_fact:
+      image_type: "{{ 'rhel' if 'rhel' in image_tags.base_image else 'centos' }}"
+      image_x: "{{ image_tags.openshift.split('.')[0] }}"
+      image_y: "{{ image_tags.openshift.split('.')[1] }}"
+      image_z: "{{ image_tags.openshift.split('.')[2] }}"
+      image_vm_images: |-
+        { "{{ image_x }}{{ image_y }}.{{ image_z }}.{{ (image_name | regex_search('([0-9]{12})'))[:8] }}": {"osVhdUrl": "{{ openshift_azure_sas_url }}" } }
+
+  - name: fetch the current offer and update the versions
+    oo_azure_rm_publish_image_facts:
+      offer: osa
+    register: offerout
+
+  - when:
+    - offerout['status_code'] != 404
+    block:
+    - debug:
+        msg: "{{ offerout }}"
+        verbosity: 1
+
+    - debug:
+        msg: "{{ offerout['data']['definition']['plans'][0]['microsoft-azure-virtualmachines.vmImages'] }}"
+        verbosity: 1
+
+    - debug:
+        msg: "{{ lookup('template', 'offer.yml.j2') }}"
+        verbosity: 1
+
+    - name: bring along the previous offer versions and combine with incoming
+      yedit:
+        content: "{{ lookup('template', 'offer.yml.j2') }}"
+        key: "definition#plans[0]#microsoft-azure-virtualmachines.vmImages#{{ item.key }}"
+        value: "{{ item.value }}"
+        separator: '#'
+      with_dict: "{{ offerout['data']['definition']['plans'][0]['microsoft-azure-virtualmachines.vmImages'] }}"
+      when:
+      - "'data' in offerout"
+      - "'definition' in offerout['data']"
+      register: yeditout
+
+    - debug:
+        msg: "{{ yeditout }}"
+        verbosity: 1
+
+    # this cancel operation returns a 202 whether it cancelled or not.
+    - name: cancel publish operation
+      oo_azure_rm_publish_image:
+        offer: osa
+        state: cancel_op
+
+  - name: create|update an offer in cloudpartner portal
+    oo_azure_rm_publish_image:
+      offer: osa
+      offer_data: "{{ (lookup('template', 'offer.yml.j2') | from_yaml) if 'skipped' in yeditout and yeditout.skipped or not yeditout.changed else yeditout.results[0].result[0].edit }}"
+      force: True
+
+  - name: publish this offer
+    oo_azure_rm_publish_image:
+      state: publish
+      offer: osa
+      emails: "{{ openshift_azure_image_publish_emails }}"

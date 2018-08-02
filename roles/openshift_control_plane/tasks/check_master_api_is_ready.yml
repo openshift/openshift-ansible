@@ -1,0 +1,25 @@
+---
+- name: Wait for APIs to become available
+  command: >
+    {{ openshift_client_binary }} get --raw /apis/{{ item }}/v1
+  register: openshift_apis
+  until: openshift_apis.rc == 0
+  with_items: "{{ l_core_api_list }}"
+  retries: 60
+  delay: 5
+
+- name: "Collect API logs when API didn't become available"
+  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-api
+  register: l_api_log_output
+  when: openshift_apis is failed
+
+- name: "Dump API logs when the API didn't become availabale"
+  debug:
+    msg: "{{ l_api_log_output.stdout_lines }}"
+  when: openshift_apis is failed
+
+- fail:
+    msg: >
+      API did not become available. Verbose curl output and API logs
+      have been collected above to assist with debugging.
+  when: openshift_apis is failed

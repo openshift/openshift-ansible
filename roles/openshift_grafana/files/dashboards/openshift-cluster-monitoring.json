@@ -184,7 +184,7 @@
 			  "tableColumn": "",
 			  "targets": [
 				{
-				  "expr": "sum (container_memory_working_set_bytes{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) / sum (machine_memory_bytes{kubernetes_io_hostname=~\"^$Node$\"}) * 100",
+				  "expr": "sum (container_memory_rss{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) / sum (machine_memory_bytes{kubernetes_io_hostname=~\"^$Node$\"}) * 100",
 				  "format": "time_series",
 				  "interval": "",
 				  "intervalFactor": 1,
@@ -431,7 +431,7 @@
 			  "tableColumn": "",
 			  "targets": [
 				{
-				  "expr": "sum (container_memory_working_set_bytes{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"})",
+				  "expr": "sum (container_memory_rss{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"})",
 				  "format": "time_series",
 				  "interval": "",
 				  "intervalFactor": 1,
@@ -1000,7 +1000,7 @@
 			  "steppedLine": true,
 			  "targets": [
 				{
-				  "expr": "sum (irate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[16s])) by (pod_name) * 100",
+				  "expr": "sum (irate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[2m])) by (pod_name) * 100",
 				  "format": "time_series",
 				  "hide": false,
 				  "interval": "",
@@ -1284,7 +1284,7 @@
 				"current": true,
 				"max": false,
 				"min": false,
-				"rightSide": false,
+				"rightSide": true,
 				"show": true,
 				"sort": "current",
 				"sortDesc": true,
@@ -1306,7 +1306,7 @@
 			  "steppedLine": true,
 			  "targets": [
 				{
-				  "expr": "sum (irate (container_memory_usage_bytes{id!=\"/\",kubernetes_io_hostname=~\"^$Node$\"}[Xs])) by (id)",
+				  "expr": "sum (irate (container_memory_rss{id!=\"/\",kubernetes_io_hostname=~\"^$Node$\"}[Xs])) by (id)",
 				  "format": "time_series",
 				  "hide": false,
 				  "interval": "1s",
@@ -1407,7 +1407,7 @@
 			  "steppedLine": true,
 			  "targets": [
 				{
-				  "expr": "sum (container_memory_working_set_bytes{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}) by (pod_name)",
+				  "expr": "sum (container_memory_rss{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}) by (pod_name)",
 				  "format": "time_series",
 				  "interval": "1s",
 				  "intervalFactor": 1,
@@ -1608,7 +1608,7 @@
 			  "steppedLine": true,
 			  "targets": [
 				{
-				  "expr": "sum (container_memory_working_set_bytes{image!=\"\",name=~\"^k8s_.*\",container_name!=\"POD\",kubernetes_io_hostname=~\"^$Node$\"}) by (container_name, pod_name)",
+				  "expr": "sum (container_memory_rss{image!=\"\",name=~\"^k8s_.*\",container_name!=\"POD\",kubernetes_io_hostname=~\"^$Node$\"}) by (container_name, pod_name)",
 				  "format": "time_series",
 				  "interval": "1s",
 				  "intervalFactor": 1,
@@ -1618,7 +1618,7 @@
 				  "step": 10
 				},
 				{
-				  "expr": "sum (container_memory_working_set_bytes{image!=\"\",name!~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}) by (kubernetes_io_hostname, name, image)",
+				  "expr": "sum (container_memory_rss{image!=\"\",name!~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}) by (kubernetes_io_hostname, name, image)",
 				  "format": "time_series",
 				  "hide": false,
 				  "interval": "1s",
@@ -1629,7 +1629,7 @@
 				  "step": 10
 				},
 				{
-				  "expr": "sum (container_memory_working_set_bytes{rkt_container_name!=\"\",kubernetes_io_hostname=~\"^$Node$\"}) by (kubernetes_io_hostname, rkt_container_name)",
+				  "expr": "sum (container_memory_rss{rkt_container_name!=\"\",kubernetes_io_hostname=~\"^$Node$\"}) by (kubernetes_io_hostname, rkt_container_name)",
 				  "format": "time_series",
 				  "hide": false,
 				  "interval": "1s",
@@ -1730,7 +1730,7 @@
 			  "steppedLine": true,
 			  "targets": [
 				{
-				  "expr": "sum (container_memory_working_set_bytes{id!=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) by (id)",
+				  "expr": "sum (container_memory_rss{id!=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) by (id)",
 				  "interval": "1s",
 				  "intervalFactor": 1,
 				  "legendFormat": "{{ id }}",
@@ -2175,13 +2175,15 @@
 			  "id": 35,
 			  "legend": {
 				"avg": false,
-				"current": false,
-				"max": false,
-				"min": false,
-				"show": false,
-				"total": false,
-				"values": false
-			  },
+			        "current": false,
+			        "max": false,
+			        "min": false,
+			        "show": true,
+			        "total": false,
+			        "values": false,
+			        "alignAsTable": true,
+			        "rightSide": true
+			  },			  
 			  "lines": true,
 			  "linewidth": 1,
 			  "links": [],
@@ -2201,7 +2203,8 @@
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
-				  "step": 4
+				  "step": 4,
+				  "legendFormat": "{{ phase }}"
 				}
 			  ],
 			  "thresholds": [],
@@ -2272,7 +2275,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "count(openshift_build_active_time_seconds{phase=\"running\"} < time() - 600)",
+				  "expr": "count(openshift_build_active_time_seconds{phase=\"Running\"} < time() - 600)",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -2347,7 +2350,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "count(openshift_build_active_time_seconds{phase=\"pending\"} < time() - 600)",
+				  "expr": "count(openshift_build_active_time_seconds{phase=\"Pending\"} < time() - 600)",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -2422,7 +2425,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "sum(openshift_build_total{phase=\"failed\"})",
+				  "expr": "sum(openshift_build_total{phase=\"Failed\"})",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -2497,7 +2500,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "openshift_build_total{phase=\"failed\",reason=\"fetchsourcefailed\"}",
+				  "expr": "openshift_build_total{phase=\"Failed\",reason=\"fetchsourcefailed\"}",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -2572,7 +2575,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "sum(openshift_build_total{phase=\"complete\"})",
+				  "expr": "sum(openshift_build_total{phase=\"Complete\"})",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -2647,7 +2650,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "openshift_build_total{phase=\"failed\"} offset 5m",
+				  "expr": "openshift_build_total{phase=\"Failed\"} offset 5m",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -3658,7 +3661,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "drop_common_labels(sort_desc(sum without (cpu) (irate(container_cpu_usage_seconds_total{container_name=\"prometheus\"}[5m]))))",
+				  "expr": "sort_desc(sum without (cpu) (irate(container_cpu_usage_seconds_total{container_name=\"prometheus\"}[5m])))",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -3745,7 +3748,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "sort_desc(drop_common_labels(sum without (instance,type,client,contentType) (irate(apiserver_request_count{verb!~\"GET|LIST|WATCH\"}[Xs])))) > 0",
+				  "expr": "sort_desc(sum without (instance,type,client,contentType) (irate(apiserver_request_count{verb!~\"GET|LIST|WATCH\"}[Xs]))) > 0",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -3820,7 +3823,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "sort_desc(drop_common_labels(sum without (instance,type,client,contentType) (irate(apiserver_request_count{verb=~\"GET|LIST|WATCH\"}[Xs])))) > 0",
+				  "expr": "sort_desc(sum without (instance,type,client,contentType) (irate(apiserver_request_count{verb=~\"GET|LIST|WATCH\"}[Xs]))) > 0",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",

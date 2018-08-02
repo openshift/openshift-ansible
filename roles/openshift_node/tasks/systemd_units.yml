@@ -4,19 +4,19 @@
     src: openshift-node
     dest: /usr/local/bin/openshift-node
     mode: 0500
+
 - name: Install Node service file
   template:
     dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
-    src: "{{ openshift_is_containerized | bool | ternary('openshift.docker.node.service', 'node.service.j2') }}"
-  when: not l_is_node_system_container | bool
+    src: "node.service.j2"
+  when: not openshift_is_atomic | bool
   notify:
   - reload systemd units
-  - restart node
 
-- when: openshift_is_containerized | bool
-  block:
-  - name: include node deps docker service file
-    include_tasks: config/install-node-deps-docker-service-file.yml
+- name: Install node system container
+  import_tasks: node_system_container.yml
+  when: openshift_is_atomic | bool
 
-- include_tasks: config/configure-node-settings.yml
-- include_tasks: config/configure-proxy-settings.yml
+
+- import_tasks: config/configure-node-settings.yml
+- import_tasks: configure-proxy-settings.yml

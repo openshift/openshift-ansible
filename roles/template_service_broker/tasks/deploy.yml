@@ -36,40 +36,40 @@
 - name: Apply template file
   shell: >
     {{ openshift_client_binary }} process --config={{ mktemp.stdout }}/admin.kubeconfig
-    -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
+    -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" -n openshift-template-service-broker
     --param API_SERVER_CONFIG="{{ config['content'] | b64decode }}"
-    --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}"
-    --param NODE_SELECTOR={{ template_service_broker_selector | to_json | quote }}
+    --param IMAGE="{{ template_service_broker_image }}"
+    --param NODE_SELECTOR={{ {'node-role.kubernetes.io/master':'true'} | to_json | quote }}
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
 
 # reconcile with rbac
 - name: Reconcile with RBAC file
   shell: >
-    {{ openshift_client_binary }} process --config={{ mktemp.stdout }}/admin.kubeconfig -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}"
+    {{ openshift_client_binary }} process --config={{ mktemp.stdout }}/admin.kubeconfig -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}" -n openshift-template-service-broker
     | {{ openshift_client_binary }} auth reconcile --config={{ mktemp.stdout }}/admin.kubeconfig -f -
 
 # Check that the TSB is running
 - name: Verify that TSB is running
-  command: >
-    curl -k https://apiserver.openshift-template-service-broker.svc/healthz
-  args:
-    # Disables the following warning:
-    # Consider using get_url or uri module rather than running curl
-    warn: no
+  uri:
+    url: https://apiserver.openshift-template-service-broker.svc/healthz
+    validate_certs: no
+    return_content: yes
+  environment:
+    no_proxy: '*'
   register: api_health
-  until: api_health.stdout == 'ok'
+  until: "'ok' in api_health.content"
   retries: 60
   delay: 10
   changed_when: false
 
 - slurp:
-    src: "{{ openshift_master_config_dir }}/service-signer.crt"
+    src: "/etc/origin/master/service-signer.crt"
   register: __ca_bundle
 
 # Register with broker
 - name: Register TSB with broker
   shell: >
-    {{ openshift_client_binary }} process --config={{ mktemp.stdout }}/admin.kubeconfig -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" --param CA_BUNDLE="{{ __ca_bundle.content }}" | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
+    {{ openshift_client_binary }} process --config={{ mktemp.stdout }}/admin.kubeconfig -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" -n openshift-template-service-broker --param CA_BUNDLE="{{ __ca_bundle.content }}" | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
 
 - file:
     state: absent

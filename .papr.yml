@@ -32,6 +32,7 @@ packages:
   - libffi-devel
   - openssl-devel
   - redhat-rpm-config
+  - findutils
 
 context: 'fedora/27/atomic'
 
@@ -40,3 +41,58 @@ tests:
 
 artifacts:
   - journals/
+
+pulls: false
+required: false
+
+---
+inherit: true
+context: 'fedora/27/atomic/upgrade_minor'
+
+cluster:
+  hosts:
+    - name: ocp-master
+      distro: fedora/27/atomic
+      specs:
+        ram: 4096
+  container:
+    image: registry.fedoraproject.org/fedora:27
+env:
+  PAPR_INVENTORY: .papr.all-in-one.inventory
+  PAPR_RUN_UPDATE: "yes"
+
+---
+inherit: true
+context: 'fedora/27/atomic/upgrade_major'
+
+cluster:
+  hosts:
+    - name: ocp-master
+      distro: fedora/27/atomic
+      specs:
+        ram: 4096
+  container:
+    image: registry.fedoraproject.org/fedora:27
+env:
+  PAPR_INVENTORY: .papr.all-in-one.inventory
+  PAPR_UPGRADE_FROM: "3.10"
+  PAPR_RUN_UPDATE: "yes"
+---
+inherit: true
+context: 'fedora/27/atomic/master-ha'
+
+cluster:
+  hosts:
+    - name: ocp-master1
+      distro: fedora/27/atomic
+      specs:
+        ram: 4096
+    - name: ocp-master2
+      distro: fedora/27/atomic
+    - name: ocp-master3
+      distro: fedora/27/atomic
+  container:
+    image: registry.fedoraproject.org/fedora:27
+
+env:
+  PAPR_INVENTORY: .papr-master-ha.inventory

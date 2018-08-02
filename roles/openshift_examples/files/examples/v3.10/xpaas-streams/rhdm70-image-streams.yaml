@@ -13,22 +13,28 @@ items:
     annotations:
       openshift.io/display-name: Red Hat Decision Manager Central 7.0
       openshift.io/provider-display-name: Red Hat, Inc.
-      version: 1.4.8
-  labels:
-    xpaas: 1.4.8
   spec:
     tags:
     - name: '1.0'
       annotations:
         description: Red Hat Decision Manager 7.0 - Decision Central image.
-        iconClass: icon-decisionserver
+        iconClass: icon-jboss
         tags: rhdm,xpaas
         supports: rhdm:7.0,xpaas:1.4
         version: '1.0'
       from:
         kind: DockerImage
         name: registry.access.redhat.com/rhdm-7/rhdm70-decisioncentral-openshift:1.0
-
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.0 - Decision Central image.
+        iconClass: icon-jboss
+        tags: rhdm,xpaas
+        supports: rhdm:7.0,xpaas:1.4
+        version: '1.1'
+      from:
+        kind: DockerImage
+        name: registry.access.redhat.com/rhdm-7/rhdm70-decisioncentral-openshift:1.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -36,18 +42,25 @@ items:
     annotations:
       openshift.io/display-name: Red Hat Decision Manager KIE Server 7.0
       openshift.io/provider-display-name: Red Hat, Inc.
-      version: 1.4.8
-  labels:
-    xpaas: 1.4.8
   spec:
     tags:
     - name: '1.0'
       annotations:
         description: Red Hat Decision Manager 7.0 - KIE Server image.
-        iconClass: icon-decisionserver
+        iconClass: icon-jboss
         tags: rhdm,xpaas
         supports: rhdm:7.0,xpaas:1.4
         version: '1.0'
       from:
         kind: DockerImage
         name: registry.access.redhat.com/rhdm-7/rhdm70-kieserver-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.0 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhdm,xpaas
+        supports: rhdm:7.0,xpaas:1.4
+        version: '1.1'
+      from:
+        kind: DockerImage
+        name: registry.access.redhat.com/rhdm-7/rhdm70-kieserver-openshift:1.1

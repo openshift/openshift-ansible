@@ -1,0 +1,48 @@
+##---
+# Source: olm/templates/12-alm-operator.deployment.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: alm-operator
+  namespace: operator-lifecycle-manager
+  labels:
+    app: alm-operator
+    tectonic-operators.coreos.com/managed-by: tectonic-x-operator
+spec:
+  strategy:
+    type: RollingUpdate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alm-operator
+  template:
+    metadata:
+      labels:
+        app: alm-operator
+    spec:
+      serviceAccountName: alm-operator-serviceaccount
+      containers:
+        - name: alm-operator
+          command:
+          - /bin/alm
+          image: quay.io/coreos/olm@sha256:d19b64d801a08fd4838ed4bd9752712688ac9f2a26fab89bcb4f28b1bbdcab16
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          env:
+          - name: OPERATOR_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: OPERATOR_NAME
+            value: alm-operator
+      imagePullSecrets:
+        - name: coreos-pull-secret

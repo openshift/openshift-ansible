@@ -79,6 +79,16 @@ def entry_from_named_pair(register_pairs, key):
     raise RuntimeError("There was no entry found in the dict that had an item with a name that matched {}".format(key))
 
 
+def entry_from_name_value_pair(key_value_dict, key, key_label='name', value_label='value'):
+    ''' Returns the entry in key given results provided by register_pairs '''
+    for key_value in key_value_dict:
+        name = key_value.get(key_label)
+        if name == key:
+            return key_value[value_label]
+    # pylint: disable=line-too-long, too-few-format-args
+    raise RuntimeError("There was no entry found in the dict that had an item with a name that matched {}:{}".format(key_label).format(key))
+
+
 def serviceaccount_name(qualified_sa):
     ''' Returns the simple name from a fully qualified name '''
     return qualified_sa.split(":")[-1]
@@ -126,6 +136,7 @@ class FilterModule(object):
         return {
             'random_word': random_word,
             'entry_from_named_pair': entry_from_named_pair,
+            'entry_from_name_value_pair': entry_from_name_value_pair,
             'min_cpu': min_cpu,
             'es_storage': es_storage,
             'serviceaccount_name': serviceaccount_name,

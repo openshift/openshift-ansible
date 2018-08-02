@@ -1,18 +1,18 @@
 ---
 - when:
-  - openshift_aws_create_iam_cert | bool
+  - openshift_aws_delete_iam_cert | bool
   - openshift_aws_iam_cert_path != ''
   - openshift_aws_iam_cert_key_path != ''
   - openshift_aws_elb_cert_arn == ''
   block:
   - name: delete AWS IAM certificates
-    iam_cert23:
+    iam_cert:
       state: absent
       name: "{{ openshift_aws_iam_cert_name }}"
     register: elb_cert_chain
     retries: 20
     delay: 10
-    until: elb_cert_chain | succeeded
+    until: elb_cert_chain is succeeded
     ignore_errors: yes
 
   - debug:
@@ -22,4 +22,4 @@
   - name: check for iam cert error
     fail:
       msg: "Couldn't delete IAM cert {{ openshift_aws_iam_cert_name }}"
-    when: not elb_cert_chain | succeeded
+    when: elb_cert_chain is failed

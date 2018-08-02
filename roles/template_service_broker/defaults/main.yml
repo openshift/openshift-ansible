@@ -2,25 +2,10 @@
 template_service_broker_remove: False
 template_service_broker_install: True
 openshift_template_service_broker_namespaces: ['openshift']
-template_service_broker_selector: "{{ openshift_hosted_infra_selector | default('region=infra') | map_from_pairs }}"
 
 __tsb_template_file: "apiserver-template.yaml"
 __tsb_config_file: "apiserver-config.yaml"
 __tsb_rbac_file: "rbac-template.yaml"
 __tsb_broker_file: "template-service-broker-registration.yaml"
 
-l_tsb_image_dict:
-  origin:
-    prefix: "docker.io/openshift/origin-"
-    version: "{{ openshift_image_tag }}"
-    image_name: "template-service-broker"
-  openshift-enterprise:
-    prefix: "registry.access.redhat.com/openshift3/ose-"
-    version: "{{ openshift_image_tag }}"
-    image_name: "template-service-broker"
-
-template_service_broker_prefix: "{{ l_tsb_image_dict[openshift_deployment_type]['prefix'] }}"
-template_service_broker_version: "{{ l_tsb_image_dict[openshift_deployment_type]['version'] }}"
-template_service_broker_image_name: "{{ l_tsb_image_dict[openshift_deployment_type]['image_name'] }}"
-
-openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+template_service_broker_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'template-service-broker') }}"

@@ -29,7 +29,7 @@ spec:
       containers:
       # Deploy Prometheus behind an oauth proxy
       - name: prom-proxy
-        image: "{{ l_openshift_prometheus_proxy_image_prefix }}oauth-proxy:{{ l_openshift_prometheus_proxy_image_version }}"
+        image: "{{ openshift_prometheus_proxy_image }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -80,7 +80,7 @@ spec:
 {% endfor %}
         - --config.file=/etc/prometheus/prometheus.yml
         - --web.listen-address=localhost:9090
-        image: "{{ l_openshift_prometheus_image_prefix }}prometheus:{{ l_openshift_prometheus_image_version }}"
+        image: "{{ openshift_prometheus_image }}"
         imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
@@ -120,7 +120,7 @@ spec:
 
       # Deploy alert-buffer behind oauth alerts-proxy
       - name: alerts-proxy
-        image: "{{ l_openshift_prometheus_proxy_image_prefix }}oauth-proxy:{{ l_openshift_prometheus_proxy_image_version }}"
+        image: "{{ openshift_prometheus_proxy_image }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -165,7 +165,7 @@ spec:
       - name: alert-buffer
         args:
         - --storage-path=/alert-buffer/messages.db
-        image: "{{ l_openshift_prometheus_alertbuffer_image_prefix }}prometheus-alert-buffer:{{ l_openshift_prometheus_alertbuffer_image_version }}"
+        image: "{{ openshift_prometheus_alertbuffer_image }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -188,7 +188,7 @@ spec:
 
       # Deploy alertmanager behind oauth alertmanager-proxy
       - name: alertmanager-proxy
-        image: "{{ l_openshift_prometheus_proxy_image_prefix }}oauth-proxy:{{ l_openshift_prometheus_proxy_image_version }}"
+        image: "{{ openshift_prometheus_proxy_image }}"
         imagePullPolicy: IfNotPresent
         requests:
 {% if openshift_prometheus_oauth_proxy_memory_requests is defined and openshift_prometheus_oauth_proxy_memory_requests is not none %}
@@ -232,7 +232,7 @@ spec:
       - name: alertmanager
         args:
         - --config.file=/etc/alertmanager/alertmanager.yml
-        image: "{{ l_openshift_prometheus_alertmanager_image_prefix }}prometheus-alertmanager:{{ l_openshift_prometheus_alertmanager_image_version }}"
+        image: "{{ openshift_prometheus_alertmanager_image }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:

@@ -9,10 +9,15 @@ environment.
 
 from __future__ import print_function
 
-from collections import Mapping
+import argparse
 import json
 import os
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
 
+from keystoneauth1.exceptions.catalog import EndpointNotFound
 import shade
 
 
@@ -39,25 +44,22 @@ def base_openshift_inventory(cluster_hosts):
     cns = [server.name for server in cluster_hosts
            if server.metadata['host-type'] == 'cns']
 
-    nodes = list(set(masters + infra_hosts + app + cns))
-
-    dns = [server.name for server in cluster_hosts
-           if server.metadata['host-type'] == 'dns']
-
     load_balancers = [server.name for server in cluster_hosts
                       if server.metadata['host-type'] == 'lb']
 
-    osev3 = list(set(nodes + etcd + load_balancers))
+    # NOTE: everything that should go to the `[nodes]` group:
+    nodes = list(set(masters + etcd + infra_hosts + app + cns))
 
-    inventory['cluster_hosts'] = {'hosts': [s.name for s in cluster_hosts]}
-    inventory['OSEv3'] = {'hosts': osev3}
-    inventory['masters'] = {'hosts': masters}
-    inventory['etcd'] = {'hosts': etcd}
-    inventory['nodes'] = {'hosts': nodes}
-    inventory['infra_hosts'] = {'hosts': infra_hosts}
-    inventory['app'] = {'hosts': app}
-    inventory['glusterfs'] = {'hosts': cns}
-    inventory['dns'] = {'hosts': dns}
+    # NOTE: all OpenShift nodes, including `[lb]`, `[nfs]`, etc.:
+    osev3 = list(set(nodes + load_balancers))
+
+    inventory['OSEv3'] = {'hosts': osev3, 'vars': {}}
+    inventory['openstack_nodes'] = {'hosts': nodes}
+    inventory['openstack_master_nodes'] = {'hosts': masters}
+    inventory['openstack_etcd_nodes'] = {'hosts': etcd}
+    inventory['openstack_infra_nodes'] = {'hosts': infra_hosts}
+    inventory['openstack_compute_nodes'] = {'hosts': app}
+    inventory['openstack_cns_nodes'] = {'hosts': cns}
     inventory['lb'] = {'hosts': load_balancers}
     inventory['localhost'] = {'ansible_connection': 'local'}
 
@@ -104,13 +106,8 @@ def _get_hostvars(server, docker_storage_mountpoints):
     if server.metadata['host-type'] == 'cns':
         hostvars['glusterfs_devices'] = ['/dev/nvme0n1']
 
-    node_labels = server.metadata.get('node_labels')
-    # NOTE(shadower): the node_labels value must be a dict not string
-    if not isinstance(node_labels, Mapping):
-        node_labels = json.loads(node_labels)
-
-    if node_labels:
-        hostvars['openshift_node_labels'] = node_labels
+    group_name = server.metadata.get('openshift_node_group_name')
+    hostvars['openshift_node_group_name'] = group_name
 
     # check for attached docker storage volumes
     if 'os-extended-volumes:volumes_attached' in server:
@@ -132,18 +129,16 @@ def build_inventory():
 
     inventory = base_openshift_inventory(cluster_hosts)
 
-    for server in cluster_hosts:
-        if 'group' in server.metadata:
-            group = server.metadata.get('group')
-            if group not in inventory:
-                inventory[group] = {'hosts': []}
-            inventory[group]['hosts'].append(server.name)
-
     inventory['_meta'] = {'hostvars': {}}
 
+    # Some clouds don't have Cinder. That's okay:
+    try:
+        volumes = cloud.list_volumes()
+    except EndpointNotFound:
+        volumes = []
+
     # cinder volumes used for docker storage
-    docker_storage_mountpoints = get_docker_storage_mountpoints(
-        cloud.list_volumes())
+    docker_storage_mountpoints = get_docker_storage_mountpoints(volumes)
     for server in cluster_hosts:
         inventory['_meta']['hostvars'][server.name] = _get_hostvars(
             server,
@@ -161,6 +156,19 @@ def build_inventory():
                 stout['api_lb_sg_id']})
         except KeyError:
             pass  # Not an API load balanced deployment
+
+        try:
+            inventory['OSEv3']['vars'][
+                'openshift_master_cluster_hostname'] = stout['private_api_ip']
+        except KeyError:
+            pass  # Internal LB not specified
+
+        inventory['localhost']['openshift_openstack_private_api_ip'] = \
+            stout.get('private_api_ip')
+        inventory['localhost']['openshift_openstack_public_api_ip'] = \
+            stout.get('public_api_ip')
+        inventory['localhost']['openshift_openstack_public_router_ip'] = \
+            stout.get('public_router_ip')
 
         try:
             inventory['OSEv3']['vars'] = _get_kuryr_vars(cloud, stout)
@@ -188,11 +196,16 @@ def _get_kuryr_vars(cloud_client, data):
     """Returns a dictionary of Kuryr variables resulting of heat stacking"""
     settings = {}
     settings['kuryr_openstack_pod_subnet_id'] = data['pod_subnet']
+    if 'pod_subnet_pool' in data:
+        settings['kuryr_openstack_pod_subnet_pool_id'] = data[
+            'pod_subnet_pool']
+    settings['kuryr_openstack_pod_router_id'] = data['pod_router']
     settings['kuryr_openstack_worker_nodes_subnet_id'] = data['vm_subnet']
     settings['kuryr_openstack_service_subnet_id'] = data['service_subnet']
     settings['kuryr_openstack_pod_sg_id'] = data['pod_access_sg_id']
     settings['kuryr_openstack_pod_project_id'] = (
         cloud_client.current_project_id)
+    settings['kuryr_openstack_api_lb_ip'] = data['private_api_ip']
 
     settings['kuryr_openstack_auth_url'] = cloud_client.auth['auth_url']
     settings['kuryr_openstack_username'] = cloud_client.auth['username']
@@ -215,5 +228,60 @@ def _get_kuryr_vars(cloud_client, data):
     return settings
 
 
+def output_inventory(inventory, output_file):
+    """Outputs inventory into a file in ini format"""
+    config = ConfigParser.ConfigParser(allow_no_value=True)
+
+    host_meta_vars = _get_host_meta_vars_as_dict(inventory)
+
+    for key in sorted(inventory.keys()):
+        if key == 'localhost':
+            config.add_section('localhost')
+            config.set('localhost', 'localhost')
+            config.add_section('localhost:vars')
+            for var, value in inventory['localhost'].items():
+                config.set('localhost:vars', var, value)
+        elif key not in ('localhost', '_meta'):
+            if 'hosts' in inventory[key]:
+                config.add_section(key)
+                for host in inventory[key]['hosts']:
+                    if host in host_meta_vars.keys():
+                        config.set(key, host + " " + host_meta_vars[host])
+                    else:
+                        config.set(key, host)
+            if 'vars' in inventory[key]:
+                config.add_section(key + ":vars")
+                for var, value in inventory[key]['vars'].items():
+                    config.set(key + ":vars", var, value)
+
+    with open(output_file, 'w') as configfile:
+        config.write(configfile)
+
+
+def _get_host_meta_vars_as_dict(inventory):
+    """parse host meta vars from inventory as dict"""
+    host_meta_vars = {}
+    if '_meta' in inventory.keys():
+        if 'hostvars' in inventory['_meta']:
+            for host in inventory['_meta']['hostvars'].keys():
+                host_meta_vars[host] = ' '.join(
+                    '{}={}'.format(key, val) for key, val in inventory['_meta']['hostvars'][host].items())
+    return host_meta_vars
+
+
+def parse_args():
+    """parse arguments to script"""
+    parser = argparse.ArgumentParser(description="Create ansible inventory.")
+    parser.add_argument('--static', type=str, default='',
+                        help='File to store a static inventory in.')
+    parser.add_argument('--list', action="store_true", default=False,
+                        help='List inventory.')
+
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
-    print(json.dumps(build_inventory(), indent=4, sort_keys=True))
+    if parse_args().static:
+        output_inventory(build_inventory(), parse_args().static)
+    else:
+        print(json.dumps(build_inventory(), indent=4, sort_keys=True))

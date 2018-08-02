@@ -17,7 +17,7 @@
 
 - name: "Getting ES version for logging-es cluster"
   command: >
-    {{ openshift_client_binary }} exec {{ available_pod }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XGET 'https://localhost:9200/'
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig exec {{ available_pod }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XGET 'https://localhost:9200/'
   register: _curl_output
   when: available_pod is defined
 
@@ -39,7 +39,7 @@
 
 - name: "Getting ES version for logging-es-ops cluster"
   command: >
-    {{ openshift_client_binary }} exec {{ available_ops_pod }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XGET 'https://localhost:9200/'
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig exec {{ available_ops_pod }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XGET 'https://localhost:9200/'
   register: _ops_curl_output
   when: available_ops_pod is defined
 

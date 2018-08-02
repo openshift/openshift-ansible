@@ -1,0 +1,155 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: openshift-cluster-monitoring-operator
+  annotations:
+    openshift.io/display-name: OpenShift Cluster Monitoring Operator
+    description: The OpenShift Cluster Monitoring Operator manages the deployment of the OpenShift monitoring platform.
+    iconClass: icon-openshift
+    tags: openshift,infra,monitoring
+    openshift.io/documentation-url: https://github.com/coreos-inc/tectonic-prometheus-operator/
+    openshift.io/support-url: https://access.redhat.com
+openshift.io/provider-display-name: Red Hat, Inc.
+parameters:
+- name: ALERTMANAGER_CONFIG
+  required: true
+  description: A complete (base64-encoded) Alertmanager configuration YAML file.
+- name: NAMESPACE
+  # This namespace cannot be changed. Only `openshift-monitoring` is supported.
+  required: true
+  value: openshift-monitoring
+
+objects:
+
+# Configures Alertmanager.
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: alertmanager-main
+    namespace: ${NAMESPACE}
+    labels:
+      k8s-app: alertmanager
+  data:
+    alertmanager.yaml: "${ALERTMANAGER_CONFIG}"
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata: {name: cluster-monitoring-operator}
+  rules:
+  - apiGroups: [rbac.authorization.k8s.io]
+    resources: [roles, rolebindings, clusterroles, clusterrolebindings]
+    verbs: [create, get, list, watch, update, delete]
+  - apiGroups: ['']
+    resources: [serviceaccounts]
+    verbs: [create, get, list, watch, update, delete]
+  - apiGroups: [apps]
+    resources: [deployments, daemonsets]
+    verbs: [create, get, list, watch, update, delete]
+  - apiGroups: [route.openshift.io]
+    resources: [routes]
+    verbs: [create, get, list, watch, update, delete]
+  - apiGroups: [security.openshift.io]
+    resources: [securitycontextconstraints]
+    verbs: [create, get, list, watch, update, delete]
+  - apiGroups: [authentication.k8s.io]
+    resources: [tokenreviews]
+    verbs: [create]
+  - apiGroups: [authorization.k8s.io]
+    resources: [subjectaccessreviews]
+    verbs: [create]
+  - apiGroups: ['']
+    resources: [nodes, pods, services, resourcequotas, replicationcontrollers, limitranges, persistentvolumeclaims, persistentvolumes, namespaces, endpoints]
+    verbs: [list, watch]
+  - apiGroups: [extensions]
+    resources: [daemonsets, deployments, replicasets]
+    verbs: [list, watch]
+  - apiGroups: [apps]
+    resources: [statefulsets]
+    verbs: [list, watch]
+  - apiGroups: [batch]
+    resources: [cronjobs, jobs]
+    verbs: [list, watch]
+  - apiGroups: [autoscaling]
+    resources: [horizontalpodautoscalers]
+    verbs: [list, watch]
+  - apiGroups: [authentication.k8s.io]
+    resources: [tokenreviews]
+    verbs: [create]
+  - apiGroups: [authorization.k8s.io]
+    resources: [subjectaccessreviews]
+    verbs: [create]
+  - apiGroups: ['']
+    resources: [pods]
+    verbs: [get]
+  - apiGroups: [extensions]
+    resourceNames: [kube-state-metrics]
+    resources: [deployments]
+    verbs: [get, update]
+  - apiGroups: [authentication.k8s.io]
+    resources: [tokenreviews]
+    verbs: [create]
+  - apiGroups: [authorization.k8s.io]
+    resources: [subjectaccessreviews]
+    verbs: [create]
+  - nonResourceURLs: [/metrics]
+    verbs: [get]
+  - apiGroups: [authentication.k8s.io]
+    resources: [tokenreviews]
+    verbs: [create]
+  - apiGroups: [authorization.k8s.io]
+    resources: [subjectaccessreviews]
+    verbs: [create]
+  - apiGroups: ['']
+    resources: [namespaces, nodes/metrics]
+    verbs: [get]
+  - apiGroups: ['']
+    resources: [nodes, services, endpoints, pods]
+    verbs: [get, list, watch]
+  - apiGroups: ['']
+    resources: [configmaps]
+    verbs: [get]
+  - apiGroups: [extensions]
+    resources: [thirdpartyresources]
+    verbs: ['*']
+  - apiGroups: [apiextensions.k8s.io]
+    resources: [customresourcedefinitions]
+    verbs: ['*']
+  - apiGroups: [monitoring.coreos.com]
+    resources: [alertmanagers, prometheuses, prometheuses/finalizers, alertmanagers/finalizers, servicemonitors, prometheusrules]
+    verbs: ['*']
+  - apiGroups: [apps]
+    resources: [statefulsets]
+    verbs: ['*']
+  - apiGroups: ['']
+    resources: [configmaps, secrets]
+    verbs: ['*']
+  - apiGroups: ['']
+    resources: [pods]
+    verbs: [list, delete]
+  - apiGroups: ['']
+    resources: [services, endpoints]
+    verbs: [get, create, update]
+  - apiGroups: ['']
+    resources: [nodes]
+    verbs: [list, watch]
+  - apiGroups: ['']
+    resources: [namespaces]
+    verbs: [list]
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: cluster-monitoring-operator
+    namespace: ${NAMESPACE}
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: cluster-monitoring-operator
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: cluster-monitoring-operator
+  subjects:
+  - kind: ServiceAccount
+    name: cluster-monitoring-operator
+    namespace: ${NAMESPACE}

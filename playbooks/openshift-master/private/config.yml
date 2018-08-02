@@ -8,33 +8,23 @@
     set_stats:
       data:
         installer_phase_master:
+          title: "Master Install"
+          playbook: "playbooks/openshift-master/config.yml"
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - import_playbook: certificates.yml
 
-- name: Disable excluders
+- name: Disable excluders and gather facts
   hosts: oo_masters_to_config
-  gather_facts: no
   roles:
-  - role: openshift_excluder
-    r_openshift_excluder_action: disable
-
-- name: Gather and set facts for master hosts
-  hosts: oo_masters_to_config
-  pre_tasks:
-  # Per https://bugzilla.redhat.com/show_bug.cgi?id=1469336
-  #
-  # When scaling up a cluster upgraded from OCP <= 3.5, ensure that
-  # OPENSHIFT_DEFAULT_REGISTRY is present as defined on the existing
-  # masters, or absent if such is the case.
-  - name: Detect if this host is a new master in a scale up
-    set_fact:
-      g_openshift_master_is_scaleup: "{{ inventory_hostname in ( groups['new_masters'] | default([]) ) }}"
-
-  - name: Scaleup Detection
-    debug:
-      var: g_openshift_master_is_scaleup
+  - openshift_facts
+  tasks:
+  - name: Disable excluders
+    import_role:
+      name: openshift_excluder
+    vars:
+      r_openshift_excluder_action: disable
 
   - name: Check for RPM generated config marker file .config_managed
     stat:
@@ -53,20 +43,10 @@
     - node
     - .config_managed
 
-  - set_fact:
-      openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
-      openshift_master_etcd_hosts: "{{ hostvars
-                                       | lib_utils_oo_select_keys(groups['oo_etcd_to_config']
-                                                        | default([]))
-                                       | lib_utils_oo_collect('openshift.common.hostname')
-                                       | default(none, true) }}"
-  roles:
-  - openshift_facts
-  post_tasks:
   - openshift_facts:
       role: master
       local_facts:
-        api_port: "{{ openshift_master_api_port | default(None) }}"
+        api_port: "{{ openshift_master_api_port }}"
         api_url: "{{ openshift_master_api_url | default(None) }}"
         api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
         controllers_port: "{{ openshift_master_controllers_port | default(None) }}"
@@ -78,139 +58,41 @@
         console_url: "{{ openshift_master_console_url | default(None) }}"
         console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
         public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
-        master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
-
-- name: Inspect state of first master config settings
-  hosts: oo_first_master
-  roles:
-  - role: openshift_facts
-  post_tasks:
   - openshift_facts:
-      role: master
+      role: node
       local_facts:
-        session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(openshift.master.session_auth_secrets | default(None)) }}"
-        session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(openshift.master.session_encryption_secrets | default(None)) }}"
-  - name: Check for existing configuration
-    stat:
-      path: /etc/origin/master/master-config.yaml
-    register: master_config_stat
+        bootstrapped: true
 
-  - name: Set clean install fact
-    set_fact:
-      l_clean_install: "{{ not master_config_stat.stat.exists | bool }}"
-
-  - name: Determine if etcd3 storage is in use
-    command: grep  -Pzo  "storage-backend:\n.*etcd3" /etc/origin/master/master-config.yaml -q
-    register: etcd3_grep
-    failed_when: false
-    changed_when: false
-
-  - name: Set etcd3 fact
-    set_fact:
-      l_etcd3_enabled: "{{ etcd3_grep.rc == 0 | bool }}"
-
-  - name: Check if atomic-openshift-master sysconfig exists yet
-    stat:
-      path: /etc/sysconfig/atomic-openshift-master
-    register: l_aom_exists
-
-  - name: Preserve OPENSHIFT_DEFAULT_REGISTRY master parameter if present
-    command: awk '/^OPENSHIFT_DEFAULT_REGISTRY/' /etc/sysconfig/atomic-openshift-master
-    register: l_default_registry_defined
-    when: l_aom_exists.stat.exists | bool
-
-  - name: Check if atomic-openshift-master-api sysconfig exists yet
-    stat:
-      path: /etc/sysconfig/atomic-openshift-master-api
-    register: l_aom_api_exists
-
-  - name: Preserve OPENSHIFT_DEFAULT_REGISTRY master-api parameter if present
-    command: awk '/^OPENSHIFT_DEFAULT_REGISTRY/' /etc/sysconfig/atomic-openshift-master-api
-    register: l_default_registry_defined_api
-    when: l_aom_api_exists.stat.exists | bool
-
-  - name: Check if atomic-openshift-master-controllers sysconfig exists yet
-    stat:
-      path: /etc/sysconfig/atomic-openshift-master-controllers
-    register: l_aom_controllers_exists
-
-  - name: Preserve OPENSHIFT_DEFAULT_REGISTRY master-controllers parameter if present
-    command: awk '/^OPENSHIFT_DEFAULT_REGISTRY/' /etc/sysconfig/atomic-openshift-master-controllers
-    register: l_default_registry_defined_controllers
-    when: l_aom_controllers_exists.stat.exists | bool
-
-  - name: Update facts with OPENSHIFT_DEFAULT_REGISTRY value
-    set_fact:
-      l_default_registry_value: "{{ l_default_registry_defined.stdout | default('') }}"
-      l_default_registry_value_api: "{{ l_default_registry_defined_api.stdout | default('') }}"
-      l_default_registry_value_controllers: "{{ l_default_registry_defined_controllers.stdout | default('') }}"
-
-- name: Generate master session secrets
+- name: Generate or retrieve existing session secrets
   hosts: oo_first_master
-  vars:
-    g_session_secrets_present: "{{ (openshift.master.session_auth_secrets | default([])) | length > 0 and (openshift.master.session_encryption_secrets | default([])) | length > 0 }}"
-    g_session_auth_secrets: "{{ [ 24 | lib_utils_oo_generate_secret ] }}"
-    g_session_encryption_secrets: "{{ [ 24 | lib_utils_oo_generate_secret ] }}"
   roles:
   - role: openshift_facts
   tasks:
-  - openshift_facts:
-      role: master
-      local_facts:
-        session_auth_secrets: "{{ g_session_auth_secrets }}"
-        session_encryption_secrets: "{{ g_session_encryption_secrets }}"
-    when: not g_session_secrets_present | bool
+  - import_role:
+      name: openshift_control_plane
+      tasks_from: generate_session_secrets.yml
 
 - name: Configure masters
   hosts: oo_masters_to_config
   any_errors_fatal: true
-  vars:
-    openshift_master_count: "{{ openshift.master.master_count }}"
-    openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
-    openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-    openshift_master_etcd_hosts: "{{ hostvars
-                                     | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
-                                     | lib_utils_oo_collect('openshift.common.hostname')
-                                     | default(none, true) }}"
-    openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
-                                                | lib_utils_oo_collect('openshift.common.ip') | default([]) | join(',')
-                                                }}"
   pre_tasks:
-  # This will be moved into the control plane role once openshift_master is removed
-  - name: Add static pod and systemd shim commands
-    import_role:
-      name: openshift_control_plane
-      tasks_from: static_shim
   - name: Prepare the bootstrap node config on masters for self-hosting
     import_role:
       name: openshift_node_group
-      tasks_from: bootstrap
-    when: openshift_master_bootstrap_enabled | default(false) | bool
+      tasks_from: bootstrap.yml
+  - name: Have the masters automatically pull their configuration
+    import_role:
+      name: openshift_node_group
+      tasks_from: bootstrap_config.yml
 
   roles:
   - role: openshift_master_facts
-  - role: openshift_clock
   - role: openshift_cloud_provider
     when: openshift_cloudprovider_kind is defined
   - role: openshift_builddefaults
   - role: openshift_buildoverrides
-  - role: nickhammond.logrotate
-
-  # DEPRECATED: begin moving away from this
-  - role: openshift_master
-    openshift_master_ha: "{{ (groups.oo_masters | length > 1) | bool }}"
-    openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
-    r_openshift_master_clean_install: "{{ hostvars[groups.oo_first_master.0].l_clean_install }}"
-    r_openshift_master_etcd3_storage: "{{ hostvars[groups.oo_first_master.0].l_etcd3_enabled }}"
-    openshift_master_is_scaleup_host: "{{ g_openshift_master_is_scaleup | default(false) }}"
-    openshift_master_default_registry_value: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value }}"
-    openshift_master_default_registry_value_api: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_api }}"
-    openshift_master_default_registry_value_controllers: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_controllers }}"
-    when: not ( openshift_master_bootstrap_enabled | default(false) | bool )
 
   - role: openshift_control_plane
-    when: openshift_master_bootstrap_enabled | default(false) | bool
   - role: tuned
   - role: nuage_ca
     when: openshift_use_nuage | default(false) | bool
@@ -223,32 +105,42 @@
   tasks:
   - import_role:
       name: kuryr
-      tasks_from: master
+      tasks_from: master.yaml
     when: openshift_use_kuryr | default(false) | bool
 
   - name: setup bootstrap settings
-    include_tasks: tasks/enable_bootstrap.yml
-    when: openshift_master_bootstrap_enabled | default(false) | bool
+    import_tasks: tasks/enable_bootstrap.yml
 
   post_tasks:
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift_deployment_type }}
     changed_when: False
+  - name: Re-enable excluders
+    import_role:
+      name: openshift_excluder
+    vars:
+      r_openshift_excluder_action: enable
 
-- name: Configure API Aggregation on masters
-  hosts: oo_masters
-  serial: 1
-  roles:
-  - role: openshift_facts
+- name: Deploy the central bootstrap configuration
+  hosts: oo_first_master
+  gather_facts: no
   tasks:
-  - include_tasks: tasks/wire_aggregator.yml
+  - name: setup bootstrap settings
+    import_tasks: tasks/enable_bootstrap_config.yml
+  - name: setup automatic node config reconcilation
+    run_once: True
+    import_role:
+      name: openshift_node_group
+      tasks_from: sync.yml
 
-- name: Re-enable excluder if it was previously enabled
+- name: Ensure inventory labels are assigned to masters
   hosts: oo_masters_to_config
   gather_facts: no
   roles:
-  - role: openshift_excluder
-    r_openshift_excluder_action: enable
+  - role: openshift_manage_node
+    openshift_master_host: "{{ groups.oo_first_master.0 }}"
+    openshift_manage_node_is_master: "{{ ('oo_masters_to_config' in group_names) | bool }}"
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
 
 - name: Master Install Checkpoint End
   hosts: all

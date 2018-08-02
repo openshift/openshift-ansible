@@ -1,0 +1,3 @@
+---
+operator_lifecycle_manager_remove: false
+operator_lifecycle_manager_install: true

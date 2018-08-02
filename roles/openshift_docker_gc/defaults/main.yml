@@ -1,14 +1,15 @@
 ---
-r_enable_docker_gc: "{{ openshift_crio_enable_docker_gc | default(True) }}"
+r_enable_docker_gc: "{{ openshift_crio_enable_docker_gc }}"
 r_docker_gc_node_selectors: "{{ openshift_crio_docker_gc_node_selector | default({'runtime': 'cri-o'}) }}"
 
 openshift_docker_gc_image_dict:
-  origin:
-    image: "openshift/origin"
-    version: "{{ openshift_image_tag }}"
-  openshift-enterprise:
-    image: "openshift3/ose"
-    version: "{{ openshift_image_tag }}"
+  origin: "origin"
+  openshift-enterprise: "ose-control-plane"
 
-openshift_docker_gc_image: "{{ openshift_docker_gc_image_dict[openshift_deployment_type]['image'] }}"
-openshift_docker_gc_version: "{{ openshift_docker_gc_image_dict[openshift_deployment_type]['version'] }}"
+l_os_dockergc_reg_search_dict:
+  origin: "origin-${component}"
+  openshift-enterprise: "ose-${component}"
+l_os_dockergc_reg_search: "{{ l_os_dockergc_reg_search_dict[openshift_deployment_type] }}"
+l_os_dockergc_replace: "{{ openshift_docker_gc_image_dict[openshift_deployment_type] }}"
+
+openshift_docker_gc_image: "{{ l_os_registry_url | regex_replace(l_os_dockergc_reg_search | regex_escape, l_os_dockergc_replace) }}"

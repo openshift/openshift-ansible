@@ -64,7 +64,7 @@ class OCGroup(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode=False):
-        '''run the idempotent ansible code'''
+        '''run the oc_group module'''
 
         gconfig = GroupConfig(params['name'],
                               params['namespace'],

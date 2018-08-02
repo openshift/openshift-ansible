@@ -113,6 +113,9 @@ class PolicyGroup(OpenShiftCLI):
             return False
 
         for binding in bindings:
+            if self.config.config_options['rolebinding_name']['value'] is not None and \
+                    binding['metadata']['name'] != self.config.config_options['rolebinding_name']['value']:
+                continue
             if binding['roleRef']['name'] == self.config.config_options['name']['value'] and \
                     binding['groupNames'] is not None and \
                     self.config.config_options['group']['value'] in binding['groupNames']:
@@ -154,11 +157,14 @@ class PolicyGroup(OpenShiftCLI):
                self.config.config_options['name']['value'],
                self.config.config_options['group']['value']]
 
+        if self.config.config_options['rolebinding_name']['value'] is not None:
+            cmd.extend(['--rolebinding-name', self.config.config_options['rolebinding_name']['value']])
+
         return self.openshift_cmd(cmd, oadm=True)
 
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run the oc_adm_policy_group module'''
 
         state = params['state']
 
@@ -174,6 +180,7 @@ class PolicyGroup(OpenShiftCLI):
                                      'group': {'value': params['group'], 'include': False},
                                      'resource_kind': {'value': params['resource_kind'], 'include': False},
                                      'name': {'value': params['resource_name'], 'include': False},
+                                     'rolebinding_name': {'value': params['rolebinding_name'], 'include': False},
                                     })
 
         policygroup = PolicyGroup(nconfig, params['debug'])

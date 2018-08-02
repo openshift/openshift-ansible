@@ -21,7 +21,7 @@ if [[ -v INVENTORY_FILE ]]; then
   cp ${INVENTORY_FILE} ${INVENTORY}
 elif [[ -v INVENTORY_DIR ]]; then
   INVENTORY="$(mktemp -d)"
-  cp -R ${INVENTORY_DIR}/* ${INVENTORY}
+  cp -RL ${INVENTORY_DIR}/* ${INVENTORY}
 elif [[ -v INVENTORY_URL ]]; then
   curl -o ${INVENTORY} ${INVENTORY_URL}
 elif [[ -v DYNAMIC_SCRIPT_URL ]]; then

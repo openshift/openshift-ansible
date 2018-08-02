@@ -6,7 +6,6 @@
     - dc
     - po
     - svc
-    - pv
     - pvc
     - statefulsets
     - routes

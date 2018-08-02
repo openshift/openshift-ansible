@@ -102,7 +102,7 @@ class RegistryTest(unittest.TestCase):
                             "containers": [
                                 {
                                     "name": "registry",
-                                    "image": "openshift3/ose-docker-registry:v3.5.0.39",
+                                    "image": "registry.access.redhat.com/openshift3/ose-docker-registry:v3.5.0.39",
                                     "ports": [
                                         {
                                             "containerPort": 5000

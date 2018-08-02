@@ -1,5 +1,5 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -20,8 +20,9 @@ spec:
     spec:
       containers:
       - args:
+        - /bin/cluster-autoscaler
         - --alsologtostderr
-        - --v={{ openshift_cluster_autoscaler_version }}
+        - --v={{ openshift_cluster_autoscaler_loglevel }}
         - --skip-nodes-with-local-storage={{ openshift_cluster_autoscaler_skip_nodes_local_storage }}
         - --leader-elect-resource-lock=configmaps
         - --namespace={{ openshift_cluster_autoscaler_namespace }}
@@ -32,6 +33,15 @@ spec:
 {% for group in openshift_cluster_autoscaler_node_groups %}
         - --nodes={{ group.min }}:{{ group.max }}:{{ group.name }}
 {% endfor %}
+{% if openshift_cluster_autoscaler_scale_down_delay_after_failure is defined %}
+        - --scale-down-delay-after-failure={{ openshift_cluster_autoscaler_scale_down_delay_after_failure }}
+{% endif %}
+{% if openshift_cluster_autoscaler_scale_down_unneeded_timeout is defined %}
+        - --scale-down-unneeded-time={{ openshift_cluster_autoscaler_scale_down_unneeded_timeout }}
+{% endif %}
+{% if openshift_cluster_autoscaler_scale_down_delay_after_add is defined %}
+        - --scale-down-delay-after-add={{ openshift_cluster_autoscaler_scale_down_delay_after_add }}
+{% endif %}
 {% if openshift_cluster_autoscaler_cloud_provider == 'aws' %}
         env: {{ openshift_cluster_autoscaler_aws_env_vars | union(openshift_cluster_autoscaler_env_vars) | to_json }}
 {% else %}

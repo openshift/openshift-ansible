@@ -30,7 +30,7 @@ Here is an example of how to run a containerized `openshift-ansible` playbook th
            -e INVENTORY_FILE=/tmp/inventory \
            -e PLAYBOOK_FILE=playbooks/openshift-checks/certificate_expiry/default.yaml \
            -e OPTS="-v" -t \
-           openshift/origin-ansible
+           docker.io/openshift/origin-ansible
 
 You might want to adjust some of the options in the example to match your environment and/or preferences. For example: you might want to create a separate directory on the host where you'll copy the ssh key and inventory files prior to invocation to avoid unwanted SELinux re-labeling of the original files or paths (see below).
 
@@ -61,7 +61,7 @@ If the inventory file needs additional files then it can use the path `/var/lib/
 Run the ansible system container:
 
 ```sh
-atomic install --system --set INVENTORY_FILE=$(pwd)/inventory.origin openshift/origin-ansible
+atomic install --system --set INVENTORY_FILE=$(pwd)/inventory.origin docker.io/openshift/origin-ansible
 systemctl start origin-ansible
 ```
 

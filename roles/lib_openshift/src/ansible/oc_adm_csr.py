@@ -15,7 +15,7 @@ def main():
             nodes=dict(default=None, type='list'),
             timeout=dict(default=30, type='int'),
             approve_all=dict(default=False, type='bool'),
-            service_account=dict(default='node-bootstrapper', type='str'),
+            service_account=dict(default='system:serviceaccount:openshift-infra:node-bootstrapper', type='str'),
             fail_on_timeout=dict(default=False, type='bool'),
         ),
         supports_check_mode=True,

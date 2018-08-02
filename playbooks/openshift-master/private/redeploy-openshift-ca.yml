@@ -120,7 +120,6 @@
   - role: openshift_master_facts
   - role: openshift_named_certificates
   - role: openshift_ca
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -138,8 +137,8 @@
 
 - name: Retrieve OpenShift CA
   hosts: oo_first_master
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  roles:
+  - openshift_facts
   tasks:
   - name: Retrieve CA certificate, key, bundle and serial
     fetch:
@@ -160,8 +159,8 @@
 
 - name: Distribute OpenShift CA to masters
   hosts: oo_masters_to_config
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  roles:
+  - openshift_facts
   tasks:
   - name: Deploy CA certificate, key, bundle and serial
     copy:
@@ -230,8 +229,8 @@
 
 - name: Distribute OpenShift CA certificate to nodes
   hosts: oo_nodes_to_config
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  roles:
+  - openshift_facts
   tasks:
   - copy:
       src: "{{ hostvars['localhost'].g_master_mktemp.stdout }}/ca-bundle.crt"

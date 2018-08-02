@@ -3,11 +3,11 @@
   ec2_vpc_net_facts:
     region: "{{ openshift_aws_region }}"
     filters:
-      "tag:Name": "{{ openshift_aws_clusterid }}"
+      "tag:Name": "{{ openshift_aws_vpc_name }}"
   register: vpcout
 
 - name: create the node group sgs
-  oo_ec2_group:
+  ec2_group:
     name: "{{ item.value.name}}"
     description: "{{ item.value.desc }}"
     rules: "{{ item.value.rules if 'rules' in item.value else [] }}"
@@ -16,7 +16,7 @@
   with_dict: "{{ openshift_aws_node_security_groups }}"
 
 - name: create the k8s sgs for the node group
-  oo_ec2_group:
+  ec2_group:
     name: "{{ item.value.name }}_k8s"
     description: "{{ item.value.desc }} for k8s"
     region: "{{ openshift_aws_region }}"

@@ -6,6 +6,8 @@ metadata:
   labels:
     openshift.io/control-plane: "true"
     openshift.io/component: etcd
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ''
 spec:
   restartPolicy: Always
   hostNetwork: true
@@ -29,8 +31,8 @@ spec:
      - mountPath: /var/lib/etcd/
        name: master-data
     livenessProbe:
-      tcpSocket:
-        port: 2379
+      exec:
+      initialDelaySeconds: 45
   volumes:
   - name: master-config
     hostPath:

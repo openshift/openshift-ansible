@@ -1,5 +1,0 @@
----
-- name: Install Node system container
-  include_tasks: node_system_container.yml
-  when:
-  - l_is_node_system_container | bool

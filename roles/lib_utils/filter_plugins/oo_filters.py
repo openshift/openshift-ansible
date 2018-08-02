@@ -9,7 +9,6 @@ import json
 import os
 import pdb
 import random
-import re
 
 from base64 import b64encode
 from collections import Mapping
@@ -428,31 +427,6 @@ def lib_utils_to_padded_yaml(data, level=0, indent=2, **kw):
         raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
 
 
-def lib_utils_oo_pods_match_component(pods, deployment_type, component):
-    """ Filters a list of Pods and returns the ones matching the deployment_type and component
-    """
-    if not isinstance(pods, list):
-        raise errors.AnsibleFilterError("failed expects to filter on a list")
-    if not isinstance(deployment_type, string_types):
-        raise errors.AnsibleFilterError("failed expects deployment_type to be a string")
-    if not isinstance(component, string_types):
-        raise errors.AnsibleFilterError("failed expects component to be a string")
-
-    image_prefix = 'openshift/origin-'
-    if deployment_type == 'openshift-enterprise':
-        image_prefix = 'openshift3/ose-'
-
-    matching_pods = []
-    image_regex = image_prefix + component + r'.*'
-    for pod in pods:
-        for container in pod['spec']['containers']:
-            if re.search(image_regex, container['image']):
-                matching_pods.append(pod)
-                break  # stop here, don't add a pod more than once
-
-    return matching_pods
-
-
 def lib_utils_oo_image_tag_to_rpm_version(version, include_dash=False):
     """ Convert an image tag string to an RPM version if necessary
         Empty strings and strings that are already in rpm version format
@@ -526,26 +500,6 @@ def lib_utils_oo_loadbalancer_backends(
     return loadbalancer_backends
 
 
-def lib_utils_oo_chomp_commit_offset(version):
-    """Chomp any "+git.foo" commit offset string from the given `version`
-    and return the modified version string.
-
-Ex:
-- chomp_commit_offset(None)                 => None
-- chomp_commit_offset(1337)                 => "1337"
-- chomp_commit_offset("v3.4.0.15+git.derp") => "v3.4.0.15"
-- chomp_commit_offset("v3.4.0.15")          => "v3.4.0.15"
-- chomp_commit_offset("v1.3.0+52492b4")     => "v1.3.0"
-    """
-    if version is None:
-        return version
-    else:
-        # Stringify, just in case it's a Number type. Split by '+' and
-        # return the first split. No concerns about strings without a
-        # '+', .split() returns an array of the original string.
-        return str(version).split('+')[0]
-
-
 def lib_utils_oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
     """Generates a random string of given length from a set of alphanumeric characters.
        The default source uses [a-z][A-Z][0-9]
@@ -556,26 +510,11 @@ def lib_utils_oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHI
     return ''.join(random.choice(source) for i in range(length))
 
 
-def lib_utils_oo_contains_rule(source, apiGroups, resources, verbs):
-    '''Return true if the specified rule is contained within the provided source'''
-
-    rules = source['rules']
-
-    if rules:
-        for rule in rules:
-            if set(rule['apiGroups']) == set(apiGroups):
-                if set(rule['resources']) == set(resources):
-                    if set(rule['verbs']) == set(verbs):
-                        return True
-
-    return False
-
-
 def lib_utils_oo_selector_to_string_list(user_dict):
     """Convert a dict of selectors to a key=value list of strings
 
 Given input of {'region': 'infra', 'zone': 'primary'} returns a list
-of items as ['region=infra', 'zone=primary']
+of items as ['node-role.kubernetes.io/infra=true', 'zone=primary']
     """
     selectors = []
     for key in user_dict:
@@ -680,6 +619,55 @@ def map_to_pairs(source, delim="="):
     return ','.join(["{}{}{}".format(key, delim, value) for key, value in iteritems(source)])
 
 
+def lib_utils_oo_etcd_host_urls(hosts, use_ssl=True, port='2379'):
+    '''Return a list of urls for etcd hosts'''
+    urls = []
+    port = str(port)
+    proto = "https://" if use_ssl else "http://"
+    for host in hosts:
+        url_string = "{}{}:{}".format(proto, host, port)
+        urls.append(url_string)
+    return urls
+
+
+def lib_utils_mutate_htpass_provider(idps):
+    '''Updates identityProviders list to mutate filename of htpasswd auth
+    to hardcode filename = /etc/origin/master/htpasswd'''
+    old_keys = ('filename', 'fileName', 'file_name')
+    for idp in idps:
+        if 'provider' in idp:
+            idp_p = idp['provider']
+            if idp_p['kind'] == 'HTPasswdPasswordIdentityProvider':
+                for old_key in old_keys:
+                    if old_key in idp_p:
+                        idp_p.pop(old_key)
+                idp_p['file'] = '/etc/origin/master/htpasswd'
+    return idps
+
+
+def lib_utils_oo_oreg_image(image_default, oreg_url):
+    '''Converts default image string to utilize oreg_url, if defined.
+       oreg_url should be passed in as string "None" if undefined.
+
+       Example input:  "quay.io/coreos/etcd:v99",
+                       "example.com/openshift/origin-${component}:${version}"
+       Example output: "example.com/coreos/etcd:v99"'''
+    # if no oreg_url is specified, we just return the original default
+    if oreg_url == 'None':
+        return image_default
+    oreg_parts = oreg_url.split('/')
+    if len(oreg_parts) < 2:
+        raise errors.AnsibleFilterError("oreg_url malformed: {}".format(oreg_url))
+    if not (len(oreg_parts) >= 3 and '.' in oreg_parts[0]):
+        # oreg_url does not include host information; we'll just return etcd default
+        return image_default
+
+    image_parts = image_default.split('/')
+    if len(image_parts) < 3:
+        raise errors.AnsibleFilterError("default image dictionary malformed, do not adjust this value.")
+    return '/'.join([oreg_parts[0], image_parts[1], image_parts[2]])
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -689,7 +677,6 @@ class FilterModule(object):
         return {
             "lib_utils_oo_select_keys": lib_utils_oo_select_keys,
             "lib_utils_oo_select_keys_from_list": lib_utils_oo_select_keys_from_list,
-            "lib_utils_oo_chomp_commit_offset": lib_utils_oo_chomp_commit_offset,
             "lib_utils_oo_collect": lib_utils_oo_collect,
             "lib_utils_oo_pdb": lib_utils_oo_pdb,
             "lib_utils_oo_prepend_strings_in_list": lib_utils_oo_prepend_strings_in_list,
@@ -700,17 +687,18 @@ class FilterModule(object):
             "lib_utils_oo_parse_named_certificates": lib_utils_oo_parse_named_certificates,
             "lib_utils_oo_parse_certificate_san": lib_utils_oo_parse_certificate_san,
             "lib_utils_oo_generate_secret": lib_utils_oo_generate_secret,
-            "lib_utils_oo_pods_match_component": lib_utils_oo_pods_match_component,
             "lib_utils_oo_image_tag_to_rpm_version": lib_utils_oo_image_tag_to_rpm_version,
             "lib_utils_oo_hostname_from_url": lib_utils_oo_hostname_from_url,
             "lib_utils_oo_loadbalancer_frontends": lib_utils_oo_loadbalancer_frontends,
             "lib_utils_oo_loadbalancer_backends": lib_utils_oo_loadbalancer_backends,
             "lib_utils_to_padded_yaml": lib_utils_to_padded_yaml,
             "lib_utils_oo_random_word": lib_utils_oo_random_word,
-            "lib_utils_oo_contains_rule": lib_utils_oo_contains_rule,
             "lib_utils_oo_selector_to_string_list": lib_utils_oo_selector_to_string_list,
             "lib_utils_oo_filter_sa_secrets": lib_utils_oo_filter_sa_secrets,
             "lib_utils_oo_l_of_d_to_csv": lib_utils_oo_l_of_d_to_csv,
             "map_from_pairs": map_from_pairs,
             "map_to_pairs": map_to_pairs,
+            "lib_utils_oo_etcd_host_urls": lib_utils_oo_etcd_host_urls,
+            "lib_utils_mutate_htpass_provider": lib_utils_mutate_htpass_provider,
+            "lib_utils_oo_oreg_image": lib_utils_oo_oreg_image,
         }

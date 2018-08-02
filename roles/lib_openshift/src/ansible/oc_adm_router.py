@@ -19,7 +19,7 @@ def main():
             default_cert=dict(default=None, type='str'),
             cert_file=dict(default=None, type='str'),
             key_file=dict(default=None, type='str'),
-            images=dict(default=None, type='str'), #'openshift3/ose-${component}:${version}'
+            images=dict(default=None, type='str'), #'registry.access.redhat.com/openshift3/ose-${component}:${version}'
             latest_images=dict(default=False, type='bool'),
             labels=dict(default=None, type='dict'),
             ports=dict(default=['80:80', '443:443'], type='list'),
@@ -28,6 +28,7 @@ def main():
             service_account=dict(default='router', type='str'),
             router_type=dict(default='haproxy-router', type='str'),
             host_network=dict(default=True, type='bool'),
+            extended_validation=dict(default=True, type='bool'),
             # external host options
             external_host=dict(default=None, type='str'),
             external_host_vserver=dict(default=None, type='str'),
@@ -36,9 +37,6 @@ def main():
             external_host_username=dict(default=None, type='str'),
             external_host_password=dict(default=None, type='str', no_log=True),
             external_host_private_key=dict(default=None, type='str', no_log=True),
-            # Metrics
-            expose_metrics=dict(default=False, type='bool'),
-            metrics_image=dict(default=None, type='str'),
             # Stats
             stats_user=dict(default=None, type='str'),
             stats_password=dict(default=None, type='str', no_log=True),

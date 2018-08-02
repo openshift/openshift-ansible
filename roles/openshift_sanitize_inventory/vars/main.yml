@@ -62,6 +62,7 @@ __warn_deprecated_vars:
   - 'openshift_hosted_logging_storage_access_modes'
   - 'openshift_hosted_logging_deployer_prefix'
   - 'openshift_hosted_logging_deployer_version'
+  - 'openshift_logging_namespace'
   # metrics
   - 'openshift_hosted_metrics_deploy'
   - 'openshift_hosted_metrics_storage_kind'
@@ -73,3 +74,7 @@ __warn_deprecated_vars:
   - 'openshift_hosted_metrics_storage_labels'
   - 'openshift_hosted_metrics_deployer_prefix'
   - 'openshift_hosted_metrics_deployer_version'
+  - 'openshift_hosted_metrics_public_url'
+  # labels and kubelet args
+  - 'openshift_node_labels'
+  - 'openshift_node_kubelet_args'

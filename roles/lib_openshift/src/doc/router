@@ -47,7 +47,7 @@ options:
   images:
     description:
     - The image to base this router on - ${component} will be replaced with --type
-    required: 'openshift3/ose-${component}:${version}'
+    required: 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
     default: None
     aliases: []
   latest_images:
@@ -94,6 +94,12 @@ options:
     required: false
     default: haproxy-router
     aliases: []
+  extended_validation:
+    description:
+    - If true, configure the router to perform extended validation on routes before admitting them.
+    required: false
+    default: True
+    aliases: []
   external_host:
     description:
     - If the underlying router implementation connects with an external host, this is the external host's hostname.
@@ -134,21 +140,6 @@ options:
   external_host_private_key:
     description:
     - If the underlying router implementation requires an SSH private key, this is the path to the private key file.
-    required: false
-    default: None
-    aliases: []
-  expose_metrics:
-    description:
-    - This is a hint to run an extra container in the pod to expose metrics - the image
-    - will either be set depending on the router implementation or provided with --metrics-image.
-    required: false
-    default: False
-    aliases: []
-  metrics_image:
-    description:
-    - If expose_metrics is specified this is the image to use to run a sidecar container
-    - in the pod exposing metrics. If not set and --expose-metrics is true the image will
-    - depend on router implementation.
     required: false
     default: None
     aliases: []
@@ -209,8 +200,8 @@ EXAMPLES = '''
       action: put
     - key: spec.template.spec.containers[0].env
       value:
-        name: EXTENDED_VALIDATION
-        value: 'false'
+        name: ROUTER_MAX_CONNECTIONS
+        value: "10000"
       action: update
   register: router_out
   run_once: True

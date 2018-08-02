@@ -2,28 +2,36 @@
 r_etcd_common_backup_tag: ''
 r_etcd_common_backup_sufix_name: ''
 
-l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
+l_etcd_bootstrapped: '{{ openshift.node.bootstrapped }}'
 
-# runc, docker, host
-r_etcd_common_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else 'docker' if openshift_is_containerized else 'host' }}"
-r_etcd_common_embedded_etcd: false
+l_etcd_static_pod: "{{ (inventory_hostname in groups['oo_masters']) | bool }}"
 
-osm_etcd_image: 'registry.access.redhat.com/rhel7/etcd'
+# runc, docker, static pod, host
+r_etcd_common_etcd_runtime: "{{ 'static_pod' if l_etcd_static_pod  else 'host' }}"
+
+r_etcd_default_version: "3.2.22"
+# lib_utils_oo_oreg_image is a custom filter defined in roles/lib_utils/filter_plugins/oo_filters.py
+# This filter attempts to combine oreg_url host with project/component from etcd_image_dict.
+# "oreg.example.com/openshift3/ose-${component}:${version}"
+# becomes "oreg.example.com/rhel7/etcd:{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
+osm_etcd_image: "{{ etcd_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
 etcd_image_dict:
-  origin: "registry.fedoraproject.org/latest/etcd"
-  openshift-enterprise: "{{ osm_etcd_image }}"
-etcd_image: "{{ etcd_image_dict[openshift_deployment_type | default('origin')] }}"
+  origin: "quay.io/coreos/etcd:v{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
+  openshift-enterprise: "registry.redhat.io/rhel7/etcd:{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
+etcd_image: "{{ osm_etcd_image }}"
 
 # etcd run on a host => use etcdctl command directly
-# etcd run as a docker container => use docker exec
-# etcd run as a runc container => use runc exec
-r_etcd_common_etcdctl_command: "{{ 'etcdctl' if r_etcd_common_etcd_runtime == 'host' or r_etcd_common_embedded_etcd | bool else 'docker exec etcd_container etcdctl' if r_etcd_common_etcd_runtime == 'docker' else 'runc exec etcd etcdctl' }}"
+etcdctl_dict:
+  host: 'etcdctl'
+  static_pod: '/usr/local/bin/master-exec etcd etcd etcdctl'
+r_etcd_common_etcdctl_command: "{{ etcdctl_dict[r_etcd_common_etcd_runtime] }}"
 
 # etcd server vars
 etcd_conf_dir: '/etc/etcd'
 etcd_conf_file: "{{ etcd_conf_dir }}/etcd.conf"
 etcd_ca_file: "{{ etcd_conf_dir }}/ca.crt"
 etcd_cert_file: "{{ etcd_conf_dir }}/server.crt"
+etcd_cert_subdir: "etcd-{{ openshift.common.hostname }}"
 etcd_key_file: "{{ etcd_conf_dir }}/server.key"
 etcd_peer_ca_file: "{{ etcd_conf_dir }}/ca.crt"
 etcd_peer_cert_file: "{{ etcd_conf_dir }}/peer.crt"
@@ -32,6 +40,8 @@ etcd_peer_key_file: "{{ etcd_conf_dir }}/peer.key"
 # etcd ca vars
 etcd_ca_dir: "{{ etcd_conf_dir}}/ca"
 etcd_generated_certs_dir: "{{ etcd_conf_dir }}/generated_certs"
+etcd_cert_prefix: ''
+etcd_cert_config_dir: "/etc/etcd"
 etcd_ca_cert: "{{ etcd_ca_dir }}/ca.crt"
 etcd_ca_key: "{{ etcd_ca_dir }}/ca.key"
 etcd_openssl_conf: "{{ etcd_ca_dir }}/openssl.cnf"
@@ -53,20 +63,19 @@ r_etcd_common_master_peer_key_file: /etc/origin/master/master.etcd-client.key
 r_etcd_common_master_peer_ca_file: /etc/origin/master/master.etcd-ca.crt
 
 # etcd server & certificate vars
-etcd_hostname: "{{ inventory_hostname }}"
-etcd_ip: "{{ ansible_default_ipv4.address }}"
-etcd_is_atomic: False
-etcd_is_containerized: False
+etcd_hostname: "{{ openshift.common.hostname }}"
+etcd_ip: "{{ openshift.common.ip }}"
+etcd_is_atomic: "{{ openshift_is_atomic }}"
 etcd_is_thirdparty: False
 
 # etcd dir vars
-etcd_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' }}"
+etcd_data_dir: "/var/lib/etcd/"
 
 # etcd ports and protocols
 etcd_client_port: 2379
 etcd_peer_port: 2380
-etcd_url_scheme: http
-etcd_peer_url_scheme: http
+etcd_url_scheme: https
+etcd_peer_url_scheme: https
 
 etcd_initial_cluster_state: new
 etcd_initial_cluster_token: etcd-cluster-1
@@ -98,4 +107,10 @@ r_etcd_os_firewall_allow:
 # set the backend quota to 4GB by default
 etcd_quota_backend_bytes: 4294967296
 
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+openshift_docker_service_name: "docker"
+
+etcd_ca_host: "{{ groups['oo_etcd_to_config'].0 }}"
+
+l_etcd_restart_command: "{{ l_etcd_static_pod | ternary('/usr/local/bin/master-restart etcd', 'systemctl restart etcd') }}"
+
+etcd_static_pod_location: "{{ openshift_control_plane_static_pod_location | default('/etc/origin/node/pods/') }}"

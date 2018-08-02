@@ -52,6 +52,9 @@ class OCPVC(OpenShiftCLI):
         elif '\"%s\" not found' % self.config.name in result['stderr']:
             result['returncode'] = 0
             result['results'] = [{}]
+        elif 'namespaces \"%s\" not found' % self.config.namespace in result['stderr']:
+            result['returncode'] = 0
+            result['results'] = [{}]
 
         return result
 
@@ -79,7 +82,7 @@ class OCPVC(OpenShiftCLI):
     # pylint: disable=too-many-branches,too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run the oc_pvc module'''
         pconfig = PersistentVolumeClaimConfig(params['name'],
                                               params['namespace'],
                                               params['kubeconfig'],

@@ -3,6 +3,14 @@
   set_fact:
     l_node_group_name: "{{ openshift_aws_node_group.name }} {{ l_deployment_serial }}"
 
+- set_fact:
+    l_openshift_aws_node_group_config_tags: "{{ openshift_aws_node_group_config_tags }}"
+
+- name: Set scale group instances autonaming
+  set_fact:
+    l_openshift_aws_node_group_config_tags: "{{ l_openshift_aws_node_group_config_tags | combine({'Name': l_node_group_name }) }}"
+  when: openshift_aws_autoname_scale_group_instances | default(false)
+
 - name: Create the scale group
   ec2_asg:
     name: "{{ l_node_group_name }}"
@@ -21,9 +29,10 @@
     replace_all_instances: "{{ omit if openshift_aws_node_group_replace_instances != []
                                     else (l_node_group_config[openshift_aws_node_group.group].replace_all_instances | default(omit)) }}"
     tags:
-    - "{{ openshift_aws_node_group_config_tags
+    - "{{ l_openshift_aws_node_group_config_tags
           | combine(openshift_aws_node_group.tags)
-          | combine({'deployment_serial': l_deployment_serial, 'ami': openshift_aws_ami_map[openshift_aws_node_group.group] | default(openshift_aws_ami)}) }}"
+          | combine({'deployment_serial': l_deployment_serial, 'ami': openshift_aws_ami_map[openshift_aws_node_group.group] | default(openshift_aws_ami)})
+          | combine({'openshift-node-group-config': openshift_aws_node_group.node_group_config | default('unset') }) }}"
 
 - name: append the asg name to the openshift_aws_created_asgs fact
   set_fact:

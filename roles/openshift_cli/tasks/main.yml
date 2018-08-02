@@ -1,49 +1,32 @@
 ---
 - name: Install clients
   package: name={{ openshift_service_type }}-clients{{ openshift_pkg_version | default('') }} state=present
-  when: not openshift_is_containerized | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 
 - block:
-  - name: Pull CLI Image
+  - name: Pull CLI Image (docker)
+    docker_image:
+      name: "{{ openshift_cli_image }}"
+    when: not openshift_use_crio_only | bool
+
+  - name: Pull CLI Image (atomic)
     command: >
-      docker pull {{ openshift_cli_image }}:{{ openshift_image_tag }}
+      atomic pull --storage ostree {{ system_openshift_cli_image }}
     register: pull_result
-    changed_when: "'Downloaded newer image' in pull_result.stdout"
+    changed_when: "'Pulling layer' in pull_result.stdout"
+    when: openshift_use_crio_only | bool
 
   # openshift_container_binary_sync is a custom module in lib_utils
   - name: Copy client binaries/symlinks out of CLI image for use on the host
     openshift_container_binary_sync:
       image: "{{ openshift_cli_image }}"
-      tag: "{{ openshift_image_tag }}"
-      backend: "docker"
-  when:
-  - openshift_is_containerized | bool
-  - not l_use_cli_atomic_image | bool
-
-- block:
-  - name: Pull CLI Image
-    command: >
-      atomic pull --storage ostree {{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift_cli_image }}:{{ openshift_image_tag }}
-    register: pull_result
-    changed_when: "'Pulling layer' in pull_result.stdout"
-
-  # openshift_container_binary_sync is a custom module in lib_utils
-  - name: Copy client binaries/symlinks out of CLI image for use on the host
-    openshift_container_binary_sync:
-      image: "{{ '' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift_cli_image }}"
-      tag: "{{ openshift_image_tag }}"
-      backend: "atomic"
-  when:
-  - openshift_is_containerized | bool
-  - l_use_cli_atomic_image | bool
-
-- name: Reload facts to pick up installed OpenShift version
-  openshift_facts:
+      backend: "{{ l_openshift_cli_image_backend }}"
+  when: openshift_is_atomic | bool
 
 - name: Install bash completion for oc tools
   package: name=bash-completion state=present
-  when: not openshift_is_containerized | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded

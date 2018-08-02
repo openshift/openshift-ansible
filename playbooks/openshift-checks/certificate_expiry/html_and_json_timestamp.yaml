@@ -3,7 +3,6 @@
 
 - name: Check cert expirys
   hosts: nodes:masters:etcd
-  become: yes
   gather_facts: no
   vars:
     openshift_certificate_expiry_generate_html_report: yes

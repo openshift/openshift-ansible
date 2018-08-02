@@ -18,7 +18,6 @@ From this role:
 | openshift_ca_cert       | `{{ openshift_ca_config_dir }}/ca.crt`        | CA certificate path including CA certificate filename.                      |
 | openshift_ca_key        | `{{ openshift_ca_config_dir }}/ca.key`        | CA key path including CA key filename.                                      |
 | openshift_ca_serial     | `{{ openshift_ca_config_dir }}/ca.serial.txt` | CA serial path including CA serial filename.                                |
-| openshift_version       | `{{ openshift_pkg_version }}`                 | OpenShift package version.                                                  |
 | openshift_master_cert_expire_days | `730` (2 years)                     | Validity of the certificates in days. Works only with OpenShift version 1.5 (3.5) and later. |
 | openshift_ca_cert_expire_days     | `1825` (5 years)                    | Validity of the CA certificates in days. Works only with OpenShift version 1.5 (3.5) and later. |
 
@@ -36,7 +35,6 @@ Example Playbook
   hosts: localhost
   roles:
   - role: openshift_ca
-    openshift_ca_host: master1.example.com
 ```
 
 License

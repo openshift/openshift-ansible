@@ -124,12 +124,12 @@ log_size_max = 52428800
 default_transport = "docker://"
 
 # pause_image is the image which we use to instantiate infra containers.
-pause_image = "kubernetes/pause"
+pause_image = "{{ pause_image }}"
 
 # pause_command is the command to run in a pause_image to have a container just
 # sit there.  If the image contains the necessary information, this value need
 # not be specified.
-pause_command = "/pause"
+pause_command = "/usr/bin/pod"
 
 # signature_policy is the name of the file which decides what sort of policy we
 # use when deciding whether or not to trust an image that we've pulled.
@@ -156,9 +156,9 @@ registries = [
 # management of CNI plugins.
 [crio.network]
 
-# network_dir is is where CNI network configuration
+# network_dir is where CNI network configuration
 # files are stored.
 network_dir = "/etc/cni/net.d/"
 
-# plugin_dir is is where CNI plugin binaries are stored.
+# plugin_dir is where CNI plugin binaries are stored.
 plugin_dir = "/opt/cni/bin/"

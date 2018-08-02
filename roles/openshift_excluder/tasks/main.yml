@@ -1,9 +1,4 @@
 ---
-- name: Detecting Atomic Host Operating System
-  stat:
-    path: /run/ostree-booted
-  register: ostree_booted
-
 - block:
 
   - name: Debug r_openshift_excluder_enable_docker_excluder
@@ -30,4 +25,4 @@
     include_tasks: "{{ r_openshift_excluder_action }}.yml"
 
   when:
-  - not ostree_booted.stat.exists | bool
+  - not openshift_is_atomic

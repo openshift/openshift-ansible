@@ -1,6 +1,6 @@
 ---
 - name: Create heketi DB volume
-  command: "{{ glusterfs_heketi_client }} setup-openshift-heketi-storage --image {{ glusterfs_heketi_image}}:{{ glusterfs_heketi_version }} --listfile /tmp/heketi-storage.json"
+  command: "{{ glusterfs_heketi_client }} setup-openshift-heketi-storage --image {{ glusterfs_heketi_image }} --listfile /tmp/heketi-storage.json"
   register: setup_storage
 
 - name: Copy heketi-storage list
@@ -48,12 +48,12 @@
 
 - name: Generate heketi endpoints
   template:
-    src: "{{ openshift_examples_content_version }}/heketi-endpoints.yml.j2"
+    src: "heketi-endpoints.yml.j2"
     dest: "{{ mktemp.stdout }}/heketi-endpoints.yml"
 
 - name: Generate heketi service
   template:
-    src: "{{ openshift_examples_content_version }}/heketi-service.yml.j2"
+    src: "heketi-service.yml.j2"
     dest: "{{ mktemp.stdout }}/heketi-service.yml"
 
 - name: Create heketi endpoints
@@ -76,7 +76,7 @@
 
 - name: Copy heketi template
   copy:
-    src: "{{ openshift_examples_content_version }}/heketi-template.yml"
+    src: "heketi-template.yml"
     dest: "{{ mktemp.stdout }}/heketi-template.yml"
 
 - name: Create heketi template
@@ -95,7 +95,6 @@
     create: True
     params:
       IMAGE_NAME: "{{ glusterfs_heketi_image }}"
-      IMAGE_VERSION: "{{ glusterfs_heketi_version }}"
       HEKETI_ROUTE: "{{ glusterfs_heketi_url | default(['heketi-',glusterfs_name]|join) }}"
       HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
       HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"

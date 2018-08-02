@@ -2,37 +2,28 @@
 r_openshift_loadbalancer_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_loadbalancer_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-openshift_router_image_default_dict:
-  origin: 'openshift/origin-haproxy-router'
-  openshift-enterprise: 'openshift3/ose-haproxy-router'
-openshift_router_image_default: "{{ openshift_router_image_default_dict[openshift_deployment_type] }}"
-openshift_router_image: "{{ openshift_router_image_default }}"
-
-haproxy_frontends:
-- name: main
-  binds:
-  - "*:{{ openshift_master_api_port | default(8443) }}"
-  default_backend: default
-
-haproxy_backends:
-- name: default
-  balance: roundrobin
-  servers:
-  - name: web01
-    address: 127.0.0.1:9000
-    opts: check
+openshift_loadbalancer_frontends: "{{ (openshift_master_api_port
+                                       | lib_utils_oo_loadbalancer_frontends(hostvars | lib_utils_oo_select_keys(groups['oo_masters']),
+                                                                             openshift_use_nuage | default(false),
+                                                                             nuage_mon_rest_server_port | default(none)))
+                                       + openshift_loadbalancer_additional_frontends | default([]) }}"
+openshift_loadbalancer_backends: "{{ (openshift_master_api_port
+                                      | lib_utils_oo_loadbalancer_backends(hostvars | lib_utils_oo_select_keys(groups['oo_masters']),
+                                                                           openshift_use_nuage | default(false),
+                                                                           nuage_mon_rest_server_port | default(none)))
+                                      + openshift_loadbalancer_additional_backends | default([]) }}"
 
 r_openshift_loadbalancer_os_firewall_deny: []
 r_openshift_loadbalancer_os_firewall_allow:
 - service: haproxy stats
   port: "9000/tcp"
 - service: haproxy balance
-  port: "{{ openshift_master_api_port | default(8443) }}/tcp"
+  port: "{{ openshift_master_api_port }}/tcp"
 - service: nuage mon
   port: "{{ nuage_mon_rest_server_port | default(9443) }}/tcp"
   cond: "{{ r_openshift_lb_use_nuage | bool }}"
 
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+openshift_docker_service_name: "docker"
 
 # NOTE
 # r_openshift_lb_use_nuage_default may be defined external to this role.

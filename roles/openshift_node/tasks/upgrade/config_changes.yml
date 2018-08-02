@@ -1,62 +1,31 @@
 ---
-- name: Update systemd units
-  include_tasks: ../systemd_units.yml
-  when: openshift_is_containerized | bool
-
-- name: Update oreg value
-  yedit:
-    src: "{{ openshift.common.config_base }}/node/node-config.yaml"
-    key: 'imageConfig.format'
-    value: "{{ oreg_url | default(oreg_url_node) }}"
-  when: oreg_url is defined or oreg_url_node is defined
-
-- name: Remove obsolete docker-sdn-ovs.conf
+- name: Ensure the node static pod directory exists
   file:
-    path: "/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf"
-    state: absent
+    path: "{{ openshift.common.config_base }}/node/pods"
+    state: directory
+    mode: 0755
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1513054
-- name: Clean up dockershim data
+- name: Ensure docker-registry directory exists
   file:
-    path: "/var/lib/dockershim/sandbox/"
-    state: absent
+    state: directory
+    path: "/etc/docker/certs.d/docker-registry.default.svc:5000"
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1518912
-- name: Clean up IPAM data
+- name: Update the docker-registry CA symlink
   file:
-    path: "/var/lib/cni/networks/openshift-sdn/"
-    state: absent
-
-# https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
-# swapoff is a custom module in lib_utils that comments out swap entries in
-# /etc/fstab and runs swapoff -a, if necessary.
-- name: Disable swap
-  swapoff: {}
-  when: openshift_disable_swap | default(true) | bool
-
-- name: Apply 3.6 dns config changes
-  yedit:
-    src: /etc/origin/node/node-config.yaml
-    key: "{{ item.key }}"
-    value: "{{ item.value }}"
-  with_items:
-  - key: "dnsBindAddress"
-    value: "127.0.0.1:53"
-  - key: "dnsRecursiveResolvConf"
-    value: "/etc/origin/node/resolv.conf"
-
-- name: Install Node service file
-  template:
-    dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
-    src: "node.service.j2"
-  register: l_node_unit
-  when: not openshift_is_containerized | bool
+    src: "{{ openshift_node_config_dir }}/client-ca.crt"
+    dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
+    state: link
+    force: yes
+    follow: no
 
 - name: Reset selinux context
   command: restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes
   when:
   - ansible_selinux is defined
   - ansible_selinux.status == 'enabled'
+
+- name: Update systemd units
+  import_tasks: ../systemd_units.yml
 
 # NOTE: This is needed to make sure we are using the correct set
 #       of systemd unit files. The RPMs lay down defaults but

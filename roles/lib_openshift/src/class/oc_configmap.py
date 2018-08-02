@@ -104,7 +104,7 @@ class OCConfigMap(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     # TODO: This function should be refactored into its individual parts.
     def run_ansible(params, check_mode):
-        '''run the ansible idempotent code'''
+        '''run the oc_configmap module'''
 
         oc_cm = OCConfigMap(params['name'],
                             params['from_file'],

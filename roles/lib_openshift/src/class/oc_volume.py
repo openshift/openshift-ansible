@@ -102,7 +102,7 @@ class OCVolume(OpenShiftCLI):
     # pylint: disable=too-many-branches,too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode=False):
-        '''run the idempotent ansible code'''
+        '''run the oc_volume module'''
         oc_volume = OCVolume(params['kind'],
                              params['name'],
                              params['namespace'],

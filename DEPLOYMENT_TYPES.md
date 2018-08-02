@@ -13,5 +13,4 @@ The table below outlines the defaults per `openshift_deployment_type`:
 | **openshift_service_type** (also used for package names)        | origin                                   | atomic-openshift                       |
 | **openshift.common.config_base**                                | /etc/origin                              | /etc/origin                            |
 | **openshift_data_dir**                                          | /var/lib/origin                          | /var/lib/origin                        |
-| **openshift.master.registry_url oreg_url_node**                 | openshift/origin-${component}:${version} | openshift3/ose-${component}:${version} |
 | **Image Streams**                                               | centos                                   | rhel                                   |

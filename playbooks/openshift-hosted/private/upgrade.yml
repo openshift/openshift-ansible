@@ -9,6 +9,13 @@
   - import_role:
       name: openshift_hosted
       tasks_from: upgrade_routers.yml
+    when: openshift_hosted_manage_router | default(True) | bool
   - import_role:
       name: openshift_hosted
       tasks_from: upgrade_registry.yml
+    when: openshift_hosted_manage_registry | default(True) | bool
+  - import_role:
+      name: openshift_docker_gc
+    when:
+    - openshift_use_crio | bool
+    - openshift_crio_enable_docker_gc | bool

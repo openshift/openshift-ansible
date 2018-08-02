@@ -3,15 +3,11 @@
 
 - import_playbook: init/main.yml
   vars:
-    skip_version: True
     l_install_base_packages: True
-    l_openshift_version_set_hosts: "all:!all"
-    l_openshift_version_check_hosts: "all:!all"
+    l_repo_hosts: "{{ l_scale_up_hosts | default('oo_all_hosts') }}"
 
 - import_playbook: init/validate_hostnames.yml
   when: not (skip_validate_hostnames | default(False))
-
-- import_playbook: init/repos.yml
 
 # This is required for container runtime for crio, only needs to run once.
 - name: Configure os_firewall

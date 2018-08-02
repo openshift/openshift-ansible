@@ -23,12 +23,12 @@
   register: new_elb
   retries: 20
   delay: 5
-  until: new_elb | succeeded
+  until: new_elb is succeeded
   ignore_errors: yes
 
 - fail:
     msg: "couldn't create ELB {{ item.value.name }}"
-  when: not new_elb | succeeded
+  when: new_elb is failed
 
 - debug:
     msg: "{{ new_elb }}"

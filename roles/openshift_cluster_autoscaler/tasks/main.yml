@@ -1,4 +1,10 @@
 ---
+- name: Set cluster autoscaler namespace
+  oc_project:
+    state: present
+    name: "{{ openshift_cluster_autoscaler_namespace }}"
+    node_selector: ""
+
 - name: create the cluster-autoscaler serviceaccount
   oc_serviceaccount:
     name: "{{ openshift_cluster_autoscaler_serviceaccount }}"
@@ -26,7 +32,7 @@
   with_items:
   - fname: clusterrole.yml
     type: clusterrole
-    name: "system:{{ openshift_cluster_autoscaler_name }}"
+    name: "{{ openshift_cluster_autoscaler_name }}"
   - fname: role.yml
     type: role
     name: "{{ openshift_cluster_autoscaler_name }}"
@@ -37,7 +43,7 @@
 - name: create the policies
   oc_adm_policy_user:
     state: "{{ openshift_cluster_autoscaler_state }}"
-    user: "system:serviceaccount:openshift-infra:{{ openshift_cluster_autoscaler_serviceaccount }}"
+    user: "system:serviceaccount:{{ openshift_cluster_autoscaler_namespace }}:{{ openshift_cluster_autoscaler_serviceaccount }}"
     namespace: "{{ openshift_cluster_autoscaler_namespace }}"
     resource_kind: "{{ item.name }}"
     resource_name: cluster-autoscaler

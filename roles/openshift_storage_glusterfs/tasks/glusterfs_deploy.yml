@@ -65,7 +65,7 @@
 
 - name: Copy GlusterFS DaemonSet template
   copy:
-    src: "{{ openshift_examples_content_version }}/glusterfs-template.yml"
+    src: "glusterfs-template.yml"
     dest: "{{ mktemp.stdout }}/glusterfs-template.yml"
 
 - name: Create GlusterFS template
@@ -92,7 +92,6 @@
     create: True
     params:
       IMAGE_NAME: "{{ glusterfs_image }}"
-      IMAGE_VERSION: "{{ glusterfs_version }}"
       NODE_LABELS: "{{ glusterfs_nodeselector }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
       GB_GLFS_LRU_COUNT: "{{ glusterfs_block_host_vol_max }}"

@@ -12,7 +12,7 @@ metadata:
     openshift.io/provider-display-name: Red Hat, Inc.
 parameters:
 - name: IMAGE
-  value: openshift/origin-web-console:latest
+  value: docker.io/openshift/origin-web-console:latest
 - name: NAMESPACE
   # This namespace cannot be changed. Only `openshift-web-console` is supported.
   value: openshift-web-console
@@ -37,11 +37,15 @@ objects:
   spec:
     replicas: "${{REPLICA_COUNT}}"
     strategy:
-      type: Recreate
+      type: RollingUpdate
+      rollingUpdate:
+        # behave like a recreate deployment, but don't wait for pods to terminate
+        maxUnavailable: 100%
     template:
       metadata:
         name: webconsole
         labels:
+          app: openshift-web-console
           webconsole: "true"
       spec:
         serviceAccountName: webconsole
@@ -70,12 +74,12 @@ objects:
             exec:
               command:
                 - /bin/sh
-                - -i
                 - -c
                 - |-
                   if [[ ! -f /tmp/webconsole-config.hash ]]; then \
                     md5sum /var/webconsole-config/webconsole-config.yaml > /tmp/webconsole-config.hash; \
                   elif [[ $(md5sum /var/webconsole-config/webconsole-config.yaml) != $(cat /tmp/webconsole-config.hash) ]]; then \
+                    echo 'webconsole-config.yaml has changed.'; \
                     exit 1; \
                   fi && curl -k -f https://0.0.0.0:8443/console/
           resources:
@@ -86,11 +90,11 @@ objects:
         volumes:
         - name: serving-cert
           secret:
-            defaultMode: 400
+            defaultMode: 0440
             secretName: webconsole-serving-cert
         - name: webconsole-config
           configMap:
-            defaultMode: 440
+            defaultMode: 0440
             name: webconsole-config
 
 # to create the config for the web console

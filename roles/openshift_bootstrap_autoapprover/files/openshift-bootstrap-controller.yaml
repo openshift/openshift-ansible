@@ -3,6 +3,9 @@ apiVersion: apps/v1beta1
 metadata:
   name: bootstrap-autoapprover
   namespace: openshift-infra
+  annotations:
+    image.openshift.io/triggers: |
+      [{"from":{"kind":"ImageStreamTag","name":"node:v3.11"},"fieldPath":"spec.template.spec.containers[?(@.name==\"signer\")].image"}]
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -11,11 +14,13 @@ spec:
       labels:
         app: bootstrap-autoapprover
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: 'true'
       serviceAccountName: bootstrap-autoapprover
       terminationGracePeriodSeconds: 1
       containers:
       - name: signer
-        image: openshift/node:v3.7.0-rc.0
+        image: " "
         command:
         - /bin/bash
         - -c
@@ -44,7 +49,7 @@ spec:
           username=\${4}
 
           # auto approve
-          if [[ -z "\${condition}" && ("\${username}" == "system:serviceaccount:openshift-infra:node-bootstrapper" || "\${username}" == "system:node:"* ) ]]; then
+          if [[ -z "\${condition}" && ("\${username}" == "system:serviceaccount:openshift-infra:node-bootstrapper" || "\${username}" == "system:node:"* || "\${username}" == "system:admin" ) ]]; then
             oc adm certificate approve "\${name}"
             exit 0
           fi
@@ -55,7 +60,7 @@ spec:
             if ! echo "\${text}" | openssl x509 -noout; then
               echo "error: Unable to parse certificate" 2>&1
               exit 1
-            fi 
+            fi
             if ! echo "\${text}" | openssl x509 -checkend -60 > /dev/null; then
               echo "Certificate is expired, deleting"
               oc delete csr "\${name}"

@@ -1,8 +1,0 @@
----
-- name: Install Node dependencies docker service file
-  template:
-    dest: "/etc/systemd/system/{{ openshift_service_type }}-node-dep.service"
-    src: openshift.docker.node.dep.service
-  notify:
-  - reload systemd units
-  - restart node

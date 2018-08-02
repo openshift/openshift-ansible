@@ -1,3 +1,0 @@
----
-- include_tasks: backup/vars.yml
-- include_tasks: backup/copy.yml

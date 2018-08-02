@@ -42,6 +42,7 @@ Example Playbook
       capacity: "5Gi"
       access_modes:
       - "ReadWriteMany"
+    openshift_persistentlocalstorage_enabled: True
   roles:
   - role: openshift_persistent_volumes
 ```

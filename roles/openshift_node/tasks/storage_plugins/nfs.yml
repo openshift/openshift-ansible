@@ -1,6 +1,8 @@
 ---
 - name: Install NFS storage plugin dependencies
-  package: name=nfs-utils state=present
+  package:
+    name: nfs-utils
+    state: present
   when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
@@ -40,8 +42,7 @@
 # the previous task when the problem has been addressed in current
 # ansible release.
 - name: Set seboolean to allow nfs storage plugin access from containers (python 3)
-  command: >
-    setsebool -P {{ item.item }} on
+  command: setsebool -P {{ item.item }} on
   when:
   - ansible_selinux
   - ansible_selinux.status == "enabled"

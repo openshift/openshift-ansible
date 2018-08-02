@@ -1,5 +1,0 @@
----
-- name: Remove member data
-  file:
-    path: "{{ etcd_data_dir }}/member"
-    state: absent

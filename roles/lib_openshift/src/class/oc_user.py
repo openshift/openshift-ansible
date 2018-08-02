@@ -139,7 +139,7 @@ class OCUser(OpenShiftCLI):
     # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode=False):
-        ''' run the idempotent ansible code
+        ''' run the oc_user module
 
             params comes from the ansible portion of this module
             check_mode: does the module support check mode. (module.check_mode)

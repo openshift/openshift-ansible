@@ -139,3 +139,10 @@
   when:
   - glusterfs_wipe
   - item.stdout_lines | count > 0
+
+- name: Wipe filesystem signatures from storage devices
+  command: "wipefs -a {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"
+  delegate_to: "{{ item }}"
+  with_items: "{{ glusterfs_nodes | default([]) }}"
+  failed_when: False
+  when: glusterfs_wipe

@@ -18,8 +18,7 @@
 - name: run the init
   import_playbook: ../../init/main.yml
 
+- import_playbook: ../../openshift-checks/private/install.yml
+
 - name: configure the control plane
   import_playbook: ../../common/private/control_plane.yml
-
-- name: ensure the masters are configured as nodes
-  import_playbook: ../../openshift-node/private/config.yml

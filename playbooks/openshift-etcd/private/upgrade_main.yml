@@ -32,12 +32,6 @@
   when:
   - true in hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config']) | lib_utils_oo_collect('__etcd_cert_lacks_hostname') | default([false])
 
-# For 1.4/3.4 we want to upgrade everyone to etcd-3.0. etcd docs say to
-# upgrade from 2.0.x to 2.1.x to 2.2.x to 2.3.x to 3.0.x. While this is a tedius
-# task for RHEL and CENTOS it's simply not possible in Fedora unless you've
-# mirrored packages on your own because only the GA and latest versions are
-# available in the repos. So for Fedora we'll simply skip this, sorry.
-
 - name: Backup etcd before upgrading anything
   import_playbook: upgrade_backup.yml
   vars:
@@ -51,9 +45,17 @@
       name: etcd
       tasks_from: drop_etcdctl.yml
 
+# We only want to upgrade with the old method if the host is not part of
+# master host.
 - name: Perform etcd upgrade
   import_playbook: upgrade_step.yml
-  when: openshift_etcd_upgrade | default(true) | bool
+  when:
+  - openshift_etcd_upgrade | default(true) | bool
+  - inventory_hostname not in groups['oo_masters']
+
+# Upgrade / convert etcd to static pods
+- name: Upgrade etcd static pods
+  import_playbook: upgrade_static.yml
 
 - name: Backup etcd
   import_playbook: upgrade_backup.yml

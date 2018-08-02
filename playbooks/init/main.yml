@@ -1,5 +1,5 @@
 ---
-# skip_version and l_install_base_packages are passed in via prerequistes.yml.
+# l_install_base_packages is passed in via prerequistes.yml.
 # skip_sanity_checks is passed in via openshift-node/private/image_prep.yml
 
 - name: Initialization Checkpoint Start
@@ -13,12 +13,18 @@
     set_stats:
       data:
         installer_phase_initialize:
+          title: "Initialization"
+          playbook: ""
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - import_playbook: evaluate_groups.yml
 
 - import_playbook: basic_facts.yml
+
+# NOTE: we must call init repos before installing base packages
+# because they may come from the repos.
+- import_playbook: repos.yml
 
 # base_packages needs to be setup for openshift_facts.py to run correctly.
 - import_playbook: base_packages.yml
@@ -27,7 +33,6 @@
 - import_playbook: cluster_facts.yml
 
 - import_playbook: version.yml
-  when: not (skip_version | default(False))
 
 - import_playbook: sanity_checks.yml
   when: not (skip_sanity_checks | default(False))

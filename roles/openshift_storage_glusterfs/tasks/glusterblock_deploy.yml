@@ -26,7 +26,7 @@
 
 - name: Copy initial glusterblock provisioner resource file
   copy:
-    src: "{{ openshift_examples_content_version }}/{{ item }}"
+    src: "{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - "glusterblock-provisioner.yml"
@@ -47,7 +47,6 @@
     create: True
     params:
       IMAGE_NAME: "{{ glusterfs_block_image }}"
-      IMAGE_VERSION: "{{ glusterfs_block_version }}"
       NAMESPACE: "{{ glusterfs_namespace }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
 

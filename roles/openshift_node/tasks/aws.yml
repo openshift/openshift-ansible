@@ -17,5 +17,3 @@
     - openshift_cloudprovider_kind == 'aws'
     - openshift_cloudprovider_aws_access_key is defined
     - openshift_cloudprovider_aws_secret_key is defined
-  notify:
-    - restart node

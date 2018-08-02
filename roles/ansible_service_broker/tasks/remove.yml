@@ -1,27 +1,5 @@
 ---
 
-- name: remove ansible-service-broker serviceaccount
-  oc_serviceaccount:
-    name: asb
-    namespace: openshift-ansible-service-broker
-    state: absent
-
-- name: remove ansible-service-broker client serviceaccount
-  oc_serviceaccount:
-    name: asb-client
-    namespace: openshift-ansible-service-broker
-    state: absent
-
-- name: remove asb-auth cluster role
-  oc_clusterrole:
-    state: absent
-    name: asb-auth
-
-- name: remove asb-access cluster role
-  oc_clusterrole:
-    state: absent
-    name: asb-access
-
 - name: Unbind admin cluster-role to asb serviceaccount
   oc_adm_policy_user:
     state: absent
@@ -46,6 +24,28 @@
     resource_name: asb-access
     user: "system:serviceaccount:openshift-ansible-service-broker:asb-client"
 
+- name: remove ansible-service-broker serviceaccount
+  oc_serviceaccount:
+    name: asb
+    namespace: openshift-ansible-service-broker
+    state: absent
+
+- name: remove ansible-service-broker client serviceaccount
+  oc_serviceaccount:
+    name: asb-client
+    namespace: openshift-ansible-service-broker
+    state: absent
+
+- name: remove asb-auth cluster role
+  oc_clusterrole:
+    state: absent
+    name: asb-auth
+
+- name: remove asb-access cluster role
+  oc_clusterrole:
+    state: absent
+    name: asb-access
+
 - name: remove asb-registry auth secret
   oc_secret:
     state: absent
@@ -58,33 +58,9 @@
     name: asb-client
     namespace: openshift-ansible-service-broker
 
-- name: Remove etcd-auth secret
-  oc_secret:
-    state: absent
-    name: etcd-auth-secret
-    namespace: openshift-ansible-service-broker
-
-- name: Remove broker-etcd-auth secret
-  oc_secret:
-    state: absent
-    name: broker-etcd-auth-secret
-    namespace: openshift-ansible-service-broker
-
 - name: remove ansible-service-broker service
   oc_service:
     name: asb
-    namespace: openshift-ansible-service-broker
-    state: absent
-
-- name: remove asb-etcd service
-  oc_service:
-    state: absent
-    name: asb-etcd
-    namespace: openshift-ansible-service-broker
-
-- name: remove etcd service
-  oc_service:
-    name: etcd
     namespace: openshift-ansible-service-broker
     state: absent
 
@@ -94,11 +70,12 @@
     namespace: openshift-ansible-service-broker
     state: absent
 
-- name: remove persistent volume claim for etcd
-  oc_pvc:
-    name: etcd
+- name: remove route for dashboard-redirector service
+  oc_route:
+    name: dr-1337
     namespace: openshift-ansible-service-broker
     state: absent
+  when: ansible_service_broker_enable_dashboard_redirector
 
 - name: remove Ansible Service Broker deployment config
   oc_obj:
@@ -107,14 +84,6 @@
     kind: DeploymentConfig
     state: absent
 
-- name: remove Ansible Service Broker etcd deployment config
-  oc_obj:
-    name: asb-etcd
-    namespace: openshift-ansible-service-broker
-    kind: DeploymentConfig
-    state: absent
-
-
 - name: remove secret for broker auth
   oc_obj:
     name: asb-client
@@ -122,13 +91,21 @@
     kind: Secret
     state: absent
 
-# TODO: saw a oc_configmap in the library, but didn't understand how to get it to do the following:
 - name: remove config map for ansible-service-broker
-  oc_obj:
+  oc_configmap:
     name: broker-config
     namespace: openshift-ansible-service-broker
     state: absent
-    kind: ConfigMap
+
+- name: remove custom resource definitions for asb
+  oc_obj:
+    name: '{{ asb_crd.metadata.name }}'
+    kind: CustomResourceDefinition
+    state: absent
+  vars:
+    asb_crd: "{{ lookup('file', item) | from_yaml }}"
+  with_fileglob:
+    - 'files/*.automationbroker.io.yaml'
 
 # TODO: Is this going to work?
 - shell: >

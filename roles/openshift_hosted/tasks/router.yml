@@ -37,22 +37,22 @@
 - block:
   - name: generate a default wildcard router certificate
     oc_adm_ca_server_cert:
-      signer_cert: "{{ openshift_master_config_dir }}/ca.crt"
-      signer_key: "{{ openshift_master_config_dir }}/ca.key"
-      signer_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
+      signer_cert: "/etc/origin/master/ca.crt"
+      signer_key: "/etc/origin/master/ca.key"
+      signer_serial: "/etc/origin/master/ca.serial.txt"
       hostnames:
       - "{{ openshift_master_default_subdomain }}"
       - "*.{{ openshift_master_default_subdomain }}"
-      cert: "{{ openshift_master_config_dir ~ '/openshift-router.crt' }}"
-      key: "{{ openshift_master_config_dir ~ '/openshift-router.key' }}"
+      cert: "/etc/origin/master/openshift-router.crt"
+      key: "/etc/origin/master/openshift-router.key"
     with_items: "{{ openshift_hosted_routers }}"
 
   - name: set the openshift_hosted_router_certificate
     set_fact:
       openshift_hosted_router_certificate:
-        certfile: "{{ openshift_master_config_dir ~ '/openshift-router.crt' }}"
-        keyfile: "{{ openshift_master_config_dir ~ '/openshift-router.key' }}"
-        cafile: "{{ openshift_master_config_dir ~ '/ca.crt' }}"
+        certfile: "/etc/origin/master/openshift-router.crt"
+        keyfile: "/etc/origin/master/openshift-router.key"
+        cafile: "/etc/origin/master/ca.crt"
   when:
   - openshift_hosted_router_create_certificate | bool
   - openshift_hosted_router_certificate == {}
@@ -96,6 +96,7 @@
     key_file: "{{ ('/etc/origin/master/' ~ (item.certificate.keyfile | basename)) if 'keyfile' in item.certificate else omit }}"
     cacert_file: "{{ ('/etc/origin/master/' ~ (item.certificate.cafile | basename)) if 'cafile' in item.certificate else omit }}"
     edits: "{{ openshift_hosted_router_edits | union(item.edits)  }}"
+    extended_validation: "{{ item.extended_validation | default(True) | bool }}"
     ports: "{{ item.ports }}"
     stats_port: "{{ item.stats_port }}"
   with_items: "{{ openshift_hosted_routers }}"

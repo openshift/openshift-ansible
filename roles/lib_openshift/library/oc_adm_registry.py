@@ -36,6 +36,7 @@ import atexit
 import copy
 import fcntl
 import json
+import time
 import os
 import re
 import shutil
@@ -96,7 +97,7 @@ options:
   images:
     description:
     - The image to base this registry on - ${component} will be replaced with --type
-    required: 'openshift3/ose-${component}:${version}'
+    required: 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
     default: None
     aliases: []
   latest_images:
@@ -202,7 +203,7 @@ EXAMPLES = '''
     replicas: 2
     namespace: default
     selector: type=infra
-    images: "registry.ops.openshift.com/openshift3/ose-${component}:${version}"
+    images: "registry.access.redhat.com/openshift3/ose-${component}:${version}"
     env_vars:
       REGISTRY_CONFIGURATION_PATH: /etc/registryconfig/config.yml
       REGISTRY_HTTP_TLS_CERTIFICATE: /etc/secrets/registry.crt
@@ -253,7 +254,7 @@ class YeditException(Exception):  # pragma: no cover
     pass
 
 
-# pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods,too-many-instance-attributes
 class Yedit(object):  # pragma: no cover
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
@@ -266,6 +267,7 @@ class Yedit(object):  # pragma: no cover
                  content=None,
                  content_type='yaml',
                  separator='.',
+                 backup_ext=None,
                  backup=False):
         self.content = content
         self._separator = separator
@@ -273,6 +275,11 @@ class Yedit(object):  # pragma: no cover
         self.__yaml_dict = content
         self.content_type = content_type
         self.backup = backup
+        if backup_ext is None:
+            self.backup_ext = ".{}".format(time.strftime("%Y%m%dT%H%M%S"))
+        else:
+            self.backup_ext = backup_ext
+
         self.load(content_type=self.content_type)
         if self.__yaml_dict is None:
             self.__yaml_dict = {}
@@ -467,7 +474,7 @@ class Yedit(object):  # pragma: no cover
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, self.filename + '.orig')
+            shutil.copy(self.filename, '{}{}'.format(self.filename, self.backup_ext))
 
         # Try to set format attributes if supported
         try:
@@ -778,12 +785,7 @@ class Yedit(object):  # pragma: no cover
 
         curr_value = invalue
         if val_type == 'yaml':
-            try:
-                # AUDIT:maybe-no-member makes sense due to different yaml libraries
-                # pylint: disable=maybe-no-member
-                curr_value = yaml.safe_load(invalue, Loader=yaml.RoundTripLoader)
-            except AttributeError:
-                curr_value = yaml.safe_load(invalue)
+            curr_value = yaml.safe_load(str(invalue))
         elif val_type == 'json':
             curr_value = json.loads(invalue)
 
@@ -853,6 +855,7 @@ class Yedit(object):  # pragma: no cover
         yamlfile = Yedit(filename=params['src'],
                          backup=params['backup'],
                          content_type=params['content_type'],
+                         backup_ext=params['backup_ext'],
                          separator=params['separator'])
 
         state = params['state']
@@ -1090,7 +1093,7 @@ class OpenShiftCLI(object):
             cmd.append(template_name)
         if params:
             param_str = ["{}={}".format(key, str(value).replace("'", r'"')) for key, value in params.items()]
-            cmd.append('-v')
+            cmd.append('-p')
             cmd.extend(param_str)
 
         results = self.openshift_cmd(cmd, output=True, input_data=template_data)
@@ -1422,9 +1425,10 @@ class Utils(object):  # pragma: no cover
                 version = version.split("-")[0]
 
             if version.startswith('v'):
-                versions_dict[tech + '_numeric'] = version[1:].split('+')[0]
-                # "v3.3.0.33" is what we have, we want "3.3"
-                versions_dict[tech + '_short'] = version[1:4]
+                version = version[1:]  # Remove the 'v' prefix
+                versions_dict[tech + '_numeric'] = version.split('+')[0]
+                # "3.3.0.33" is what we have, we want "3.3"
+                versions_dict[tech + '_short'] = "{}.{}".format(*version.split('.'))
 
         return versions_dict
 
@@ -1665,8 +1669,12 @@ spec:
             return False
 
         for result in results:
-            if result['name'] == key and result['value'] == value:
-                return True
+            if result['name'] == key:
+                if 'value' not in result:
+                    if value == "" or value is None:
+                        return True
+                elif result['value'] == value:
+                    return True
 
         return False
 
@@ -2309,7 +2317,7 @@ class OCVersion(OpenShiftCLI):
 
     @staticmethod
     def run_ansible(params):
-        '''run the idempotent ansible code'''
+        '''run the oc_version module'''
         oc_version = OCVersion(params['kubeconfig'], params['debug'])
 
         if params['state'] == 'list':
@@ -2652,7 +2660,7 @@ class Registry(OpenShiftCLI):
     # pylint: disable=too-many-branches,too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run idempotent ansible code'''
+        '''run the oc_adm_registry module'''
 
         registry_options = {'images': {'value': params['images'], 'include': True},
                             'latest_images': {'value': params['latest_images'], 'include': True},

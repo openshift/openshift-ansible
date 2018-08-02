@@ -2,7 +2,7 @@
 
 - name: Ensure that Grafana has nodes to run on
   import_role:
-    name: openshift_master
+    name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
     openshift_master_ensure_nodes_selector: "{{ grafana_node_selector | map_to_pairs }}"
@@ -25,7 +25,8 @@
 # TODO remove this when annotations are supported by oc_serviceaccount
 - name: annotate serviceaccount
   command: >
-    {{ openshift_client_binary }} annotate --overwrite -n {{ grafana_namespace }}
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    annotate --overwrite -n {{ grafana_namespace }}
     serviceaccount {{ grafana_serviceaccount_name }} {{ item }}
   with_items:
     "{{ grafana_serviceaccount_annotations }}"
@@ -37,7 +38,7 @@
     namespace: "{{ grafana_namespace }}"
     resource_kind: cluster-role
     resource_name: cluster-reader
-    user: "system:serviceaccount:{{ grafana_namespace }}:{{ grafana_serviceaccount_name }}"
+    user: "{{ openshift_grafana_serviceaccount_name }}"
 
 - name: create grafana routes
   oc_route:
@@ -60,6 +61,7 @@
     annotations:
       prometheus.io/scrape: "true"
       prometheus.io/scheme: https
+      prometheus.io/port: "{{ grafana_service_targetport | int }}"
       service.alpha.openshift.io/serving-cert-secret-name: grafana-tls
     ports:
     - name: grafana
@@ -149,7 +151,7 @@
 - name: Get prometheus route
   oc_route:
     state: list
-    name: prometheus
+    name: "{{ grafana_prometheus_route }}"
     namespace: "{{ grafana_prometheus_namespace }}"
   register: prometheus_route
 
@@ -162,14 +164,14 @@
 
 - name: set facts
   set_fact:
-    payload_data: "{{ grafana_datasource_json | regex_replace('grafana_name', grafana_datasource_name ) | regex_replace('prometheus_url', prometheus_route.results[0].spec.host ) | regex_replace('satoken',  prometheus_sa_token.stdout ) }}"
+    payload_data: "{{ grafana_datasource_json | regex_replace('grafana_name', grafana_datasource_name ) | regex_replace('prometheus_url', prometheus_route.results[0].spec.host ) | regex_replace('Bearer',  'Bearer ' + prometheus_sa_token.stdout) }}"
     grafana_route: "https://{{ grafana_route.results[0].spec.host }}"
 
 - name: Add new datasource to grafana
   uri:
     url: "{{ grafana_route }}/api/datasources"
     user: "{{ grafana_sa_token.stdout }}"
-    force_basic_auth: true
+    validate_certs: false
     method: POST
     body: '{{ payload_data }}'
     body_format: json
@@ -215,7 +217,7 @@
   uri:
     url: "{{ grafana_route }}/api/dashboards/db"
     user: "{{ grafana_sa_token.stdout }}"
-    force_basic_auth: true
+    validate_certs: false
     method: POST
     body: '{{ slurpfile["content"] | b64decode }}'
     body_format: json
@@ -232,7 +234,7 @@
   uri:
     url: "{{ grafana_route }}/api/dashboards/db"
     user: "{{ grafana_sa_token.stdout }}"
-    force_basic_auth: true
+    validate_certs: false
     method: POST
     body: '{{ slurpfile["content"] | b64decode }}'
     body_format: json

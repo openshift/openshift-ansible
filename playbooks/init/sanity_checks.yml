@@ -3,6 +3,7 @@
 - name: Verify Requirements
   hosts: oo_first_master
   roles:
+  - role: openshift_facts
   - role: lib_utils
   tasks:
   # sanity_checks is a custom action plugin defined in lib_utils.
@@ -13,4 +14,6 @@
   - name: Run variable sanity checks
     sanity_checks:
       check_hosts: "{{ l_sanity_check_hosts | default(groups['oo_all_hosts']) }}"
-    run_once: True
+  # node_group_checks is a custom action plugin defined in lib_utils.
+  - name: Validate openshift_node_groups and openshift_node_group_name
+    node_group_checks: {}

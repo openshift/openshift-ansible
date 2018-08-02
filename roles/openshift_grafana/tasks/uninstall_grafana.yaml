@@ -4,4 +4,4 @@
 - name: Remove grafana project
   oc_project:
     state: absent
-    name: "{{ grafana_namespace }}"
+    name: "{{ openshift_grafana_namespace }}"

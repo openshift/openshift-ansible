@@ -26,7 +26,7 @@
   fail:
     msg: |-
       openshift_release is "{{ openshift_release }}" which is not a valid version string.
-      Please set it to a version string like "3.4".
+      Please set openshift_release to a version string and ensure that the value is quoted, ex: openshift_release="3.4".
 
 - include_tasks: unsupported.yml
   when:
@@ -77,6 +77,24 @@
         openshift_cloudprovider_vsphere_host is undefined or openshift_cloudprovider_vsphere_datacenter is undefined or
         openshift_cloudprovider_vsphere_datastore is undefined )
 
+- name: Ensure azure configuration variables are defined
+  when: openshift_cloudprovider_kind | default('none') == 'azure'
+  block:
+    - name: ensure provider configuration variables are defined
+      fail:
+        msg: >
+          Required variable(s) for azure provider not defined. Refer to documentation
+          for more information on configuring for azure provider.
+
+          https://github.com/openshift/openshift-docs/blob/master/install_config/configuring_azure.adoc
+      when: >
+        openshift_cloudprovider_azure_client_id is not defined
+        or openshift_cloudprovider_azure_client_secret is not defined
+        or openshift_cloudprovider_azure_tenant_id is not defined
+        or openshift_cloudprovider_azure_subscription_id is not defined
+        or openshift_cloudprovider_azure_resource_group is not defined
+        or openshift_cloudprovider_azure_location is not defined
+
 - name: Ensure removed web console extension variables are not set
   fail:
     msg: >
@@ -96,4 +114,16 @@
       server, please open a support ticket.
   when:
     - openshift_master_console_port is defined
-    - openshift_master_console_port != (openshift_master_api_port | default(8443))
+    - openshift_master_console_port != openshift_master_api_port
+
+- name: At least one master is schedulable
+  fail:
+    msg: >
+      No schedulable masters found, please remove 'openshift_schedulable=False' from all of your masters.
+  when:
+    - l_master_schedulable | length > 0
+    - false in l_master_schedulable
+  vars:
+    l_masters: "{{ groups['oo_masters_to_config'] | default([]) }}"
+    l_openshift_schedulable: "{{ l_masters | map('extract', hostvars, 'openshift_schedulable') | select('defined') | list }}"
+    l_master_schedulable: "{{ l_openshift_schedulable | map('bool') | list }}"

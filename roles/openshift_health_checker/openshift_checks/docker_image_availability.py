@@ -12,14 +12,14 @@ DEPLOYMENT_IMAGE_INFO = {
     "origin": {
         "namespace": "openshift",
         "name": "origin",
-        "registry_console_prefix": "cockpit/",
+        "registry_console_prefix": "docker.io/cockpit/",
         "registry_console_basename": "kubernetes",
         "registry_console_default_version": "latest",
     },
     "openshift-enterprise": {
         "namespace": "openshift3",
         "name": "ose",
-        "registry_console_prefix": "openshift3/",
+        "registry_console_prefix": "registry.access.redhat.com/openshift3/",
         "registry_console_basename": "registry-console",
         "registry_console_default_version": "${short_version}",
     },
@@ -59,8 +59,8 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         deployment_type = self.get_var("openshift_deployment_type", default="")
         if deployment_type == "origin" and "docker.io" not in regs:
             regs.append("docker.io")
-        elif deployment_type == 'openshift-enterprise' and "registry.access.redhat.com" not in regs:
-            regs.append("registry.access.redhat.com")
+        elif deployment_type == 'openshift-enterprise' and "registry.redhat.io" not in regs:
+            regs.append("registry.redhat.io")
         self.registries["configured"] = regs
 
         # for the oreg_url registry there may be credentials specified
@@ -142,15 +142,17 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
     def required_images(self):
         """
         Determine which images we expect to need for this host.
-        Returns: a set of required images like 'openshift/origin:v3.6'
+        Returns: a set of required images like 'docker.io/openshift/origin:v3.6'
 
         The thorny issue of determining the image names from the variables is under consideration
         via https://github.com/openshift/openshift-ansible/issues/4415
 
         For now we operate as follows:
-        * For containerized components (master, node, ...) we look at the deployment type and
-          use openshift/origin or openshift3/ose as the base for those component images. The
-          version is openshift_image_tag as determined by the openshift_version role.
+        * For containerized components (master, node, ...) we look at the deployment
+          type and use docker.io/openshift/origin or
+          registry.access.redhat.com/openshift3/ose as the base for those component
+          images. The version is openshift_image_tag as determined by the
+          openshift_version role.
         * For OpenShift-managed infrastructure (router, registry...) we use oreg_url if
           it is defined; otherwise we again use the base that depends on the deployment type.
         Registry is not included in constructed images. It may be in oreg_url or etcd image.
@@ -173,22 +175,9 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
             if self.get_var("osm_use_cockpit", default=True, convert=bool):
                 required.add(self._registry_console_image(image_tag, image_info))
 
-        # images for containerized components
-        def add_var_or_default_img(var_name, comp_name):
-            """Returns: default image from comp_name, overridden by var_name in task_vars"""
-            default = "{}/{}:{}".format(image_info["namespace"], comp_name, image_tag)
-            required.add(self.template_var(self.get_var(var_name, default=default)))
-
-        if self.get_var("openshift_is_containerized", convert=bool):
+        if self.get_var("openshift_is_atomic", convert=bool):
             if 'oo_nodes_to_config' in host_groups:
-                add_var_or_default_img("osn_image", "node")
-                add_var_or_default_img("osn_ovs_image", "openvswitch")
-            if 'oo_masters_to_config' in host_groups:  # name is "origin" or "ose"
-                add_var_or_default_img("osm_image", image_info["name"])
-            if 'oo_etcd_to_config' in host_groups:
-                # special case, note default is the same for origin/enterprise and has no image tag
-                etcd_img = self.get_var("osm_etcd_image", default="registry.access.redhat.com/rhel7/etcd")
-                required.add(self.template_var(etcd_img))
+                required.add(self.template_var(self.get_var('osn_image', default='')))
 
         return required
 
@@ -251,7 +240,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         registries = self.registries["configured"]
         # If image already includes a registry, only use that.
         # NOTE: This logic would incorrectly identify images that do not use a namespace, e.g.
-        # registry.access.redhat.com/rhel7 as if the registry were a namespace.
+        # registry.redhat.io/rhel7 as if the registry were a namespace.
         # It's not clear that there's any way to distinguish them, but fortunately
         # the current set of images all look like [registry/]namespace/name[:version].
         if image.count("/") > 1:

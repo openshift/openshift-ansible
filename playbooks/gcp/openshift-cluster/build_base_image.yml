@@ -111,6 +111,11 @@
     package:
       name: qemu-user-static
       state: present
+  - name: Disable yum-cron service (installed by Google Cloud by default)
+    systemd:
+      name: yum-cron
+      state: stopped
+      enabled: no
   - name: Start and enable systemd-binfmt service
     systemd:
       name: systemd-binfmt
@@ -148,6 +153,7 @@
     - iptables-services
     - bridge-utils
     - bash-completion
+    - atomic
   - name: Clean yum metadata
     command: yum clean all
     args:

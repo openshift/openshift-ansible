@@ -1,16 +1,18 @@
 ---
 - name: Check status of master certificates
   stat:
-    path: "{{ openshift_master_config_dir }}/{{ item }}"
+    path: "/etc/origin/master/{{ item }}"
   with_items:
   - admin.crt
   - ca.crt
   - ca-bundle.crt
+  - front-proxy-ca.crt
   - master.kubelet-client.crt
   - master.proxy-client.crt
   - master.server.crt
   - openshift-master.crt
   - service-signer.crt
+  - aggregator-front-proxy.crt
   register: g_master_cert_stat_result
   when: not openshift_certificates_redeploy | default(false) | bool
 
@@ -30,7 +32,7 @@
   delegate_to: "{{ openshift_ca_host }}"
 
 - find:
-    paths: "{{ openshift_master_config_dir }}/legacy-ca/"
+    paths: "/etc/origin/master/legacy-ca/"
     patterns: ".*-ca.crt"
     use_regex: true
   register: g_master_legacy_ca_result
@@ -86,14 +88,31 @@
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
-- file:
-    src: "{{ openshift_master_config_dir }}/{{ item }}"
+- copy:
+    src: "/etc/origin/master/{{ item }}"
     dest: "{{ openshift_master_generated_config_dir }}/{{ item }}"
-    state: hard
-    force: true
+    remote_src: yes
   with_items:
-  # certificates_to_synchronize is a custom filter in lib_utils
-  - "{{ hostvars[inventory_hostname] | certificates_to_synchronize }}"
+  - admin.crt
+  - admin.key
+  - admin.kubeconfig
+  - aggregator-front-proxy.crt
+  - aggregator-front-proxy.key
+  - aggregator-front-proxy.kubeconfig
+  - front-proxy-ca.crt
+  - front-proxy-ca.key
+  - master.kubelet-client.crt
+  - master.kubelet-client.key
+  - master.proxy-client.crt
+  - master.proxy-client.key
+  - service-signer.crt
+  - service-signer.key
+  - ca-bundle.crt
+  - ca.crt
+  - ca.key
+  - client-ca-bundle.crt
+  - serviceaccounts.private.key
+  - serviceaccounts.public.key
   when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
@@ -101,6 +120,7 @@
   file:
     path: "{{ openshift_master_generated_config_dir }}/{{ item }}"
     state: absent
+  # Do we need this boolean here?
   when: openshift_master_etcd_hosts | length > 0
   with_items:
   - master.etcd-client.crt
@@ -139,14 +159,14 @@
 
 - name: Ensure certificate directory exists
   file:
-    path: "{{ openshift_master_config_dir }}"
+    path: "/etc/origin/master"
     state: directory
   when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
 
 - name: Unarchive the tarball on the master
   unarchive:
     src: "{{ g_master_certs_mktemp.stdout }}/{{ openshift_master_cert_subdir }}.tgz"
-    dest: "{{ openshift_master_config_dir }}"
+    dest: "/etc/origin/master"
   when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
 
 - name: Delete local temp directory
@@ -175,7 +195,7 @@
 # the dest file, will need to make sure to ignore things that could be added
 - name: Copy the admin client config(s)
   copy:
-    src: "{{ openshift_master_config_dir }}/admin.kubeconfig"
+    src: "/etc/origin/master/admin.kubeconfig"
     dest: "~{{ item }}/.kube/config"
     remote_src: yes
     force: "{{ openshift_certificates_redeploy | default(false) }}"
@@ -214,4 +234,5 @@
     src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
     path: "{{ openshift.common.config_base }}/master/ca.crt"
     state: link
+    force: yes
   when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists

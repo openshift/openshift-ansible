@@ -70,6 +70,9 @@ The OpenStack environment must satisfy these requirements:
     for production
 * The keypair for SSH must be available in OpenStack
 * You must have a`keystonerc` file that lets you talk to the OpenStack services
+* In order to install an OpenShift cluster and deploy services, we recommend
+that you have a minimum of 30 security groups, 200 security group rules, and 200
+ports available in your quota.
 
 It is also strongly recommended that you configure an external Neutron network
 with a floating IP address pool.
@@ -174,6 +177,9 @@ any_errors_fatal = true
 This will abort the Ansible playbook execution as soon as any error is
 encountered.
 
+If you want, you can [Build the OpenShift node images at this
+point][build-images].
+
 Now, run the provision + install playbook. This will create OpenStack resources
 and deploy an OpenShift cluster on top of them:
 
@@ -240,3 +246,4 @@ $ ansible-playbook --user openshift \
 [access-the-ui]: ./post-install.md#access-the-ui
 [dynamic]: http://docs.ansible.com/ansible/latest/intro_dynamic_inventory.html
 [kuryr-sdn]: ./configuration.md#kuryr-networking-configuration
+[build-images]: ./configuration.md#building-node-images

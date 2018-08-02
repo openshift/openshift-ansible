@@ -7,6 +7,7 @@
   file:
     state: directory
     path: "/etc/systemd/system/{{ openshift_service_type }}-node.service.d"
+  when: '"cloud-init" in r_openshift_node_image_prep_packages'
 
 - name: laydown systemd override
   copy:
@@ -14,6 +15,7 @@
     content: |
       [Unit]
       After=cloud-init.service
+  when: '"cloud-init" in r_openshift_node_image_prep_packages'
 
 - name: update the sysconfig to have necessary variables
   lineinfile:
@@ -25,14 +27,10 @@
   # add the kubeconfig
   - line: "KUBECONFIG={{ openshift_node_config_dir }}/bootstrap.kubeconfig"
     regexp: "^KUBECONFIG=.*"
-  # remove the config file.  This comes from openshift_facts
-  - line: "CONFIG_FILE={{ openshift_node_config_dir }}/bootstrap-node-config.yaml"
-    regexp: "^CONFIG_FILE=.*"
 
 - name: include aws sysconfig credentials
   import_tasks: aws.yml
   when: not (openshift_node_use_instance_profiles | default(False))
-
 
 - name: "disable {{ openshift_service_type }}-node service"
   systemd:
@@ -61,19 +59,13 @@
     src: bootstrap.yml.j2
     dest: /root/openshift_bootstrap/bootstrap.yml
 
-- name: symlink master ca for docker-registry
+- name: Create a symlink to the node client CA for the docker registry
   file:
-    src: "{{ item }}"
-    dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/{{ item | basename }}"
+    src: "{{ openshift_node_config_dir }}/client-ca.crt"
+    dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
     state: link
     force: yes
-  with_items:
-  - "{{ openshift_node_config_dir }}/client-ca.crt"
-
-- name: Remove default node-config.yaml to allow bootstrapping config
-  file:
-    path: "/etc/origin/node/node-config.yaml"
-    state: absent
+    follow: no
 
 - when: rpmgenerated_config.stat.exists
   block:

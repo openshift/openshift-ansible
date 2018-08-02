@@ -20,23 +20,9 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 
 ### Optional vars:
 - `openshift_logging_purge_logging`: When `openshift_logging_install_logging` is set to 'False' to trigger uninstalation and `openshift_logging_purge_logging` is set to 'True', it will completely and irreversibly remove all logging persistent data including PVC. Defaults to 'False'.
-- `openshift_logging_image_prefix`: The prefix for the logging images to use. Defaults to 'docker.io/openshift/origin-'.
-- `openshift_logging_curator_image_prefix`: Setting the image prefix for Curator image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_elasticsearch_image_prefix`: Setting the image prefix for Elasticsearch image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_fluentd_image_prefix`: Setting the image prefix for Fluentd image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_kibana_image_prefix`: Setting the image prefix for Kibana image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_kibana_proxy_image_prefix`: Setting the image prefix for Kibana proxy image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_mux_image_prefix`: Setting the image prefix for Mux image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_image_version`: The image version for the logging images to use. Defaults to 'latest'.
-- `openshift_logging_curator_image_version`: Setting the image version for Curator image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_elasticsearch_image_version`: Setting the image version for Elasticsearch image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_fluentd_image_version`: Setting the image version for Fluentd image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_kibana_image_version`: Setting the image version for Kibana image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_kibana_proxy_image_version`: Setting the image version for Kibana proxy image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_mux_image_version`: Setting the image version for Mux image. Defaults to `openshift_logging_image_version`.
 - `openshift_logging_use_ops`: If 'True', set up a second ES and Kibana cluster for infrastructure logs. Defaults to 'False'.
 - `openshift_logging_master_url`: The URL for the Kubernetes master, this does not need to be public facing but should be accessible from within the cluster. Defaults to 'https://kubernetes.default.svc.{{openshift.common.dns_domain}}'.
-- `openshift_logging_master_public_url`: The public facing URL for the Kubernetes master, this is used for Authentication redirection. Defaults to 'https://{{openshift.common.public_hostname}}:{{openshift.master.api_port}}'.
+- `openshift_logging_master_public_url`: The public facing URL for the Kubernetes master, this is used for Authentication redirection. Defaults to 'https://{{openshift.common.public_hostname}}:{{openshift_master_api_port}}'.
 - `openshift_logging_namespace`: The namespace that Aggregated Logging will be installed in. Defaults to 'logging'.
 - `openshift_logging_curator_default_days`: The default minimum age (in days) Curator uses for deleting log records. Defaults to '30'.
 - `openshift_logging_curator_run_hour`: The hour of the day that Curator will run at. Defaults to '0'.
@@ -184,10 +170,9 @@ Elasticsearch OPS too, if using an OPS cluster:
  interface as reported by the `ansible_default_ipv4` fact.
 - `openshift_logging_mux_cpu_request`: 100m
 - `openshift_logging_mux_memory_limit`: 512Mi
-- `openshift_logging_mux_default_namespaces`: Default `["mux-undefined"]` - the
- first value in the list is the namespace to use for undefined projects,
- followed by any additional namespaces to create by default - users will
- typically not need to set this
+- `openshift_logging_mux_default_namespaces`:
+  openshift_logging_mux_default_namespaces is not supported.
+  use openshift_logging_mux_namespaces instead.
 - `openshift_logging_mux_namespaces`: Default `[]` - additional namespaces to
   create for _external_ mux clients to associate with their logs - users will
   need to set this
@@ -274,10 +259,10 @@ $ docker inspect ff2e249fc45a
             "Labels": {
                 . . .
                 "build-date": "2017-10-12T14:38:22.414827",
-                . . . 
+                . . .
                 "release": "0.143.3.0",
                 . . .
-                "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift3/logging-fluentd/images/v3.7.0-0.143.3.0",
+                "url": "https://access.redhat.com/containers/#/registry.redhat.io/openshift3/logging-fluentd/images/v3.7.0-0.143.3.0",
                 . . .
                 "version": "v3.7.0"
             }
@@ -293,13 +278,13 @@ $ docker pull <registry>/openshift3/logging-fluentd:v3.7
 If there was an update, you need to run the `docker pull` on each node.
 
 It is recommended that you now rerun the `openshift_logging` playbook to ensure that any necessary config changes are also picked up.
- 
+
 To manually redeploy your pod you can do the following:
 - for a DC you can do:
 ```
 oc rollout latest <dc_name>
 ```
-     
+
 - for a RC you can scale down and scale back up
 ```
 oc scale --replicas=0 <rc_name>
@@ -320,4 +305,4 @@ Tue Oct 26, 2017
 - Make CPU request equal limit if limit is greater then request
 
 Tue Oct 10, 2017
-- Default imagePullPolicy changed from Always to IfNotPresent 
+- Default imagePullPolicy changed from Always to IfNotPresent

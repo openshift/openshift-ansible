@@ -30,12 +30,15 @@ spec:
               fieldPath: metadata.namespace
         args:
         - controller-manager
-        - --port
-        - "8080"
+        - --secure-port
+        - "6443"
         - -v
-        - "5"
+        - "3"
         - --leader-election-namespace
         - kube-service-catalog
+        - --leader-elect-resource-lock
+        - configmaps
+        - --cluster-id-configmap-namespace=kube-service-catalog
         - --broker-relist-interval
         - "5m"
         - --feature-gates
@@ -44,12 +47,16 @@ spec:
         - --feature-gates
         - AsyncBindingOperations=true
 {% endif %}
-        image: {{ openshift_service_catalog_image_prefix }}service-catalog:{{ openshift_service_catalog_image_version }}
+{% if openshift_service_catalog_namespaced_service_brokers_enabled | bool %}
+        - --feature-gates
+        - NamespacedServiceBroker=true
+{% endif %}
+        image: {{ openshift_service_catalog_image }}
         command: ["/usr/bin/service-catalog"]
         imagePullPolicy: IfNotPresent
         name: controller-manager
         ports:
-        - containerPort: 8080
+        - containerPort: 6443
           protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
@@ -68,4 +75,6 @@ spec:
           items:
           - key: tls.crt
             path: apiserver.crt
-          secretName: apiserver-ssl
+          - key: tls.key
+            path: apiserver.key
+          secretName: controllermanager-ssl

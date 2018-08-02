@@ -52,5 +52,7 @@
   register: result
   until: result is succeeded
 
-- include_tasks: restart.yml
+- import_role:
+    name: container_runtime
+    tasks_from: docker_restart.yml
   when: not skip_docker_restart | default(False) | bool

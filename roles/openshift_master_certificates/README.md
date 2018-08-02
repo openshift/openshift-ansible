@@ -22,7 +22,6 @@ From this role:
 | openshift_generated_configs_dir       | `{{ openshift.common.config_base }}/generated-configs`                    | Directory in which per-master generated config directories will be created on the `openshift_ca_host`.                        |
 | openshift_master_cert_subdir          | `master-{{ openshift.common.hostname }}`                                  | Directory within `openshift_generated_configs_dir` where per-master configurations will be placed on the `openshift_ca_host`. |
 | openshift_master_cert_expire_days     | `730` (2 years)                                                           | Validity of the certificates in days. Works only with OpenShift version 1.5 (3.5) and later.                                  |
-| openshift_master_config_dir           | `{{ openshift.common.config_base }}/master`                               | Master configuration directory in which certificates will be deployed on masters.                                             |
 | openshift_master_generated_config_dir | `{{ openshift_generated_configs_dir }}/{{ openshift_master_cert_subdir }` | Full path to the per-master generated config directory.                                                                       |
 
 Dependencies

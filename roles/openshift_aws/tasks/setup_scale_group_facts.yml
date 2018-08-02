@@ -46,4 +46,5 @@
     ansible_ssh_host: "{{ item.public_dns_name }}"
     name: "{{ item.public_dns_name }}"
     hostname: "{{ item.public_dns_name }}"
+    openshift_node_group_name: "{{ item.tags['openshift-node-group-config'] | default('unset') }}"
   with_items: "{{ qinstances.instances }}"

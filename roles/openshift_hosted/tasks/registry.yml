@@ -7,43 +7,19 @@
     l_openshift_hosted_fw_allow: "{{ r_openshift_hosted_registry_os_firewall_allow }}"
     l_openshift_hosted_fw_deny: "{{ r_openshift_hosted_registry_os_firewall_deny }}"
 
-- when: openshift_hosted_registry_replicas | default(none) is none
-  block:
-  - name: Retrieve list of openshift nodes matching registry selector
-    oc_obj:
-      state: list
-      kind: node
-      selector: "{{ openshift_hosted_registry_selector }}"
-    register: registry_nodes
-
-  - name: set_fact l_node_count to number of nodes matching registry selector
-    set_fact:
-      l_node_count: "{{ registry_nodes.results.results[0]['items'] | length }}"
-
-  # Determine the default number of registry/router replicas to use if no count
-  # has been specified.
-  # If no registry nodes defined, the default should be 0.
-  - name: set_fact l_default_replicas when l_node_count == 0
-    set_fact:
-      l_default_replicas: 0
-    when: l_node_count | int == 0
-
-  # If registry nodes are defined and the registry storage kind is
-  # defined, default should be the number of registry nodes, otherwise
-  # just 1:
-  - name: set_fact l_default_replicas when l_node_count > 0
-    set_fact:
-      l_default_replicas: "{{ l_node_count if openshift_hosted_registry_storage_kind | default(none) is not none else 1 }}"
-    when: l_node_count | int > 0
-
 - name: set openshift_hosted facts
   set_fact:
     # This determines the gluster_ips to use for the registry by looping over the glusterfs_registry group
     openshift_hosted_registry_storage_glusterfs_ips: "{%- set gluster_ips = [] %}{% if groups.glusterfs_registry is defined %}{% for node in groups.glusterfs_registry %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% elif groups.glusterfs is defined %}{% for node in groups.glusterfs %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% else %}{{ openshift_hosted_registry_storage_glusterfs_ips }}{% endif %}"
 
 - name: Update registry environment variables when pushing via dns
+  # OPENSHIFT_DEFAULT_REGISTRY is deprecated - keep until 3.11
   set_fact:
-    openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine({'REGISTRY_OPENSHIFT_SERVER_ADDR':'docker-registry.default.svc:5000'}) }}"
+    openshift_hosted_registry_env_vars: "{{ {'OPENSHIFT_DEFAULT_REGISTRY': item,
+                                             'REGISTRY_OPENSHIFT_SERVER_ADDR': item}
+                                           | combine(openshift_hosted_registry_env_vars) }}"
+  with_items:
+  - "docker-registry.default.svc:5000"
   when: openshift_push_via_dns | bool
 
 - name: Update registry proxy settings for dc/docker-registry
@@ -106,7 +82,7 @@
       type: persistentVolumeClaim
       claim_name: "{{ openshift_hosted_registry_storage_volume_name }}-claim"
   when:
-  - openshift_hosted_registry_storage_kind | default(none) in ['nfs', 'openstack', 'glusterfs']
+  - openshift_hosted_registry_storage_kind | default(none) in ['nfs', 'glusterfs', 'hostpath', 'openstack', 'vsphere']
 
 - include_tasks: storage/glusterfs_endpoints.yml
   when:
@@ -118,7 +94,7 @@
     name: "{{ openshift_hosted_registry_name }}"
     namespace: "{{ openshift_hosted_registry_namespace }}"
     selector: "{{ openshift_hosted_registry_selector }}"
-    replicas: "{{ openshift_hosted_registry_replicas | default(l_default_replicas) }}"
+    replicas: "{{ openshift_hosted_registry_replicas }}"
     service_account: "{{ openshift_hosted_registry_serviceaccount }}"
     images: "{{ openshift_hosted_registry_registryurl }}"
     env_vars: "{{ openshift_hosted_registry_env_vars }}"

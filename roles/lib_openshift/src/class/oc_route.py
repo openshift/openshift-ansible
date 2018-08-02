@@ -42,6 +42,9 @@ class OCRoute(OpenShiftCLI):
         elif 'routes \"%s\" not found' % self.config.name in result['stderr']:
             result['returncode'] = 0
             result['results'] = [{}]
+        elif 'namespaces \"%s\" not found' % self.config.namespace in result['stderr']:
+            result['returncode'] = 0
+            result['results'] = [{}]
 
         return result
 
@@ -79,7 +82,7 @@ class OCRoute(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode=False):
-        ''' run the idempotent asnible code
+        ''' run the oc_route module
 
             params comes from the ansible portion for this module
             files: a dictionary for the certificates
