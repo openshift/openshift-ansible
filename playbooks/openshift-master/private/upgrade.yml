@@ -67,7 +67,7 @@
   - name: Upgrade all storage
     command: >
       {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      migrate storage --include=* --confirm
+      migrate storage --include=*
     register: l_pb_upgrade_control_plane_pre_upgrade_storage
     when: openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
     until: l_pb_upgrade_control_plane_pre_upgrade_storage.rc == 0
@@ -206,7 +206,7 @@
   - name: Migrate storage post policy reconciliation
     command: >
       {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      migrate storage --include=* --confirm
+      migrate storage --include=*
     run_once: true
     register: l_pb_upgrade_control_plane_post_upgrade_storage
     when: openshift_upgrade_post_storage_migration_enabled | default(true) | bool
