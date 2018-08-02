@@ -5,13 +5,14 @@ MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 USER root
 
 # Playbooks, roles, and their dependencies are installed from packages.
-RUN INSTALL_PKGS="openshift-ansible atomic-openshift-clients python-boto python2-boto3 python2-crypto openssl iproute httpd-tools google-cloud-sdk" \
+RUN INSTALL_PKGS="openshift-ansible atomic-openshift-clients python-boto python2-boto3 python2-crypto openssl iproute httpd-tools" \
+ && x86_EXTRA_RPMS=$(if [ "$(uname -m)" == "x86_64" ]; then echo -n google-cloud-sdk ; fi) \
  && yum repolist > /dev/null \
  && yum-config-manager --enable rhel-7-server-ose-3.7-rpms \
  && yum-config-manager --enable rhel-7-server-rh-common-rpms \
  && yum install -y java-1.8.0-openjdk-headless \
- && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
- && rpm -q $INSTALL_PKGS \
+ && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS $x86_EXTRA_RPMS \
+ && rpm -q $INSTALL_PKGS $x86_EXTRA_RPMS \
  && yum clean all
 
 LABEL name="openshift3/ose-ansible" \
