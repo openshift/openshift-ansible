@@ -11,6 +11,11 @@
       failed_when:
         - results.rc != 0
 
+    - name: ensure the unmount of top level mount point
+      mount:
+        path: "{{ docker_default_storage_path }}"
+        state: unmounted
+
     - name: "Set the selinux context on {{ docker_alt_storage_path }}"
       command: "semanage fcontext -a -e {{ docker_default_storage_path }} {{ docker_alt_storage_path }}"
       register: results
