@@ -70,6 +70,9 @@ The OpenStack environment must satisfy these requirements:
     for production
 * The keypair for SSH must be available in OpenStack
 * You must have a`keystonerc` file that lets you talk to the OpenStack services
+* In order to install an OpenShift cluster and deploy services, we recommend
+that you have a minimum of 30 security groups, 200 security group rules, and 200
+ports available in your quota.
 
 It is also strongly recommended that you configure an external Neutron network
 with a floating IP address pool.
