@@ -33,15 +33,15 @@ outputs:
 
   node_names:
     description: Name of the nodes
-    value: { get_attr: [ compute_nodes, name ] }
+    value: { list_concat:[{ get_attr: [ compute_nodes, name ] }, { get_attr: [ baremetal_nodes, name ] }] }
 
   node_ips:
     description: IPs of the nodes
-    value: { get_attr: [ compute_nodes, private_ip ] }
+    value: { list_concat:[{ get_attr: [ compute_nodes, private_ip ] }, { get_attr: [ baremetal_nodes, private_ip ] }] }
 
   node_floating_ips:
     description: Floating IPs of the nodes
-    value: { get_attr: [ compute_nodes, floating_ip ] }
+    value: { list_concat:[{ get_attr: [ compute_nodes, floating_ip ] }, { get_attr: [ baremetal_nodes, floating_ip ] }] }
 
   infra_names:
     description: Name of the nodes
@@ -745,6 +745,77 @@ resources:
           openshift_node_group_name: node-config-compute
           image:       {{ openshift_openstack_node_image }}
           flavor:      {{ openshift_openstack_node_flavor }}
+          key_name:    {{ openshift_openstack_keypair_name }}
+{% if openshift_openstack_provider_network_name %}
+          net:         {{ openshift_openstack_provider_network_name }}
+          net_name:         {{ openshift_openstack_provider_network_name }}
+{% else %}
+          net:         { get_resource: net }
+          subnet:      { get_resource: subnet }
+{% if openshift_use_kuryr|default(false)|bool %}
+          pod_net:     { get_resource: pod_net }
+          pod_subnet:  { get_resource: pod_subnet }
+{% endif %}
+          net_name:
+            str_replace:
+              template: openshift-ansible-cluster_id-net
+              params:
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
+{% if openshift_use_flannel|default(False)|bool %}
+          attach_data_net: true
+          data_net:    { get_resource: data_net }
+          data_subnet: { get_resource: data_subnet }
+{% endif %}
+{% endif %}
+          secgrp:
+            - { get_resource: {% if openshift_openstack_flat_secgrp|default(False)|bool %}flat-secgrp{% else %}node-secgrp{% endif %} }
+            - { get_resource: common-secgrp }
+{% if openshift_use_kuryr|default(false)|bool %}
+          pod_secgrp:
+            - { get_resource: pod_access_sg }
+{% endif %}
+          floating_network:
+            if:
+              - no_floating
+              - ''
+              - {{ openshift_openstack_external_network_name }}
+{% if openshift_openstack_provider_network_name %}
+          attach_float_net: false
+{% endif %}
+          volume_size: {{ openshift_openstack_node_volume_size }}
+{% if not openshift_openstack_provider_network_name %}
+    depends_on:
+      - interface
+{% endif %}
+
+  baremetal_nodes:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: {{ openshift_openstack_num_baremetal_nodes }}
+      removal_policies:
+      - resource_list: {{ openshift_openstack_nodes_to_remove | to_json }}
+      resource_def:
+        type: baremetal_server.yaml
+        properties:
+          name:
+            str_replace:
+              template: hostname-%index%domain_suffix
+              params:
+                hostname: {{ openshift_openstack_baremetal_node_hostname }}
+                domain_suffix: {{ l_hostname_domain_suffix }}
+          cluster_env: {{ openshift_openstack_public_dns_domain }}
+          cluster_id:  {{ openshift_openstack_full_dns_domain }}
+          group:
+            str_replace:
+              template: k8s_type.cluster_id
+              params:
+                k8s_type: nodes
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
+          type:        node
+          subtype:     app
+          openshift_node_group_name: node-config-compute
+          image:       {{ openshift_openstack_node_image }}
+          flavor:      {{ openshift_openstack_baremetal_node_flavor }}
           key_name:    {{ openshift_openstack_keypair_name }}
 {% if openshift_openstack_provider_network_name %}
           net:         {{ openshift_openstack_provider_network_name }}
