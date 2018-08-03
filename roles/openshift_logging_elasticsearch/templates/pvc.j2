@@ -15,7 +15,7 @@ spec:
   selector:
     matchLabels:
 {% for key,value in pv_selector.items() %}
-      {{key}}: {{value}}
+      {{key}}: "{{value}}"
 {% endfor %}
 {% endif %}
   accessModes:
