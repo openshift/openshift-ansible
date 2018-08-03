@@ -425,6 +425,8 @@
     file:
       path: "~{{ item }}/.kube"
       state: absent
+    become: yes
+    become_user: "{{ item }}"
     with_items:
     - "{{ client_users }}"
 
