@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.27
-Release:        1%{?dist}
+Release:        2
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,46 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri Aug 03 2018 Scott Dodson <sdodson@redhat.com> 3.10.27-2
+- Disable papr on pull requests (sdodson@redhat.com)
+- Add step to remove all k8s_ containers (mgugino@redhat.com)
+- Add boolean to uninstall for docker (mgugino@redhat.com)
+- Add doc note that kuryr requires openstack cloud provider
+  (tzumainn@redhat.com)
+- Add containerized glusterfs cluster health check (mgugino@redhat.com)
+- Cleanup node bootstrap / scaleup code (mgugino@redhat.com)
+- adding unmount task below the backup task (bysnupy@hotmail.com)
+- Allow user to specify local openstack.conf (tzumainn@redhat.com)
+- Remove sections of kuryr documentation that tell user to disable registry
+  creation (tzumainn@redhat.com)
+- Added OpenStack security group requirements section (tzumainn@redhat.com)
+- Allow disabling Network Manager managed dns (arun.neelicattu@gmail.com)
+- Add bool filter to all instances of openshift_use_crio (rteague@redhat.com)
+- Allow shared_non_ops as kibana index mode (farandac@redhat.com)
+- ignore failing dns clean errors when running openstack uninstall playbook
+  (tzumainn@redhat.com)
+- Remove unused variables (spasquie@redhat.com)
+- Added node selector option for CFME role and fixed formatting issues
+  (dluong@redhat.com)
+- Support tabs in resolv.conf (vrutkovs@redhat.com)
+- Upgrade Prometheus and AlertManager image versions (spasquie@redhat.com)
+- Fix order for invoking the hostpath storage task for registry
+  (ngompa@datto.com)
+- Add a components public playbook (sdodson@redhat.com)
+- Cope with OpenShift returning no value when an environment variable is an
+  empty string (mchappel@redhat.com)
+- Update Calico versions to the latest (v3.1.3) (mleung975@gmail.com)
+- bug 1597282. Quote selector to make it valid json (jcantril@redhat.com)
+- Add Prometheus scrape config for openshift-logging (lukas.vlcek@gmail.com)
+- bug 1590920. Bump fluent default memory to 756M (jcantril@redhat.com)
+- oreg url fix (m.judeikis@gmail.com)
+- Defining a default for logging_elasticsearch_rollout_override var in es
+  handler (ewolinet@redhat.com)
+- Allow the 9k-10k port range for Prometheus (spasquie@redhat.com)
+- Setup logrotate on nodes once (vrutkovs@redhat.com)
+- google-cloud-sdk is x86_64 only (sdodson@redhat.com)
+- bug 1575546. Fix logging eventrouter cpu requests (jcantril@redhat.com)
+
 * Mon Jul 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.27-1
 - 
 
