@@ -106,8 +106,8 @@
       name: openshift_storage_glusterfs
       tasks_from: check_cluster_health.yml
     when: >
-          inventory_hostname in groups['glusterfs']
-          or inventory_hostname in groups['glusterfs_registry']
+          ('glusterfs' in groups and inventory_hostname in groups['glusterfs'])
+          or ('glusterfs_registry' in groups and inventory_hostname in groups['glusterfs_registry'])
 
 - import_playbook: ../upgrade_control_plane.yml
   vars:
