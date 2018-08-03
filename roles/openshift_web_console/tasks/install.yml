@@ -59,6 +59,10 @@
   - set_fact:
       cro_plugin_enabled: "{{ config_to_migrate.admissionConfig is defined and config_to_migrate.admissionConfig.pluginConfig is defined and config_to_migrate.admissionConfig.pluginConfig.ClusterResourceOverrides is defined }}"
 
+  - set_fact:
+      console_picker_admin_console_public_url: "https://{{ openshift_console_hostname | default('console.{{openshift_master_default_subdomain}}') }}/"
+    when: openshift_console_install | default(true) | bool
+
   # Update properties in the config template based on inventory vars when the
   # asset config does not exist.
   - name: Set web console config properties from inventory variables
@@ -72,6 +76,8 @@
         value: "{{ openshift.master.public_api_url }}"
       - key: clusterInfo#logoutPublicURL
         value: "{{ openshift.master.logout_url | default('') }}"
+      - key: clusterInfo#adminConsolePublicURL
+        value: "{{ console_picker_admin_console_public_url | default('') }}"
       - key: features#inactivityTimeoutMinutes
         value: "{{ openshift_web_console_inactivity_timeout_minutes | default(0) }}"
       - key: features#clusterResourceOverridesEnabled
