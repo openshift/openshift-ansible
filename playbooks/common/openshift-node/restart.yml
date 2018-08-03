@@ -27,7 +27,7 @@
       state: started
     when:
     - openshift.common.is_containerized | bool
-    - openshift_use_openshift_sdn | bool
+    - openshift_use_openshift_sdn | default(true) | bool
 
   - name: Restart containerized services
     service:

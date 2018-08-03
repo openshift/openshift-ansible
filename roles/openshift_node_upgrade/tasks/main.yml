@@ -16,7 +16,7 @@
   service:
     name: openvswitch
     state: stopped
-  when: openshift_use_openshift_sdn | bool
+  when: openshift_use_openshift_sdn | default(true) | bool
 
 - name: Stop node service
   service:
