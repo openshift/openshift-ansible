@@ -13,34 +13,6 @@
     name: alm-operator-binding
     namespace: operator-lifecycle-manager
 
-- name: Remove clusterserviceversion-v1s.app.coreos.com CustomResourceDefinition manifest
-  oc_obj:
-    state: absent
-    kind: CustomResourceDefinition
-    name: clusterserviceversion-v1s.app.coreos.com
-    namespace: operator-lifecycle-manager
-
-- name: Remove catalogsource-v1s.app.coreos.com CustomResourceDefinition manifest
-  oc_obj:
-    state: absent
-    kind: CustomResourceDefinition
-    name: catalogsource-v1s.app.coreos.com
-    namespace: operator-lifecycle-manager
-
-- name: Remove installplan-v1s.app.coreos.com CustomResourceDefinition manifest
-  oc_obj:
-    state: absent
-    kind: CustomResourceDefinition
-    name: installplan-v1s.app.coreos.com
-    namespace: operator-lifecycle-manager
-
-- name: Remove subscription-v1s.app.coreos.com CustomResourceDefinition manifest
-  oc_obj:
-    state: absent
-    kind: CustomResourceDefinition
-    name: subscription-v1s.app.coreos.com
-    namespace: operator-lifecycle-manager
-
 - name: Remove tectonic-ocs ConfigMap manifest
   oc_obj:
     state: absent
@@ -81,4 +53,32 @@
     state: absent
     kind: CatalogSource-v1
     name: upstream-components
+    namespace: operator-lifecycle-manager
+
+- name: Remove clusterserviceversion-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: clusterserviceversion-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove catalogsource-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: catalogsource-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove installplan-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: installplan-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove subscription-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: subscription-v1s.app.coreos.com
     namespace: operator-lifecycle-manager
