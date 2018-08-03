@@ -120,6 +120,7 @@ spec:
           exec:
             command:
             - "/opt/apache-cassandra/bin/cassandra-docker-ready.sh"
+          timeoutSeconds: 10
         lifecycle:
           preStop:
             exec:
