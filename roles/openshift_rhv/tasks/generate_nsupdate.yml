@@ -17,7 +17,7 @@
       {
       'record': '{{ hostvars[item]["ansible_host"].split(".")[3] }}',
       'zone': '{{".".join(hostvars[item]["ansible_host"].split(".")[2::-1]) }}.in-addr.arpa',
-      'value': '{{ item }}',
+      'value': '{{ item }}.',
       'type': 'PTR'
       },
       ]
