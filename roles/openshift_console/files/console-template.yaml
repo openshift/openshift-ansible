@@ -50,6 +50,7 @@ objects:
     strategy:
       type: RollingUpdate
     progressDeadlineSeconds: 600
+    replicas: "${{REPLICA_COUNT}}"
     template:
       metadata:
         labels:
@@ -110,7 +111,6 @@ objects:
           - mountPath: /var/console-config
             name: console-config
         dnsPolicy: ClusterFirst
-        replicas: "${{REPLICA_COUNT}}"
         restartPolicy: Always
         terminationGracePeriodSeconds: 30
         volumes:
