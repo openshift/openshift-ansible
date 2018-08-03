@@ -37,10 +37,12 @@ Updating the operator itself to a custom image can be done by setting `openshift
 For example:
 
 ```
-openshift_metering_config: quay.io/coreos/chargeback-helm-operator:latest
+openshift_metering_operator_image: quay.io/coreos/chargeback-helm-operator:latest
 ```
 
 Using a custom project/namespace can be done by specifying `__openshift_metering_namespace`.
+
+For a full list of variables, and descriptions of what they do see the [defaults/main.yml](defaults/main.yml) variables file.
 
 ## License
 

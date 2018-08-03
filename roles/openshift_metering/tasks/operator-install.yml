@@ -37,6 +37,63 @@
       value: "{{ openshift_metering_config }}"
   when: openshift_metering_config != None
 
+- name: Update Metering config with custom database config for Hive metastore
+  yedit:
+    src: "{{ mktemp.stdout }}/metering-manifests/operator/metering.yaml"
+    edits:
+    - key: spec.presto.hive.config.dbConnectionURL
+      value: "{{ openshift_metering_hive_metastore_db_url }}"
+    - key: spec.presto.hive.config.dbDriver
+      value: "{{ openshift_metering_hive_metastore_db_driver }}"
+    - key: spec.presto.hive.config.dbConnectionUsername
+      value: "{{ openshift_metering_hive_metastore_db_username }}"
+    - key: spec.presto.hive.config.dbConnectionPassword
+      value: "{{ openshift_metering_hive_metastore_db_password }}"
+  when: openshift_metering_hive_metastore_db_use_custom | bool
+
+- name: Update Metering config with custom default storage location
+  yedit:
+    src: "{{ mktemp.stdout }}/metering-manifests/operator/metering.yaml"
+    edits:
+    - key: spec.metering-operator.config.defaultStorage
+      value:
+        create: true
+        isDefault: true
+        name: "{{ openshift_metering_default_storage_name }}"
+        type: "{{ openshift_metering_default_storage_type }}"
+    - key: "spec.metering-operator.config.defaultStorage.{{ openshift_metering_default_storage_type }}"
+      value: "{{ openshift_metering_default_storage_config[openshift_metering_default_storage_type] }}"
+  when: openshift_metering_default_storage_use_custom | bool
+
+- name: Update Metering config to enable or disable HDFS
+  yedit:
+    src: "{{ mktemp.stdout }}/metering-manifests/operator/metering.yaml"
+    edits:
+    - key: spec.hdfs.enabled
+      value: "{{ openshift_metering_hdfs_enabled }}"
+  when: openshift_metering_default_storage_use_custom | bool
+
+- name: Update Metering config with AWS credentials
+  yedit:
+    src: "{{ mktemp.stdout }}/metering-manifests/operator/metering.yaml"
+    edits:
+    - key: "{{ item.key }}"
+      value: "{{ item.value }}"
+  # If the value is empty, then the credentials aren't set and we don't need to
+  # make the edit
+  when: item.value != ""
+  with_items:
+  - key: spec.metering-operator.config.awsAccessKeyID
+    value: "{{ openshift_metering_aws_access_key_id }}"
+  - key: spec.metering-operator.config.awsSecretAccessKey
+    value: "{{ openshift_metering_aws_secret_access_key }}"
+  - key: spec.presto.config.awsAccessKeyID
+    value: "{{ openshift_metering_aws_access_key_id }}"
+  - key: spec.presto.config.awsSecretAccessKey
+    value: "{{ openshift_metering_aws_secret_access_key }}"
+  # Hide secrets
+  no_log: True
+
 - name: Fetch updated operator manifests
   fetch:
     src: "{{ item.dest }}"
