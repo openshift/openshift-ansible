@@ -111,6 +111,16 @@ outputs:
     value: { get_resource: pod_subnet_pool }
 {% endif %}
 
+{% if openshift_kuryr_sg_driver|default('default') == 'namespace' %}
+  sg_allow_from_default:
+    description: ID of the security group to enable access from default namespace
+    value: { get_resource: sg_allow_from_default}
+
+  sg_allow_from_namespace:
+    description: ID of the security group to enable access from namespaces to default namespace
+    value: { get_resource: sg_allow_from_namespace}
+{% endif %}
+
   pod_access_sg_id:
     description: Id of the security group for services to be able to reach pods
     value: { get_resource: pod_access_sg }
@@ -216,6 +226,54 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
 {% endif %}
+
+{% if openshift_kuryr_sg_driver|default('default') == 'namespace' %}
+  sg_allow_from_default:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-allow_from_default
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      description: Give access to the services and pods from the default namespace
+
+  sg_allow_from_namespace:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-allow_from_namespace
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      description: Give access to the services and pods on the default namespace from the other namespaces
+      rules:
+      - ethertype: IPv4
+        remote_group_id: { get_resource: sg_allow_from_default }
+        remote_mode: remote_group_id
+
+  sg_allow_from_default_rule:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: sg_allow_from_default }
+      ethertype: IPv4
+      remote_group: { get_resource: sg_allow_from_namespace }
+
+  common-secgrp_namespace_rule:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: common-secgrp }
+      ethertype: IPv4
+      remote_group: { get_resource: sg_allow_from_namespace }
+
+  common-secgrp_default_rule:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: common-secgrp }
+      ethertype: IPv4
+      remote_group: { get_resource: sg_allow_from_default }
+{% endif %}
+
 
   pod_subnet:
     type: OS::Neutron::Subnet
@@ -393,8 +451,10 @@ resources:
         remote_ip_prefix: {{ openshift_openstack_kuryr_service_subnet_cidr }}
       - ethertype: IPv4
         remote_ip_prefix: {{ openshift_openstack_subnet_cidr }}
+{% if openshift_kuryr_sg_driver|default('default') != 'namespace' %}
       - ethertype: IPv4
         remote_mode: remote_group_id
+{% endif %}
 {% endif %}
 
 {% if openshift_openstack_flat_secgrp|default(False)|bool %}

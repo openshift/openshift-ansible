@@ -42,6 +42,7 @@ pods. This allows to have interconnectivity between pods and OpenStack VMs.
 * ``openshift_kuryr_precreate_subports=5``
 * ``openshift_kuryr_device_owner=compute:kuryr``
 * ``openshift_kuryr_subnet_driver=default``
+* ``openshift_kuryr_sg_driver=default``
 
 ## OpenShift API loadbalancer
 

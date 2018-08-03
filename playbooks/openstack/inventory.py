@@ -199,6 +199,12 @@ def _get_kuryr_vars(cloud_client, data):
     if 'pod_subnet_pool' in data:
         settings['kuryr_openstack_pod_subnet_pool_id'] = data[
             'pod_subnet_pool']
+    if 'sg_allow_from_default' in data:
+        settings['kuryr_openstack_sg_allow_from_default_id'] = data[
+            'sg_allow_from_default']
+    if 'sg_allow_from_namespace' in data:
+        settings['kuryr_openstack_sg_allow_from_namespace_id'] = data[
+            'sg_allow_from_namespace']
     settings['kuryr_openstack_pod_router_id'] = data['pod_router']
     settings['kuryr_openstack_worker_nodes_subnet_id'] = data['vm_subnet']
     settings['kuryr_openstack_service_subnet_id'] = data['service_subnet']

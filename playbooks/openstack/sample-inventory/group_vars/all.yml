@@ -53,6 +53,7 @@ openshift_openstack_external_network_name: "public"
 
 # # Kuryr can use a different subnet per namespace
 # openshift_kuryr_subnet_driver: namespace
+# openshift_kuryr_sg_driver: namespace
 
 # If you VM images will name the ethernet device different than 'eth0',
 # override this
