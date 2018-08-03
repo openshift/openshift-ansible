@@ -3,24 +3,27 @@ OpenShift RHV
 
 OpenShift Provisioned on Red Hat Virtualization and oVirt
 
-Requirements
-------------
+Optional Requirements
+---------------------
 
-* oVirt-ansible roles in Ansible role path. See the [oVirt Ansible Roles page](https://github.com/ovirt/ovirt-ansible/) for installation details.
-  * oVirt.image-template
-  * oVirt.vm-infra
 * External DNS server to provide name resolution to nodes and applications. See the [OpenShift Installation Documentation](https://docs.openshift.com/container-platform/3.9/install_config/install/prerequisites.html#prereq-dns) for details.
+* dnspython (If using the nsupdate code)
 
 Role Tasks
 ----------
 
-* `build_vm_list.yml`: Creates a list of virtual machine definitions based on a simple manifest
-* `generate_dns.yml`: Creates files with hostname to IP mapping either for use with nsupdate, or a Unix hosts style for dnsmasq.
+* `build_vm_list.yml`: Creates a list of virtual machine definitions and
+  affinity groups based on a simple manifest (below)
+* `generate_hostfile.yml`: Creates a file in the style of `/etc/hosts` based on inventory
+* `generate_nsupdate.yml`: Creates nsupdate entries for entry via the nsupdate module.
+  Requires inventory with FQDN names and IP addresses in `ansible_host` field
+* `hosts_from_dns.yml`: Creates inventory entries with IP addresses in the
+  `ansible_host` field as required by 
 
 Role Variables
 --------------
 
-For default values, see [`defaults/main.yaml`](defaults/main.yaml).
+For default values, see [`defaults/main.yml`](defaults/main.yml).
 
 For documentation on virtual machine profile options, see the [oVirt Ansible VM-Infra Documentation](https://github.com/oVirt/ovirt-ansible-vm-infra)
 
@@ -57,9 +60,6 @@ openshift_rhv_nsupdate_key:
   secret: 'XYXYXYXYXYXYXYXYXYXY+h=='
   algorithm: hmac-md5
 ```
-
-Role Requirements
------------------
 
 Example Playbook
 ----------------
