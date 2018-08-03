@@ -31,7 +31,7 @@
     name: openvswitch
     state: started
   when:
-    - openshift_use_openshift_sdn | bool
+    - openshift_use_openshift_sdn | default(true) | bool
 
 - name: Start services
   service: name={{ item }} state=started

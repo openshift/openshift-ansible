@@ -8,7 +8,7 @@
     state: stopped
   when:
     - openshift.common.is_containerized | bool
-    - openshift_use_openshift_sdn | bool
+    - openshift_use_openshift_sdn | default(true) | bool
 
 - name: Stop containerized services
   service: name={{ item }} state=stopped
