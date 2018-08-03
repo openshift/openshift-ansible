@@ -14,15 +14,15 @@
 cluster:
   hosts:
     - name: ocp-master
-      distro: fedora/27/atomic
+      distro: fedora/28/atomic
       specs:
         ram: 4096
     - name: ocp-node1
-      distro: fedora/27/atomic
+      distro: fedora/28/atomic
     - name: ocp-node2
-      distro: fedora/27/atomic
+      distro: fedora/28/atomic
   container:
-    image: registry.fedoraproject.org/fedora:27
+    image: registry.fedoraproject.org/fedora:28
 
 packages:
   - gcc
@@ -34,7 +34,7 @@ packages:
   - redhat-rpm-config
   - findutils
 
-context: 'fedora/27/atomic'
+context: 'fedora/28/atomic'
 
 tests:
   - ./.papr.sh
@@ -47,52 +47,52 @@ required: false
 
 ---
 inherit: true
-context: 'fedora/27/atomic/upgrade_minor'
+context: 'fedora/28/atomic/upgrade_minor'
 
 cluster:
   hosts:
     - name: ocp-master
-      distro: fedora/27/atomic
+      distro: fedora/28/atomic
       specs:
         ram: 4096
   container:
-    image: registry.fedoraproject.org/fedora:27
+    image: registry.fedoraproject.org/fedora:28
 env:
   PAPR_INVENTORY: .papr.all-in-one.inventory
   PAPR_RUN_UPDATE: "yes"
 
 ---
 inherit: true
-context: 'fedora/27/atomic/upgrade_major'
+context: 'fedora/28/atomic/upgrade_major'
 
 cluster:
   hosts:
     - name: ocp-master
-      distro: fedora/27/atomic
+      distro: fedora/28/atomic
       specs:
         ram: 4096
   container:
-    image: registry.fedoraproject.org/fedora:27
+    image: registry.fedoraproject.org/fedora:28
 env:
   PAPR_INVENTORY: .papr.all-in-one.inventory
   PAPR_UPGRADE_FROM: "3.10"
   PAPR_RUN_UPDATE: "yes"
 ---
 inherit: true
-context: 'fedora/27/atomic/master-ha'
+context: 'fedora/28/atomic/master-ha'
 
 cluster:
   hosts:
     - name: ocp-master1
-      distro: fedora/27/atomic
+      distro: fedora/28/atomic
       specs:
         ram: 4096
     - name: ocp-master2
-      distro: fedora/27/atomic
+      distro: fedora/28/atomic
     - name: ocp-master3
-      distro: fedora/27/atomic
+      distro: fedora/28/atomic
   container:
-    image: registry.fedoraproject.org/fedora:27
+    image: registry.fedoraproject.org/fedora:28
 
 env:
   PAPR_INVENTORY: .papr-master-ha.inventory
