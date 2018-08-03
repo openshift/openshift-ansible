@@ -189,28 +189,53 @@
   file:
     path: "~{{ item }}/.kube"
     state: directory
-    mode: 0700
+    mode: 0777
     owner: "{{ item }}"
-    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
+    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout }}"
+  become: yes
+  become_user: "{{ item }}"
   with_items: "{{ client_users }}"
+
+- name: Create temp file for config
+  command: mktemp /tmp/openshift-ansible-XXXXXXX
+  register: _config_temp_file
+
+- name: Copy the admin client config(s) to a temporary file
+  copy:
+    src: "{{ openshift_master_config_dir }}/admin.kubeconfig"
+    dest: "{{ _config_temp_file.stdout }}"
+    remote_src: yes
+    mode: 0777
 
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
 - name: Copy the admin client config(s)
   copy:
-    src: "/etc/origin/master/admin.kubeconfig"
+    src: "{{ _config_temp_file.stdout }}"
     dest: "~{{ item }}/.kube/config"
     remote_src: yes
+    owner: "{{ item }}"
+    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout }}"
     force: "{{ openshift_certificates_redeploy | default(false) }}"
+  become: yes
+  become_user: "{{ item }}"
   with_items: "{{ client_users }}"
+
+- name: Remove temp file with config
+  file:
+    path: "{{ _config_temp_file.stdout }}"
+    state: absent
 
 - name: Update the permissions on the admin client config(s)
   file:
-    path: "~{{ item }}/.kube/config"
-    state: file
+    path: "~{{ item }}/.kube"
+    state: directory
     mode: 0700
     owner: "{{ item }}"
-    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
+    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout }}"
+    recurse: yes
+  become: yes
+  become_user: "{{ item }}"
   with_items: "{{ client_users }}"
 
 # Ensure ca-bundle exists for 3.2+ configuration
