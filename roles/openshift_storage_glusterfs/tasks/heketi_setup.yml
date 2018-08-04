@@ -21,14 +21,12 @@
     resource_name: edit
     state: present
 
-- import_tasks: heketi_pod_check.yml
-
 - name: Generate heketi config file
   template:
     src: "heketi.json.j2"
     dest: "{{ mktemp.stdout }}/heketi.json"
 
-- import_tasks: get_heketi_key.yml
+- import_tasks: heketi_get_key.yml
 
 - name: Generate heketi admin key
   set_fact:

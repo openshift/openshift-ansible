@@ -29,24 +29,24 @@
       HEKETI_FSTAB: "{{ glusterfs_heketi_fstab }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
 
-- name: Set heketi Deployed fact
-  set_fact:
-    glusterfs_heketi_deploy_is_missing: False
-
 - name: Wait for deploy-heketi pod
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: pod
     state: list
     selector: "glusterfs=deploy-heketi-{{ glusterfs_name }}-pod"
-  register: deploy_heketi_pod
+  register: deploy_heketi_pod_wait
   until:
-  - "deploy_heketi_pod.results.results[0]['items'] | count > 0"
+  - "deploy_heketi_pod_wait.results.results[0]['items'] | count > 0"
   # Pod's 'Ready' status must be True
-  - "deploy_heketi_pod.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+  - "deploy_heketi_pod_wait.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
-  when:
-  - glusterfs_heketi_is_native
-  - not glusterfs_heketi_deploy_is_missing
-  - glusterfs_heketi_is_missing
+
+- name: Update deploy-heketi pod result
+  set_fact:
+    deploy_heketi_pod: "{{ deploy_heketi_pod_wait.results.results[0]['items'][0] }}"
+
+- name: Set deploy-heketi deployed fact
+  set_fact:
+    glusterfs_heketi_deploy_is_missing: False

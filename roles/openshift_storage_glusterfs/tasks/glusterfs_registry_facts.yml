@@ -1,6 +1,8 @@
 ---
 - set_fact:
     glusterfs_timeout: "{{ openshift_storage_glusterfs_registry_timeout }}"
+    glusterfs_health_timeout: "{{ openshift_storage_glusterfs_registry_health_timeout }}"
+    glusterfs_restart: "{{ openshift_storage_glusterfs_registry_restart }}"
     glusterfs_namespace: "{{ openshift_storage_glusterfs_registry_namespace }}"
     glusterfs_is_native: "{{ openshift_storage_glusterfs_registry_is_native | bool }}"
     glusterfs_name: "{{ openshift_storage_glusterfs_registry_name }}"
