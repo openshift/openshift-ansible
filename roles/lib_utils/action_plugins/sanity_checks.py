@@ -103,6 +103,10 @@ REMOVED_VARIABLES = (
     ('openshift_storage_glusterfs_registry_block_version', 'openshift_storage_glusterfs_registry_block_image'),
     ('openshift_storage_glusterfs_registry_s3_version', 'openshift_storage_glusterfs_registry_s3_image'),
     ('openshift_storage_glusterfs_registry_heketi_version', 'openshift_storage_glusterfs_registry_heketi_image'),
+    # TODO(michaelgugino): Remove in 3.12
+    ('openshift_cockpit_deployer_prefix', 'openshift_cockpit_deployer_image'),
+    ('openshift_cockpit_deployer_basename', 'openshift_cockpit_deployer_image'),
+    ('openshift_cockpit_deployer_version', 'openshift_cockpit_deployer_image'),
 )
 
 # TODO(michaelgugino): Remove in 3.11
