@@ -110,6 +110,18 @@ options:
     required: false
     default: v1
     aliases: []
+  mount_options:
+    description:
+    - A list of mount options to pass when mounting volumes of this storage class.
+    required: false
+    default: None
+    aliases: []
+  reclaim_policy:
+    description:
+    - The reclaim policy to use for this storage class.
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
@@ -1488,7 +1500,9 @@ class StorageClassConfig(object):
                  annotations=None,
                  default_storage_class="false",
                  api_version='v1',
-                 kubeconfig='/etc/origin/master/admin.kubeconfig'):
+                 kubeconfig='/etc/origin/master/admin.kubeconfig',
+                 mount_options=None,
+                 reclaim_policy=None):
         ''' constructor for handling storageclass options '''
         self.name = name
         self.parameters = parameters
@@ -1497,6 +1511,8 @@ class StorageClassConfig(object):
         self.api_version = api_version
         self.default_storage_class = str(default_storage_class).lower()
         self.kubeconfig = kubeconfig
+        self.mount_options = mount_options
+        self.reclaim_policy = reclaim_policy
         self.data = {}
 
         self.create_dict()
@@ -1525,6 +1541,11 @@ class StorageClassConfig(object):
         else:
             self.data['parameters']['type'] = 'gp2'
 
+        self.data['mountOptions'] = self.mount_options or []
+
+        if self.reclaim_policy is not None:
+            self.data['reclaimPolicy'] = self.reclaim_policy
+
 
 
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
@@ -1533,6 +1554,8 @@ class StorageClass(Yedit):
     annotations_path = "metadata.annotations"
     provisioner_path = "provisioner"
     parameters_path = "parameters"
+    mount_options_path = "mountOptions"
+    reclaim_policy_path = "reclaimPolicy"
     kind = 'StorageClass'
 
     def __init__(self, content):
@@ -1546,6 +1569,14 @@ class StorageClass(Yedit):
     def get_parameters(self):
         ''' get the service selector'''
         return self.get(StorageClass.parameters_path) or {}
+
+    def get_mount_options(self):
+        ''' get mount options'''
+        return self.get(StorageClass.mount_options_path) or []
+
+    def get_reclaim_policy(self):
+        ''' get reclaim policy'''
+        return self.get(StorageClass.reclaim_policy_path)
 
 # -*- -*- -*- End included fragment: lib/storageclass.py -*- -*- -*-
 
@@ -1611,6 +1642,14 @@ class OCStorageClass(OpenShiftCLI):
             if 'is-default-class' in anno_key and anno_value != self.config.default_storage_class:
                 return True
 
+        # check if mount options have updated
+        if set(self.storage_class.get_mount_options()) != set(self.config.mount_options):
+            return True
+
+        # check if reclaim policy has been updated
+        if self.storage_class.get_reclaim_policy() != self.config.reclaim_policy:
+            return True
+
         return False
 
     @staticmethod
@@ -1640,6 +1679,8 @@ class OCStorageClass(OpenShiftCLI):
                                      api_version="storage.k8s.io/{}".format(params['api_version']),
                                      default_storage_class=params.get('default_storage_class', 'false'),
                                      kubeconfig=params['kubeconfig'],
+                                     mount_options=params['mount_options'],
+                                     reclaim_policy=params['reclaim_policy']
                                     )
 
         oc_sc = OCStorageClass(rconfig, verbose=params['debug'])
@@ -1737,6 +1778,8 @@ def main():
             provisioner=dict(required=True, type='str'),
             api_version=dict(default='v1', type='str'),
             default_storage_class=dict(default="false", type='str'),
+            mount_options=dict(default=None, type='list'),
+            reclaim_policy=dict(default=None, type='str'),
         ),
         supports_check_mode=True,
     )
