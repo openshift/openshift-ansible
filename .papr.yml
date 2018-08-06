@@ -16,6 +16,7 @@ cluster:
     - name: ocp-master
       distro: fedora/27/atomic
       specs:
+        cpu: 2
         ram: 4096
     - name: ocp-node1
       distro: fedora/27/atomic
@@ -33,6 +34,7 @@ packages:
   - openssl-devel
   - redhat-rpm-config
   - findutils
+  - rsync
 
 context: 'fedora/27/atomic'
 
@@ -41,6 +43,7 @@ tests:
 
 artifacts:
   - journals/
+  - container_logs/
 
 pulls: false
 required: false
@@ -54,6 +57,7 @@ cluster:
     - name: ocp-master
       distro: fedora/27/atomic
       specs:
+        cpu: 2
         ram: 4096
   container:
     image: registry.fedoraproject.org/fedora:27
@@ -70,6 +74,7 @@ cluster:
     - name: ocp-master
       distro: fedora/27/atomic
       specs:
+        cpu: 2
         ram: 4096
   container:
     image: registry.fedoraproject.org/fedora:27
@@ -86,6 +91,7 @@ cluster:
     - name: ocp-master1
       distro: fedora/27/atomic
       specs:
+        cpu: 2
         ram: 4096
     - name: ocp-master2
       distro: fedora/27/atomic
