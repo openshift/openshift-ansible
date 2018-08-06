@@ -34,6 +34,18 @@ ENTERPRISE_TAG_REGEX = {'re': '(^v\\d+\\.\\d+(\\.\\d+)*(-\\d+(\\.\\d+)*)?$)',
 IMAGE_TAG_REGEX = {'origin': ORIGIN_TAG_REGEX,
                    'openshift-enterprise': ENTERPRISE_TAG_REGEX}
 
+PKG_VERSION_REGEX_ERROR = """openshift_pkg_version must be in the format
+-[optional.release]. Examples: -3.6.0, -3.7.0-0.126.0.git.0.9351aae.el7 -3.11*
+You specified openshift_pkg_version={}"""
+PKG_VERSION_REGEX = {'re': '(^-.*)',
+                     'error_msg': PKG_VERSION_REGEX_ERROR}
+
+RELEASE_REGEX_ERROR = """openshift_release must be in the format
+v#[.#[.#]]. Examples: v3.9, v3.10.0
+You specified openshift_release={}"""
+RELEASE_REGEX = {'re': '(^v?\\d+(\\.\\d+(\\.\\d+)?)?$)',
+                 'error_msg': RELEASE_REGEX_ERROR}
+
 STORAGE_KIND_TUPLE = (
     'openshift_hosted_registry_storage_kind',
     'openshift_loggingops_storage_kind',
@@ -182,6 +194,30 @@ class ActionModule(ActionBase):
             msg = msg.format(str(openshift_image_tag))
             raise errors.AnsibleModuleError(msg)
 
+    def check_pkg_version_format(self, hostvars, host):
+        """Ensure openshift_pkg_version is formatted correctly"""
+        openshift_pkg_version = self.template_var(hostvars, host, 'openshift_pkg_version')
+        if not openshift_pkg_version:
+            return None
+        regex_to_match = PKG_VERSION_REGEX['re']
+        res = re.match(regex_to_match, str(openshift_pkg_version))
+        if res is None:
+            msg = PKG_VERSION_REGEX['error_msg']
+            msg = msg.format(str(openshift_pkg_version))
+            raise errors.AnsibleModuleError(msg)
+
+    def check_release_format(self, hostvars, host):
+        """Ensure openshift_release is formatted correctly"""
+        openshift_release = self.template_var(hostvars, host, 'openshift_release')
+        if not openshift_release:
+            return None
+        regex_to_match = RELEASE_REGEX['re']
+        res = re.match(regex_to_match, str(openshift_release))
+        if res is None:
+            msg = RELEASE_REGEX['error_msg']
+            msg = msg.format(str(openshift_release))
+            raise errors.AnsibleModuleError(msg)
+
     def network_plugin_check(self, hostvars, host):
         """Ensure only one type of network plugin is enabled"""
         res = []
@@ -316,6 +352,8 @@ class ActionModule(ActionBase):
         odt = self.check_openshift_deployment_type(hostvars, host)
         self.check_python_version(hostvars, host, distro)
         self.check_image_tag_format(hostvars, host, odt)
+        self.check_pkg_version_format(hostvars, host)
+        self.check_release_format(hostvars, host)
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)
         self.check_session_auth_secrets(hostvars, host)
