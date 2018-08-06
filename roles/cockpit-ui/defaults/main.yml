@@ -1,2 +1,3 @@
 ---
 openshift_config_base: "/etc/origin"
+openshift_cockpit_deployer_version: "{{ openshift_image_tag }}"
