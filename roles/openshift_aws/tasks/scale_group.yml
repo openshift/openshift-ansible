@@ -24,7 +24,7 @@
     termination_policies: "{{ l_node_group_config[openshift_aws_node_group.group].termination_policy if 'termination_policy' in  l_node_group_config[openshift_aws_node_group.group] else omit }}"
     load_balancers: "{{ l_node_group_config[openshift_aws_node_group.group].elbs if 'elbs' in l_node_group_config[openshift_aws_node_group.group] else omit }}"
     wait_for_instances: "{{ l_node_group_config[openshift_aws_node_group.group].wait_for_instances | default(False)}}"
-    vpc_zone_identifier: "{{ subnetout.subnets[0].id }}"
+    vpc_zone_identifier: "{{ subnetout.results | map(attribute='subnets.0.subnet_id') | list }}"
     replace_instances: "{{ openshift_aws_node_group_replace_instances if openshift_aws_node_group_replace_instances != [] else omit }}"
     replace_all_instances: "{{ omit if openshift_aws_node_group_replace_instances != []
                                     else (l_node_group_config[openshift_aws_node_group.group].replace_all_instances | default(omit)) }}"

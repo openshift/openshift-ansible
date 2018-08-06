@@ -11,12 +11,14 @@
     var: vpcout
     verbosity: 1
 
-- name: fetch the default subnet id
+- name: fetch the subnet ids
   ec2_vpc_subnet_facts:
     region: "{{ openshift_aws_region }}"
     filters:
-      "availability-zone": "{{ openshift_aws_subnet_az }}"
       vpc-id: "{{ vpcout.vpcs[0].id }}"
+      "tag:Name": "{{ item }}"
+  with_items:
+  - "{{ openshift_aws_vpc.subnets[openshift_aws_region] | map(attribute='az') | list }}"
   register: subnetout
 
 - name: debug subnetout
