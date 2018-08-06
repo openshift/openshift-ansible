@@ -1,4 +1,10 @@
 ---
+- name: Copy cloud CA certificate
+  copy:
+    content: "{{ openshift_cloudprovider_openstack_ca_file }}"
+    dest: "{{ openshift_openstack_ca_file_path }}"
+  when: openshift_cloudprovider_openstack_ca_file is defined
+
 - name: Create cloud config from template
   template:
     dest: "{{ openshift.common.config_base }}/cloudprovider/openstack.conf"
