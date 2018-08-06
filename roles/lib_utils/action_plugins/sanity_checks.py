@@ -66,7 +66,9 @@ REMOVED_VARIABLES = (
     ('oreg_auth_credentials_replace', 'Removed: Credentials are now always updated'),
     ('oreg_url_master', 'oreg_url'),
     ('oreg_url_node', 'oreg_url'),
-
+    ('openshift_cockpit_deployer_prefix', 'openshift_cockpit_deployer_image'),
+    ('openshift_cockpit_deployer_basename', 'openshift_cockpit_deployer_image'),
+    ('openshift_cockpit_deployer_version', 'openshift_cockpit_deployer_image'),
 )
 
 # JSON_FORMAT_VARIABLES does not intende to cover all json variables, but
