@@ -290,7 +290,7 @@ spec:
             # chosen from this range. Changing this value after installation will have
             # no effect. This should fall within '--cluster-cidr'.
             - name: CALICO_IPV4POOL_CIDR
-              value: "{{ openshift.master.sdn_cluster_network_cidr }}"
+              value: "{{ openshift_cluster_network_cidr }}"
             - name: CALICO_IPV4POOL_IPIP
               value: "{{ calico_ipv4pool_ipip }}"
             # Disable IPv6 on Kubernetes.
