@@ -52,6 +52,10 @@
     src: calicov3.yml.j2
   when: (node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version >= '3.0.0') or (node_version == 'master') or (cnx == "cnx" and node_version >= '2.0.0')
 
+- name: Apply node label
+  command: >
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig label node {{ openshift.node.nodename | lower }} --overwrite projectcalico.org/ds-ready=true
+
 - name: Calico Master | Launch Calico
   command: >
     {{ openshift_client_binary }} apply
