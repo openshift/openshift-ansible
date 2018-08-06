@@ -51,7 +51,7 @@
     when:
     - openshift_cloudprovider_kind is defined
     - openshift_cloudprovider_kind == 'vsphere'
-    - openshift_version is version_compare('3.9', '>=')
+    - openshift_version is version('3.9', '>=')
 
 - name: update vsphere provider master config
   hosts: oo_masters_to_config

@@ -43,11 +43,11 @@
     fail:
       msg: "OpenShift {{ avail_openshift_version }} is available, but {{ openshift_upgrade_target }} or greater is required"
     when:
-    - (openshift_pkg_version | default('-0.0', True)).split('-')[1] is version_compare(openshift_upgrade_target, '<')
+    - (openshift_pkg_version | default('-0.0', True)).split('-')[1] is version(openshift_upgrade_target, '<')
 
 - name: Fail when openshift version does not meet minimum requirement for Origin upgrade
   fail:
     msg: "This upgrade playbook must be run against OpenShift {{ openshift_upgrade_min }} or later"
   when:
   - openshift_deployment_type == 'origin'
-  - openshift_current_version is version_compare(openshift_upgrade_min,'<')
+  - openshift_current_version is version(openshift_upgrade_min,'<')

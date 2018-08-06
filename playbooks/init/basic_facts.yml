@@ -61,7 +61,7 @@
     - name: assert atomic host docker version is 1.12 or later
       assert:
         that:
-        - l_atomic_docker_version.stdout | replace('"', '') is version_compare('1.12','>=')
+        - l_atomic_docker_version.stdout | replace('"', '') is version('1.12','>=')
         msg: Installation on Atomic Host requires Docker 1.12 or later. Please upgrade and restart the Atomic Host.
 
 - name: Retrieve existing master configs and validate

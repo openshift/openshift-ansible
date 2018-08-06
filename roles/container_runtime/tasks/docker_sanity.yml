@@ -8,7 +8,7 @@
   when:
   - not (curr_docker_version is skipped)
   - curr_docker_version.stdout != ''
-  - curr_docker_version.stdout is version_compare(l_required_docker_version, '<')
+  - curr_docker_version.stdout is version(l_required_docker_version, '<')
   - not (docker_version is defined)
 
 - name: Error out if requested Docker is too old
@@ -16,4 +16,4 @@
     msg: "Docker {{ docker_version }} requested, but >= {{ l_required_docker_version }} is required."
   when:
   - docker_version is defined
-  - docker_version is version_compare(l_required_docker_version, '<')
+  - docker_version is version(l_required_docker_version, '<')
