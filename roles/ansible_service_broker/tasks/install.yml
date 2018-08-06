@@ -210,7 +210,7 @@
     kind: ConfigMap
     content:
       path: /tmp/cmout
-      data: "{{ lookup('template', 'configmap.yaml.j2') | from_yaml }}"
+      data: "{{ ansible_service_broker_full_broker_config }}"
 
 - oc_secret:
     name: asb-registry-auth

@@ -23,6 +23,9 @@ ansible_service_broker_auto_escalate: false
 ansible_service_broker_local_registry_whitelist: []
 ansible_service_broker_local_registry_namespaces: ["openshift"]
 
+
+ansible_service_broker_full_broker_config_map: "{{ lookup('template', 'configmap.yaml.j2') | from_yaml }}"
+
 l_asb_default_images_dict:
   origin: 'docker.io/ansibleplaybookbundle/origin-ansible-service-broker:latest'
   openshift-enterprise: 'registry.redhat.io/openshift3/ose-ansible-service-broker:${version}'
