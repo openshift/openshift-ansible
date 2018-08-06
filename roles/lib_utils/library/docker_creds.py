@@ -19,6 +19,7 @@
 import base64
 import json
 import os
+import pipes
 
 from ansible.module_utils.basic import AnsibleModule
 
@@ -134,7 +135,8 @@ def gen_skopeo_cmd(registry, username, password, proxy_vars, image_name):
     '''Generate skopeo command to run'''
     skopeo_temp = ("{proxy_vars} timeout 10 skopeo inspect"
                    " {creds} docker://{registry}/{image_name}")
-    creds = '--creds {}:{}'.format(username, password)
+    # this will quote the entire creds argument to account for special chars.
+    creds = pipes.quote('--creds {}:{}'.format(username, password))
     skopeo_args = {'proxy_vars': proxy_vars, 'creds': creds,
                    'registry': registry, 'image_name': image_name}
     return skopeo_temp.format(**skopeo_args).strip()
