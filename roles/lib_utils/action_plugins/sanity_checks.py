@@ -266,7 +266,8 @@ class ActionModule(ActionBase):
 
         manage_pass = self.template_var(
             hostvars, host, 'openshift_master_manage_htpasswd')
-        if to_bool(manage_pass):
+        # default for openshift_master_manage_htpasswd is True.
+        if to_bool(manage_pass) or manage_pass is None:
             # If we manage the file, we can just generate in the new path.
             return None
         idps = self.template_var(
