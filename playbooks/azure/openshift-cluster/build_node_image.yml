@@ -18,7 +18,6 @@
       openshift_enable_origin_repo: False
       skip_node_svc_handlers: True
       openshift_additional_repos: "{{ azure_node_repos[ansible_distribution] }}"
-      openshift_node_open_ports: [{"service":"Node exporter metrics", "port":"9100/tcp"}]
       openshift_node_include_control_plane: True
       openshift_control_plane_static_pod_location: /etc/origin/node/disabled/
       openshift_node_group_cloud_provider: azure
