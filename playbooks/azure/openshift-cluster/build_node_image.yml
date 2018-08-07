@@ -87,16 +87,6 @@
       content: "{{ oreg_url }}"
     when: oreg_url is defined
 
-  - name: run waagent deprovision
-    shell: sleep 2 && waagent -deprovision+user -force
-    async: 1
-    poll: 0
-
-- hosts: localhost
-  gather_facts: no
-  tasks:
-  - set_fact:
-      openshift_rpm: "{{ hostvars[groups['nodes'][0]]['yum'].results | selectattr('name', 'match', '^(origin|atomic-openshift)$') | first }}"
   - name: create a file with image name
     copy:
       content: |
@@ -110,6 +100,16 @@
       group: root
       mode: '0440'
 
+  - name: run waagent deprovision
+    shell: sleep 2 && waagent -deprovision+user -force
+    async: 1
+    poll: 0
+
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - set_fact:
+      openshift_rpm: "{{ hostvars[groups['nodes'][0]]['yum'].results | selectattr('name', 'match', '^(origin|atomic-openshift)$') | first }}"
   - name: create image
     import_tasks: tasks/create_image_from_vm.yml
     vars:
