@@ -17,13 +17,12 @@
 # limitations under the License.
 
 try:
-    import configparser
-    CONFIG_PROXY_NEW = True
-except ImportError:
     # configparser is available in python 2.7 backports, but that package
     # might not be installed.
     import ConfigParser as configparser
-    CONFIG_PROXY_NEW = False
+except ImportError:
+    import configparser
+import re
 import sys
 import os
 
@@ -61,21 +60,23 @@ class SectionlessParser(configparser.RawConfigParser):
     # pylint: disable=invalid-name,too-many-locals,too-many-branches,too-many-statements
     # pylint: disable=anomalous-backslash-in-string,raising-bad-type
     """RawConfigParser that allows no sections"""
-    # This code originally retrieved from:
+    # This class originally retrieved from:
     # https://github.com/python/cpython/blob/master/Lib/configparser.py
     # Copyright 2001-2018 Python Software Foundation; All Rights Reserved
     # Modified to allow no sections.
+    def _set_proxies(self, sectname):
+        """proxies not present in old version"""
+        pass
+
     def optionxform(self, optionstr):
         """Override this method, don't set .lower()"""
         return optionstr
 
-    def _write_section(self, fp, section_name, section_items, delimiter):
+    def _write_section(self, fp, _, section_items, delimiter):
         """Override for formatting"""
         for key, value in section_items:
             if " " in value and "\ " not in value and not value.startswith('"'):
                 value = u'"{}"'.format(value)
-            value = self._interpolation.before_write(self, section_name, key,
-                                                     value)
             if value is not None or not self._allow_no_value:
                 value = delimiter + str(value).replace('\n', '\n\t')
             else:
@@ -83,6 +84,7 @@ class SectionlessParser(configparser.RawConfigParser):
             fp.write(u"{}{}\n".format(key, value))
             fp.write(u"\n")
 
+    # pylint: disable=arguments-differ
     def write(self, fp, space_around_delimiters=True):
         """Ovrride write method"""
         delimiters = ('=', ':')
@@ -94,10 +96,15 @@ class SectionlessParser(configparser.RawConfigParser):
             self._write_section(fp, section,
                                 self._sections[section].items(), d)
 
-    def _set_proxies(self, sectname):
-        """set proxies"""
-        self._proxies[sectname] = configparser.SectionProxy(self, sectname)
+    def _join_multiline_values(self):
+        all_sections = self._sections.items()
+        for _, options in all_sections:
+            for name, val in options.items():
+                if isinstance(val, list):
+                    val = '\n'.join(val).rstrip()
+                options[name] = val
 
+    # pylint: disable=attribute-defined-outside-init
     def _read(self, fp, fpname):
         """Parse a sectionless configuration file."""
         elements_added = set()
@@ -105,6 +112,11 @@ class SectionlessParser(configparser.RawConfigParser):
         sectname = '__none_sect'
         self._sections[sectname] = cursect
         self._set_proxies(sectname)
+        self._inline_comment_prefixes = ()
+        self._comment_prefixes = ()
+        self._empty_lines_in_values = True
+        self.NONSPACECRE = re.compile(r"\S")
+        self.default_section = 'DEFAULT'
         optname = None
         lineno = 0
         indent_level = 0
@@ -180,20 +192,9 @@ class SectionlessParser(configparser.RawConfigParser):
             raise e
 
 
-# pylint: disable=R0901,C0103,R0204
-class SectionlessParserOld(SectionlessParser):
-    """Overrides write method to utilize newer abstraction"""
-    def _set_proxies(self, sectname):
-        """proxies not present in old version"""
-        pass
-
-
 def create_file(src, dest):
     '''Create the dest file from src file'''
-    if CONFIG_PROXY_NEW:
-        config = SectionlessParser()
-    else:
-        config = SectionlessParserOld()
+    config = SectionlessParser()
     config.readfp(open(src))
     with open(dest, 'w') as output:
         config.write(output, False)
