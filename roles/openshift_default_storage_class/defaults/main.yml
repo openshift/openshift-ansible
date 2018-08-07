@@ -15,8 +15,8 @@ openshift_storageclass_defaults:
     provisioner: azure-disk
     name: azure-standard
     parameters:
-      storageaccounttype: 'Standard_LRS'
-      kind: 'Shared'
+      storageaccounttype: "{{ openshift_cloudproviders_azure_storage_type | default ('Standard_LRS') }}"
+      kind: "{{ openshift_cloudproviders_azure_storage_kind | default ('Shared') }}"
 
   gce:
     name: standard
