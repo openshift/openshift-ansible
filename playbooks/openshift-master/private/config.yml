@@ -93,9 +93,9 @@
 
   - role: openshift_control_plane
   - role: tuned
-  - role: nuage_ca
-    when: openshift_use_nuage | default(false) | bool
   - role: nuage_common
+    when: openshift_use_nuage | default(false) | bool
+  - role: nuage_ca
     when: openshift_use_nuage | default(false) | bool
   - role: nuage_master
     when: openshift_use_nuage | default(false) | bool

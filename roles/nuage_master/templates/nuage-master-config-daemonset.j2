@@ -23,6 +23,12 @@ data:
       enterpriseName: {{ enterprise }}
       # Name of the domain in which pods will reside
       domainName: {{ domain }}
+      # Enable/Disable encryption flags on VSD
+      encryptionEnabled: {{ '1' if nuage_personality == 'evdf' else '0' }}
+      #Enable Underlay Support for this domain on VSD. 1 => enabled, 0 => disabled(default)
+      underlaySupport: {{ enable_underlay_support | default(0) }}
+      #Enable Stats logging for this domain on VSD. 1 => enabled, 0 => disabled(default)
+      statsLogging: {{ enable_stats_logging | default(0) }}
       # VSD generated user certificate file location on master node
       userCertificateFile: {{ nuage_master_crt_dir }}/{{ vsd_user }}.pem
       # VSD generated user key file location on master node
@@ -35,7 +41,7 @@ data:
       logLevel: 0
       # Parameters related to the nuage monitor REST server
       nuageMonServer:
-          URL: 0.0.0.0:9443
+          URL: 0.0.0.0:{{ nuage_mon_rest_server_port }}
           certificateDirectory: {{ nuage_master_crt_dir }}
           clientCA: ""
           serverCertificate: ""
@@ -49,6 +55,10 @@ data:
       {% for etcd_url in openshift_master_etcd_urls %}
               - {{ etcd_url }}
       {% endfor %}
+      # auto scale subnets feature
+      # 0 => disabled(default)
+      # 1 => enabled
+      autoScaleSubnets: {{ auto_scale_subnets | default(0) }}
 
 ---
 
@@ -78,7 +88,7 @@ spec:
       containers:
         # This container configures Nuage Master node
         - name: install-nuage-master-config
-          image: nuage/master:{{ nuage_monitor_container_image_version }}
+          image: {{nuage_mon_image_name }}:{{ nuage_monitor_container_image_version }}
           ports:
             - containerPort: 9443
               hostPort: 9443
