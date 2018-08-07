@@ -135,7 +135,11 @@
     delete_after: true
 
 - name: Checking for passwd.yml
-  stat: path="{{ generated_certs_dir }}/passwd.yml"
+  stat:
+    path: "{{ generated_certs_dir }}/passwd.yml"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: passwd_file
   check_mode: no
 

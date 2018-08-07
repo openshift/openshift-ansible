@@ -1,6 +1,10 @@
 ---
 - name: Checking for {{ shared_key_info.procure_component }}_shared_key
-  stat: path="{{generated_certs_dir}}/{{ shared_key_info.procure_component }}_shared_key"
+  stat:
+    path: "{{generated_certs_dir}}/{{ shared_key_info.procure_component }}_shared_key"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: component_shared_key_file
   check_mode: no
 

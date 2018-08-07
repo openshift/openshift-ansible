@@ -11,6 +11,9 @@
 - name: Check for old etcd service files
   stat:
     path: "{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   with_items:
   - "/etc/systemd/system/etcd.service"
   - "/etc/systemd/system/etcd_container.service"

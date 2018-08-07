@@ -42,6 +42,9 @@
 - name: Check for RPM generated config marker file .config_managed
   stat:
     path: /etc/origin/.config_managed
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: rpmgenerated_config
 
 - name: create directories for bootstrapping

@@ -23,7 +23,11 @@
 - name: Check if temp file exists on any masters
   hosts: oo_masters_to_config
   tasks:
-  - stat: path="{{ hostvars.localhost.mktemp.stdout }}"
+  - stat:
+      path: "{{ hostvars.localhost.mktemp.stdout }}"
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: exists
     changed_when: false
     when: "'stdout' in hostvars.localhost.mktemp"
