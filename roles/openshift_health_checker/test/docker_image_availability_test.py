@@ -301,7 +301,7 @@ def test_registry_console_image(task_vars, expected):
     ), (
         dict(
             group_names=['oo_etcd_to_config'],
-            etcd_image='spam/etcd',
+            osm_etcd_image='spam/etcd',
         ),
         set(['spam/etcd']),
     ),
