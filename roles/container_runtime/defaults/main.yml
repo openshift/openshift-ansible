@@ -83,8 +83,9 @@ l_crio_pause_images_dict:
   origin: 'docker.io/openshift/origin-${component}:${version}'
   openshift-enterprise: 'registry.redhat.io/openshift3/ose-${component}:${version}'
 l_pause_registry_url_default: "{{ l_crio_pause_images_dict[openshift_deployment_type] }}"
+l_pause_registry_url: "{{ oreg_url_master | default(oreg_url) | default(l_pause_registry_url_default) | regex_replace('${version}' | regex_escape, l_openshift_image_tag | default('${version}')) }}"
 
-pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
+pause_image: "{{ l_pause_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
 
 l_required_docker_version: '1.13'
 
