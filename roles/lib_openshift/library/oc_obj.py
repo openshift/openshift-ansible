@@ -1625,6 +1625,7 @@ class OCObject(OpenShiftCLI):
         ########
         if state == 'absent':
             # verify it's not in our results
+            # pylint: disable=too-many-boolean-expressions
             if (params['name'] is not None or params['selector'] is not None) and \
                (len(api_rval['results']) == 0 or \
                (not api_rval['results'][0]) or \
