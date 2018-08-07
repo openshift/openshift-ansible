@@ -1,13 +1,12 @@
 ##---
 # Source: olm/templates/13-catalog-operator.deployment.yaml
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: catalog-operator
   namespace: operator-lifecycle-manager
   labels:
     app: catalog-operator
-    tectonic-operators.coreos.com/managed-by: tectonic-x-operator
 spec:
   strategy:
     type: RollingUpdate
@@ -20,7 +19,7 @@ spec:
       labels:
         app: catalog-operator
     spec:
-      serviceAccountName: alm-operator-serviceaccount
+      serviceAccountName: olm-operator-serviceaccount
       containers:
         - name: catalog-operator
           command:
@@ -28,7 +27,7 @@ spec:
           - '-namespace'
           - operator-lifecycle-manager
           - '-debug'
-          image: quay.io/coreos/catalog@sha256:299a9cd6b34c9ccb601d6fffa8b6a633658165510940ed8c5481ce6acdad46b1
+          image: quay.io/coreos/catalog@sha256:20886d49205aa8d8fd53f1c85fad6a501775226da25ef14f51258b7066e91064
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
