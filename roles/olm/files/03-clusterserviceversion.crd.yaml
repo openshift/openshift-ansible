@@ -3,27 +3,49 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: clusterserviceversion-v1s.app.coreos.com
+  name: clusterserviceversions.operators.coreos.com
   annotations:
     displayName: Operator Version
     description: Represents an Operator that should be running on the cluster, including requirements and install strategy.
-  labels:
-    tectonic-operators.coreos.com/managed-by: tectonic-x-operator
 spec:
   names:
-    plural: clusterserviceversion-v1s
-    singular: clusterserviceversion-v1
-    kind: ClusterServiceVersion-v1
-    listKind: ClusterServiceVersionList-v1
-  group: app.coreos.com
+    plural: clusterserviceversions
+    singular: clusterserviceversion
+    kind: ClusterServiceVersion
+    listKind: ClusterServiceVersionList
+    shortNames:
+    - csv
+    categories:
+    - all
+    - olm
+  additionalPrinterColumns:
+  - name: Display
+    type: string
+    description: The name of the CSV
+    JSONPath: .spec.displayName
+  - name: Version
+    type: string
+    description: The version of the CSV
+    JSONPath: .spec.version
+  - name: Replaces
+    type: string
+    description: The name of a CSV that this one replaces
+    JSONPath: .spec.replaces
+  - name: Phase
+    type: string
+    JSONPath: .status.phase
+  group: operators.coreos.com
   version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   scope: Namespaced
+  subresources:
+    # status enables the status subresource.
+    status: {}
   validation:
     openAPIV3Schema:
-      type: object
-      description: Represents a single version of the operator software
-      required:
-      - spec
       properties:
         spec:
           type: object
@@ -137,7 +159,7 @@ spec:
                   description: Label key:value pairs to match directly
                 matchExpressions:
                   type: array
-                  descriptions: A set of expressions to match against the resource.
+                  description: A set of expressions to match against the resource.
                   items:
                     allOf:
                       - type: object
@@ -411,3 +433,6 @@ spec:
                                         - patch
                                         - delete
                                         - deletecollection
+        status:
+          type: object
+          description: Status for a ClusterServiceVersion

@@ -17,77 +17,77 @@
     src: "{{ item }}"
     dest: "{{ mktemp.stdout }}"
   with_fileglob: files/*.yaml
-- name: Apply alm-operator-serviceaccount ServiceAccount manifest
+- name: Apply olm-operator-serviceaccount ServiceAccount manifest
   oc_obj:
     state: present
     kind: ServiceAccount
-    name: alm-operator-serviceaccount
+    name: olm-operator-serviceaccount
     namespace: operator-lifecycle-manager
     files:
       - "{{ mktemp.stdout }}/01-alm-operator.serviceaccount.yaml"
 
-- name: Apply alm-operator-binding ClusterRoleBinding manifest
+- name: Apply olm-operator-binding-operator-lifecycle-manager ClusterRoleBinding manifest
   oc_obj:
     state: present
     kind: ClusterRoleBinding
-    name: alm-operator-binding
+    name: olm-operator-binding-operator-lifecycle-manager
     namespace: operator-lifecycle-manager
     files:
       - "{{ mktemp.stdout }}/02-alm-operator.rolebinding.yaml"
 
-- name: Apply clusterserviceversion-v1s.app.coreos.com CustomResourceDefinition manifest
+- name: Apply clusterserviceversions.operators.coreos.com CustomResourceDefinition manifest
   oc_obj:
     state: present
     kind: CustomResourceDefinition
-    name: clusterserviceversion-v1s.app.coreos.com
+    name: clusterserviceversions.operators.coreos.com
     namespace: operator-lifecycle-manager
     files:
       - "{{ mktemp.stdout }}/03-clusterserviceversion.crd.yaml"
 
-- name: Apply catalogsource-v1s.app.coreos.com CustomResourceDefinition manifest
+- name: Apply catalogsources.operators.coreos.com CustomResourceDefinition manifest
   oc_obj:
     state: present
     kind: CustomResourceDefinition
-    name: catalogsource-v1s.app.coreos.com
+    name: catalogsources.operators.coreos.com
     namespace: operator-lifecycle-manager
     files:
       - "{{ mktemp.stdout }}/05-catalogsource.crd.yaml"
 
-- name: Apply installplan-v1s.app.coreos.com CustomResourceDefinition manifest
+- name: Apply installplans.operators.coreos.com CustomResourceDefinition manifest
   oc_obj:
     state: present
     kind: CustomResourceDefinition
-    name: installplan-v1s.app.coreos.com
+    name: installplans.operators.coreos.com
     namespace: operator-lifecycle-manager
     files:
       - "{{ mktemp.stdout }}/06-installplan.crd.yaml"
 
-- name: Apply subscription-v1s.app.coreos.com CustomResourceDefinition manifest
+- name: Apply subscriptions.operators.coreos.com CustomResourceDefinition manifest
   oc_obj:
     state: present
     kind: CustomResourceDefinition
-    name: subscription-v1s.app.coreos.com
+    name: subscriptions.operators.coreos.com
     namespace: operator-lifecycle-manager
     files:
       - "{{ mktemp.stdout }}/07-subscription.crd.yaml"
 
-- name: Apply tectonic-ocs ConfigMap manifest
+- name: Apply ocs ConfigMap manifest
   oc_obj:
     state: present
     kind: ConfigMap
-    name: tectonic-ocs
+    name: ocs
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/08-tectonicocs.configmap.yaml"
+      - "{{ mktemp.stdout }}/08-ocs.configmap.yaml"
 
-- name: Apply tectonic-ocs CatalogSource-v1 manifest
+- name: Apply ocs CatalogSource manifest
   oc_obj:
     state: present
-    kind: CatalogSource-v1
-    name: tectonic-ocs
+    kind: CatalogSource
+    name: ocs
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/10-tectonicocs.catalogsource.yaml"
+      - "{{ mktemp.stdout }}/10-ocs.catalogsource.yaml"
 
 - name: Apply alm-operator Deployment manifest
   oc_obj:
@@ -107,20 +107,29 @@
     files:
       - "{{ mktemp.stdout }}/13-catalog-operator.deployment.yaml"
 
-- name: Apply upstream-components ConfigMap manifest
+- name: Apply aggregate-olm-edit ClusterRole manifest
   oc_obj:
     state: present
-    kind: ConfigMap
-    name: upstream-components
+    kind: ClusterRole
+    name: aggregate-olm-edit
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/18-upstreamcomponents.configmap.yaml"
+      - "{{ mktemp.stdout }}/20-aggregated-edit.clusterrole.yaml"
 
-- name: Apply upstream-components CatalogSource-v1 manifest
+- name: Apply aggregate-olm-edit ClusterRole manifest
   oc_obj:
     state: present
-    kind: CatalogSource-v1
-    name: upstream-components
+    kind: ClusterRole
+    name: aggregate-olm-edit
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/19-upstreamcomponents.catalogsource.yaml"
+      - "{{ mktemp.stdout }}/20-aggregated.clusterrole.yaml"
+
+- name: Apply aggregate-olm-view ClusterRole manifest
+  oc_obj:
+    state: present
+    kind: ClusterRole
+    name: aggregate-olm-view
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/21-aggregated-view.clusterrole.yaml"

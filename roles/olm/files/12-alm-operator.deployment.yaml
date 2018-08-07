@@ -1,13 +1,12 @@
 ##---
 # Source: olm/templates/12-alm-operator.deployment.yaml
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: alm-operator
   namespace: operator-lifecycle-manager
   labels:
     app: alm-operator
-    tectonic-operators.coreos.com/managed-by: tectonic-x-operator
 spec:
   strategy:
     type: RollingUpdate
@@ -20,12 +19,12 @@ spec:
       labels:
         app: alm-operator
     spec:
-      serviceAccountName: alm-operator-serviceaccount
+      serviceAccountName: olm-operator-serviceaccount
       containers:
         - name: alm-operator
           command:
-          - /bin/alm
-          image: quay.io/coreos/olm@sha256:d19b64d801a08fd4838ed4bd9752712688ac9f2a26fab89bcb4f28b1bbdcab16
+          - /bin/olm
+          image: quay.io/coreos/olm@sha256:44b445850b3e612c062424c3727bb85048ec8e71407b39985786d29aa20f5c79
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
