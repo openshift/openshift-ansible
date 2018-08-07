@@ -65,3 +65,6 @@ data:
       baseImage: {{ openshift_cluster_monitoring_operator_kube_rbac_proxy_image }}
     auth:
       baseImage: {{ openshift_cluster_monitoring_operator_proxy_image }}
+    http:
+      httpProxy: {{ openshift.common.http_proxy  | default('') }}
+      httpsProxy: {{ openshift.common.https_proxy  | default('') }}
