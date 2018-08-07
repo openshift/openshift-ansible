@@ -124,7 +124,7 @@ log_size_max = 52428800
 default_transport = "docker://"
 
 # pause_image is the image which we use to instantiate infra containers.
-pause_image = "{{ pause_image }}"
+pause_image = "{{ openshift_crio_pause_image }}"
 
 # pause_command is the command to run in a pause_image to have a container just
 # sit there.  If the image contains the necessary information, this value need
