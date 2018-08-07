@@ -7,6 +7,9 @@
   pre_tasks:
   - stat:
       path: "{{ openshift.common.config_base }}/generated-configs"
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: openshift_generated_configs_dir_stat
   - name: Backup generated certificate and config directories
     command: >

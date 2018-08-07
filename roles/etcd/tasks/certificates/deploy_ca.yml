@@ -43,7 +43,10 @@
   run_once: true
 
 - name: Check etcd_ca_db exist
-  stat: path="{{ etcd_ca_db }}"
+  stat:
+    path: "{{ etcd_ca_db }}"
+    get_checksum: false
+    get_mime: false
   register: etcd_ca_db_check
   changed_when: false
   delegate_to: "{{ etcd_ca_host }}"
