@@ -75,16 +75,7 @@ docker_http_proxy: "{{ openshift_http_proxy | default('') }}"
 docker_https_proxy: "{{ openshift.common.https_proxy | default('') }}"
 docker_no_proxy: "{{ openshift.common.no_proxy | default('') }}"
 
-# Set pause_image variable for crio.conf.j2 required to start the crio service in package_crio.yml
-l_openshift_image_tag_default: "{{ 'v' ~ openshift_release if openshift_release is defined else 'latest' }}"
-l_openshift_image_tag: "{{ openshift_image_tag | default(l_openshift_image_tag_default) | string}}"
-
-l_crio_pause_images_dict:
-  origin: 'docker.io/openshift/origin-${component}:${version}'
-  openshift-enterprise: 'registry.redhat.io/openshift3/ose-${component}:${version}'
-l_pause_registry_url_default: "{{ l_crio_pause_images_dict[openshift_deployment_type] }}"
-
-pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
+openshift_crio_pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
 
 l_required_docker_version: '1.13'
 
