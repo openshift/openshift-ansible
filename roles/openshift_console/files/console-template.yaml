@@ -20,6 +20,9 @@ parameters:
 - name: CONSOLE_HOSTNAME
   value: console.router.default.svc.cluster.local
   required: true
+- name: TLS_CERT
+- name: TLS_KEY
+- name: TLS_CA_CERT
 - name: NODE_SELECTOR
   value: "{}"
   required: true
@@ -196,6 +199,9 @@ objects:
     tls:
       insecureEdgeTerminationPolicy: Redirect
       termination: reencrypt
+      certificate: ${TLS_CERT}
+      key: ${TLS_KEY}
+      caCertificate: ${TLS_CA_CERT}
 
 # to let users log in
 - apiVersion: oauth.openshift.io/v1
