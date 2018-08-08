@@ -12,7 +12,6 @@ docker_bridge: "{{ nuage_docker_bridge | default('docker0') }}"
 rest_client_cert: "{{ vsp_openshift_dir }}/nuageMonClient.crt"
 rest_client_key: "{{ vsp_openshift_dir }}/nuageMonClient.key"
 rest_server_ca_cert: "{{ vsp_openshift_dir }}/nuageMonCA.crt"
-vport_mtu: "{{ nuage_interface_mtu | default('1460') }}"
 plugin_log_level: "{{ nuage_plugin_log_level | default('err') }}"
 
 nuage_plugin_rest_client_crt_dir: "{{ nuage_ca_master_crt_dir }}/{{ ansible_nodename }}"
