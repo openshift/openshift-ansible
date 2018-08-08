@@ -15,3 +15,8 @@
   - role: openshift_node
   - role: tuned
   - role: nickhammond.logrotate
+  tasks:
+  - import_role:
+      name: openshift_storage_glusterfs
+      tasks_from: kernel_modules.yml
+    when: "'glusterfs' in osn_storage_plugin_deps"
