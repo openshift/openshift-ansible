@@ -136,7 +136,7 @@ def gen_skopeo_cmd(registry, username, password, proxy_vars, image_name):
     skopeo_temp = ("{proxy_vars} timeout 10 skopeo inspect"
                    " {creds} docker://{registry}/{image_name}")
     # this will quote the entire creds argument to account for special chars.
-    creds = pipes.quote('--creds {}:{}'.format(username, password))
+    creds = pipes.quote('--creds={}:{}'.format(username, password))
     skopeo_args = {'proxy_vars': proxy_vars, 'creds': creds,
                    'registry': registry, 'image_name': image_name}
     return skopeo_temp.format(**skopeo_args).strip()
