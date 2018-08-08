@@ -45,13 +45,6 @@
   register: node_service
   failed_when: false
 
-- name: Approve the node
-  oc_adm_csr:
-    nodes: ["{{ openshift.node.nodename }}"]
-    timeout: 60
-    fail_on_timeout: true
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-
 - name: Check status of node service
   async_status:
     jid: "{{ node_service.ansible_job_id }}"
