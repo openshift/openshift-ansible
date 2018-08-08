@@ -87,13 +87,13 @@ infra2.example.com
 lb0.example.com
 
 [nodes]
-master0.example.com openshift_hostname=master0.example.com openshift_node_group_name=node-config-master
-master1.example.com openshift_hostname=master1.example.com openshift_node_group_name=node-config-master
-master2.example.com openshift_hostname=master2.example.com openshift_node_group_name=node-config-master
-infra0.example.com openshift_hostname=infra0.example.com openshift_node_group_name=node-config-infra
-infra1.example.com openshift_hostname=infra1.example.com openshift_node_group_name=node-config-infra
-infra2.example.com openshift_hostname=infra2.example.com openshift_node_group_name=node-config-infra
-compute0.example.com openshift_hostname=compute0.example.com openshift_node_group_name=node-config-compute
-compute1.example.com openshift_hostname=compute1.example.com openshift_node_group_name=node-config-compute
-compute2.example.com openshift_hostname=compute2.example.com openshift_node_group_name=node-config-compute
+master0.example.com openshift_node_group_name=node-config-master
+master1.example.com openshift_node_group_name=node-config-master
+master2.example.com openshift_node_group_name=node-config-master
+infra0.example.com openshift_node_group_name=node-config-infra
+infra1.example.com openshift_node_group_name=node-config-infra
+infra2.example.com openshift_node_group_name=node-config-infra
+compute0.example.com openshift_node_group_name=node-config-compute
+compute1.example.com openshift_node_group_name=node-config-compute
+compute2.example.com openshift_node_group_name=node-config-compute
 # vim: set syntax=dosini
