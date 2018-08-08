@@ -7,6 +7,9 @@
 - name: Check for First Master Aggregator Signer cert
   stat:
     path: /etc/origin/master/front-proxy-ca.crt
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: first_proxy_ca_crt
   changed_when: false
   delegate_to: "{{ groups.oo_first_master.0 }}"
@@ -14,6 +17,9 @@
 - name: Check for First Master Aggregator Signer key
   stat:
     path: /etc/origin/master/front-proxy-ca.crt
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: first_proxy_ca_key
   changed_when: false
   delegate_to: "{{ groups.oo_first_master.0 }}"
@@ -33,12 +39,18 @@
 - name: Check for Aggregator Signer cert
   stat:
     path: /etc/origin/master/front-proxy-ca.crt
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: proxy_ca_crt
   changed_when: false
 
 - name: Check for Aggregator Signer key
   stat:
     path: /etc/origin/master/front-proxy-ca.crt
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: proxy_ca_key
   changed_when: false
 
@@ -73,6 +85,9 @@
 - name: Check for first master api-client config
   stat:
     path: /etc/origin/master/aggregator-front-proxy.kubeconfig
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: first_front_proxy_kubeconfig
   delegate_to: "{{ groups.oo_first_master.0 }}"
   run_once: true
@@ -110,6 +125,9 @@
 - name: Check for api-client config
   stat:
     path: /etc/origin/master/aggregator-front-proxy.kubeconfig
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: front_proxy_kubeconfig
 
 - name: Copy api-client config from first master

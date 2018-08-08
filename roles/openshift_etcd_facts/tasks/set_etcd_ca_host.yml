@@ -2,6 +2,9 @@
 - name: Check for CA indicator files
   stat:
     path: "{{ item.0 }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   delegate_to: "{{ item.1 }}"
   with_nested:
   - - /etc/etcd/ca

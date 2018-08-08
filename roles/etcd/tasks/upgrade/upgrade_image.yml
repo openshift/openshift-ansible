@@ -34,6 +34,9 @@
 - name: Detecting Atomic Host Operating System
   stat:
     path: /run/ostree-booted
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: l_ostree_booted
 
 - name: Upgrade etcd for etcdctl when not atomic

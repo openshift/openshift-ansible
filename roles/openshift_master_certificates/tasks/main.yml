@@ -2,6 +2,9 @@
 - name: Check status of master certificates
   stat:
     path: "{{ openshift_master_config_dir }}/{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   with_items:
   - admin.crt
   - ca.crt
@@ -194,12 +197,18 @@
 - name: Check for ca-bundle.crt
   stat:
     path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: ca_bundle_stat
   failed_when: false
 
 - name: Check for ca.crt
   stat:
     path: "{{ openshift.common.config_base }}/master/ca.crt"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: ca_crt_stat
   failed_when: false
 

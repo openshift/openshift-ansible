@@ -1,6 +1,10 @@
 ---
 - name: Checking for journald.conf
-  stat: path=/etc/systemd/journald.conf
+  stat:
+    path: /etc/systemd/journald.conf
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: journald_conf_file
 
 - name: Create journald persistence directories

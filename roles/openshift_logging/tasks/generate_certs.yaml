@@ -1,17 +1,29 @@
 ---
 # we will ensure our secrets and configmaps are set up here first
 - name: Checking for ca.key
-  stat: path="{{generated_certs_dir}}/ca.key"
+  stat:
+    path: "{{generated_certs_dir}}/ca.key"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: ca_key_file
   check_mode: no
 
 - name: Checking for ca.crt
-  stat: path="{{generated_certs_dir}}/ca.crt"
+  stat:
+    path: "{{generated_certs_dir}}/ca.crt"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: ca_cert_file
   check_mode: no
 
 - name: Checking for ca.serial.txt
-  stat: path="{{generated_certs_dir}}/ca.serial.txt"
+  stat:
+    path: "{{generated_certs_dir}}/ca.serial.txt"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: ca_serial_file
   check_mode: no
 
@@ -27,7 +39,11 @@
     - not ca_serial_file.stat.exists
 
 - name: Checking for signing.conf
-  stat: path="{{generated_certs_dir}}/signing.conf"
+  stat:
+    path: "{{generated_certs_dir}}/signing.conf"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: signing_conf_file
   check_mode: no
 
@@ -89,7 +105,11 @@
   check_mode: no
 
 - name: Checking for ca.db
-  stat: path="{{generated_certs_dir}}/ca.db"
+  stat:
+    path: "{{generated_certs_dir}}/ca.db"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: ca_db_file
   check_mode: no
 
@@ -99,7 +119,11 @@
     - not ca_db_file.stat.exists
 
 - name: Checking for ca.crl.srl
-  stat: path="{{generated_certs_dir}}/ca.crl.srl"
+  stat:
+    path: "{{generated_certs_dir}}/ca.crl.srl"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: ca_crl_srl_file
   check_mode: no
 

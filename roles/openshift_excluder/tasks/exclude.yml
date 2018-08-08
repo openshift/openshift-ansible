@@ -2,6 +2,9 @@
 - name: Check for docker-excluder
   stat:
     path: /sbin/{{ r_openshift_excluder_service_type }}-docker-excluder
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: docker_excluder_stat
 
 - name: Enable docker excluder
@@ -13,6 +16,9 @@
 - name: Check for openshift excluder
   stat:
     path: /sbin/{{ r_openshift_excluder_service_type }}-excluder
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: openshift_excluder_stat
 
 - name: Enable openshift excluder
