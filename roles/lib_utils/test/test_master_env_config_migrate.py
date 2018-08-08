@@ -24,21 +24,13 @@ def test_read_write_ini():
 
     outfile = io.StringIO()
 
-    if master_env_config_migrate.CONFIG_PROXY_NEW:
-        config = master_env_config_migrate.SectionlessParser()
-    else:
-        config = master_env_config_migrate.SectionlessParserOld()
+    config = master_env_config_migrate.SectionlessParser()
 
     config.readfp(infile)
     config.write(outfile, False)
     print(outfile.getvalue())
     # TODO(michaelgugino): Come up with some clever way to assert the file is
     # correct.
-
-
-def test_read_write_ini_old():
-    master_env_config_migrate.CONFIG_PROXY_NEW = False
-    test_read_write_ini()
 
 # Contents for t.in:
 ############################
@@ -54,14 +46,9 @@ def test_read_write_ini_old():
 
 if __name__ == '__main__':
     test_read_write_ini()
-    test_read_write_ini_old()
+
     with open('t.in') as f:
         config = master_env_config_migrate.SectionlessParser()
-        config.readfp(f)
-    with open('t.out', 'w') as f:
-        config.write(f, False)
-    with open('t.in') as f:
-        config = master_env_config_migrate.SectionlessParserOld()
         config.readfp(f)
     with open('t2.out', 'w') as f:
         config.write(f, False)
