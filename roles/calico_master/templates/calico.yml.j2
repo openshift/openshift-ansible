@@ -66,7 +66,7 @@ metadata:
 data:
   # Configure this with the location of your etcd cluster.
   etcd_endpoints: "{{ calico_etcd_endpoints }}"
-  
+
   # Configure the Calico backend to use.
   calico_backend: "bird"
 
@@ -126,8 +126,6 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
-      nodeSelector:
-        projectcalico.org/ds-ready: "true"
       hostNetwork: true
       tolerations:
         # Make sure calico/node gets scheduled on all nodes.

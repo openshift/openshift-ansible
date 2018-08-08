@@ -181,8 +181,6 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
-      nodeSelector:
-        projectcalico.org/ds-ready: "true"
       hostNetwork: true
       tolerations:
         # Make sure calico/node gets scheduled on all nodes.
