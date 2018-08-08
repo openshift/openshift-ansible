@@ -23,7 +23,7 @@ ca-file = {{ openshift_openstack_ca_file_path }}
 subnet-id = {{ openshift_cloudprovider_openstack_lb_subnet_id }}
 {% endif %}
 [BlockStorage]
-ignore-volume-az = {{ openshift_cloudprovider_openstack_blockstorage_ignore_volume_az }}
+ignore-volume-az = {{ openshift_cloudprovider_openstack_blockstorage_ignore_volume_az | ternary('yes', 'no') }}
 {% if openshift_cloudprovider_openstack_blockstorage_version is defined %}
 bs-version={{ openshift_cloudprovider_openstack_blockstorage_version }}
 {% endif %}
