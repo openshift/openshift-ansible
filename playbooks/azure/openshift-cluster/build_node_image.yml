@@ -93,7 +93,7 @@
       content: |
         ---
         image_name: {{ openshift_azure_output_image_name }}
-        base_image: {{ (input_image.stdout | from_json).name }}
+        base_image: {{ (hostvars['localhost'].input_image.stdout | from_json).name }}
         subscription: {{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}
         resource_group: {{ openshift_azure_output_image_ns }}
       dest: /etc/origin/image.yml
