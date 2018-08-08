@@ -21,6 +21,7 @@ data:
         name: localregistry
         namespaces: ['openshift']
         white_list: {{ ansible_service_broker_local_registry_whitelist | to_yaml }}
+        namespaces: {{ ansible_service_broker_local_registry_namespaces | to_yaml }}
     dao:
       type: crd
     log:
