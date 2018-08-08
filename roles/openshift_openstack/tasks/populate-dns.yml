@@ -84,6 +84,7 @@
   retries: 10
   delay: 1
   when:
+    - openshift_openstack_external_nsupdate_keys['public'] is defined
     - groups.masters
     - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
     - openshift_openstack_public_api_ip is defined
