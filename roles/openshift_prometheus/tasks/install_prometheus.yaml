@@ -95,8 +95,8 @@
     labels:
       name: prometheus
     annotations:
-      oprometheus.io/scrape: 'true'
-      oprometheus.io/scheme: https
+      prometheus.io/scrape: 'true'
+      prometheus.io/scheme: https
       service.alpha.openshift.io/serving-cert-secret-name: prometheus-tls
     ports:
     - name: prometheus
