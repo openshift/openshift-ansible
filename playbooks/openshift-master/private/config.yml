@@ -138,7 +138,6 @@
   roles:
   - role: openshift_manage_node
     openshift_master_host: "{{ groups.oo_first_master.0 }}"
-    openshift_manage_node_is_master: "{{ ('oo_masters_to_config' in group_names) | bool }}"
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
 
 - name: Master Install Checkpoint End

@@ -2,17 +2,6 @@
 r_openshift_loadbalancer_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_loadbalancer_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-openshift_loadbalancer_frontends: "{{ (openshift_master_api_port
-                                       | lib_utils_oo_loadbalancer_frontends(hostvars | lib_utils_oo_select_keys(groups['oo_masters']),
-                                                                             openshift_use_nuage | default(false),
-                                                                             nuage_mon_rest_server_port | default(none)))
-                                       + openshift_loadbalancer_additional_frontends | default([]) }}"
-openshift_loadbalancer_backends: "{{ (openshift_master_api_port
-                                      | lib_utils_oo_loadbalancer_backends(hostvars | lib_utils_oo_select_keys(groups['oo_masters']),
-                                                                           openshift_use_nuage | default(false),
-                                                                           nuage_mon_rest_server_port | default(none)))
-                                      + openshift_loadbalancer_additional_backends | default([]) }}"
-
 r_openshift_loadbalancer_os_firewall_deny: []
 r_openshift_loadbalancer_os_firewall_allow:
 - service: haproxy stats
