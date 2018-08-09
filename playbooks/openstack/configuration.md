@@ -843,6 +843,9 @@ Adding more nodes to the cluster is a simple process: we need to update the
 node cloud in `inventory/group_vars/all/yml`, then run the appropriate
 scaleup playbook.
 
+**NOTE**: the dynamic inventory used for scaling is different. Make sure you
+use `scaleup_inventory.py` for all the operations below.
+
 
 ### 1. Update The Inventory
 
@@ -868,7 +871,7 @@ for other nodes. For example:
 
 ```
 $ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py \
+  -i openshift-ansible/playbooks/openstack/scaleup_inventory.py \
   -i inventory \
   openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml
 ```
