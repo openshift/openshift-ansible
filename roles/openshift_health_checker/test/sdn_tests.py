@@ -1,5 +1,6 @@
 import pytest
 from openshift_checks.sdn import SDNCheck
+from openshift_checks import OpenShiftCheckException
 
 
 def fake_execute_module(*args):
@@ -168,6 +169,33 @@ def test_check_nodes():
         raise ValueError('not expecting module %s' % module_name)
 
     SDNCheck(execute_module, task_vars).run()
+
+
+def test_resolve_address():
+    def execute_module(module_name, args, *_):
+        if module_name != 'command':
+            raise ValueError('not expecting module %s' % module_name)
+
+        command_args = args['_raw_params'].split()
+        if command_args[0] != '/bin/getent':
+            raise ValueError('not expecting command: %s' % args.raw_params)
+
+        # The expected command_args is ['/bin/getent', 'ahostsv4', 'foo'].
+        if command_args[2] == 'foo':
+            return {
+                'rc': 0,
+                'stdout': '''1.2.3.4         STREAM bar
+1.2.3.4         DGRAM
+1.2.3.4         RAW
+'''
+            }
+
+        return {'rc': 2}
+
+    check = SDNCheck(execute_module, None)
+    assert check.resolve_address('foo') == '1.2.3.4'
+    with pytest.raises(OpenShiftCheckException):
+        check.resolve_address('baz')
 
 
 def test_no_nodes():
