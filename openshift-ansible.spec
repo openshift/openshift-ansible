@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.11.0
+Release:        0.12.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,82 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Aug 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.12.0
+- add equals to quoted skopeo argument (sjenning@redhat.com)
+- Fix missing input_image name error. (kwoodson@redhat.com)
+- excluders cannot be run on Atomic (vrutkovs@redhat.com)
+- Add new line in openshift_node defaults (vrutkovs@redhat.com)
+- Remove openshift_node_use_persistentlocalvolumes (vrutkovs@redhat.com)
+- Remove openshift_node_image_config_latest (vrutkovs@redhat.com)
+- Remove openshift_node_use_<sdn> vars (vrutkovs@redhat.com)
+- Remove openshift_set_node_ip (vrutkovs@redhat.com)
+- Remove openshift_node_proxy_mode (vrutkovs@redhat.com)
+- Remove openshift_master_node_labels (vrutkovs@redhat.com)
+- Remove openshift_manage_node_is_master (vrutkovs@redhat.com)
+- openshift_loadbalancer: remove unused vars (vrutkovs@redhat.com)
+- openshift_hosted: remove openshift_push_via_dns flag (vrutkovs@redhat.com)
+- openshift_hosted: remove ununsed vars (vrutkovs@redhat.com)
+- openshift_facts: remove unused vars (vrutkovs@redhat.com)
+- openshift_expand_partition: remove unused vars (vrutkovs@redhat.com)
+- openshift_examples: remove unused vars (vrutkovs@redhat.com)
+- docker-gc: remove unused var (vrutkovs@redhat.com)
+- Remove unused vars from control_plane role (vrutkovs@redhat.com)
+- Remove unused vars in etcd role (vrutkovs@redhat.com)
+- Be more accuracy for getting def_route_int and def_route_ip
+  (bysnupy@hotmail.com)
+- Remove master env migration module (mgugino@redhat.com)
+- Bump OLM version to 0.6.0 (cordell.evan@gmail.com)
+- nuage specific changes for eVDF and some fixes (siva_teja.areti@nokia.com)
+- Moving file to the image to fix error. (kwoodson@redhat.com)
+- cluster-monitoring: pass through http(s) proxy settings
+  (sergiusz.urbaniak@gmail.com)
+- Fix openshift_openstack: Add public API Record (akrzos@redhat.com)
+- add OSA 3.11 repos for pre-release (m.judeikis@gmail.com)
+- Renames CRI-O pause_image to openshift_crio_pause_image.
+  (jtudelag@redhat.com)
+- pylint: disable travis error (vrutkovs@redhat.com)
+- Adding image info to /etc/origin/image.yml on Azure (kwoodson@redhat.com)
+- Refactor glusterfs for scaleup (mgugino@redhat.com)
+- Quote registry credentials for skopeo (mgugino@redhat.com)
+- Commit to enable AWS multi avail zone (mazzystr@gmail.com)
+- rollback node ports (m.judeikis@gmail.com)
+- Output cert check file to more sensible location (mgugino@redhat.com)
+- Bug 1611841 - Allow customizing admin console certificates
+  (spadgett@redhat.com)
+- Additional cleanup of v1beta1 rbac.authorization (sdodson@redhat.com)
+- Fix glusterfs cluster check when condition (mgugino@redhat.com)
+- Ensure skopeo and atomic are installed in crt role (mgugino@redhat.com)
+- Ensure that monitoring operator has nodes to run (vrutkovs@redhat.com)
+- Don't get file checksum, attributes and mime type in stat module calls
+  (vrutkovs@redhat.com)
+- Bug 1611840 - Correctly set console replicas (spadgett@redhat.com)
+- BZ-1608216 Set timeoutSeconds for readinessProbe on Cassandra RCs
+  (ruben.vp8510@gmail.com)
+- openshift_metering: Add options to use RDS & S3 integrations
+  (chance.zibolski@coreos.com)
+- add conditional clauses for handling cnx versions (derekmcquay@gmail.com)
+- roles/openshift_metering: Fix typo in readme (chance.zibolski@coreos.com)
+- Remove exclude-bootstrapped logic (mgugino@redhat.com)
+- updating doc for SSL cert (dcritch@redhat.com)
+- apply the container_runtime for calico (derekmcquay@gmail.com)
+- Enable console picker (spadgett@redhat.com)
+- Version_compare filter was renamed to version (vrutkovs@redhat.com)
+- Avoid using deprecated syntax for filters in OLM (vrutkovs@redhat.com)
+- fix bug 1608269 (jiazha@redhat.com)
+- oc_obj should correctly identify  'results': [{}] as 'Object not found'
+  (mchappel@redhat.com)
+- router-redeploy: don't check that annotations are missing
+  (vrutkovs@redhat.com)
+- Update Calico versions to the latest (v3.1.3) (mleung975@gmail.com)
+- Always ensure master config has proper url upgrade (mgugino@redhat.com)
+- Move metrics-server out of openshift-monitoring NS (sross@redhat.com)
+- Don't collect node facts on master - these are set during bootstrap
+  (vrutkovs@redhat.com)
+- Don't set OAUTH_CLIENT_ID in console OAuth secret (spadgett@redhat.com)
+- Drop --confirm from migrate storage invocation (maszulik@redhat.com)
+- Adding support for an SSL certificate signed by the OpenStack cluster
+  (dcritch@redhat.com)
+
 * Thu Aug 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.11.0
 - Reorganized OpenStack cloud provider documentation (tzumainn@redhat.com)
 - Add doc note that kuryr requires openstack cloud provider
