@@ -36,7 +36,7 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
         return [
             "{rpm_prefix}".format(rpm_prefix=rpm_prefix),
             "{rpm_prefix}-clients".format(rpm_prefix=rpm_prefix),
-            "{rpm_prefix}-master".format(rpm_prefix=rpm_prefix),
+            "{rpm_prefix}-hyperkube".format(rpm_prefix=rpm_prefix),
             "bash-completion",
             "cockpit-bridge",
             "cockpit-docker",
