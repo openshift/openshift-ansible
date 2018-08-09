@@ -42,7 +42,6 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
             "cockpit-docker",
             "cockpit-system",
             "cockpit-ws",
-            "etcd",
             "httpd-tools",
         ]
 
