@@ -121,11 +121,15 @@ def build_inventory():
     '''Build the dynamic inventory.'''
     cloud = shade.openstack_cloud()
 
+    # Use an environment variable to optionally skip returning the app nodes.
+    show_compute_nodes = os.environ.get('OPENSTACK_SHOW_COMPUTE_NODES', 'true').lower() == "true"
+
     # TODO(shadower): filter the servers based on the `OPENSHIFT_CLUSTER`
     # environment variable.
     cluster_hosts = [
         server for server in cloud.list_servers()
-        if 'metadata' in server and 'clusterid' in server.metadata]
+        if 'metadata' in server and 'clusterid' in server.metadata and
+        (show_compute_nodes or server.metadata.get('sub-host-type') != 'app')]
 
     inventory = base_openshift_inventory(cluster_hosts)
 
