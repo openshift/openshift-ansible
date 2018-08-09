@@ -22,10 +22,10 @@
       },
       ]
   with_items:
-    - "{{ groups['nodes'] }}"
-    - "{{ groups['lb'] }}"
+  - "{{ groups['nodes'] }}"
+  - "{{ groups['lb'] }}"
   tags:
-    - openshift_rhv
+  - openshift_rhv
 
 # Public interface A records
 - name: Create NSUPDATE wildcard A entries
@@ -40,7 +40,7 @@
       },
       ]
   tags:
-    - openshift_rhv
+  - openshift_rhv
 
 - debug:
     var: records
@@ -57,7 +57,7 @@
       },
       ]
   tags:
-    - openshift_rhv
+  - openshift_rhv
 
 # host A entries
 - name: Create NSUPDATE host A entries
@@ -72,8 +72,8 @@
       },
       ]
   with_items:
-    - "{{ groups['nodes'] }}"
-    - "{{ groups['lb'] }}"
+  - "{{ groups['nodes'] }}"
+  - "{{ groups['lb'] }}"
   tags:
-    - openshift_rhv
+  - openshift_rhv
 ...

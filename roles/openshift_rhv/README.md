@@ -23,27 +23,67 @@ Role Tasks
 Role Variables
 --------------
 
-For default values, see [`defaults/main.yml`](defaults/main.yml).
-
 For documentation on virtual machine profile options, see the [oVirt Ansible VM-Infra Documentation](https://github.com/oVirt/ovirt-ansible-vm-infra)
 
-- `openshift_rhv_vm_profile`: Dictionary of dictionaries providing common VM parameters for virtual machine creation.
-- `openshift_rhv_vm_manifest`: List of dictionaries specifying node base name, count, and which of the above profiles to apply. The default creates three master nodes, three infrastructure nodes, three application nodes, and a load balancer.
+| Name                      | Default value |                                                                                         |
+|---------------------------|---------------|-----------------------------------------------------------------------------------------|
+| openshift_rhv_vm_profile  | See below.    | Dictionary of dictionaries providing common VM parameters for virtual machine creation. |
+| openshift_rhv_vm_manifest | See below.    | List of dictionaries specifying node base name, count, and which of the above profiles to apply. The default creates three master nodes, three infrastructure nodes, three application nodes, and a load balancer. |
+
+```
+openshift_rhv_vm_profile:
+  master:
+    cluster: "{{ openshift_rhv_cluster }}"
+    template: "{{ ovirt_template_name }}"
+    memory: 16GiB
+    cores: 2
+    high_availability: true
+    disks:
+    - size: 15GiB
+      storage_domain: "{{ openshift_rhv_data_store }}"
+      name: docker_disk
+      interface: virtio
+    - size: 30GiB
+      storage_domain: "{{ openshift_rhv_data_store }}"
+      name: localvol_disk
+      interface: virtio
+    - size: 25GiB
+      storage_domain: "{{ openshift_rhv_data_store }}"
+      name: etcd_disk
+      interface: virtio
+    state: running
+  node:
+    cluster: "{{ openshift_rhv_cluster }}"
+    template: "{{ ovirt_template_name }}"
+    memory: 8GiB
+    cores: 2
+    high_availability: true
+    disks:
+    - size: 15GiB
+      storage_domain: "{{ openshift_rhv_data_store }}"
+      name: docker_disk
+      interface: virtio
+    - size: 30GiB
+      storage_domain: "{{ openshift_rhv_data_store }}"
+      name: localvol_disk
+      interface: virtio
+    state: running
+```
 
 ```
 openshift_rhv_vm_manifest:
-  - name: 'master'
-    count: 3
-    profile: 'master'
-  - name: 'infra'
-    count: 3
-    profile: 'node'
-  - name: 'compute'
-    count: 3
-    profile: 'node'
-  - name: 'lb'
-    count: 1
-    profile: 'node'
+- name: 'master'
+  count: 3
+  profile: 'master'
+- name: 'infra'
+  count: 3
+  profile: 'node'
+- name: 'compute'
+  count: 3
+  profile: 'node'
+- name: 'lb'
+  count: 1
+  profile: 'node'
 ```
 
 To automatically update DNS using `nsupdate`, ensure the following variables are defined:
@@ -68,12 +108,12 @@ Example Playbook
 - name: Create dns nsupdate or hosts files for admin use
   hosts: localhost
   tasks:
-    - import_role:
-        name: oVirt.vm-infra
-        tasks_from: create_inventory.yml
-    - import_role:
-        name: openshift_rhv
-        tasks_from: generate_dns.yml
+  - import_role:
+      name: oVirt.vm-infra
+      tasks_from: create_inventory.yml
+  - import_role:
+      name: openshift_rhv
+      tasks_from: generate_dns.yml
 ```
 
 License

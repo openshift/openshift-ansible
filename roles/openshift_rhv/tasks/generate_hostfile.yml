@@ -4,24 +4,24 @@
     lb_ip: "{{hostvars[groups['lb'].0]['ansible_host'] }}"
     lb_host: "{{groups['lb'].0}}"
   tags:
-    - openshift_rhv
+  - openshift_rhv
 
 - name: Clear existing files
   file:
     path: "../{{ item }}"
     state: absent
   with_items:
-    - inventory.hosts
+  - inventory.hosts
   tags:
-    - openshift_rhv
+  - openshift_rhv
 - name: Recreate files
   file:
     path: "../{{ item }}"
     state: touch
   with_items:
-    - inventory.hosts
+  - inventory.hosts
   tags:
-    - openshift_rhv
+  - openshift_rhv
 
 ###############################
 # Create HOST entries
@@ -31,13 +31,13 @@
     line: "{{lb_ip}} {{lb_host}} {{openshift_master_cluster_public_hostname}}"
     state: present
   tags:
-    - openshift_rhv
+  - openshift_rhv
 - name: Create HOSTS node entries
   lineinfile:
     path: ../inventory.hosts
     line: "{{hostvars[item]['ansible_host']}} {{ item }}"
   with_items:
-    - "{{ groups['nodes'] }}"
+  - "{{ groups['nodes'] }}"
   tags:
-    - openshift_rhv
+  - openshift_rhv
 ...
