@@ -1,47 +1,63 @@
 ---
-- name: Check for legacy service
-  stat:
-    path: /lib/systemd/system/calico.service
-    get_checksum: false
-    get_attributes: false
-    get_mime: false
-  register: sym
-- fail:
-    msg: You are running a systemd based installation of Calico. Please run the calico upgrade playbook to upgrade to a self-hosted installation.
-  when: sym.stat.exists
+- include_tasks: certs.yml
 
-- name: Configure NetworkManager to ignore Calico interfaces
-  copy:
-    src: files/calico.conf
-    dest: /etc/NetworkManager/conf.d/
-  when: using_network_manager | default(true) | bool
-  register: nm
+- name: Calico Master | oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:calico-node
+  oc_adm_policy_user:
+    user: system:serviceaccount:kube-system:calico-node
+    resource_kind: scc
+    resource_name: privileged
+    state: present
 
-- name: restart NetworkManager
-  systemd:
-    name: NetworkManager
-    state: restarted
-  when: nm.changed
+- name: Calico Master | oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:calico-kube-controllers
+  oc_adm_policy_user:
+    user: system:serviceaccount:kube-system:calico-kube-controllers
+    resource_kind: scc
+    resource_name: privileged
+    state: present
 
-# TODO: Move into shared vars file
-- name: Load default node image
+- name: Calico Master | oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:calico-upgrade-job
+  oc_adm_policy_user:
+    user: system:serviceaccount:kube-system:calico-upgrade-job
+    resource_kind: scc
+    resource_name: privileged
+    state: present
+
+- name: Set default selector for kube-system
+  command: >
+    {{ openshift_client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    annotate  ns kube-system openshift.io/node-selector="" --overwrite
+
+- name: Calico Master | Create temp directory
+  command: mktemp -d /tmp/openshift-ansible-XXXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Calico Master | Parse node version
   set_fact:
-    calico_node_image: "quay.io/calico/node:v2.6.7"
-  when: calico_node_image is not defined
+    node_version: "{{ calico_node_image | regex_replace('^.*node:v?(.*)$', '\\1') }}"
+    cnx: "{{ calico_node_image | regex_replace('[^-]*', '\\0') }}"
 
 - name: Prepull Images
   command: "{{ openshift_container_cli }} pull {{ calico_node_image }}"
 
-- name: Apply node label
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  command: >
-    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig label node {{ openshift.node.nodename | lower }} --overwrite projectcalico.org/ds-ready=true
+- name: Calico Master | Write Calico v3
+  template:
+    dest: "{{ mktemp.stdout }}/calico.yml"
+    src: calicov3.yml.j2
+  when: (node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version >= '3.0.0') or (node_version == 'master') or (cnx == "cnx" and node_version >= '2.0.0')
 
-- name: Wait for node running
-  uri:
-    url: http://localhost:9099/readiness
-    status_code: 204
-  delay: 3
-  retries: 10
-  register: result
-  until: result.status == 204
+- name: Calico Master | Launch Calico
+  command: >
+    {{ openshift_client_binary }} apply
+    -f {{ mktemp.stdout }}/calico.yml
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+  register: calico_create_output
+  failed_when: "('already exists' not in calico_create_output.stderr) and ('created' not in calico_create_output.stdout) and calico_create_output.rc != 0"
+  changed_when: ('created' in calico_create_output.stdout)
+
+- name: Calico Master | Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False
