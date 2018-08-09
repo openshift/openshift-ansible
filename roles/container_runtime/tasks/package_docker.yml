@@ -26,8 +26,6 @@
     state: present
   when:
   - not (openshift_is_atomic | bool)
-  - not (curr_docker_version is skipped)
-  - not (curr_docker_version.stdout != '')
   register: result
   until: result is succeeded
   vars:
