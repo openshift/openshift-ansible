@@ -337,8 +337,14 @@ class SDNCheck(OpenShiftCheck):
             self.register_failure('%s is not started.' % service_name)
             return
 
+        # The timestamp should be in the format "%a %Y-%m-%d %H:%M:%S %Z".
+        # However, Python cannot reliably parse timezone names
+        # (see <https://bugs.python.org/issue22377>), so we must drop the
+        # timezone name before parsing the timestamp.
+        start_timestamp = ' '.join(start_timestamp.split()[0:3])
+
         since_date = datetime.datetime.strptime(start_timestamp,
-                                                '%a %Y-%m-%d %H:%M:%S %Z')
+                                                '%a %Y-%m-%d %H:%M:%S')
         until_date = since_date + datetime.timedelta(minutes=5)
         since = since_date.strftime(time_fmt)
         until = until_date.strftime(time_fmt)
