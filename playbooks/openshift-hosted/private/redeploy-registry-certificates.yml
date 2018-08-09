@@ -39,7 +39,7 @@
   # Replace dc/docker-registry environment variable certificate data if set.
   - name: Update docker-registry environment variables
     shell: >
-      {{ openshift_client_binary }} env dc/docker-registry
+      {{ openshift_client_binary }} set env dc/docker-registry
       OPENSHIFT_CA_DATA="$(cat /etc/origin/master/ca.crt)"
       OPENSHIFT_CERT_DATA="$(cat /etc/origin/master/openshift-registry.crt)"
       OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-registry.key)"
