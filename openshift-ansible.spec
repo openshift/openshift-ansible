@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.12.0
+Release:        0.13.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Aug 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.13.0
+- SDN check: Fix parsing time stamp's time zone (miciah.masters@gmail.com)
+
 * Thu Aug 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.12.0
 - add equals to quoted skopeo argument (sjenning@redhat.com)
 - Fix missing input_image name error. (kwoodson@redhat.com)
