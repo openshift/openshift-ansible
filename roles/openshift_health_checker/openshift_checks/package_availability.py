@@ -52,7 +52,6 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
         return [
             "{rpm_prefix}".format(rpm_prefix=rpm_prefix),
             "{rpm_prefix}-node".format(rpm_prefix=rpm_prefix),
-            "{rpm_prefix}-sdn-ovs".format(rpm_prefix=rpm_prefix),
             "bind",
             "ceph-common",
             "dnsmasq",
