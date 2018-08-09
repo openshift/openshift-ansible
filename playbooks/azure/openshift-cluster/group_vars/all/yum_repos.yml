@@ -59,7 +59,7 @@ azure_node_repos:
 
   CentOS:
   # TODO: should be using a repo which only provides prerequisites
-  - name: openshift-origin
-    baseurl: http://mirror.centos.org/centos/7/paas/x86_64/openshift-origin/
+  - name: openshift-origin310
+    baseurl: http://mirror.centos.org/centos/7/paas/x86_64/openshift-origin310/
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS
     enabled: yes
