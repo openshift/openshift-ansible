@@ -1,7 +1,7 @@
 ##---
 # Source: olm/templates/17-alm-servicebroker.deployment.yaml
 
-apiVersion: extensions/v1beta1
+apiVersion: v1
 kind: Deployment
 metadata:
   name: alm-service-broker
