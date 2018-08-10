@@ -61,6 +61,24 @@ objects:
     secret-key: "${ANSIBLE_SECRET_KEY}"
     admin-password: "${ANSIBLE_ADMIN_PASSWORD}"
 - apiVersion: v1
+  data:
+    miq_logs.conf: |
+      /var/www/miq/vmdb/log/*.log /var/www/miq/vmdb/log/apache/*.log {
+        daily
+        dateext
+        missingok
+        rotate 14
+        notifempty
+        compress
+        copytruncate
+        lastaction
+          /sbin/service httpd reload > /dev/null 2>&1 || true
+        endscript
+      }
+  kind: ConfigMap
+  metadata:
+    name: miq-logs-config
+- apiVersion: v1
   kind: ConfigMap
   metadata:
     name: "${DATABASE_SERVICE_NAME}-configs"
@@ -394,6 +412,9 @@ objects:
           volumeMounts:
           - name: "${NAME}-server"
             mountPath: "/persistent"
+          - name: miq-logs-config
+            mountPath: /etc/logrotate.d/miq_logs.conf
+            subPath: miq_logs.conf
           env:
           - name: MY_POD_NAMESPACE
             valueFrom:
@@ -434,6 +455,10 @@ objects:
               exec:
                 command:
                 - "/opt/rh/cfme-container-scripts/sync-pv-data"
+        volumes:
+        - name: miq-logs-config
+          configMap:
+            name: miq-logs-config
         serviceAccount: cfme-orchestrator
         serviceAccountName: cfme-orchestrator
         terminationGracePeriodSeconds: 90
