@@ -26,7 +26,7 @@ items:
 {% if r_docker_gc_node_selectors %}
         nodeSelector:
 {% for k,v in r_docker_gc_node_selectors.items() %}
-          {{ k }}: {{ v }}{% endfor %}{% endif %}
+          {{ k }}: "{{ v }}"{% endfor %}{% endif %}
 
         serviceAccountName: dockergc
         containers:
