@@ -30,9 +30,9 @@
     ansible_service_broker_image: "{{ ansible_service_broker_image_prefix }}ansible-service-broker:{{ ansible_service_broker_image_tag }}"
     ansible_service_broker_etcd_image: "{{ ansible_service_broker_etcd_image_prefix }}etcd:{{ ansible_service_broker_etcd_image_tag }}"
 
-- include_tasks: validate_facts.yml
+- import_tasks: validate_facts.yml
 
-- include_tasks: generate_certs.yml
+- import_tasks: generate_certs.yml
 
 # Deployment of ansible-service-broker starts here
 - name: create openshift-ansible-service-broker project
@@ -113,50 +113,7 @@
     resource_name: asb-access
     user: "system:serviceaccount:openshift-ansible-service-broker:asb-client"
 
-- name: create asb-client token secret
-  oc_obj:
-    name: asb-client
-    namespace: openshift-ansible-service-broker
-    state: present
-    kind: Secret
-    content:
-      path: /tmp/asbclientsecretout
-      data:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: asb-client
-          namespace: openshift-ansible-service-broker
-          annotations:
-            kubernetes.io/service-account.name: asb-client
-        type: kubernetes.io/service-account-token
-
-- name: Create etcd-auth secret
-  oc_secret:
-    name: etcd-auth-secret
-    namespace: openshift-ansible-service-broker
-    contents:
-      - path: ca.crt
-        data: '{{ etcd_ca_cert }}'
-
-- name: Create broker-etcd-auth secret
-  oc_secret:
-    name: broker-etcd-auth-secret
-    namespace: openshift-ansible-service-broker
-    contents:
-      - path: client.crt
-        data: '{{ etcd_client_cert }}'
-      - path: client.key
-        data: '{{ etcd_client_key }}'
-
-- oc_secret:
-    state: list
-    namespace: openshift-ansible-service-broker
-    name: asb-client
-  register: asb_client_secret
-
-- set_fact:
-    service_ca_crt: "{{ asb_client_secret.results.results.0.data['service-ca.crt'] }}"
+- import_tasks: update_secrets.yml
 
 - name: create ansible-service-broker service
   oc_service:

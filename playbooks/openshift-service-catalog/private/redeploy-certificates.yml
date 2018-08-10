@@ -1,0 +1,27 @@
+---
+- name: Update service catalog certificates
+  hosts: oo_first_master
+  vars:
+  roles:
+    - lib_openshift
+    - openshift_facts
+  tasks:
+    - name: Remove existing SC and ASB certificates
+      import_role:
+        name: ansible_service_broker
+        tasks_from: delete_secrets.yml
+
+    - name: Generate new service catalog certificates
+      import_role:
+        name: ansible_service_broker
+        tasks_from: generate_certs.yml
+
+    - name: Update secrets
+      import_role:
+        name: ansible_service_broker
+        tasks_from: update_secrets.yml
+
+    - name: Generate new service catalog certificates
+      import_role:
+        name: ansible_service_broker
+        tasks_from: restart_pods.yml

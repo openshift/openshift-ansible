@@ -21,6 +21,9 @@
 - import_playbook: openshift-hosted/private/redeploy-registry-certificates.yml
   when: openshift_hosted_manage_registry | default(true) | bool
 
+- import_playbook: openshift-service-catalog/private/redeploy-certificates.yml
+  when: not openshift_service_catalog_remove | default(false) | bool
+
 - import_playbook: openshift-master/private/revert-client-ca.yml
 
 - import_playbook: openshift-master/private/restart.yml
