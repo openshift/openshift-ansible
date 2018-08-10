@@ -89,17 +89,17 @@ debug_level=2
 #openshift_install_examples=true
 
 # Configure logoutURL in the master config for console customization
-# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#changing-the-logout-url
+# See: https://docs.okd.io/latest/install_config/web_console_customization.html#changing-the-logout-url
 #openshift_master_logout_url=http://example.com
 
 # Configure extensions in the master config for console customization
-# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
+# See: https://docs.okd.io/latest/install_config/web_console_customization.html#serving-static-files
 #openshift_master_oauth_templates={'login': '/path/to/login-template.html'}
 # openshift_master_oauth_template is deprecated.  Use openshift_master_oauth_templates instead.
 #openshift_master_oauth_template=/path/to/login-template.html
 
 # Configure imagePolicyConfig in the master config
-# See: https://docs.openshift.org/latest/admin_guide/image_policy.html
+# See: https://docs.okd.io/latest/admin_guide/image_policy.html
 #openshift_master_image_policy_config={"maxImagesBulkImportedPerRepository": 3, "disableScheduledImport": true}
 # This setting overrides allowedRegistriesForImport in openshift_master_image_policy_config. By default, all registries are allowed.
 #openshift_master_image_policy_allowed_registries_for_import=["docker.io", "*.docker.io", "*.redhat.com", "gcr.io", "quay.io", "registry.centos.org", "registry.redhat.io", "*.amazonaws.com"]
@@ -777,7 +777,7 @@ debug_level=2
 
 # Configure custom named certificates (SNI certificates)
 #
-# https://docs.openshift.org/latest/install_config/certificate_customization.html
+# https://docs.okd.io/latest/install_config/certificate_customization.html
 # https://docs.openshift.com/enterprise/latest/install_config/certificate_customization.html
 #
 # NOTE: openshift_master_named_certificates is cached on masters and is an
@@ -873,7 +873,7 @@ debug_level=2
 # configuration into Builds. Proxy related values will default to the global proxy
 # config values. You only need to set these if they differ from the global proxy settings.
 # See BuildDefaults documentation at
-# https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
+# https://docs.okd.io/latest/admin_guide/build_defaults_overrides.html
 #openshift_builddefaults_http_proxy=http://USER:PASSWORD@HOST:PORT
 #openshift_builddefaults_https_proxy=https://USER:PASSWORD@HOST:PORT
 #openshift_builddefaults_no_proxy=mycorp.com
@@ -894,7 +894,7 @@ debug_level=2
 # These options configure the BuildOverrides admission controller which injects
 # configuration into Builds.
 # See BuildOverrides documentation at
-# https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
+# https://docs.okd.io/latest/admin_guide/build_defaults_overrides.html
 #openshift_buildoverrides_force_pull=true
 #openshift_buildoverrides_image_labels=[{'name':'imagelabelname1','value':'imagelabelvalue1'}]
 #openshift_buildoverrides_nodeselectors={'nodelabel1':'nodelabelvalue1'}

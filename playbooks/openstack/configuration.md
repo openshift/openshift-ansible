@@ -120,7 +120,7 @@ https://github.com/openshift/openshift-ansible/blob/master/roles/openshift_cloud
 
 For more information, consult the [Configuring for OpenStack page in the OpenShift documentation][openstack-credentials].
 
-[openstack-credentials]: https://docs.openshift.org/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
+[openstack-credentials]: https://docs.okd.io/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
 
 If you would like to use additional parameters, create a custom cloud provider
 configuration file locally and specify it in `inventory/group_vars/OSEv3.yml`:

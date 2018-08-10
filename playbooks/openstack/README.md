@@ -230,8 +230,8 @@ $ ansible-playbook --user openshift \
 [devstack]: https://docs.openstack.org/devstack/
 [tripleo]: http://tripleo.org/
 [packstack]: https://www.rdoproject.org/install/packstack/
-[configure-authentication]: https://docs.openshift.org/latest/install_config/configuring_authentication.html
-[hardware-requirements]: https://docs.openshift.org/latest/install_config/install/prerequisites.html#hardware
+[configure-authentication]: https://docs.okd.io/latest/install_config/configuring_authentication.html
+[hardware-requirements]: https://docs.okd.io/latest/install_config/install/prerequisites.html#hardware
 [origin]: https://www.openshift.org/
 [centos7]: https://www.centos.org/
 [sample-openshift-inventory]: https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example

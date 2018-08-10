@@ -13,7 +13,7 @@ class DiskAvailability(OpenShiftCheck):
     tags = ["preflight"]
 
     # Values taken from the official installation documentation:
-    # https://docs.openshift.org/latest/install_config/install/prerequisites.html#system-requirements
+    # https://docs.okd.io/latest/install_config/install/prerequisites.html#system-requirements
     recommended_disk_space_bytes = {
         '/var': {
             'oo_masters_to_config': 40 * 10**9,

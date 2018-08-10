@@ -7,5 +7,5 @@ clusters.
 Usage is documented in the official OpenShift documentation pages, under the
 Advanced Installation topic:
 
-- [OpenShift Origin: Advanced Installation](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
+- [OpenShift Origin: Advanced Installation](https://docs.okd.io/latest/install_config/install/advanced_install.html)
 - [OpenShift Container Platform: Advanced Installation](https://docs.openshift.com/container-platform/latest/install_config/install/advanced_install.html)
