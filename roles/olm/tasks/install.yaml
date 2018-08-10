@@ -116,15 +116,6 @@
     files:
       - "{{ mktemp.stdout }}/20-aggregated-edit.clusterrole.yaml"
 
-- name: Apply aggregate-olm-edit ClusterRole manifest
-  oc_obj:
-    state: present
-    kind: ClusterRole
-    name: aggregate-olm-edit
-    namespace: operator-lifecycle-manager
-    files:
-      - "{{ mktemp.stdout }}/20-aggregated.clusterrole.yaml"
-
 - name: Apply aggregate-olm-view ClusterRole manifest
   oc_obj:
     state: present
