@@ -12,10 +12,11 @@ t1=Yes
 t2=A Space
 t3=An\ escaped
 t4="A quoted space"
-t5="a quoted \\
+t5="a quoted \\ # in-line comment
   escaped line"
 t6 = an unquoted multiline \\
   string
+# comment line
 """
 
 

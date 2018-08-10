@@ -112,8 +112,8 @@ class SectionlessParser(configparser.RawConfigParser):
         sectname = '__none_sect'
         self._sections[sectname] = cursect
         self._set_proxies(sectname)
-        self._inline_comment_prefixes = ()
-        self._comment_prefixes = ()
+        self._inline_comment_prefixes = ('#',)
+        self._comment_prefixes = ('#',)
         self._empty_lines_in_values = True
         self.NONSPACECRE = re.compile(r"\S")
         self.default_section = 'DEFAULT'
