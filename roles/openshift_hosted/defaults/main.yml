@@ -3,6 +3,8 @@
 # Common #
 ##########
 openshift_hosted_infra_selector: "node-role.kubernetes.io/infra=true"
+r_openshift_hosted_use_calico_default: "{{ openshift_use_calico | default(False) }}"
+r_openshift_hosted_use_calico: "{{ r_openshift_hosted_use_calico_default }}"
 
 openshift_default_projects:
   default:
@@ -85,7 +87,7 @@ r_openshift_hosted_registry_os_firewall_deny: []
 r_openshift_hosted_registry_os_firewall_allow:
 - service: Docker Registry Port
   port: 5000/tcp
-  cond: "{{ openshift_use_calico | default(False) }}"
+  cond: "{{ r_openshift_hosted_use_calico }}"
 
 openshift_hosted_registry_serviceaccount: registry
 openshift_hosted_registry_volumes: []
@@ -105,6 +107,9 @@ openshift_hosted_registry_edits:
 
 openshift_hosted_registry_force:
 - False
+
+# TODO: this flag should be removed when master bootstrapping is enforced
+openshift_push_via_dns: True
 
 # NOTE: settting openshift_docker_hosted_registry_insecure may affect other roles
 openshift_hosted_docker_registry_insecure_default: "{{ openshift_docker_hosted_registry_insecure | default(False) }}"
