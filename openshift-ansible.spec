@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.13.0
+Release:        0.14.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,27 @@ BuildArch:     noarch
 
 
 %changelog
+* Sun Aug 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.14.0
+- Revert "Remove several unused vars" (sdodson@redhat.com)
+- Making the app nodes an optional return. (mbruzek@gmail.com)
+- 'Wait for node to be ready' task should check that all vars are defined
+  (vrutkovs@redhat.com)
+- Ensure kernel-modules not installed on atomic (mgugino@redhat.com)
+- Remove extra namespaces field on configmap (dymurray@redhat.com)
+- Adding min-port to dnsmasq configuration. (rhowe@redhat.com)
+- pull in origin imagestream+template updates (bparees@redhat.com)
+- Revert "openshift_loadbalancer: remove unused vars" (vrutkovs@redhat.com)
+- Remove node CSR approval from upgrade in 3.11 (rteague@redhat.com)
+- loopback_cluster_name: use api_hostname (vrutkovs@redhat.com)
+- Add quotes to node selector (rteague@redhat.com)
+- Bug 1543129 - Add configuration option for ASB local registry namespaces
+  (dymurray@redhat.com)
+- Omit resetting openshift_logging_elasticsearch_pvc_dynamic if volume is NFS
+  (vrutkovs@redhat.com)
+- Set claimRef for logging PVC when NFS volume is created previously
+  (vrutkovs@redhat.com)
+- Fix prometheus annotations typo (vrutkovs@redhat.com)
+
 * Thu Aug 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.13.0
 - SDN check: Fix parsing time stamp's time zone (miciah.masters@gmail.com)
 
