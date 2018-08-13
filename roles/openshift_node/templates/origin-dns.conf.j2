@@ -6,6 +6,7 @@ enable-dbus
 dns-forward-max=5000
 cache-size=5000
 bind-dynamic
+min-port=1024
 {% for interface in openshift_node_dnsmasq_except_interfaces %}
 except-interface={{ interface }}
 {% endfor %}
