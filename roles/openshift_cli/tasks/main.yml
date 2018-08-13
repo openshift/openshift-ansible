@@ -20,7 +20,7 @@
       backend: "docker"
   when:
   - openshift_is_containerized | bool
-  - not l_use_cli_atomic_image | bool
+  - not openshift_use_crio_only | bool
 
 - block:
   - name: Pull CLI Image
@@ -37,7 +37,7 @@
       backend: "atomic"
   when:
   - openshift_is_containerized | bool
-  - l_use_cli_atomic_image | bool
+  - openshift_use_crio_only | bool
 
 - name: Reload facts to pick up installed OpenShift version
   openshift_facts:
