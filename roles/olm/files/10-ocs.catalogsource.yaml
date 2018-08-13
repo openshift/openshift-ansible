@@ -1,0 +1,16 @@
+##---
+# Source: olm/templates/10-ocs.catalogsource.yaml
+
+#! validate-crd: ./deploy/chart/templates/05-catalogsource.crd.yaml
+#! parse-kind: CatalogSource
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: ocs
+  namespace: operator-lifecycle-manager
+spec:
+  sourceType: internal
+  configMap: ocs
+  displayName: Open Cloud Services
+  publisher: Red Hat
+

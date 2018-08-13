@@ -37,7 +37,6 @@ class CAServerCert(OpenShiftCLI):
         # Added this here as a safegaurd for stomping on the
         # cert and key files if they exist
         if self.config.config_options['backup']['value']:
-            import time
             ext = time.strftime("%Y-%m-%d@%H:%M:%S", time.localtime(time.time()))
             date_str = "%s_" + "%s" % ext
 
@@ -94,10 +93,9 @@ class CAServerCert(OpenShiftCLI):
 
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run the oc_adm_ca_server_cert module'''
 
-        # Filter non-strings from hostnames list s.t. the omit filter
-        # may be used to conditionally add a hostname.
+        # Filter non-strings from hostnames list (Such as boolean: False)
         params['hostnames'] = [host for host in params['hostnames'] if isinstance(host, string_types)]
 
         config = CAServerCertConfig(params['kubeconfig'],
@@ -143,4 +141,3 @@ class CAServerCert(OpenShiftCLI):
 
         return {'failed': True,
                 'msg': 'Unknown state passed. %s' % state}
-

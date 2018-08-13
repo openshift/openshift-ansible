@@ -1,7 +1,7 @@
 ---
 - name: Ensure growpart is installed
   package: name=cloud-utils-growpart state=present
-  when: not openshift_is_containerized | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 
@@ -10,7 +10,7 @@
   register: has_growpart
   failed_when: has_growpart.rc != 0 and 'package cloud-utils-growpart is not installed' not in has_growpart.stdout
   changed_when: false
-  when: openshift_is_containerized | bool
+  when: openshift_is_atomic | bool
 
 - name: Grow the partitions
   command: "growpart {{oep_drive}} {{oep_partition}}"

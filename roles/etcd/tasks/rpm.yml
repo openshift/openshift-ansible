@@ -1,16 +1,12 @@
 ---
-- name: Set hostname and ip facts
-  set_fact:
-    # Store etcd_hostname and etcd_ip such that they will be available
-    # in hostvars. Defaults for these variables are set in etcd_common.
-    etcd_hostname: "{{ etcd_hostname }}"
-    etcd_ip: "{{ etcd_ip }}"
+# Set some facts to reference from hostvars
+- import_tasks: set_facts.yml
 
 - name: setup firewall
   import_tasks: firewall.yml
 
 - name: Install etcd
-  package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
+  package: name=etcd state=present
   register: result
   until: result is succeeded
 
@@ -43,7 +39,7 @@
     template:
       dest: "{{ etcd_systemd_dir }}/custom.conf"
       src: custom.conf.j2
-  when: etcd_is_thirdparty
+  when: etcd_is_thirdparty | bool
 
 - name: Ensure etcd datadir ownership for thirdparty datadir
   file:
@@ -55,14 +51,6 @@
     recurse: True
   when: etcd_is_thirdparty | bool
 
-- name: Validate permissions on the config dir
-  file:
-    path: "{{ etcd_conf_dir }}"
-    state: directory
-    owner: "etcd"
-    group: "etcd"
-    mode: 0700
-
 - name: Write etcd global config file
   template:
     src: etcd.conf.j2
@@ -70,6 +58,9 @@
     backup: true
   notify:
   - restart etcd
+
+- name: Ensure etcd owns the files in it's config dir
+  command: "chown etcd:etcd {{ etcd_conf_dir }}/ -R"
 
 - name: Enable etcd
   systemd:

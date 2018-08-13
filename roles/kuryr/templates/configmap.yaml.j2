@@ -191,7 +191,7 @@ data:
     #
 
     # The root URL of the Kubernetes API (string value)
-    api_root = {{ openshift.master.api_url }}
+    api_root = https://{{ kuryr_openstack_api_lb_ip }}:{{openshift_master_api_port}}
 
     # Absolute path to client cert to connect to HTTPS K8S_API (string value)
     # ssl_client_crt_file = /etc/kuryr/controller.crt
@@ -216,7 +216,7 @@ data:
     service_project_driver = default
 
     # The driver to determine Neutron subnets for pod ports (string value)
-    pod_subnets_driver = default
+    pod_subnets_driver = {{ openshift_kuryr_subnet_driver|default('default') }}
 
     # The driver to determine Neutron subnets for services (string value)
     service_subnets_driver = default
@@ -231,7 +231,15 @@ data:
     pod_vif_driver = nested-vlan
 
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
-    vif_pool_driver = {{ kuryr_openstack_enable_pools | default(False) | ternary('multi', 'noop') }}
+    vif_pool_driver = {{ kuryr_openstack_pool_driver }}
+
+    # The comma-separated handlers that should be registered for watching
+    # in the pipeline. (list value)
+{% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
+    enabled_handlers = vif,lb,lbaasspec,namespace
+{% else %}
+    enabled_handlers = vif,lb,lbaasspec
+{% endif %}
 
     [neutron]
     # Configuration options for OpenStack Neutron
@@ -246,6 +254,12 @@ data:
     # Authentication type to load (string value)
     # Deprecated group/name - [neutron]/auth_plugin
     auth_type = password
+
+{% if kuryr_ca_certificate is defined %}
+    # PEM encoded Certificate Authority to use when verifying HTTPs connections.
+    # (string value)
+    cafile = /etc/ssl/certs/kuryr-ca-bundle.crt
+{% endif %}
 
     # Domain ID to scope to (string value)
     user_domain_name = {{ kuryr_openstack_user_domain_name }}
@@ -293,7 +307,19 @@ data:
     # TODO (apuimedo): Remove the duplicated line just after this one once the
     # RDO packaging contains the upstream patch
     worker_nodes_subnet = {{ kuryr_openstack_worker_nodes_subnet_id }}
+    external_svc_net = {{ kuryr_openstack_public_net_id }}
+{% if kuryr_openstack_public_subnet_id|default(false) %}
     external_svc_subnet = {{ kuryr_openstack_public_subnet_id }}
+{% endif %}
+
+{% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
+    [namespace_subnet]
+    pod_subnet_pool = {{ kuryr_openstack_pod_subnet_pool_id }}
+    pod_router = {{ kuryr_openstack_pod_router_id }}
+{% endif %}
+
+    # Time (in seconds) that Kuryr controller waits for LBaaS to be activated
+    lbaas_activation_timeout = 1200
 
     [pod_vif_nested]
 
@@ -331,6 +357,9 @@ data:
 
     # Pod VIF drivers vs Pool Drivers mapping allowed
     pools_vif_drivers = nested:nested-vlan,neutron:neutron-vif
+
+    [health_server]
+    port = {{ kuryr_controller_healthcheck_port }}
 
   kuryr-cni.conf: |+
     [DEFAULT]
@@ -513,7 +542,7 @@ data:
     #
 
     # The root URL of the Kubernetes API (string value)
-    api_root = {{ openshift.master.api_url }}
+    api_root = https://{{ kuryr_openstack_api_lb_ip }}:{{openshift_master_api_port}}
 
     # Absolute path to client cert to connect to HTTPS K8S_API (string value)
     # ssl_client_crt_file = /etc/kuryr/controller.crt
@@ -553,7 +582,10 @@ data:
     pod_vif_driver = nested-vlan
 
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
-    vif_pool_driver = {{ kuryr_openstack_enable_pools | default(False) | ternary('nested', 'noop') }}
+    vif_pool_driver = {{ kuryr_openstack_pool_driver }}
+
+    # Time (in seconds) the watcher retries watching for. (integer value)
+    watch_retry_timeout = 3600
 
     [neutron]
     # Configuration options for OpenStack Neutron
@@ -650,9 +682,8 @@ data:
     # Minimun interval (in seconds) between pool updates (integer value)
     ports_pool_update_frequency = {{ kuryr_openstack_pool_update_frequency | default(20) }}
 
-    [oslo_concurrency]
+    [cni_health_server]
+    port = {{ kuryr_cni_healthcheck_port }}
 
-    #
-    # From kuryr_kubernetes
-    #
-    lock_path = {{ kuryr_openstack_lock_path | default('/var/kuryr-lock') }}
+    # Maximum memory usage (MiB) before kuryr-daemon is marked as unhealthy
+    max_memory_usage = -1

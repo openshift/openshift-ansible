@@ -5,6 +5,8 @@ openshift_management_project: openshift-management
 openshift_management_project_description: CloudForms Management Engine
 # Number of retries when waiting for the app to start (retried every 30 seconds)
 openshift_management_pod_rollout_retries: 30
+# Node selector for project:
+openshift_management_nodeselector: "{{ openshift_hosted_infra_selector }}"
 
 ######################################################################
 # BASE TEMPLATE AND DATABASE OPTIONS
@@ -48,8 +50,8 @@ openshift_management_storage_class: nfs
 #   configured the required inventory parameters for your cloud
 #   provider
 #
-#   Ensure 'openshift_cloudprovider_kind' is defined (aws or gce) and
-#   that the applicable cloudprovider parameters are provided.
+#   Ensure 'openshift_cloudprovider_kind' is defined (aws, azure or gce)
+#   and that the applicable cloudprovider parameters are provided.
 
 #---------------------------------------------------------------------
 # STORAGE - NFS OPTIONS

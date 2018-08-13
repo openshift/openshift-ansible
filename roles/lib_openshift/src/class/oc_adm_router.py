@@ -27,7 +27,7 @@ class Router(OpenShiftCLI):
            - secret/router-certs
            - clusterrolebinding/router-router-role
         '''
-        super(Router, self).__init__('default', router_config.kubeconfig, verbose)
+        super(Router, self).__init__(router_config.namespace, router_config.kubeconfig, verbose)
         self.config = router_config
         self.verbose = verbose
         self.router_parts = [{'kind': 'dc', 'name': self.config.name},
@@ -179,6 +179,16 @@ class Router(OpenShiftCLI):
         '''modify the deployment config'''
         # We want modifications in the form of edits coming in from the module.
         # Let's apply these here
+
+        # If extended validation is enabled, set the corresponding environment
+        # variable.
+        if self.config.config_options['extended_validation']['value']:
+            if not deploymentconfig.exists_env_key('EXTENDED_VALIDATION'):
+                deploymentconfig.add_env_value('EXTENDED_VALIDATION', "true")
+            else:
+                deploymentconfig.update_env_var('EXTENDED_VALIDATION', "true")
+
+        # Apply any edits.
         edit_results = []
         for edit in self.config.config_options['edits'].get('value', []):
             if edit['action'] == 'put':
@@ -280,7 +290,6 @@ class Router(OpenShiftCLI):
         results = []
         self.needs_update()
 
-        import time
         # pylint: disable=maybe-no-member
         for kind, oc_data in self.prepared_router.items():
             if oc_data['obj'] is not None:
@@ -396,7 +405,7 @@ class Router(OpenShiftCLI):
 
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run ansible idempotent code'''
+        '''run the oc_adm_router module'''
 
         rconfig = RouterConfig(params['name'],
                                params['namespace'],
@@ -413,6 +422,7 @@ class Router(OpenShiftCLI):
                                 'service_account': {'value': params['service_account'], 'include': True},
                                 'router_type': {'value': params['router_type'], 'include': False},
                                 'host_network': {'value': params['host_network'], 'include': True},
+                                'extended_validation': {'value': params['extended_validation'], 'include': False},
                                 'external_host': {'value': params['external_host'], 'include': True},
                                 'external_host_vserver': {'value': params['external_host_vserver'],
                                                           'include': True},
@@ -426,8 +436,6 @@ class Router(OpenShiftCLI):
                                                            'include': True},
                                 'external_host_private_key': {'value': params['external_host_private_key'],
                                                               'include': True},
-                                'expose_metrics': {'value': params['expose_metrics'], 'include': True},
-                                'metrics_image': {'value': params['metrics_image'], 'include': True},
                                 'stats_user': {'value': params['stats_user'], 'include': True},
                                 'stats_password': {'value': params['stats_password'], 'include': True},
                                 'stats_port': {'value': params['stats_port'], 'include': True},

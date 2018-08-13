@@ -16,7 +16,7 @@
     calico_etcd_ca_cert_file: "/etc/origin/master/master.etcd-ca.crt"
     calico_etcd_cert_file: "/etc/origin/master/master.etcd-client.crt"
     calico_etcd_key_file: "/etc/origin/master/master.etcd-client.key"
-    calico_etcd_endpoints: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls | join(',') }}"
+    calico_etcd_endpoints: "{{ hostvars[groups.oo_first_master.0].openshift_master_etcd_urls | join(',') }}"
 
 - name: Calico Node | Error if no certs set.
   fail:
@@ -31,6 +31,9 @@
 - name: Calico Node | Assure the calico certs are present
   stat:
     path: "{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   with_items:
   - "{{ calico_etcd_ca_cert_file }}"
   - "{{ calico_etcd_cert_file }}"
@@ -39,6 +42,7 @@
 - name: Create secret
   oc_secret:
     name: calico-etcd-secrets
+    state: present
     namespace: kube-system
     files:
     - name: etcd-key
@@ -47,3 +51,4 @@
       path: "{{ calico_etcd_cert_file }}"
     - name: etcd-ca
       path: "{{ calico_etcd_ca_cert_file }}"
+  run_once: true

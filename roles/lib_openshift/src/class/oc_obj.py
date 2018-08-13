@@ -107,7 +107,7 @@ class OCObject(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode=False):
-        '''perform the ansible idempotent code'''
+        '''run the oc_obj module'''
 
         ocobj = OCObject(params['kind'],
                          params['namespace'],
@@ -134,9 +134,11 @@ class OCObject(OpenShiftCLI):
         # Delete
         ########
         if state == 'absent':
-            # verify its not in our results
+            # verify it's not in our results
+            # pylint: disable=too-many-boolean-expressions
             if (params['name'] is not None or params['selector'] is not None) and \
                (len(api_rval['results']) == 0 or \
+               (not api_rval['results'][0]) or \
                ('items' in api_rval['results'][0] and len(api_rval['results'][0]['items']) == 0)):
                 return {'changed': False, 'state': state}
 

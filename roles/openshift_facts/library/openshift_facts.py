@@ -19,7 +19,6 @@ import ipaddress
 from distutils.util import strtobool
 from ansible.module_utils.six import text_type
 from ansible.module_utils.six import string_types
-from ansible.module_utils.six.moves import configparser
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
@@ -31,14 +30,6 @@ from ansible.module_utils.six import iteritems, itervalues
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlunparse
 from ansible.module_utils._text import to_native
 
-HAVE_DBUS = False
-
-try:
-    from dbus import SystemBus, Interface
-    from dbus.exceptions import DBusException
-    HAVE_DBUS = True
-except ImportError:
-    pass
 
 DOCUMENTATION = '''
 ---
@@ -49,25 +40,6 @@ requirements: [ ]
 '''
 EXAMPLES = '''
 '''
-
-
-# TODO: We should add a generic migration function that takes source and destination
-# paths and does the right thing rather than one function for common, one for node, etc.
-def migrate_common_facts(facts):
-    """ Migrate facts from various roles into common """
-    params = {
-        'node': ('portal_net'),
-        'master': ('portal_net')
-    }
-    if 'common' not in facts:
-        facts['common'] = {}
-    # pylint: disable=consider-iterating-dictionary
-    for role in params.keys():
-        if role in facts:
-            for param in params[role]:
-                if param in facts[role]:
-                    facts['common'][param] = facts[role].pop(param)
-    return facts
 
 
 def migrate_admission_plugin_facts(facts):
@@ -88,7 +60,6 @@ def migrate_admission_plugin_facts(facts):
 def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
-    migrated_facts = migrate_common_facts(migrated_facts)
     migrated_facts = migrate_admission_plugin_facts(migrated_facts)
     return migrated_facts
 
@@ -392,7 +363,6 @@ def set_url_facts_if_unset(facts):
         api_hostname = cluster_hostname if cluster_hostname else hostname
         api_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
         console_path = facts['master']['console_path']
-        etcd_hosts = facts['master']['etcd_hosts']
 
         use_ssl = dict(
             api=facts['master']['api_use_ssl'],
@@ -400,7 +370,6 @@ def set_url_facts_if_unset(facts):
             loopback_api=facts['master']['api_use_ssl'],
             console=facts['master']['console_use_ssl'],
             public_console=facts['master']['console_use_ssl'],
-            etcd=facts['master']['etcd_use_ssl']
         )
 
         ports = dict(
@@ -409,20 +378,7 @@ def set_url_facts_if_unset(facts):
             loopback_api=facts['master']['api_port'],
             console=facts['master']['console_port'],
             public_console=facts['master']['console_port'],
-            etcd=facts['master']['etcd_port'],
         )
-
-        etcd_urls = []
-        if etcd_hosts != '':
-            facts['master']['etcd_port'] = ports['etcd']
-            for host in etcd_hosts:
-                etcd_urls.append(format_url(use_ssl['etcd'], host,
-                                            ports['etcd']))
-        else:
-            etcd_urls = [format_url(use_ssl['etcd'], hostname,
-                                    ports['etcd'])]
-
-        facts['master'].setdefault('etcd_urls', etcd_urls)
 
         prefix_hosts = [('api', api_hostname),
                         ('public_api', api_public_hostname),
@@ -433,7 +389,7 @@ def set_url_facts_if_unset(facts):
                                                                    host,
                                                                    ports[prefix]))
 
-        r_lhn = "{0}:{1}".format(hostname, ports['api']).replace('.', '-')
+        r_lhn = "{0}:{1}".format(api_hostname, ports['api']).replace('.', '-')
         r_lhu = "system:openshift-master/{0}:{1}".format(api_hostname, ports['api']).replace('.', '-')
         facts['master'].setdefault('loopback_cluster_name', r_lhn)
         facts['master'].setdefault('loopback_context_name', "default/{0}/system:openshift-master".format(r_lhn))
@@ -502,31 +458,6 @@ def set_sdn_facts_if_unset(facts, system_facts):
                   were not already present
     """
 
-    if 'master' in facts:
-        # set defaults for sdn_cluster_network_cidr and sdn_host_subnet_length
-        # these might be overridden if they exist in the master config file
-        sdn_cluster_network_cidr = '10.128.0.0/14'
-        sdn_host_subnet_length = '9'
-
-        master_cfg_path = os.path.join(facts['common']['config_base'],
-                                       'master/master-config.yaml')
-        if os.path.isfile(master_cfg_path):
-            with open(master_cfg_path, 'r') as master_cfg_f:
-                config = yaml.safe_load(master_cfg_f.read())
-
-            if 'networkConfig' in config:
-                if 'clusterNetworkCIDR' in config['networkConfig']:
-                    sdn_cluster_network_cidr = \
-                        config['networkConfig']['clusterNetworkCIDR']
-                if 'hostSubnetLength' in config['networkConfig']:
-                    sdn_host_subnet_length = \
-                        config['networkConfig']['hostSubnetLength']
-
-        if 'sdn_cluster_network_cidr' not in facts['master']:
-            facts['master']['sdn_cluster_network_cidr'] = sdn_cluster_network_cidr
-        if 'sdn_host_subnet_length' not in facts['master']:
-            facts['master']['sdn_host_subnet_length'] = sdn_host_subnet_length
-
     if 'node' in facts and 'sdn_mtu' not in facts['node']:
         node_ip = facts['common']['ip']
 
@@ -554,7 +485,38 @@ def set_nodename(facts):
         # elif 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
         #     facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
         else:
-            facts['node']['nodename'] = facts['common']['hostname'].lower()
+            if 'bootstrapped' in facts['node'] and facts['node']['bootstrapped']:
+                facts['node']['nodename'] = facts['common']['raw_hostname'].lower()
+            else:
+                facts['node']['nodename'] = facts['common']['hostname'].lower()
+    return facts
+
+
+def make_allowed_registries(registry_list):
+    """ turns a list of wildcard registries to allowedRegistriesForImport json setting """
+    return {
+        "allowedRegistriesForImport": [
+            {'domainName': reg} if isinstance(reg, str) else reg for reg in registry_list
+        ]
+    }
+
+
+def set_allowed_registries(facts):
+    """ override allowedRegistriesForImport in imagePolicyConfig """
+    if 'master' in facts:
+        image_policy = {}
+        overriden = False
+        if facts['master'].get('image_policy_config', None):
+            image_policy = facts['master']['image_policy_config']
+            overriden = True
+
+        overrides = facts['master'].get('image_policy_allowed_registries_for_import', None)
+        if overrides:
+            image_policy = merge_facts(image_policy, make_allowed_registries(overrides), None)
+            overriden = True
+
+        if overriden:
+            facts['master']['image_policy_config'] = image_policy
     return facts
 
 
@@ -655,6 +617,10 @@ def build_controller_args(facts):
                 if facts['cloudprovider']['kind'] == 'aws':
                     controller_args['cloud-provider'] = ['aws']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                    controller_args['disable-attach-detach-reconcile-sync'] = ['true']
+                if facts['cloudprovider']['kind'] == 'azure':
+                    controller_args['cloud-provider'] = ['azure']
+                    controller_args['cloud-config'] = [cloud_cfg_path + '/azure.conf']
                 if facts['cloudprovider']['kind'] == 'openstack':
                     controller_args['cloud-provider'] = ['openstack']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
@@ -677,6 +643,9 @@ def build_api_server_args(facts):
                 if facts['cloudprovider']['kind'] == 'aws':
                     api_server_args['cloud-provider'] = ['aws']
                     api_server_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                if facts['cloudprovider']['kind'] == 'azure':
+                    api_server_args['cloud-provider'] = ['azure']
+                    api_server_args['cloud-config'] = [cloud_cfg_path + '/azure.conf']
                 if facts['cloudprovider']['kind'] == 'openstack':
                     api_server_args['cloud-provider'] = ['openstack']
                     api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
@@ -686,63 +655,6 @@ def build_api_server_args(facts):
         if api_server_args != {}:
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [])
     return facts
-
-
-def is_service_running(service):
-    """ Queries systemd through dbus to see if the service is running """
-    service_running = False
-    try:
-        bus = SystemBus()
-        systemd = bus.get_object('org.freedesktop.systemd1', '/org/freedesktop/systemd1')
-        manager = Interface(systemd, dbus_interface='org.freedesktop.systemd1.Manager')
-        service_unit = service if service.endswith('.service') else manager.GetUnit('{0}.service'.format(service))
-        service_proxy = bus.get_object('org.freedesktop.systemd1', str(service_unit))
-        service_properties = Interface(service_proxy, dbus_interface='org.freedesktop.DBus.Properties')
-        service_load_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'LoadState')
-        service_active_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'ActiveState')
-        if service_load_state == 'loaded' and service_active_state == 'active':
-            service_running = True
-    except DBusException:
-        # TODO: do not swallow exception, as it may be hiding useful debugging
-        # information.
-        pass
-
-    return service_running
-
-
-def rpm_rebuilddb():
-    """
-    Runs rpm --rebuilddb to ensure the db is in good shape.
-    """
-    module.run_command(['/usr/bin/rpm', '--rebuilddb'])  # noqa: F405
-
-
-def get_version_output(binary, version_cmd):
-    """ runs and returns the version output for a command """
-    cmd = []
-    for item in (binary, version_cmd):
-        if isinstance(item, list):
-            cmd.extend(item)
-        else:
-            cmd.append(item)
-
-    if os.path.isfile(cmd[0]):
-        _, output, _ = module.run_command(cmd)  # noqa: F405
-    return output
-
-
-# We may need this in the future.
-def get_docker_version_info():
-    """ Parses and returns the docker version info """
-    result = None
-    if is_service_running('docker') or is_service_running('container-engine'):
-        version_info = yaml.safe_load(get_version_output('/usr/bin/docker', 'version'))
-        if 'Server' in version_info:
-            result = {
-                'api_version': version_info['Server']['API version'],
-                'version': version_info['Server']['Version']
-            }
-    return result
 
 
 def apply_provider_facts(facts, provider_facts):
@@ -879,23 +791,11 @@ def get_local_facts_from_file(filename):
         Returns:
             dict: the retrieved facts
     """
-    local_facts = dict()
     try:
-        # Handle conversion of INI style facts file to json style
-        ini_facts = configparser.SafeConfigParser()
-        ini_facts.read(filename)
-        for section in ini_facts.sections():
-            local_facts[section] = dict()
-            for key, value in ini_facts.items(section):
-                local_facts[section][key] = value
-
-    except (configparser.MissingSectionHeaderError,
-            configparser.ParsingError):
-        try:
-            with open(filename, 'r') as facts_file:
-                local_facts = json.load(facts_file)
-        except (ValueError, IOError):
-            pass
+        with open(filename, 'r') as facts_file:
+            local_facts = json.load(facts_file)
+    except (ValueError, IOError):
+        local_facts = {}
 
     return local_facts
 
@@ -944,15 +844,25 @@ def set_proxy_facts(facts):
                 if isinstance(common['no_proxy_etcd_host_ips'], string_types):
                     common['no_proxy'].extend(common['no_proxy_etcd_host_ips'].split(','))
 
+            # Master IPs should be added to no proxy lists to make liveness probes to pass
+            if 'no_proxy_master_ips' in common:
+                if isinstance(common['no_proxy_master_ips'], string_types):
+                    common['no_proxy'].extend(common['no_proxy_master_ips'].split(','))
+
             if 'generate_no_proxy_hosts' in common and safe_get_bool(common['generate_no_proxy_hosts']):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
+            # TODO: This is Azure specific and should be scoped out to only Azure installs
+            common['no_proxy'].append('169.254.169.254')
             # We always add local dns domain and ourselves no matter what
             kube_svc_ip = str(ipaddress.ip_network(text_type(common['portal_net']))[1])
             common['no_proxy'].append(kube_svc_ip)
             common['no_proxy'].append('.' + common['dns_domain'])
             common['no_proxy'].append('.svc')
             common['no_proxy'].append(common['hostname'])
+            if 'master' in facts:
+                if 'cluster_hostname' in facts['master']:
+                    common['no_proxy'].append(facts['master']['cluster_hostname'])
             common['no_proxy'] = ','.join(sort_unique(common['no_proxy']))
         facts['common'] = common
 
@@ -1052,34 +962,15 @@ def set_buildoverrides_facts(facts):
     return facts
 
 
-# pylint: disable=too-many-statements
-def set_container_facts_if_unset(facts):
-    """ Set containerized facts.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated containerization
-            facts
-    """
-
-    return facts
-
-
 def pop_obsolete_local_facts(local_facts):
     """Remove unused keys from local_facts"""
     keys_to_remove = {
-        'master': ('etcd_port',)
+        'master': ('etcd_port', 'etcd_use_ssl', 'etcd_hosts')
     }
     for role in keys_to_remove:
         if role in local_facts:
             for key in keys_to_remove[role]:
                 local_facts[role].pop(key, None)
-
-
-class OpenShiftFactsInternalError(Exception):
-    """Origin Facts Error"""
-    pass
 
 
 class OpenShiftFactsUnsupportedRoleError(Exception):
@@ -1175,7 +1066,6 @@ class OpenShiftFacts(object):
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
-        facts = set_container_facts_if_unset(facts)
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_aggregate_facts(facts)
@@ -1183,6 +1073,7 @@ class OpenShiftFacts(object):
         facts = set_builddefaults_facts(facts)
         facts = set_buildoverrides_facts(facts)
         facts = set_nodename(facts)
+        facts = set_allowed_registries(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
@@ -1201,9 +1092,12 @@ class OpenShiftFacts(object):
         hostname_values = [hostname_f, self.system_facts['ansible_nodename'],
                            self.system_facts['ansible_fqdn']]
         hostname = choose_hostname(hostname_values, ip_addr).lower()
+        exit_code, output, _ = module.run_command(['hostname'])  # noqa: F405
+        raw_hostname = output.strip() if exit_code == 0 else hostname
 
         defaults['common'] = dict(ip=ip_addr,
                                   public_ip=ip_addr,
+                                  raw_hostname=raw_hostname,
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',
@@ -1215,20 +1109,11 @@ class OpenShiftFacts(object):
                                       controllers_port='8444',
                                       console_use_ssl=True,
                                       console_path='/console',
-                                      console_port='8443', etcd_use_ssl=True,
-                                      etcd_hosts='', etcd_port='2379',
+                                      console_port='8443',
                                       portal_net='172.30.0.0/16',
-                                      embedded_kube=True,
-                                      embedded_dns=True,
                                       bind_addr='0.0.0.0',
                                       session_max_seconds=3600,
-                                      session_name='ssn',
-                                      session_secrets_file='',
-                                      access_token_max_seconds=86400,
-                                      auth_token_max_seconds=500,
-                                      oauth_grant_method='auto',
-                                      dynamic_provisioning_enabled=True,
-                                      max_requests_inflight=500)
+                                      session_name='ssn')
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)
@@ -1344,7 +1229,6 @@ class OpenShiftFacts(object):
         pop_obsolete_local_facts(new_local_facts)
 
         if new_local_facts != local_facts:
-            self.validate_local_facts(new_local_facts)
             changed = True
             if not module.check_mode:  # noqa: F405
                 save_local_facts(self.filename, new_local_facts)
@@ -1369,71 +1253,6 @@ class OpenShiftFacts(object):
             del facts[fact]
         return facts
 
-    def validate_local_facts(self, facts=None):
-        """ Validate local facts
-
-            Args:
-                facts (dict): local facts to validate
-        """
-        invalid_facts = dict()
-        invalid_facts = self.validate_master_facts(facts, invalid_facts)
-        if invalid_facts:
-            msg = 'Invalid facts detected:\n'
-            # pylint: disable=consider-iterating-dictionary
-            for key in invalid_facts.keys():
-                msg += '{0}: {1}\n'.format(key, invalid_facts[key])
-            module.fail_json(msg=msg, changed=self.changed)  # noqa: F405
-
-    # disabling pylint errors for line-too-long since we're dealing
-    # with best effort reduction of error messages here.
-    # disabling errors for too-many-branches since we require checking
-    # many conditions.
-    # pylint: disable=line-too-long, too-many-branches
-    @staticmethod
-    def validate_master_facts(facts, invalid_facts):
-        """ Validate master facts
-
-            Args:
-                facts (dict): local facts to validate
-                invalid_facts (dict): collected invalid_facts
-
-            Returns:
-                dict: Invalid facts
-        """
-        if 'master' in facts:
-            # openshift.master.session_auth_secrets
-            if 'session_auth_secrets' in facts['master']:
-                session_auth_secrets = facts['master']['session_auth_secrets']
-                if not issubclass(type(session_auth_secrets), list):
-                    invalid_facts['session_auth_secrets'] = 'Expects session_auth_secrets is a list.'
-                elif 'session_encryption_secrets' not in facts['master']:
-                    invalid_facts['session_auth_secrets'] = ('openshift_master_session_encryption secrets must be set '
-                                                             'if openshift_master_session_auth_secrets is provided.')
-                elif len(session_auth_secrets) != len(facts['master']['session_encryption_secrets']):
-                    invalid_facts['session_auth_secrets'] = ('openshift_master_session_auth_secrets and '
-                                                             'openshift_master_session_encryption_secrets must be '
-                                                             'equal length.')
-                else:
-                    for secret in session_auth_secrets:
-                        if len(secret) < 32:
-                            invalid_facts['session_auth_secrets'] = ('Invalid secret in session_auth_secrets. '
-                                                                     'Secrets must be at least 32 characters in length.')
-            # openshift.master.session_encryption_secrets
-            if 'session_encryption_secrets' in facts['master']:
-                session_encryption_secrets = facts['master']['session_encryption_secrets']
-                if not issubclass(type(session_encryption_secrets), list):
-                    invalid_facts['session_encryption_secrets'] = 'Expects session_encryption_secrets is a list.'
-                elif 'session_auth_secrets' not in facts['master']:
-                    invalid_facts['session_encryption_secrets'] = ('openshift_master_session_auth_secrets must be '
-                                                                   'set if openshift_master_session_encryption_secrets '
-                                                                   'is provided.')
-                else:
-                    for secret in session_encryption_secrets:
-                        if len(secret) not in [16, 24, 32]:
-                            invalid_facts['session_encryption_secrets'] = ('Invalid secret in session_encryption_secrets. '
-                                                                           'Secrets must be 16, 24, or 32 characters in length.')
-        return invalid_facts
-
 
 def main():
     """ main """
@@ -1451,9 +1270,6 @@ def main():
         supports_check_mode=True,
         add_file_common_args=True,
     )
-
-    if not HAVE_DBUS:
-        module.fail_json(msg="This module requires dbus python bindings")  # noqa: F405
 
     module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']  # noqa: F405
     module.params['gather_timeout'] = 10  # noqa: F405

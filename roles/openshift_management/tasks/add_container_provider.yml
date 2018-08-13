@@ -46,7 +46,7 @@
   oc_route:
     state: list
     name: httpd
-    namespace: openshift-management
+    namespace: "{{ openshift_management_project }}"
   register: route
 
 - name: Ensure the management service route is saved
@@ -69,5 +69,5 @@
           endpoint: {role: default, security_protocol: ssl-without-validation, verify_ssl: 0}
       hostname: "{{ l_cluster_hostname }}"
       name: "{{ openshift_management_project }}"
-      port: "{{ openshift.master.api_port }}"
+      port: "{{ openshift_master_api_port }}"
       type: "ManageIQ::Providers::Openshift::ContainerManager"

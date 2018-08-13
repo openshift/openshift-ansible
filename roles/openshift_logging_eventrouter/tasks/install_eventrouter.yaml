@@ -6,7 +6,7 @@
 
 - name: Ensure that Logging EventRouter has nodes to run on
   import_role:
-    name: openshift_master
+    name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
     openshift_master_ensure_nodes_selector: "{{ openshift_logging_eventrouter_nodeselector | map_to_pairs }}"
@@ -31,10 +31,11 @@
 # create EventRouter deployment config
 - name: Generate EventRouter template
   template:
-    src: "{{ __base_file_dir }}/eventrouter-template.j2"
+    src: "eventrouter-template.j2"
     dest: "{{ tempdir }}/templates/eventrouter-template.yaml"
   vars:
     node_selector: "{{ openshift_logging_eventrouter_nodeselector | default({}) }}"
+    cpu_limit: "{{ openshift_logging_eventrouter_cpu_limit }}"
 
 - name: Create EventRouter template
   oc_obj:
@@ -51,9 +52,10 @@
     template_name: eventrouter-template
     namespace: "{{ openshift_logging_eventrouter_namespace }}"
     params:
-      IMAGE: "{{openshift_logging_eventrouter_image_prefix}}logging-eventrouter:{{openshift_logging_eventrouter_image_version}}"
+      IMAGE: "{{ openshift_logging_eventrouter_image }}"
       REPLICAS: "{{ openshift_logging_eventrouter_replicas }}"
       CPU: "{{ openshift_logging_eventrouter_cpu_request }}"
+      CPU_LIMIT: "{{ openshift_logging_eventrouter_cpu_limit }}"
       MEMORY: "{{ openshift_logging_eventrouter_memory_limit }}"
       NAMESPACE: "{{ openshift_logging_eventrouter_namespace }}"
       SINK: "{{ openshift_logging_eventrouter_sink }}"

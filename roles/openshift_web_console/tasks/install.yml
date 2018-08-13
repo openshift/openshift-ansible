@@ -59,6 +59,10 @@
   - set_fact:
       cro_plugin_enabled: "{{ config_to_migrate.admissionConfig is defined and config_to_migrate.admissionConfig.pluginConfig is defined and config_to_migrate.admissionConfig.pluginConfig.ClusterResourceOverrides is defined }}"
 
+  - set_fact:
+      console_picker_admin_console_public_url: "https://{{ openshift_console_hostname | default('console.{{openshift_master_default_subdomain}}') }}/"
+    when: openshift_console_install | default(true) | bool
+
   # Update properties in the config template based on inventory vars when the
   # asset config does not exist.
   - name: Set web console config properties from inventory variables
@@ -72,6 +76,8 @@
         value: "{{ openshift.master.public_api_url }}"
       - key: clusterInfo#logoutPublicURL
         value: "{{ openshift.master.logout_url | default('') }}"
+      - key: clusterInfo#adminConsolePublicURL
+        value: "{{ console_picker_admin_console_public_url | default('') }}"
       - key: features#inactivityTimeoutMinutes
         value: "{{ openshift_web_console_inactivity_timeout_minutes | default(0) }}"
       - key: features#clusterResourceOverridesEnabled
@@ -114,15 +120,28 @@
     src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
   register: updated_console_config
 
+# Avoids an issue where existing replica sets can be orphaned due to the label selector changing.
+- name: Apply the app label to pods and replica sets
+  shell: >
+    {{ openshift_client_binary }} label rs,pods -l webconsole=true app=openshift-web-console --overwrite=true -n openshift-web-console
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+  when: not create_console_project.changed
+
 - name: Apply the web console template file
   shell: >
     {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __console_template_file }}"
     --param API_SERVER_CONFIG="{{ updated_console_config['content'] | b64decode }}"
-    --param IMAGE="{{ openshift_web_console_prefix }}{{ openshift_web_console_image_name }}:{{ openshift_web_console_version }}"
+    --param IMAGE="{{ openshift_web_console_image }}"
     --param NODE_SELECTOR={{ openshift_web_console_nodeselector | to_json | quote }}
     --param REPLICA_COUNT="{{ openshift_web_console_replica_count }}"
     --config={{ mktemp.stdout }}/admin.kubeconfig
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
+
+- name: Remove temp directory
+  file:
+    state: absent
+    name: "{{ mktemp.stdout }}"
+  changed_when: False
 
 # Wait to give the rollout time to start before verifying that the console is
 # running. Unfortunately, we can't check if the deployment revision changed
@@ -134,60 +153,4 @@
   # Skip if the project didn't exist since there was no previous deployment.
   when: not create_console_project.changed
 
-- name: Verify that the web console is running
-  command: >
-    curl -k https://webconsole.openshift-web-console.svc/healthz
-  args:
-    # Disables the following warning:
-    # Consider using get_url or uri module rather than running curl
-    warn: no
-  register: console_health
-  until: console_health.stdout == 'ok'
-  retries: 60
-  delay: 10
-  changed_when: false
-  # Ignore errors so we can log troubleshooting info on failures.
-  ignore_errors: yes
-
-# Log the result of `oc status`, `oc get pods`, `oc get events`, and `oc logs deployment/webconsole` for troubleshooting failures.
-- when: console_health.stdout != 'ok'
-  block:
-  - name: Check status in the openshift-web-console namespace
-    command: >
-      {{ openshift_client_binary }} status --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
-    register: console_status
-    ignore_errors: true
-  - debug:
-      msg: "{{ console_status.stdout_lines }}"
-  - name: Get pods in the openshift-web-console namespace
-    command: >
-      {{ openshift_client_binary }} get pods --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console -o wide
-    register: console_pods
-    ignore_errors: true
-  - debug:
-      msg: "{{ console_pods.stdout_lines }}"
-  - name: Get events in the openshift-web-console namespace
-    command: >
-      {{ openshift_client_binary }} get events --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
-    register: console_events
-    ignore_errors: true
-  - debug:
-      msg: "{{ console_events.stdout_lines }}"
-  - name: Get console pod logs
-    command: >
-      {{ openshift_client_binary }} logs deployment/webconsole --tail=50 --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
-    register: console_log
-    ignore_errors: true
-  - debug:
-      msg: "{{ console_log.stdout_lines }}"
-
-- name: Remove temp directory
-  file:
-    state: absent
-    name: "{{ mktemp.stdout }}"
-  changed_when: False
-
-- name: Report console errors
-  fail:
-    msg: Console install failed.
-  when: console_health.stdout != 'ok'
+- include_tasks: start.yml

@@ -4,7 +4,7 @@ metadata:
   name: service-catalog-role-bindings
 objects:
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRole
   metadata:
     name: servicecatalog-serviceclass-viewer
@@ -19,14 +19,16 @@ objects:
     - watch
     - get
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRoleBinding
   metadata:
     name: servicecatalog-serviceclass-viewer-binding
   roleRef:
+    kind: ClusterRole
     name: servicecatalog-serviceclass-viewer
-  groupNames:
-  - system:authenticated
+  subjects:
+  - kind: Group
+    name: system:authenticated
 
 - kind: ServiceAccount
   apiVersion: v1
@@ -38,7 +40,7 @@ objects:
   metadata:
     name: service-catalog-apiserver
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRole
   metadata:
     name: sar-creator
@@ -50,18 +52,19 @@ objects:
     verbs:
     - create
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRoleBinding
   metadata:
     name: service-catalog-sar-creator-binding
   roleRef:
+    kind: ClusterRole
     name: sar-creator
   subjects:
   - kind: ServiceAccount
     name: service-catalog-apiserver
     namespace: kube-service-catalog
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRole
   metadata:
     name: namespace-viewer
@@ -74,30 +77,41 @@ objects:
     - list
     - watch
     - get
+  - apiGroups:
+    - "admissionregistration.k8s.io"
+    resources:
+    - validatingwebhookconfigurations
+    - mutatingwebhookconfigurations
+    verbs:
+    - list
+    - watch
+    - get
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRoleBinding
   metadata:
     name: service-catalog-namespace-viewer-binding
   roleRef:
+    kind: ClusterRole
     name: namespace-viewer
   subjects:
   - kind: ServiceAccount
     name: service-catalog-apiserver
     namespace: kube-service-catalog
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRoleBinding
   metadata:
     name: service-catalog-controller-namespace-viewer-binding
   roleRef:
+    kind: ClusterRole
     name: namespace-viewer
   subjects:
   - kind: ServiceAccount
     name: service-catalog-controller
     namespace: kube-service-catalog
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRole
   metadata:
     name: service-catalog-controller
@@ -124,6 +138,9 @@ objects:
     - servicebindings/status
     - servicebindings/finalizers
     - serviceinstances/reference
+    - servicebrokers/status
+    - serviceclasses/status
+    - serviceplans/status
     verbs:
     - update
   - apiGroups:
@@ -132,6 +149,7 @@ objects:
     - clusterservicebrokers
     - serviceinstances
     - servicebindings
+    - servicebrokers
     verbs:
     - list
     - get
@@ -148,6 +166,8 @@ objects:
     resources:
     - clusterserviceclasses
     - clusterserviceplans
+    - serviceclasses
+    - serviceplans
     verbs:
     - create
     - delete
@@ -168,26 +188,27 @@ objects:
     - list
     - watch
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRoleBinding
   metadata:
     name: service-catalog-controller-binding
   roleRef:
+    kind: ClusterRole
     name: service-catalog-controller
   subjects:
   - kind: ServiceAccount
     name: service-catalog-controller
     namespace: kube-service-catalog
-  
-- apiVersion: authorization.openshift.io/v1
+
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: Role
   metadata:
-    name: endpoint-accessor
+    name: configmap-accessor
   rules:
   - apiGroups:
     - ""
     resources:
-    - endpoints
+    - configmaps
     verbs:
     - list
     - watch
@@ -195,23 +216,50 @@ objects:
     - create
     - update
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
   metadata:
-    name: endpointer-accessor-binding
-  roleRef:
-    name: endpoint-accessor
+    name: configmap-accessor-binding
     namespace: kube-service-catalog
+  roleRef:
+    kind: Role
+    name: configmap-accessor
   subjects:
   - kind: ServiceAccount
     namespace: kube-service-catalog
     name: service-catalog-controller
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: cluster-info-configmap
+    namespace: kube-service-catalog
+  rules:
+  - apiGroups:     [""]
+    resources:     ["configmaps"]
+    resourceNames: ["cluster-info"]
+    verbs:         ["get","create","list","watch","update"]
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: cluster-info-configmap-binding
+    namespace: kube-service-catalog
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: cluster-info-configmap
+  subjects:
+  - kind: ServiceAccount
+    namespace: kube-service-catalog
+    name: service-catalog-controller
+
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRoleBinding
   metadata:
     name: system:auth-delegator-binding
   roleRef:
+    kind: ClusterRole
     name: system:auth-delegator
   subjects:
   - kind: ServiceAccount

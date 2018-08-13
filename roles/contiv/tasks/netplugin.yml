@@ -27,6 +27,7 @@
     src: "{{ contiv_current_release_directory }}/netplugin"
     dest: "{{ contiv_bin_dir }}/netplugin"
     state: link
+    force: yes
 
 - name: Netplugin | Ensure contiv_cni_bin_dir exists
   file:
@@ -39,6 +40,7 @@
     src: "{{ contiv_current_release_directory }}/contivk8s"
     dest: "{{ contiv_cni_bin_dir }}/contivk8s"
     state: link
+    force: yes
 
 - name: Netplugin | Copy CNI loopback bin
   copy:
@@ -102,6 +104,9 @@
   command: systemctl daemon-reload
   when: docker_updated is changed
 
+- name: Netplugin | Flush handlers
+  meta: flush_handlers
+
 - name: Netplugin | Restart docker
   service:
     name: "{{ contiv_openshift_docker_service_name }}"
@@ -121,5 +126,4 @@
   service:
     name: netplugin
     state: started
-  register: netplugin_started
 # notify: restart kubelet

@@ -31,16 +31,16 @@ openshift_deployment_type=origin
 openshift_hosted_registry_storage_kind=glusterfs
 
 [masters]
-master
+master openshift_node_group_name="node-config-master"
 
 [nodes]
 # masters should be schedulable to run web console pods
 master  openshift_schedulable=True
 # A hosted registry, by default, will only be deployed on nodes labeled
-# "region=infra".
-node0   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
-node1   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
-node2   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
+# "node-role.kubernetes.io/infra=true".
+node0   openshift_node_group_name="node-config-infra"
+node1   openshift_node_group_name="node-config-infra"
+node2   openshift_node_group_name="node-config-infra"
 
 [etcd]
 master

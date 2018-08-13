@@ -36,6 +36,7 @@ import atexit
 import copy
 import fcntl
 import json
+import time
 import os
 import re
 import shutil
@@ -99,7 +100,7 @@ options:
   images:
     description:
     - The image to base this router on - ${component} will be replaced with --type
-    required: 'openshift3/ose-${component}:${version}'
+    required: 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
     default: None
     aliases: []
   latest_images:
@@ -146,6 +147,12 @@ options:
     required: false
     default: haproxy-router
     aliases: []
+  extended_validation:
+    description:
+    - If true, configure the router to perform extended validation on routes before admitting them.
+    required: false
+    default: True
+    aliases: []
   external_host:
     description:
     - If the underlying router implementation connects with an external host, this is the external host's hostname.
@@ -186,21 +193,6 @@ options:
   external_host_private_key:
     description:
     - If the underlying router implementation requires an SSH private key, this is the path to the private key file.
-    required: false
-    default: None
-    aliases: []
-  expose_metrics:
-    description:
-    - This is a hint to run an extra container in the pod to expose metrics - the image
-    - will either be set depending on the router implementation or provided with --metrics-image.
-    required: false
-    default: False
-    aliases: []
-  metrics_image:
-    description:
-    - If expose_metrics is specified this is the image to use to run a sidecar container
-    - in the pod exposing metrics. If not set and --expose-metrics is true the image will
-    - depend on router implementation.
     required: false
     default: None
     aliases: []
@@ -261,8 +253,8 @@ EXAMPLES = '''
       action: put
     - key: spec.template.spec.containers[0].env
       value:
-        name: EXTENDED_VALIDATION
-        value: 'false'
+        name: ROUTER_MAX_CONNECTIONS
+        value: "10000"
       action: update
   register: router_out
   run_once: True
@@ -278,7 +270,7 @@ class YeditException(Exception):  # pragma: no cover
     pass
 
 
-# pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods,too-many-instance-attributes
 class Yedit(object):  # pragma: no cover
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
@@ -291,6 +283,7 @@ class Yedit(object):  # pragma: no cover
                  content=None,
                  content_type='yaml',
                  separator='.',
+                 backup_ext=None,
                  backup=False):
         self.content = content
         self._separator = separator
@@ -298,6 +291,11 @@ class Yedit(object):  # pragma: no cover
         self.__yaml_dict = content
         self.content_type = content_type
         self.backup = backup
+        if backup_ext is None:
+            self.backup_ext = ".{}".format(time.strftime("%Y%m%dT%H%M%S"))
+        else:
+            self.backup_ext = backup_ext
+
         self.load(content_type=self.content_type)
         if self.__yaml_dict is None:
             self.__yaml_dict = {}
@@ -492,7 +490,7 @@ class Yedit(object):  # pragma: no cover
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, self.filename + '.orig')
+            shutil.copy(self.filename, '{}{}'.format(self.filename, self.backup_ext))
 
         # Try to set format attributes if supported
         try:
@@ -803,12 +801,7 @@ class Yedit(object):  # pragma: no cover
 
         curr_value = invalue
         if val_type == 'yaml':
-            try:
-                # AUDIT:maybe-no-member makes sense due to different yaml libraries
-                # pylint: disable=maybe-no-member
-                curr_value = yaml.safe_load(invalue, Loader=yaml.RoundTripLoader)
-            except AttributeError:
-                curr_value = yaml.safe_load(invalue)
+            curr_value = yaml.safe_load(str(invalue))
         elif val_type == 'json':
             curr_value = json.loads(invalue)
 
@@ -878,6 +871,7 @@ class Yedit(object):  # pragma: no cover
         yamlfile = Yedit(filename=params['src'],
                          backup=params['backup'],
                          content_type=params['content_type'],
+                         backup_ext=params['backup_ext'],
                          separator=params['separator'])
 
         state = params['state']
@@ -1115,7 +1109,7 @@ class OpenShiftCLI(object):
             cmd.append(template_name)
         if params:
             param_str = ["{}={}".format(key, str(value).replace("'", r'"')) for key, value in params.items()]
-            cmd.append('-v')
+            cmd.append('-p')
             cmd.extend(param_str)
 
         results = self.openshift_cmd(cmd, output=True, input_data=template_data)
@@ -1447,9 +1441,10 @@ class Utils(object):  # pragma: no cover
                 version = version.split("-")[0]
 
             if version.startswith('v'):
-                versions_dict[tech + '_numeric'] = version[1:].split('+')[0]
-                # "v3.3.0.33" is what we have, we want "3.3"
-                versions_dict[tech + '_short'] = version[1:4]
+                version = version[1:]  # Remove the 'v' prefix
+                versions_dict[tech + '_numeric'] = version.split('+')[0]
+                # "3.3.0.33" is what we have, we want "3.3"
+                versions_dict[tech + '_short'] = "{}.{}".format(*version.split('.'))
 
         return versions_dict
 
@@ -1883,8 +1878,12 @@ spec:
             return False
 
         for result in results:
-            if result['name'] == key and result['value'] == value:
-                return True
+            if result['name'] == key:
+                if 'value' not in result:
+                    if value == "" or value is None:
+                        return True
+                elif result['value'] == value:
+                    return True
 
         return False
 
@@ -2703,7 +2702,7 @@ class Router(OpenShiftCLI):
            - secret/router-certs
            - clusterrolebinding/router-router-role
         '''
-        super(Router, self).__init__('default', router_config.kubeconfig, verbose)
+        super(Router, self).__init__(router_config.namespace, router_config.kubeconfig, verbose)
         self.config = router_config
         self.verbose = verbose
         self.router_parts = [{'kind': 'dc', 'name': self.config.name},
@@ -2855,6 +2854,16 @@ class Router(OpenShiftCLI):
         '''modify the deployment config'''
         # We want modifications in the form of edits coming in from the module.
         # Let's apply these here
+
+        # If extended validation is enabled, set the corresponding environment
+        # variable.
+        if self.config.config_options['extended_validation']['value']:
+            if not deploymentconfig.exists_env_key('EXTENDED_VALIDATION'):
+                deploymentconfig.add_env_value('EXTENDED_VALIDATION', "true")
+            else:
+                deploymentconfig.update_env_var('EXTENDED_VALIDATION', "true")
+
+        # Apply any edits.
         edit_results = []
         for edit in self.config.config_options['edits'].get('value', []):
             if edit['action'] == 'put':
@@ -2956,7 +2965,6 @@ class Router(OpenShiftCLI):
         results = []
         self.needs_update()
 
-        import time
         # pylint: disable=maybe-no-member
         for kind, oc_data in self.prepared_router.items():
             if oc_data['obj'] is not None:
@@ -3072,7 +3080,7 @@ class Router(OpenShiftCLI):
 
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run ansible idempotent code'''
+        '''run the oc_adm_router module'''
 
         rconfig = RouterConfig(params['name'],
                                params['namespace'],
@@ -3089,6 +3097,7 @@ class Router(OpenShiftCLI):
                                 'service_account': {'value': params['service_account'], 'include': True},
                                 'router_type': {'value': params['router_type'], 'include': False},
                                 'host_network': {'value': params['host_network'], 'include': True},
+                                'extended_validation': {'value': params['extended_validation'], 'include': False},
                                 'external_host': {'value': params['external_host'], 'include': True},
                                 'external_host_vserver': {'value': params['external_host_vserver'],
                                                           'include': True},
@@ -3102,8 +3111,6 @@ class Router(OpenShiftCLI):
                                                            'include': True},
                                 'external_host_private_key': {'value': params['external_host_private_key'],
                                                               'include': True},
-                                'expose_metrics': {'value': params['expose_metrics'], 'include': True},
-                                'metrics_image': {'value': params['metrics_image'], 'include': True},
                                 'stats_user': {'value': params['stats_user'], 'include': True},
                                 'stats_password': {'value': params['stats_password'], 'include': True},
                                 'stats_port': {'value': params['stats_port'], 'include': True},
@@ -3197,7 +3204,7 @@ def main():
             default_cert=dict(default=None, type='str'),
             cert_file=dict(default=None, type='str'),
             key_file=dict(default=None, type='str'),
-            images=dict(default=None, type='str'), #'openshift3/ose-${component}:${version}'
+            images=dict(default=None, type='str'), #'registry.access.redhat.com/openshift3/ose-${component}:${version}'
             latest_images=dict(default=False, type='bool'),
             labels=dict(default=None, type='dict'),
             ports=dict(default=['80:80', '443:443'], type='list'),
@@ -3206,6 +3213,7 @@ def main():
             service_account=dict(default='router', type='str'),
             router_type=dict(default='haproxy-router', type='str'),
             host_network=dict(default=True, type='bool'),
+            extended_validation=dict(default=True, type='bool'),
             # external host options
             external_host=dict(default=None, type='str'),
             external_host_vserver=dict(default=None, type='str'),
@@ -3214,9 +3222,6 @@ def main():
             external_host_username=dict(default=None, type='str'),
             external_host_password=dict(default=None, type='str', no_log=True),
             external_host_private_key=dict(default=None, type='str', no_log=True),
-            # Metrics
-            expose_metrics=dict(default=False, type='bool'),
-            metrics_image=dict(default=None, type='str'),
             # Stats
             stats_user=dict(default=None, type='str'),
             stats_password=dict(default=None, type='str', no_log=True),

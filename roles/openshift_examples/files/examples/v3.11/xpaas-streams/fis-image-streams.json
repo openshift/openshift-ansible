@@ -1,0 +1,102 @@
+{
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "fis-image-streams",
+        "annotations": {
+            "description": "ImageStream definitions for JBoss Fuse Integration Services."
+        }
+    },
+    "items": [
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "fis-java-openshift"
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "JBoss Fuse Integration Services 1.0 Java S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,jboss-fuse,java,xpaas,hidden",
+                            "supports": "jboss-fuse:6.2.1,java:8,xpaas:1.2",
+                            "version": "1.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-fuse-6/fis-java-openshift:1.0"
+                        }
+                    },
+                    {
+                        "name": "2.0",
+                        "annotations": {
+                            "description": "JBoss Fuse Integration Services 2.0 Java S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,jboss-fuse,java,xpaas",
+                            "supports": "jboss-fuse:6.3.0,java:8,xpaas:1.2",
+                            "version": "2.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-fuse-6/fis-java-openshift:2.0"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "fis-karaf-openshift"
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "JBoss Fuse Integration Services 1.0 Karaf S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,jboss-fuse,java,karaf,xpaas,hidden",
+                            "supports": "jboss-fuse:6.2.1,java:8,xpaas:1.2",
+                            "version": "1.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-fuse-6/fis-karaf-openshift:1.0"
+                        }
+                    },
+                    {
+                        "name": "2.0",
+                        "annotations": {
+                            "description": "JBoss Fuse Integration Services 2.0 Karaf S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,jboss-fuse,java,karaf,xpaas",
+                            "supports": "jboss-fuse:6.3.0,java:8,xpaas:1.2",
+                            "version": "2.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-fuse-6/fis-karaf-openshift:2.0"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

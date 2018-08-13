@@ -7,14 +7,14 @@
     - name: Include the NFS Setup role tasks
       import_role:
         role: openshift_nfs
-        tasks_from: setup
+        tasks_from: setup.yml
       vars:
         l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
 
     - name: Create the App export
       import_role:
         role: openshift_nfs
-        tasks_from: create_export
+        tasks_from: create_export.yml
       vars:
         l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
         l_nfs_export_config: "{{ __openshift_management_flavor_short }}"
@@ -24,7 +24,7 @@
     - name: Create the DB export
       import_role:
         role: openshift_nfs
-        tasks_from: create_export
+        tasks_from: create_export.yml
       vars:
         l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
         l_nfs_export_config: "{{ __openshift_management_flavor_short }}"

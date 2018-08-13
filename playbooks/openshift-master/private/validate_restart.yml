@@ -7,13 +7,6 @@
   - fail:
       msg: "openshift_rolling_restart_mode must be set to either 'services' or 'system'"
     when: openshift_rolling_restart_mode is defined and openshift_rolling_restart_mode not in ["services", "system"]
-  - openshift_facts:
-      role: "{{ item.role }}"
-      local_facts: "{{ item.local_facts }}"
-    with_items:
-    - role: common
-      local_facts:
-        rolling_restart_mode: "{{ openshift_rolling_restart_mode | default('services') }}"
 
 # Creating a temp file on localhost, we then check each system that will
 # be rebooted to see if that file exists, if so we know we're running
@@ -30,7 +23,11 @@
 - name: Check if temp file exists on any masters
   hosts: oo_masters_to_config
   tasks:
-  - stat: path="{{ hostvars.localhost.mktemp.stdout }}"
+  - stat:
+      path: "{{ hostvars.localhost.mktemp.stdout }}"
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: exists
     changed_when: false
     when: "'stdout' in hostvars.localhost.mktemp"
@@ -58,9 +55,9 @@
         inventory and relaunch the playbook.
     when:
     - "'stat' in exists"
-    - exists.stat.exists and openshift.common.rolling_restart_mode == 'system'
+    - exists.stat.exists and openshift_rolling_restart_mode | default('services') == 'system'
   - set_fact:
       current_host: "{{ exists.stat.exists }}"
     when:
     - "'stat' in exists"
-    - openshift.common.rolling_restart_mode == 'system'
+    - openshift_rolling_restart_mode | default('services') == 'system'

@@ -39,7 +39,7 @@
 - name: Apply the node exporter template file
   shell: >
     {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __node_exporter_template_file }}"
-    --param IMAGE="{{ l_openshift_prometheus_node_exporter_image_prefix }}prometheus-node-exporter:{{ l_openshift_prometheus_node_exporter_image_version }}"
+    --param IMAGE="{{ openshift_prometheus_node_exporter_image }}"
     --param MEMORY_REQUESTS="{{ openshift_prometheus_node_exporter_memory_requests }}"
     --param CPU_REQUESTS="{{ openshift_prometheus_node_exporter_cpu_requests }}"
     --param MEMORY_LIMITS="{{ openshift_prometheus_node_exporter_memory_limit }}"

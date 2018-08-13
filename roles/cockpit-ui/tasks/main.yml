@@ -7,7 +7,7 @@
   # not be run.
   - name: fetch the docker-registry route
     oc_route:
-      kubeconfig: "{{ openshift_master_config_dir }}/admin.kubeconfig"
+      kubeconfig: "/etc/origin/master/admin.kubeconfig"
       name: docker-registry
       namespace: default
       state: list
@@ -15,7 +15,7 @@
 
   - name: Create passthrough route for registry-console
     oc_route:
-      kubeconfig: "{{ openshift_master_config_dir }}/admin.kubeconfig"
+      kubeconfig: "/etc/origin/master/admin.kubeconfig"
       name: registry-console
       namespace: default
       service_name: registry-console
@@ -34,7 +34,7 @@
 
   - name: Copy the admin client config(s)
     command: >
-      cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ openshift_hosted_kubeconfig }}
+      cp /etc/origin/master/admin.kubeconfig {{ openshift_hosted_kubeconfig }}
     changed_when: False
 
   - name: Deploy registry-console

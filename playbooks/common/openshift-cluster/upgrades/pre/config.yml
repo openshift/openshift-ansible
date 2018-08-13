@@ -23,6 +23,17 @@
     - openshift_http_proxy is defined or openshift_https_proxy is defined
     - openshift_generate_no_proxy_hosts | default(True) | bool
 
+- import_playbook: ../disable_excluders.yml
+
+- import_playbook: ../../../../init/version.yml
+  vars:
+    # Request specific openshift_release and let the openshift_version role handle converting this
+    # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
+    # defined, and overriding the normal behavior of protecting the installed version
+    openshift_release: "{{ openshift_upgrade_target }}"
+    # openshift_protect_installed_version is passed n via upgrade_control_plane.yml
+    # l_openshift_version_set_hosts is passed via upgrade_control_plane.yml
+
 - name: OpenShift Health Checks
   hosts: "{{ l_upgrade_health_check_hosts }}"
   any_errors_fatal: true
@@ -39,22 +50,6 @@
       - memory_availability
       - docker_image_availability
 
-- import_playbook: ../disable_excluders.yml
-
-- import_playbook: ../../../../init/version.yml
-  vars:
-    # Request specific openshift_release and let the openshift_version role handle converting this
-    # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
-    # defined, and overriding the normal behavior of protecting the installed version
-    openshift_release: "{{ openshift_upgrade_target }}"
-    # openshift_protect_installed_version is passed n via upgrade_control_plane.yml
-    # l_openshift_version_set_hosts is passed via upgrade_control_plane.yml
-    # l_openshift_version_check_hosts is passed via upgrade_control_plane.yml
-
-# version_override will set various version-related variables during a double upgrade.
-- import_playbook: version_override.yml
-  when: l_double_upgrade_cp | default(False)
-
 - import_playbook: verify_cluster.yml
 
 # If we're only upgrading nodes, we need to ensure masters are already upgraded
@@ -64,7 +59,7 @@
   - fail: msg="Master running {{ openshift_current_version }} must be upgraded to {{ openshift_version }} before node upgrade can be run."
     when:
     - l_upgrade_nodes_only | default(False) | bool
-    - not (openshift_current_version | default('0.0') | match(openshift_version))
+    - not (openshift_current_version | default('0.0') is match(openshift_version))
 
 # If we're only upgrading nodes, skip this.
 - import_playbook: ../../../../openshift-master/private/validate_restart.yml
@@ -75,7 +70,10 @@
   roles:
   - role: openshift_facts
   tasks:
-  - include_tasks: verify_upgrade_targets.yml
+  - import_tasks: verify_upgrade_targets.yml
+    vars:
+      dedicated_etcds: "{{ groups['oo_etcd_to_config'] | difference(groups['oo_masters']) }}"
+    when: inventory_hostname not in dedicated_etcds
 
 - name: Verify docker upgrade targets
   hosts: "{{ l_upgrade_docker_target_hosts }}"

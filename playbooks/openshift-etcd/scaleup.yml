@@ -27,10 +27,7 @@
 # re-run prerequisites
 - import_playbook: ../prerequisites.yml
   vars:
-    # We need to ensure container_runtime is only processed for containerized
-    # etcd hosts by setting l_build_container_groups_hosts and l_etcd_scale_up_hosts
-    l_build_container_groups_hosts: "oo_new_etcd_to_config"
-    l_etcd_scale_up_hosts: "oo_hosts_containerized_managed_true"
+    l_etcd_scale_up_crt_hosts: "all:!all"
     l_scale_up_hosts: "oo_new_etcd_to_config"
     l_base_packages_hosts: "oo_new_etcd_to_config"
     l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_new_etcd_to_config"
@@ -43,11 +40,9 @@
 # prerequisites, we can just init facts as normal.
 - import_playbook: ../init/main.yml
   vars:
-    skip_version: True
     l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_new_etcd_to_config"
     l_sanity_check_hosts: "{{ groups['oo_new_etcd_to_config'] | union(groups['oo_masters_to_config']) | union(groups['oo_etcd_to_config']) }}"
     l_openshift_version_set_hosts: "all:!all"
-    l_openshift_version_check_hosts: "all:!all"
   when:
   - inventory_hostname in groups['oo_masters']
   - inventory_hostname in groups['oo_nodes_to_config']

@@ -1,35 +1,53 @@
 ---
-- name: Delete pre-existing gluster-s3 resources
-  oc_obj:
+- name: Create heketi secret
+  oc_secret:
     namespace: "{{ glusterfs_namespace }}"
-    kind: "{{ item.kind }}"
-    name: "{{ item.name | default(omit) }}"
-    selector: "{{ item.selector | default(omit) }}"
-    state: absent
-  with_items:
-  - kind: "all,svc,deploy,secret,sc,pvc"
-    selector: "gluster-s3"
-  failed_when: False
-  when: glusterfs_wipe
+    state: present
+    name: "heketi-{{ glusterfs_name }}-admin-secret"
+    type: "kubernetes.io/glusterfs"
+    force: True
+    contents:
+    - path: key
+      data: "{{ glusterfs_heketi_admin_key }}"
+  when:
+  - glusterfs_heketi_admin_key is defined
 
-- name: Wait for gluster-s3 pods to terminate
+- name: Get heketi Endpoints
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
-    kind: pod
+    kind: ep
     state: list
-    selector: "glusterfs=s3-{{ glusterfs_name }}-provisioner-pod"
-  register: gluster_s3_pod
-  until: "gluster_s3_pod.results.results[0]['items'] | count == 0"
-  delay: 10
-  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
-  when: glusterfs_wipe
+    name: "heketi-{{ glusterfs_name }}"
+  register: heketi_endpoints
+  when:
+  - glusterfs_heketi_is_native
+  - glusterfs_heketi_url is not defined
+
+- name: Determine StorageClass heketi URL
+  set_fact:
+    glusterfs_heketi_url: "{{ heketi_endpoints.results.results[0]['subsets'][0]['addresses'][0]['ip'] }}"
+    glusterfs_heketi_port: "{{ heketi_endpoints.results.results[0]['subsets'][0]['ports'][0]['port'] }}"
+  when:
+  - glusterfs_heketi_is_native
+  - glusterfs_heketi_url is not defined
+
+- name: Generate GlusterFS StorageClass for S3 file
+  template:
+    src: "gluster-s3-storageclass.yml.j2"
+    dest: "{{ mktemp.stdout }}/gluster-s3-storageclass.yml"
+
+- name: Create GlusterFS StorageClass for S3
+  oc_obj:
+    state: present
+    kind: storageclass
+    name: "glusterfs-{{ glusterfs_name }}-s3"
+    files:
+    - "{{ mktemp.stdout }}/gluster-s3-storageclass.yml"
 
 - name: Copy gluster-s3 PVCs template file
   copy:
-    src: "{{ openshift_examples_content_version }}/{{ item }}"
+    src: "gluster-s3-pvcs-template.yml"
     dest: "{{ mktemp.stdout }}/{{ item }}"
-  with_items:
-  - "gluster-s3-pvcs-template.yml"
 
 - name: Create gluster-s3 PVCs template
   oc_obj:
@@ -69,10 +87,8 @@
 
 - name: Copy gluster-s3 template file
   copy:
-    src: "{{ openshift_examples_content_version }}/{{ item }}"
+    src: "gluster-s3-template.yml"
     dest: "{{ mktemp.stdout }}/{{ item }}"
-  with_items:
-  - "gluster-s3-template.yml"
 
 - name: Create gluster-s3 template
   oc_obj:
@@ -90,7 +106,6 @@
     create: True
     params:
       IMAGE_NAME: "{{ glusterfs_s3_image }}"
-      IMAGE_VERSION: "{{ glusterfs_s3_version }}"
       S3_ACCOUNT: "{{ glusterfs_s3_account }}"
       S3_USER: "{{ glusterfs_s3_user }}"
       S3_PASSWORD: "{{ glusterfs_s3_password }}"
@@ -111,3 +126,11 @@
   - "gluster_s3_pod.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
+
+- name: Delete GlusterFS StorageClass for S3
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: "sc"
+    name: "glusterfs-{{ glusterfs_name }}-s3"
+    state: absent
+  failed_when: False

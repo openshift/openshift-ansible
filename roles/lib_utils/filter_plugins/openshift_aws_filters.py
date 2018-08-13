@@ -67,24 +67,8 @@ class FilterModule(object):
 
         return tags
 
-    @staticmethod
-    def get_default_az(subnets):
-        ''' From a list of subnets/AZs in a specific region (from the VPC
-            structure), return the AZ that has the key/value
-            'default_az=True.' '''
-
-        for subnet in subnets:
-            if subnet.get('default_az'):
-                return subnet['az']
-
-        # if there was none marked with default_az=True, just return the first
-        # one. (this does mean we could possible return an item that has
-        # default_az=False set
-        return subnets[0]['az']
-
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {'build_instance_tags': self.build_instance_tags,
-                'get_default_az': self.get_default_az,
                 'scale_groups_match_capacity': self.scale_groups_match_capacity,
                 'scale_groups_serial': self.scale_groups_serial}

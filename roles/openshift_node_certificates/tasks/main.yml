@@ -2,6 +2,9 @@
 - name: Ensure CA certificate exists on openshift_ca_host
   stat:
     path: "{{ openshift_ca_cert }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: g_ca_cert_stat_result
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
@@ -17,6 +20,9 @@
 - name: Check status of node certificates
   stat:
     path: "{{ openshift.common.config_base }}/node/{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   with_items:
   - "system:node:{{ openshift.common.hostname | lower }}.crt"
   - "system:node:{{ openshift.common.hostname | lower }}.key"

@@ -18,12 +18,17 @@ class ActionModule(ActionBase):
         volume = self.get_templated(str(varname) + '_volume_name')
         size = self.get_templated(str(varname) + '_volume_size')
         labels = self.task_vars.get(str(varname) + '_labels')
+        annotations = self.task_vars.get(str(varname) + '_annotations')
         if labels:
             labels = self._templar.template(labels)
         else:
             labels = dict()
+        if annotations:
+            annotations = self._templar.template(annotations)
+        else:
+            annotations = list()
         access_modes = self.get_templated(str(varname) + '_access_modes')
-        return (volume, size, labels, access_modes)
+        return (volume, size, labels, annotations, access_modes)
 
     def build_pv_nfs(self, varname=None):
         """Build pv dictionary for nfs storage type"""
@@ -37,10 +42,10 @@ class ActionModule(ActionBase):
                 host = groups['oo_nfs_to_config'][0]
             else:
                 raise errors.AnsibleModuleError("|failed no storage host detected")
-        volume, size, labels, access_modes = self.build_common(varname=varname)
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
         directory = self.get_templated(str(varname) + '_nfs_directory')
         path = directory + '/' + volume
-        return dict(
+        result = dict(
             name="{0}-volume".format(volume),
             capacity=size,
             labels=labels,
@@ -49,12 +54,20 @@ class ActionModule(ActionBase):
                 nfs=dict(
                     server=host,
                     path=path)))
+        # Add claimref for NFS as default storageclass can be different
+        create_pvc = self.task_vars.get(str(varname) + '_create_pvc')
+        if create_pvc and self._templar.template(create_pvc):
+            result['storage']['claimName'] = "{0}-claim".format(volume)
+        return result
 
     def build_pv_openstack(self, varname=None):
         """Build pv dictionary for openstack storage type"""
-        volume, size, labels, access_modes = self.build_common(varname=varname)
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
         filesystem = self.get_templated(str(varname) + '_openstack_filesystem')
+        volume_name = self.get_templated(str(varname) + '_volume_name')
         volume_id = self.get_templated(str(varname) + '_openstack_volumeID')
+        if volume_name and not volume_id:
+            volume_id = _try_cinder_volume_id_from_name(volume_name)
         return dict(
             name="{0}-volume".format(volume),
             capacity=size,
@@ -67,11 +80,11 @@ class ActionModule(ActionBase):
 
     def build_pv_glusterfs(self, varname=None):
         """Build pv dictionary for glusterfs storage type"""
-        volume, size, labels, access_modes = self.build_common(varname=varname)
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
         endpoints = self.get_templated(str(varname) + '_glusterfs_endpoints')
         path = self.get_templated(str(varname) + '_glusterfs_path')
         read_only = self.get_templated(str(varname) + '_glusterfs_readOnly')
-        return dict(
+        result = dict(
             name="{0}-volume".format(volume),
             capacity=size,
             labels=labels,
@@ -81,6 +94,31 @@ class ActionModule(ActionBase):
                     endpoints=endpoints,
                     path=path,
                     readOnly=read_only)))
+        # Add claimref for glusterfs as default storageclass can be different
+        create_pvc = self.task_vars.get(str(varname) + '_create_pvc')
+        if create_pvc and self._templar.template(create_pvc):
+            result['storage']['claimName'] = "{0}-claim".format(volume)
+        return result
+
+    def build_pv_hostpath(self, varname=None):
+        """Build pv dictionary for hostpath storage type"""
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
+        # hostpath only supports ReadWriteOnce
+        if access_modes[0] != 'ReadWriteOnce':
+            msg = "Hostpath storage only supports 'ReadWriteOnce' Was given {}."
+            raise errors.AnsibleModuleError(msg.format(access_modes.join(', ')))
+        path = self.get_templated(str(varname) + '_hostpath_path')
+        return dict(
+            name="{0}-volume".format(volume),
+            capacity=size,
+            labels=labels,
+            access_modes=access_modes,
+            storage=dict(
+                hostPath=dict(
+                    path=path
+                )
+            )
+        )
 
     def build_pv_dict(self, varname=None):
         """Check for the existence of PV variables"""
@@ -98,7 +136,10 @@ class ActionModule(ActionBase):
                 elif kind == 'glusterfs':
                     return self.build_pv_glusterfs(varname=varname)
 
-                elif not (kind == 'object' or kind == 'dynamic'):
+                elif kind == 'hostpath':
+                    return self.build_pv_hostpath(varname=varname)
+
+                elif not (kind == 'object' or kind == 'dynamic' or kind == 'vsphere'):
                     msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
                         kind,
                         varname)
@@ -117,15 +158,21 @@ class ActionModule(ActionBase):
                 if create_pvc:
                     create_pvc = self._templar.template(create_pvc)
                     if kind != 'object' and create_pv and create_pvc:
-                        volume, size, _, access_modes = self.build_common(varname=varname)
+                        volume, size, _, annotations, access_modes = self.build_common(varname=varname)
                         storageclass = self.task_vars.get(str(varname) + '_storageclass')
+                        # if storageclass is specified => use it
+                        # if kind is 'nfs' => set to empty
+                        # if any other kind => set to none
                         if storageclass:
                             storageclass = self._templar.template(storageclass)
-                        elif storageclass is None and kind != 'dynamic':
+                        elif kind == 'nfs':
                             storageclass = ''
+                        if kind == 'dynamic':
+                            storageclass = None
                         return dict(
                             name="{0}-claim".format(volume),
                             capacity=size,
+                            annotations=annotations,
                             access_modes=access_modes,
                             storageclass=storageclass)
         return None
@@ -145,10 +192,7 @@ class ActionModule(ActionBase):
                          'openshift_hosted_etcd_storage',
                          'openshift_logging_storage',
                          'openshift_loggingops_storage',
-                         'openshift_metrics_storage',
-                         'openshift_prometheus_storage',
-                         'openshift_prometheus_alertmanager_storage',
-                         'openshift_prometheus_alertbuffer_storage']
+                         'openshift_metrics_storage']
         persistent_volumes = []
         persistent_volume_claims = []
         for varname in vars_to_check:
@@ -161,3 +205,25 @@ class ActionModule(ActionBase):
         result["persistent_volumes"] = persistent_volumes
         result["persistent_volume_claims"] = persistent_volume_claims
         return result
+
+
+def _try_cinder_volume_id_from_name(volume_name):
+    """Try to look up a Cinder volume UUID from its name.
+
+    Returns None on any failure (missing shade, auth, no such volume).
+    """
+    try:
+        import shade
+    except ImportError:
+        return None
+    try:
+        cloud = shade.openstack_cloud()
+    except shade.keystoneauth1.exceptions.ClientException:
+        return None
+    except shade.OpenStackCloudException:
+        return None
+    volume = cloud.get_volume(volume_name)
+    if volume:
+        return volume.id
+    else:
+        return None

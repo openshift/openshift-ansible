@@ -22,12 +22,18 @@ spec:
       - image: {{ openshift_openstack_kuryr_controller_image }}
         imagePullPolicy: IfNotPresent
         name: controller
-{% if kuryr_openstack_enable_pools | default(false) %}
+{% if enable_kuryr_controller_probes|default(true)|bool %}
         readinessProbe:
-          exec:
-            command:
-            - cat
-            - /tmp/pools_loaded
+          httpGet:
+            path: /ready
+            port: {{ kuryr_controller_healthcheck_port }}
+            scheme: HTTP
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /alive
+            port: {{ kuryr_controller_healthcheck_port }}
+          initialDelaySeconds: 15
 {% endif %}
         terminationMessagePath: "/dev/termination-log"
         # FIXME(dulek): This shouldn't be required, but without it selinux is
@@ -39,9 +45,16 @@ spec:
         - name: config-volume
           mountPath: "/etc/kuryr/kuryr.conf"
           subPath: kuryr.conf
+        - name: certificates-volume
+          mountPath: "/etc/ssl/certs/kuryr-ca-bundle.crt"
+          subPath: kuryr-ca-bundle.crt
+          readOnly: true
       volumes:
       - name: config-volume
         configMap:
           name: kuryr-config
           defaultMode: 0666
+      - name: certificates-volume
+        secret:
+          secretName: kuryr-certificates
       restartPolicy: Always

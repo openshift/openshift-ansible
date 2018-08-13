@@ -8,7 +8,7 @@ class LookupModule(LookupBase):
     # pylint: disable=too-many-branches,too-many-statements,too-many-arguments
 
     def run(self, terms, variables=None, zones_enabled=True, short_version=None,
-            cloudprovider_enabled=False, **kwargs):
+            **kwargs):
 
         priorities = []
 
@@ -27,13 +27,13 @@ class LookupModule(LookupBase):
                 # pylint: disable=line-too-long
                 raise AnsibleError("Either OpenShift needs to be installed or openshift_release needs to be specified")
 
-        if short_version not in ['3.6', '3.7', '3.8', '3.9', '3.10', 'latest']:
+        if short_version not in ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11', 'latest']:
             raise AnsibleError("Unknown short_version %s" % short_version)
 
         if short_version == 'latest':
-            short_version = '3.10'
+            short_version = '3.11'
 
-        if short_version in ['3.6', '3.7', '3.8', '3.9', '3.10']:
+        if short_version in ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11']:
             priorities.extend([
                 {'name': 'SelectorSpreadPriority', 'weight': 1},
                 {'name': 'InterPodAffinityPriority', 'weight': 1},
@@ -45,15 +45,11 @@ class LookupModule(LookupBase):
             ])
 
         if zones_enabled:
-            if cloudprovider_enabled:
-                zone_label = 'failure-domain.beta.kubernetes.io/zone'
-            else:
-                zone_label = 'zone'
             zone_priority = {
                 'name': 'Zone',
                 'argument': {
                     'serviceAntiAffinity': {
-                        'label': zone_label
+                        'label': 'zone'
                     }
                 },
                 'weight': 2

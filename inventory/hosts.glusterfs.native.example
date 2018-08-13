@@ -31,7 +31,7 @@ master
 # masters should be schedulable to run web console pods
 master  openshift_schedulable=True
 # A hosted registry, by default, will only be deployed on nodes labeled
-# "region=infra".
+# "node-role.kubernetes.io/infra=true".
 node0   openshift_schedulable=True
 node1   openshift_schedulable=True
 node2   openshift_schedulable=True

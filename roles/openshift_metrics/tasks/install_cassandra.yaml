@@ -1,7 +1,7 @@
 ---
 - name: Ensure that Cassandra has nodes to run on
   import_role:
-    name: openshift_master
+    name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
     openshift_master_ensure_nodes_selector: "{{ openshift_metrics_cassandra_nodeselector | map_to_pairs }}"
@@ -27,6 +27,10 @@
     master: "{{ (item == '1')|string|lower }}"
     replica_count: "{{cassandra_replica_count.results[item|int - 1].stdout}}"
     node_selector: "{{openshift_metrics_cassandra_nodeselector | default('') }}"
+    fsgroup: "{{ openshift_metrics_namespace_fsgroup }}"
+    run_as_uid: "{{ openshift_metrics_namespace_uid }}"
+    selinux_level: "{{ openshift_metrics_namespace_selinux }}"
+
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   changed_when: false
 

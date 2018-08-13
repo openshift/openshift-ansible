@@ -1,3 +1,0 @@
----
-__openshift_metrics_image_prefix: "docker.io/openshift/origin-"
-__openshift_metrics_image_version: "{{ openshift_image_tag }}"

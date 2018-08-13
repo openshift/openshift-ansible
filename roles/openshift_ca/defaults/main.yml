@@ -7,5 +7,3 @@ openshift_ca_cert: "{{ openshift_ca_config_dir }}/ca.crt"
 openshift_ca_key: "{{ openshift_ca_config_dir }}/ca.key"
 openshift_ca_serial: "{{ openshift_ca_config_dir }}/ca.serial.txt"
 openshift_master_loopback_config: "{{ openshift_ca_config_dir }}/openshift-master.kubeconfig"
-
-openshift_version: "{{ openshift_pkg_version | default('') }}"

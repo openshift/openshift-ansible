@@ -15,3 +15,4 @@
       openshift_metrics_image_version: openshift_hosted_metrics_deployer_version
       openshift_metrics_install_metrics: openshift_hosted_metrics_deploy
       openshift_metrics_storage_kind: openshift_hosted_metrics_storage_kind
+      openshift_metrics_hawkular_hostname: openshift_hosted_metrics_public_url

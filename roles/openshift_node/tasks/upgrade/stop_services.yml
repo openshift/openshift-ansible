@@ -4,19 +4,8 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-  - etcd_container
   - openvswitch
-  - "{{ openshift_service_type }}-master-api"
-  - "{{ openshift_service_type }}-master-controllers"
   - "{{ openshift_service_type }}-node"
-  failed_when: false
-
-- name: Ensure static containerized services stopped before Docker restart
-  command: /usr/local/bin/master-restart "{{ item }}"
-  with_items:
-  - api
-  - controllers
-  - etcd
   failed_when: false
 
 - service:
@@ -30,12 +19,15 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
-- name: Stop rpm based services
+- name: Stop crio
   service:
-    name: "{{ item }}"
+    name: cri-o
     state: stopped
-  with_items:
-  - "{{ openshift_service_type }}-node"
-  - openvswitch
-  failed_when: false
-  when: not openshift_is_containerized | bool
+  when: openshift_use_crio | bool
+
+# TODO: Need to determine if this is needed long term or just 3.9 to 3.10
+# Upgrading cri-o, at least from 1.9 to 1.10, requires that all
+# pods be stopped
+- name: Clean up cri-o pods
+  script: clean-up-crio-pods.sh
+  when: openshift_use_crio | bool

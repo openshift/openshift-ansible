@@ -1,7 +1,6 @@
 import pytest
 
 from openshift_checks.package_version import PackageVersion
-from openshift_checks import OpenShiftCheckException
 
 
 def task_vars_for(openshift_release, deployment_type):
@@ -15,33 +14,6 @@ def task_vars_for(openshift_release, deployment_type):
         openshift_image_tag='v' + openshift_release,
         openshift_deployment_type=deployment_type,
     )
-
-
-def test_openshift_version_not_supported():
-    check = PackageVersion(None, task_vars_for("1.2.3", 'origin'))
-    check.get_major_minor_version = lambda: (3, 4, 1)  # won't be in the dict
-
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.get_required_ovs_version()
-    assert "no recommended version of Open vSwitch" in str(excinfo.value)
-
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.get_required_docker_version()
-    assert "no recommended version of Docker" in str(excinfo.value)
-
-
-def test_invalid_openshift_release_format():
-    task_vars = dict(
-        ansible_pkg_mgr='yum',
-        openshift_service_type='origin',
-        openshift_image_tag='v0',
-        openshift_deployment_type='origin',
-    )
-
-    check = PackageVersion(lambda *_: {}, task_vars)
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run()
-    assert "invalid version" in str(excinfo.value)
 
 
 @pytest.mark.parametrize('openshift_release', [
@@ -73,34 +45,7 @@ def test_package_version(openshift_release):
     assert result == return_value
 
 
-@pytest.mark.parametrize('deployment_type,openshift_release,expected_docker_version', [
-    ("origin", "3.5", "1.12"),
-    ("origin", "1.3", "1.10"),
-    ("origin", "1.1", "1.8"),
-    ("openshift-enterprise", "3.4", "1.12"),
-    ("openshift-enterprise", "3.2", "1.10"),
-    ("openshift-enterprise", "3.1", "1.8"),
-])
-def test_docker_package_version(deployment_type, openshift_release, expected_docker_version):
-
-    return_value = {"foo": object()}
-
-    def execute_module(module_name=None, module_args=None, *_):
-        assert module_name == 'aos_version'
-        assert "package_list" in module_args
-
-        for pkg in module_args["package_list"]:
-            if pkg["name"] == "docker":
-                assert pkg["version"] == expected_docker_version
-
-        return return_value
-
-    check = PackageVersion(execute_module, task_vars_for(openshift_release, deployment_type))
-    result = check.run()
-    assert result == return_value
-
-
-@pytest.mark.parametrize('group_names,openshift_is_containerized,is_active', [
+@pytest.mark.parametrize('group_names,openshift_is_atomic,is_active', [
     (['oo_masters_to_config'], False, True),
     # ensure check is skipped on containerized installs
     (['oo_masters_to_config'], True, False),
@@ -112,9 +57,9 @@ def test_docker_package_version(deployment_type, openshift_release, expected_doc
     (['lb'], False, False),
     (['nfs'], False, False),
 ])
-def test_package_version_skip_when_not_master_nor_node(group_names, openshift_is_containerized, is_active):
+def test_package_version_skip_when_not_master_nor_node(group_names, openshift_is_atomic, is_active):
     task_vars = dict(
         group_names=group_names,
-        openshift_is_containerized=openshift_is_containerized,
+        openshift_is_atomic=openshift_is_atomic,
     )
     assert PackageVersion(None, task_vars).is_active() == is_active

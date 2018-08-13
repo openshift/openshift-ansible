@@ -34,19 +34,6 @@
     msg: WARNING Use of openshift_logging_mux_client_mode=minimal is not recommended due to current scaling issues
   when: openshift_logging_mux_client_mode is defined and openshift_logging_mux_client_mode == 'minimal'
 
-- name: Set default image variables based on openshift_deployment_type
-  include_vars: "{{ var_file_name }}"
-  with_first_found:
-    - "{{ openshift_deployment_type }}.yml"
-    - "default_images.yml"
-  loop_control:
-    loop_var: var_file_name
-
-- name: Set fluentd image facts
-  set_fact:
-    openshift_logging_fluentd_image_prefix: "{{ openshift_logging_fluentd_image_prefix | default(__openshift_logging_fluentd_image_prefix) }}"
-    openshift_logging_fluentd_image_version: "{{ openshift_logging_fluentd_image_version | default(__openshift_logging_fluentd_image_version) }}"
-
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
   command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
@@ -102,17 +89,17 @@
 
 # create Fluentd configmap
 - template:
-    src: "{{ __base_file_dir }}/fluent.conf.j2"
+    src: "fluent.conf.j2"
     dest: "{{ tempdir }}/fluent.conf"
   vars:
     deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
 
 - copy:
-    src: "{{ __base_file_dir }}/fluentd-throttle-config.yaml"
+    src: "fluentd-throttle-config.yaml"
     dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
 
 - copy:
-    src: "{{ __base_file_dir }}/secure-forward.conf"
+    src: "secure-forward.conf"
     dest: "{{ tempdir }}/secure-forward.conf"
 
 - import_role:
@@ -120,7 +107,7 @@
     tasks_from: patch_configmap_files.yaml
   vars:
     configmap_name: "logging-fluentd"
-    configmap_namespace: "logging"
+    configmap_namespace: "{{ openshift_logging_namespace }}"
     configmap_file_names:
       - current_file: "fluent.conf"
         new_file: "{{ tempdir }}/fluent.conf"
@@ -140,6 +127,8 @@
       secure-forward.conf: "{{ tempdir }}/secure-forward.conf"
 
 # create Fluentd secret
+# if we don't provide a location for provided certs then we use from generated_certs_dir
+# ops will use the same certs as non-ops by default
 # TODO: add aggregation secrets if necessary
 - name: Set logging-fluentd secret
   oc_secret:
@@ -148,18 +137,24 @@
     namespace: "{{ openshift_logging_fluentd_namespace }}"
     files:
       - name: ca
-        path: "{{ generated_certs_dir }}/ca.crt"
+        path: "{{ openshift_logging_fluentd_ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
       - name: key
-        path: "{{ generated_certs_dir }}/system.logging.fluentd.key"
+        path: "{{ openshift_logging_fluentd_key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
       - name: cert
-        path: "{{ generated_certs_dir }}/system.logging.fluentd.crt"
+        path: "{{ openshift_logging_fluentd_cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
+      - name: ops-ca
+        path: "{{ openshift_logging_fluentd_ops_ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
+      - name: ops-key
+        path: "{{ openshift_logging_fluentd_ops_key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
+      - name: ops-cert
+        path: "{{ openshift_logging_fluentd_ops_cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
 
 # create Fluentd daemonset
 # this should change based on the type of fluentd deployment to be done...
 # TODO: pass in aggregation configurations
 - name: Generate logging-fluentd daemonset definition
   template:
-    src: "{{ __base_file_dir }}/fluentd.j2"
+    src: "fluentd.j2"
     dest: "{{ tempdir }}/templates/logging-fluentd.yaml"
   vars:
     daemonset_name: logging-fluentd
@@ -204,9 +199,14 @@
     openshift_logging_fluentd_hosts: "{{ fluentd_hosts.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   when: "'--all' in openshift_logging_fluentd_hosts"
 
-- include_tasks: label_and_wait.yaml
-  vars:
-    node: "{{ fluentd_host }}"
+# We need to pause between nodes while labeling to avoid overloading the scheduler.
+- name: Label OCP nodes for Fluentd
+  shell: >
+    {{ openshift_client_binary }} --config=/etc/origin/master/admin.kubeconfig \
+    label --overwrite node {{ fluentd_host }} \
+    {% for k, v in openshift_logging_fluentd_nodeselector.items() %} {{ k }}={{ v }} {% endfor %} \
+    && \
+    sleep {{ openshift_logging_fluentd_label_delay }}
   with_items: "{{ openshift_logging_fluentd_hosts }}"
   loop_control:
     loop_var: fluentd_host

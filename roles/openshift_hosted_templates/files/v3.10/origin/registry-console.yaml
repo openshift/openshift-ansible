@@ -25,6 +25,8 @@ objects:
           labels:
             name: "registry-console"
         spec:
+          nodeSelector:
+            node-role.kubernetes.io/master: 'true'
           containers:
             - name: registry-console
               image: ${IMAGE_PREFIX}${IMAGE_BASENAME}:${IMAGE_VERSION}
@@ -78,19 +80,6 @@ objects:
           targetPort: 9090
       selector:
         name: "registry-console"
-  - kind: ImageStream
-    apiVersion: v1
-    metadata:
-      name: registry-console
-      annotations:
-        description: Atomic Registry console
-    spec:
-      tags:
-        - annotations: null
-          from:
-            kind: DockerImage
-            name: ${IMAGE_PREFIX}${IMAGE_BASENAME}:${IMAGE_VERSION}
-          name: ${IMAGE_VERSION}
   - kind: OAuthClient
     apiVersion: v1
     metadata:

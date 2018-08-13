@@ -10,9 +10,5 @@
     line: "OPTIONS={{ openshift_node_start_options | default('') }}"
   - regex: '^DEBUG_LOGLEVEL='
     line: "DEBUG_LOGLEVEL={{ openshift_node_debug_level }}"
-  - regex: '^CONFIG_FILE='
-    line: "CONFIG_FILE={{ openshift.common.config_base }}/node/node-config.yaml"
   - regex: '^IMAGE_VERSION='
     line: "IMAGE_VERSION={{ openshift_image_tag }}"
-  notify:
-  - restart node

@@ -1,27 +1,13 @@
 ---
 # fail is we don't have an endpoint for ES to connect to?
-- name: Set default image variables based on openshift_deployment_type
-  include_vars: "{{ var_file_name }}"
-  with_first_found:
-    - "{{ openshift_deployment_type }}.yml"
-    - "default_images.yml"
-  loop_control:
-    loop_var: var_file_name
 
 - name: Ensure that Kibana has nodes to run on
   import_role:
-    name: openshift_master
+    name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
     openshift_master_ensure_nodes_selector: "{{ openshift_logging_kibana_nodeselector | map_to_pairs }}"
     openshift_master_ensure_nodes_service: Kibana
-
-- name: Set kibana image facts
-  set_fact:
-    openshift_logging_kibana_image_prefix: "{{ openshift_logging_kibana_image_prefix | default(__openshift_logging_kibana_image_prefix) }}"
-    openshift_logging_kibana_image_version: "{{ openshift_logging_kibana_image_version | default(__openshift_logging_kibana_image_version) }}"
-    openshift_logging_kibana_proxy_image_prefix: "{{ openshift_logging_kibana_proxy_image_prefix | default(__openshift_logging_kibana_proxy_image_prefix) }}"
-    openshift_logging_kibana_proxy_image_version: "{{ openshift_logging_kibana_proxy_image_version | default(__openshift_logging_kibana_proxy_image_version) }}"
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
@@ -65,17 +51,25 @@
 
 # Check {{ generated_certs_dir }} for session_secret and oauth_secret
 - name: Checking for session_secret
-  stat: path="{{generated_certs_dir}}/session_secret"
+  stat:
+    path: "{{generated_certs_dir}}/session_secret"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: session_secret_file
 
 - name: Checking for oauth_secret
-  stat: path="{{generated_certs_dir}}/oauth_secret"
+  stat:
+    path: "{{generated_certs_dir}}/oauth_secret"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: oauth_secret_file
 
 # gen session_secret if necessary
 - name: Generate session secret
   copy:
-    content: "{{ 200 | lib_utils_oo_random_word }}"
+    content: "{{ 32 | lib_utils_oo_random_word }}"
     dest: "{{ generated_certs_dir }}/session_secret"
   when:
     - not session_secret_file.stat.exists
@@ -139,7 +133,7 @@
 
 - name: Generating Kibana route template
   template:
-    src: "{{ __base_file_dir }}/route_reencrypt.j2"
+    src: "route_reencrypt.j2"
     dest: "{{ tempdir }}/templates/kibana-route.yaml"
   vars:
     obj_name: "{{ kibana_name }}"
@@ -180,7 +174,7 @@
 # create oauth client
 - name: Create oauth-client template
   template:
-    src: "{{ __base_file_dir }}/oauth-client.j2"
+    src: "oauth-client.j2"
     dest: "{{ tempdir }}/templates/oauth-client.yml"
   vars:
     kibana_hostnames: "{{ proxy_hostnames | unique }}"
@@ -239,14 +233,12 @@
 # create Kibana DC
 - name: Generate Kibana DC template
   template:
-    src: "{{ __base_file_dir }}/kibana.j2"
+    src: "kibana.j2"
     dest: "{{ tempdir }}/templates/kibana-dc.yaml"
   vars:
     component: "{{ kibana_component }}"
     logging_component: kibana
     deploy_name: "{{ kibana_name }}"
-    image: "{{ openshift_logging_kibana_image_prefix }}logging-kibana:{{ openshift_logging_kibana_image_version }}"
-    proxy_image: "{{ openshift_logging_kibana_proxy_image_prefix }}logging-auth-proxy:{{ openshift_logging_kibana_proxy_image_version }}"
     es_host: "{{ openshift_logging_kibana_es_host }}"
     es_port: "{{ openshift_logging_kibana_es_port }}"
     kibana_cpu_limit: "{{ openshift_logging_kibana_cpu_limit }}"

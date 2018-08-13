@@ -49,7 +49,7 @@ docker run -u `id -u` \
        -e PLAYBOOK_FILE=playbooks/openshift-checks/health.yml \
        -e GENERATE_INVENTORY=true \
        -e USER=`whoami` \
-       openshift/origin-ansible
+       docker.io/openshift/origin-ansible
 
 ```
 
@@ -66,7 +66,7 @@ and manually execute `/usr/local/bin/generate`:
 docker run -u `id -u` \
        -v ...
        ...
-       -it openshift/origin-ansible /bin/bash
+       -it docker.io/openshift/origin-ansible /bin/bash
 
 ---
 

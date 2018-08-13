@@ -11,7 +11,7 @@ metadata:
     openshift.io/provider-display-name: Red Hat, Inc.
 parameters:
 - name: IMAGE
-  value: openshift/prometheus-node-exporter:v0.15.2
+  value: openshift/prometheus-node-exporter:v0.16.0
 - name: MEMORY_REQUESTS
   value: 30Mi
 - name: CPU_REQUESTS
@@ -65,6 +65,8 @@ objects:
         containers:
         - image: ${IMAGE}
           name: node-exporter
+          args:
+          - --no-collector.wifi
           ports:
           - containerPort: 9100
             name: scrape

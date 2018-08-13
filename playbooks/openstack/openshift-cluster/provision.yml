@@ -1,21 +1,13 @@
 ---
 - name: Create the OpenStack resources for cluster installation
-  any_errors_fatal: true
-  hosts: localhost
-  tasks:
-  - name: retrieve cluster name from the environment if present
-    set_fact:
-      openshift_openstack_stack_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER') | ternary (lookup('env', 'OPENSHIFT_CLUSTER'), omit) }}"
-  - name: provision cluster
-    import_role:
-      name: openshift_openstack
-      tasks_from: provision.yml
+  import_playbook: provision_resources.yml
 
 
-# NOTE(shadower): Bring in the host groups:
-- name: evaluate groups
+- name: Evaluate OpenStack groups from the dynamic inventory
+  import_playbook: evaluate_groups.yml
+
+- name: Evaluate remaining cluster groups
   import_playbook: ../../init/evaluate_groups.yml
-
 
 - name: Wait for the nodes and gather their facts
   any_errors_fatal: true
@@ -38,10 +30,12 @@
   any_errors_fatal: true
   hosts: localhost
   tasks:
-  - name: Populate DNS entries
+  - name: Add the DNS records
     import_role:
       name: openshift_openstack
       tasks_from: populate-dns.yml
+    vars:
+      l_openshift_openstack_dns_update_nodes: "{{ groups.OSEv3 }}"
     when:
     - openshift_openstack_external_nsupdate_keys is defined
     - openshift_openstack_external_nsupdate_keys.private is defined or openshift_openstack_external_nsupdate_keys.public is defined
@@ -62,3 +56,6 @@
     - ansible_distribution == "RedHat"
     - rhsub_user is defined
     - rhsub_pass is defined
+
+- name: Show information about the deployed cluster
+  import_playbook: cluster-info.yml

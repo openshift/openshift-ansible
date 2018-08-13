@@ -42,9 +42,12 @@ data:
       loglevel: "info"
       portresolvetimer: 60
       logfilesize: 1
+      logfilemaxage: 2
       vrsconnectionchecktimer: 180
-      mtu: 1450
+      mtu: {{ nuage_vport_mtu }}
       staleentrytimeout: 600
+      nuagesiteid: {{ nuage_site_id | default(-1) }}
+      platform: {{ nuage_personality | default('vrs') }}
 
 ---
 
@@ -73,7 +76,7 @@ spec:
         # This container installs Nuage CNI binaries
         # and CNI network config file on each node.
         - name: install-nuage-cni
-          image: nuage/cni:{{ nuage_cni_container_image_version }}
+          image: {{ nuage_cni_image_name }}:{{ nuage_cni_container_image_version }}
           command: ["/install-cni.sh"]
           args: ["nuage-cni-openshift", "{{ slave_host_type }}"]
           securityContext:
@@ -93,7 +96,7 @@ spec:
                   key: cni_yaml_config
             # Nuage cluster network CIDR for iptables configuration
             - name: NUAGE_CLUSTER_NW_CIDR
-              value: "{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
+              value: "{{ openshift_cluster_network_cidr }}"
           volumeMounts:
             - mountPath: /host/opt/cni/bin
               name: cni-bin-dir
@@ -159,26 +162,34 @@ spec:
         # This container installs Nuage VRS running as a
         # container on each worker node
         - name: install-nuage-vrs
-          image: nuage/vrs:{{ nuage_vrs_container_image_version }}
+          image: {{ nuage_vrs_image_name }}:{{ nuage_vrs_container_image_version }}
           securityContext:
             privileged: true
           env:
             # Configure parameters for VRS openvswitch file
             - name: NUAGE_ACTIVE_CONTROLLER
-              value: "{{ vsc_active_ip }}"
+              value: "{{ nuage_vsc_active_ip }}"
             - name: NUAGE_STANDBY_CONTROLLER
-              value: "{{ vsc_standby_ip }}"
+              value: "{{ nuage_vsc_standby_ip }}"
             - name: NUAGE_PLATFORM
               value: '"kvm, k8s"'
             - name: NUAGE_K8S_SERVICE_IPV4_SUBNET
-              value: '172.30.0.0\/16'
+              value: '{{ svc_ipv4_subnet }}\/{{ svc_ipv4_subnet_mask }}'
             - name: NUAGE_NETWORK_UPLINK_INTF
-              value: "eth0"
+              value: "{{ nw_uplink_intf }}"
+            - name: NUAGE_BRIDGE_MTU
+              value: "{{ vrs_bridge_mtu_config }}"
+{% if nuage_bgp_config == 'enable' %}
+            - name: ENABLE_BGP
+              value: "yes"
+{% endif %}
           volumeMounts:
             - mountPath: /var/run
               name: vrs-run-dir
             - mountPath: /var/log
               name: vrs-log-dir
+            - mountPath: {{ nuage_vrs_mount_dir }}
+              name: vrs-mnt-dir
             - mountPath: /sys/module
               name: sys-mod-dir
               readOnly: true
@@ -192,6 +203,9 @@ spec:
         - name: vrs-log-dir
           hostPath:
             path: /var/log
+        - name: vrs-mnt-dir
+          hostPath:
+            path: {{ nuage_vrs_mount_dir }}
         - name: sys-mod-dir
           hostPath:
             path: /sys/module

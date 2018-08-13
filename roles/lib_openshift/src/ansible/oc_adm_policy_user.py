@@ -15,6 +15,7 @@ def main():
             resource_name=dict(required=True, type='str'),
             namespace=dict(default='default', type='str'),
             role_namespace=dict(default=None, type='str'),
+            rolebinding_name=dict(default=None, type='str'),
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
 
             user=dict(required=True, type='str'),

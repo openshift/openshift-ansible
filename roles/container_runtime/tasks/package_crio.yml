@@ -4,7 +4,7 @@
   when:
     - openshift_is_atomic | bool
 
-- include_tasks: common/pre.yml
+- import_tasks: common/pre.yml
 
 - name: Check that overlay is in the kernel
   shell: lsmod | grep overlay
@@ -32,10 +32,16 @@
 
 - name: Install cri-o
   package:
-    name: "cri-o"
-    state: present
+    name: "{{ crio_pkgs | join(',') }}"
+    state: latest
   register: result
   until: result is succeeded
+  vars:
+    crio_pkgs:
+      - "cri-o"
+      - "cri-tools"
+      - atomic
+      - skopeo
 
 - name: Remove CRI-O default configuration files
   file:
@@ -63,16 +69,12 @@
   template:
     dest: /etc/cni/net.d/openshift-sdn.conf
     src: 80-openshift-sdn.conf.j2
+  when: r_crio_use_openshift_sdn | bool
 
 - name: Create /etc/sysconfig/crio-network
   template:
     dest: /etc/sysconfig/crio-network
     src: crio-network.j2
-
-- name: Fixup SELinux permissions for docker
-  shell: |
-          semanage fcontext -a -e /var/lib/docker/overlay2 /var/lib/containers/overlay2
-          restorecon -R -v /var/lib/containers/overlay2
 
 - name: Start the CRI-O service
   systemd:
@@ -84,6 +86,4 @@
 
 # If we are using crio only, docker.service might not be available for
 # 'docker login'
-- include_tasks: common/post.yml
-  vars:
-    openshift_docker_alternative_creds: "{{ (openshift_use_crio_only | bool) or (openshift_docker_use_system_container | bool) }}"
+- import_tasks: common/post.yml

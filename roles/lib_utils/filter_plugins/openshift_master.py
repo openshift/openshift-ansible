@@ -273,9 +273,12 @@ class HTPasswdPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
+        # Workaround: We used to let users specify arbitrary location of
+        # htpasswd file, but now it needs to be in specific spot.
+        idp['file'] = '/etc/origin/master/htpasswd'
         super(HTPasswdPasswordIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
-        self._required += [['file', 'filename', 'fileName', 'file_name']]
+        self._required += [['file']]
 
     @staticmethod
     def get_default(key):
@@ -454,7 +457,7 @@ class GitHubIdentityProvider(IdentityProviderOauthBase):
 
 
 class FilterModule(object):
-    ''' Custom ansible filters for use by the openshift_master role'''
+    ''' Custom ansible filters for use by the openshift_control_plane role'''
 
     @staticmethod
     def translate_idps(idps, api_version):
@@ -481,27 +484,6 @@ class FilterModule(object):
                            Dumper=AnsibleDumper))
 
     @staticmethod
-    def certificates_to_synchronize(hostvars, include_keys=True, include_ca=True):
-        ''' Return certificates to synchronize based on facts. '''
-        if not issubclass(type(hostvars), dict):
-            raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
-        certs = ['admin.crt',
-                 'admin.key',
-                 'admin.kubeconfig',
-                 'master.kubelet-client.crt',
-                 'master.kubelet-client.key',
-                 'master.proxy-client.crt',
-                 'master.proxy-client.key',
-                 'service-signer.crt',
-                 'service-signer.key']
-        if bool(include_ca):
-            certs += ['ca.crt', 'ca.key', 'ca-bundle.crt', 'client-ca-bundle.crt']
-        if bool(include_keys):
-            certs += ['serviceaccounts.private.key',
-                      'serviceaccounts.public.key']
-        return certs
-
-    @staticmethod
     def oo_htpasswd_users_from_file(file_contents):
         ''' return a dictionary of htpasswd users from htpasswd file contents '''
         htpasswd_entries = {}
@@ -524,5 +506,4 @@ class FilterModule(object):
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {"translate_idps": self.translate_idps,
-                "certificates_to_synchronize": self.certificates_to_synchronize,
                 "oo_htpasswd_users_from_file": self.oo_htpasswd_users_from_file}

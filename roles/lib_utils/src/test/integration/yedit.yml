@@ -11,7 +11,6 @@
   vars:
     test_file: kube-manager-test.yaml
     test: test
-  strategy: debug
 
   post_tasks:
   - name: copy the kube-manager.yaml file so that we have a pristine copy each time
@@ -276,4 +275,60 @@
       that:
       - absentout.result == ['oranges']
       - absentout.result|length == 1
+      ###### end test state absent on list item ####
+
+
+  ###### test backup ext on filename #####
+  - name: test backup ext on file
+    yedit:
+      state: present
+      src: "{{ test_file }}"
+      key: test
+      backup: true
+      backup_ext: .orig
+      value: "{{ lookup('pipe', 'date +%s') }}"
+
+  - name: second call which should be noop
+    yedit:
+      state: present
+      src: "{{ test_file }}"
+      key: test
+      backup: true
+      value: "{{ lookup('pipe', 'date +%s') }}"
+
+  - name: stat file
+    stat:
+      path: "{{ test_file }}.orig"
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
+    register: statout
+
+  - assert:
+      that:
+      - statout.stat.exists
+
+  - name: set the date string for backup_ext
+    set_fact:
+      date_str: "{{ lookup('pipe', 'date +%s') }}"
+
+  - yedit:
+      state: present
+      src: "{{ test_file }}"
+      key: test
+      backup: true
+      backup_ext: "{{ date_str }}"
+      value: "{{ lookup('pipe', 'date +%s') }}"
+
+  - name: stat file
+    stat:
+      path: "{{ test_file }}{{ date_str }}"
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
+    register: statout
+
+  - assert:
+      that:
+      - statout.stat.exists
       ###### end test state absent on list item ####

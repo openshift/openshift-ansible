@@ -1,17 +1,13 @@
 ---
 - name: upload certificates to AWS IAM
-  iam_cert23:
+  iam_cert:
     state: present
     name: "{{ openshift_aws_iam_cert_name }}"
     cert: "{{ openshift_aws_iam_cert_path }}"
     key: "{{ openshift_aws_iam_cert_key_path }}"
     cert_chain: "{{ openshift_aws_iam_cert_chain_path | default(omit) }}"
+    dup_ok: True
   register: elb_cert_chain
-  failed_when:
-  - "'failed' in elb_cert_chain"
-  - elb_cert_chain.failed
-  - "'msg' in elb_cert_chain"
-  - "'already exists and has a different certificate body' in elb_cert_chain.msg or 'BotoServerError' in elb_cert_chain.msg or 'Traceback' in elb_cert_chain.msg.module_stderr"
   when:
   - openshift_aws_create_iam_cert | bool
   - openshift_aws_iam_cert_path != ''

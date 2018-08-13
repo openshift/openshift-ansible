@@ -406,7 +406,7 @@ For consistency, role names SHOULD follow the above naming pattern. It is import
 Many times the `technology` portion of the pattern will line up with a package name. It is advised that whenever possible, the package name should be used.
 
 .Examples:
-* The role to configure a master is called `openshift_master`
+* The role to configure a master is called `openshift_control_plane`
 * The role to configure OpenShift specific yum repositories is called `openshift_repos`
 
 === Filters

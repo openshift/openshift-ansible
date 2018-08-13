@@ -28,6 +28,8 @@ openshift_gcp_base_image: rhel-7
 openshift_gcp_registry_bucket_keyfile: ''
 openshift_gcp_registry_bucket_name: "{{ openshift_gcp_prefix }}-docker-registry"
 
+openshift_gcp_master_dns_ttl: 300
+
 openshift_gcp_node_group_config:
   - name: master
     suffix: m
@@ -58,3 +60,8 @@ openshift_gcp_startup_script_file: "{{ role_path }}/files/bootstrap-script.sh"
 openshift_gcp_user_data_file: ''
 
 openshift_gcp_multizone: False
+
+openshift_gcp_node_group_mapping:
+  masters: 'node-config-master'
+  infra: 'node-config-infra'
+  compute: 'node-config-compute'

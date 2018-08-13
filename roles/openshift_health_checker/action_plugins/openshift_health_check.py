@@ -70,6 +70,9 @@ class ActionModule(ActionBase):
         result["checks"] = check_results = {}
 
         user_disabled_checks = normalize(task_vars.get('openshift_disable_check', []))
+        # Automatically add docker_storage if only CRIO is used, as docker service would be stopped
+        if task_vars.get('openshift_use_crio_only'):
+            user_disabled_checks.append('docker_storage')
 
         for name in resolved_checks:
             display.banner("CHECK [{} : {}]".format(name, task_vars["ansible_host"]))

@@ -68,7 +68,7 @@ class LoggingCheck(OpenShiftCheck):
 
     def logging_namespace(self):
         """Returns the namespace in which logging is configured to deploy."""
-        return self.get_var("openshift_logging_namespace", default="logging")
+        return self.get_var("openshift_logging_namespace", default="openshift-logging")
 
     def exec_oc(self, cmd_str="", extra_args=None, save_as_name=None):
         """

@@ -1,8 +1,4 @@
 ---
-- name: set openshift_node_bootstrap to True when building AMI
-  set_fact:
-    openshift_node_bootstrap: True
-
 - include_tasks: vpc_and_subnet_id.yml
 
 - name: create instance for ami creation
@@ -11,8 +7,8 @@
     region: "{{ openshift_aws_region }}"
     key_name: "{{ openshift_aws_ssh_key_name }}"
     group: "{{ openshift_aws_build_ami_group }}"
-    instance_type: m4.xlarge
-    vpc_subnet_id: "{{ openshift_aws_subnet_id | default(subnetout.subnets[0].id) }}"
+    instance_type: "{{ openshift_aws_instance_type }}"
+    vpc_subnet_id: "{{ subnetout.results[0].subnets[0].id }}"
     image: "{{ openshift_aws_base_ami }}"
     volumes: "{{ openshift_aws_node_group_config_node_volumes }}"
     wait: yes

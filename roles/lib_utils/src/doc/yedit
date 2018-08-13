@@ -95,6 +95,12 @@ options:
     required: false
     default: false
     aliases: []
+  backup_ext:
+    description:
+    - The backup file's appended string.
+    required: false
+    default: .orig
+    aliases: []
   backup:
     description:
     - Whether to make a backup copy of the current file when performing an

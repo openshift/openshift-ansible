@@ -8,48 +8,16 @@
     set_stats:
       data:
         installer_phase_glusterfs:
+          title: "GlusterFS Install"
+          playbook: "playbooks/openshift-glusterfs/config.yml"
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- name: Configure GlusterFS hosts
-  hosts: glusterfs
-  tasks:
-  - import_role:
-      name: openshift_storage_glusterfs
-      tasks_from: firewall.yml
-    when: openshift_storage_glusterfs_is_native | default(True) | bool
-  - import_role:
-      name: openshift_storage_glusterfs
-      tasks_from: host_services.yml
-    when: openshift_storage_glusterfs_is_native | default(True) | bool
+- import_playbook: setup_nodes.yml
 
-- name: Configure GlusterFS registry hosts
-  hosts: glusterfs_registry
-  tasks:
-  - import_role:
-      name: openshift_storage_glusterfs
-      tasks_from: firewall.yml
-    when: openshift_storage_glusterfs_registry_is_native | default(True) | bool
-  - import_role:
-      name: openshift_storage_glusterfs
-      tasks_from: host_services.yml
-    when: openshift_storage_glusterfs_registry_is_native | default(True) | bool
+- import_playbook: gluster_hosts.yml
 
-- name: Load kernel modules for nodes
-  hosts: oo_nodes_to_config
-  tasks:
-  - import_role:
-      name: openshift_storage_glusterfs
-      tasks_from: kernel_modules.yml
-    when: openshift_storage_glusterfs_registry_is_native | default(True) | bool
-
-- name: Configure GlusterFS
-  hosts: oo_first_master
-  tasks:
-  - name: setup glusterfs
-    import_role:
-      name: openshift_storage_glusterfs
-    when: groups.oo_glusterfs_to_config | default([]) | count > 0
+- import_playbook: gluster_main.yml
 
 - name: GlusterFS Install Checkpoint End
   hosts: all

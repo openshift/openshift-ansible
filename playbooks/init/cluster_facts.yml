@@ -13,6 +13,17 @@
     get_current_openshift_version:
       deployment_type: "{{ openshift_deployment_type }}"
 
+  # oo_first_master group might not be present due to provisioning plays
+  # for existing clusters, openshift_portal_net will be force-set by
+  # basic_facts.yml from value in existing master configs.
+  - name: set_fact openshift_portal_net if present on masters
+    set_fact:
+      openshift_portal_net: "{{ hostvars[groups.oo_first_master.0].openshift_portal_net }}"
+    when:
+    - "'oo_first_master' in groups"
+    - "groups.oo_first_master | length > 0"
+    - "'openshift_portal_net' in hostvars[groups.oo_first_master.0]"
+
   - name: Gather Cluster facts
     openshift_facts:
       role: common
@@ -21,7 +32,7 @@
         ip: "{{ openshift_ip | default(None) }}"
         public_hostname: "{{ openshift_public_hostname | default(None) }}"
         public_ip: "{{ openshift_public_ip | default(None) }}"
-        portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
+        portal_net: "{{ openshift_portal_net }}"
         http_proxy: "{{ openshift_http_proxy | default(None) }}"
         https_proxy: "{{ openshift_https_proxy | default(None) }}"
         no_proxy: "{{ openshift_no_proxy | default(None) }}"
@@ -36,6 +47,11 @@
                                              | union(groups['oo_etcd_to_config'] | default([])))
                                          | lib_utils_oo_collect('openshift.common.hostname') | default([]) | join (',')
                                          }}"
+        no_proxy_master_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_masters_to_config']
+                                          | default([]))
+                                          | lib_utils_oo_collect('openshift.common.ip')
+                                          | default([]) | join (',')
+                              }}"
     when:
     - openshift_http_proxy is defined or openshift_https_proxy is defined
     - openshift_generate_no_proxy_hosts | default(True) | bool
@@ -45,3 +61,30 @@
       role: node
       local_facts:
         sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+        bootstrapped: "{{ openshift_is_bootstrapped }}"
+
+- name: Initialize etcd host variables
+  hosts: oo_masters_to_config
+  roles:
+  - role: openshift_facts
+  - role: lib_utils
+  tasks:
+  # This needs to run after openshift_facts common role has run on etcd hosts.
+  # lib_utils_oo_select_keys, lib_utils_oo_collect
+  # are custom filter plugins in roles/lib_utils/filter_plugins/oo_filters.py
+  - set_fact:
+      openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                                  | lib_utils_oo_collect('openshift.common.ip') | default([]) | join(',')
+                                                  }}"
+      openshift_master_etcd_port: "{{ etcd_client_port | default('2379') }}"
+      openshift_master_etcd_hosts: "{{ hostvars
+                                       | lib_utils_oo_select_keys(groups['oo_etcd_to_config']
+                                                        | default([]))
+                                       | lib_utils_oo_collect('openshift.common.hostname')
+                                       | default(none, true) }}"
+  # This fact requires the facts set above, so needs to happen in it's own task.
+  - set_fact:
+      # lib_utils_oo_etcd_host_urls is a custom filter plugin in roles/lib_utils/filter_plugins/oo_filters.py
+      openshift_master_etcd_urls: "{{ openshift_master_etcd_hosts | lib_utils_oo_etcd_host_urls(l_use_ssl, openshift_master_etcd_port) }}"
+    vars:
+      l_use_ssl: "{{ openshift_master_etcd_use_ssl | default(True) | bool}}"

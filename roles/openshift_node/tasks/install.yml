@@ -10,15 +10,5 @@
   - name: "{{ openshift_service_type }}-clients{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
   - name: "conntrack-tools"
   when:
-  - not openshift_is_containerized | bool
+  - not openshift_is_atomic | bool
   - item['install'] | default(True) | bool
-
-- when:
-  - openshift_is_containerized | bool
-  - not l_is_node_system_container | bool
-  block:
-  - name: Pre-pull node image when containerized
-    command: >
-      docker pull {{ osn_image }}
-    register: pull_result
-    changed_when: "'Downloaded newer image' in pull_result.stdout"

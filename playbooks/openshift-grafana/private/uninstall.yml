@@ -7,4 +7,4 @@
   - name: Run the Grafana Uninstall Role Tasks
     include_role:
       name: openshift_grafana
-      tasks_from: uninstall_grafana
+      tasks_from: uninstall_grafana.yaml

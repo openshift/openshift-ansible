@@ -31,13 +31,12 @@ class BinarySyncer(object):
     a container onto the host system.
     """
 
-    def __init__(self, module, image, tag, backend):
+    def __init__(self, module, image, backend):
         self.module = module
         self.changed = False
         self.output = []
         self.bin_dir = '/usr/local/bin'
         self._image = image
-        self.tag = tag
         self.backend = backend
         self.temp_dir = None  # TBD
 
@@ -51,7 +50,7 @@ class BinarySyncer(object):
         self.temp_dir = tempfile.mkdtemp()
         temp_dir_mount = tempfile.mkdtemp()
         try:
-            image_spec = '%s:%s' % (self.image, self.tag)
+            image_spec = self.image
             rc, stdout, stderr = self.module.run_command(['atomic', 'mount',
                                                           '--storage', "ostree",
                                                           image_spec, temp_dir_mount])
@@ -71,7 +70,7 @@ class BinarySyncer(object):
     def _sync_docker(self):
         container_name = "openshift-cli-%s" % random.randint(1, 100000)
         rc, stdout, stderr = self.module.run_command(['docker', 'create', '--name',
-                                                      container_name, '%s:%s' % (self.image, self.tag)])
+                                                      container_name, self.image])
         if rc:
             raise BinarySyncError("Error creating temporary docker container. stdout=%s, stderr=%s" %
                                   (stdout, stderr))
@@ -177,20 +176,18 @@ def main():
     module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             image=dict(required=True),
-            tag=dict(required=True),
             backend=dict(required=True),
         ),
         supports_check_mode=True
     )
 
     image = module.params['image']
-    tag = module.params['tag']
     backend = module.params['backend']
 
     if backend not in ["docker", "atomic"]:
         module.fail_json(msg="unknown backend")
 
-    binary_syncer = BinarySyncer(module, image, tag, backend)
+    binary_syncer = BinarySyncer(module, image, backend)
 
     try:
         binary_syncer.sync()

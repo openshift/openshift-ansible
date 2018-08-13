@@ -11,7 +11,7 @@ openshift_provisioners_project: openshift-infra
 
 openshift_provisioners_image_prefix_dict:
   origin: "docker.io/openshift/origin-"
-  openshift-enterprise: "registry.access.redhat.com/openshift3/"
+  openshift-enterprise: "registry.redhat.io/openshift3/"
 
 openshift_provisioners_image_version_dict:
   origin: "latest"

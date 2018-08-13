@@ -6,6 +6,7 @@
   with_items:
     - support
     - heapster
+    - hawkular_schema_job
     - hawkular
     - cassandra
   loop_control:
@@ -67,9 +68,6 @@
   with_items: "{{ hawkular_agent_object_defs.results }}"
   when: openshift_metrics_install_hawkular_agent | bool
 
-- include_tasks: update_master_config.yaml
-  when: not openshift_version_gte_3_9
-
 # Update asset config in openshift-web-console namespace
 - name: Add metrics route information to web console asset config
   include_role:
@@ -81,7 +79,6 @@
         value: "https://{{ openshift_metrics_hawkular_hostname}}/hawkular/metrics"
   when:
     - openshift_web_console_install | default(true) | bool
-    - openshift_version_gte_3_9
 
 - command: >
     {{openshift_client_binary}}

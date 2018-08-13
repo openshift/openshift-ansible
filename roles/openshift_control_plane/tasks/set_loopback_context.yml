@@ -8,7 +8,7 @@
 
 - command: >
     {{ openshift_client_binary }} config set-cluster
-    --certificate-authority={{ openshift_master_config_dir }}/ca.crt
+    --certificate-authority=/etc/origin/master/ca.crt
     --embed-certs=true --server={{ openshift.master.loopback_api_url }}
     {{ openshift.master.loopback_cluster_name }}
     --config={{ openshift_master_loopback_config }}

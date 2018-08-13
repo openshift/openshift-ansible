@@ -1,6 +1,8 @@
 ---
 - name: Install NFS storage plugin dependencies
-  package: name=nfs-utils state=present
+  package:
+    name: nfs-utils
+    state: present
   when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
@@ -31,7 +33,7 @@
   # since getsebool prints the resolved name.  (At some point Ansible's seboolean module
   # should learn to deal with aliases)
   - item.item in item.stdout  # Boolean does not have an alias.
-  - ansible_python_version is version_compare('3', '<')
+  - ansible_python_version is version('3', '<')
   with_items: "{{ nfs_getsebool_status.results }}"
 
 # Workaround for https://github.com/openshift/openshift-ansible/issues/4438
@@ -40,8 +42,7 @@
 # the previous task when the problem has been addressed in current
 # ansible release.
 - name: Set seboolean to allow nfs storage plugin access from containers (python 3)
-  command: >
-    setsebool -P {{ item.item }} on
+  command: setsebool -P {{ item.item }} on
   when:
   - ansible_selinux
   - ansible_selinux.status == "enabled"
@@ -52,5 +53,5 @@
   # should learn to deal with aliases)
   - item.item in item.stdout  # Boolean does not have an alias.
   - ('--> off' in item.stdout)  # Boolean is currently off.
-  - ansible_python_version is version_compare('3', '>=')
+  - ansible_python_version is version('3', '>=')
   with_items: "{{ nfs_getsebool_status.results }}"

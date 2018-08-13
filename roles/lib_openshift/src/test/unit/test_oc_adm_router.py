@@ -109,7 +109,7 @@ class RouterTest(unittest.TestCase):
                         "containers": [
                             {
                                 "name": "router",
-                                "image": "openshift3/ose-haproxy-router:v3.5.0.39",
+                                "image": "registry.access.redhat.com/openshift3/ose-haproxy-router:v3.5.0.39",
                                 "ports": [
                                     {
                                         "containerPort": 80
@@ -314,6 +314,7 @@ class RouterTest(unittest.TestCase):
                   'service_account': 'router',
                   'router_type': None,
                   'host_network': None,
+                  'extended_validation': True,
                   'external_host': None,
                   'external_host_vserver': None,
                   'external_host_insecure': False,
@@ -321,8 +322,6 @@ class RouterTest(unittest.TestCase):
                   'external_host_username': None,
                   'external_host_password': None,
                   'external_host_private_key': None,
-                  'expose_metrics': False,
-                  'metrics_image': None,
                   'stats_user': None,
                   'stats_password': None,
                   'stats_port': 1936,
@@ -362,7 +361,7 @@ class RouterTest(unittest.TestCase):
             mock.call(['oc', 'get', 'sa', 'router', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'get', 'secret', 'router-certs', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'get', 'clusterrolebinding', 'router-router-role', '-o', 'json', '-n', 'default'], None),
-            mock.call(['oc', 'adm', 'router', 'router', '--expose-metrics=False', '--external-host-insecure=False',
+            mock.call(['oc', 'adm', 'router', 'router', '--external-host-insecure=False',
                        "--labels=another-label=val,router=router",
                        '--ports=80:80,443:443', '--replicas=2', '--selector=type=infra', '--service-account=router',
                        '--stats-port=1936', '--dry-run=True', '-o', 'json', '-n', 'default'], None),

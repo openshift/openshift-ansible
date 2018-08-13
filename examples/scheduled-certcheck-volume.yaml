@@ -1,4 +1,4 @@
-# An example ScheduledJob to run a regular check of OpenShift's internal
+# An example CronJob to run a regular check of OpenShift's internal
 # certificate status.
 #
 # Each job will add a new pair of reports to the configured Persistent Volume
@@ -6,13 +6,10 @@
 # The Job specification is the same as 'certificate-check-volume.yaml'
 # and the expected pre-configuration is equivalent.
 # See that Job example and examples/README.md for more details.
-#
-# NOTE: ScheduledJob has been renamed to CronJob in upstream k8s recently. At
-# some point (OpenShift 3.6+) this will have to be renamed to "kind: CronJob"
-# and once the API stabilizes the apiVersion will have to be updated too.
+
 ---
-apiVersion: batch/v2alpha1
-kind: ScheduledJob
+apiVersion: batch/v1beta1
+kind: CronJob
 metadata:
   name: certificate-check
   labels:
@@ -28,10 +25,10 @@ spec:
         spec:
           containers:
           - name: openshift-ansible
-            image: openshift/origin-ansible
+            image: docker.io/openshift/origin-ansible
             env:
             - name: PLAYBOOK_FILE
-              value: playbooks/certificate_expiry/html_and_json_timestamp.yaml
+              value: playbooks/openshift-checks/certificate_expiry/html_and_json_timestamp.yaml
             - name: INVENTORY_FILE
               value: /tmp/inventory/hosts       # from configmap vol below
             - name: ANSIBLE_PRIVATE_KEY_FILE    # from secret vol below

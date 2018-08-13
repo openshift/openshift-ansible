@@ -7,7 +7,7 @@
   debug:
     msg: "openshift_aws_region={{ openshift_aws_region }}"
 
-- name: fetch newly created instances
+- name: fetch master instances
   ec2_instance_facts:
     region: "{{ openshift_aws_region }}"
     filters:
@@ -26,6 +26,7 @@
     groups: "{{ openshift_aws_masters_groups }}"
     name: "{{ item.public_dns_name }}"
     hostname: "{{ openshift_aws_clusterid }}-master-{{ item.instance_id[:-5] }}"
+    openshift_node_group_name: "{{ item.tags['openshift-node-group-config'] | default('unset') }}"
   with_items: "{{ instancesout.instances }}"
 
 - name: wait for ssh to become available

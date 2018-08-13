@@ -2,50 +2,20 @@
 - name: Update master count
   hosts: oo_masters:!oo_masters_to_config
   serial: 1
-  roles:
-  - openshift_facts
-  post_tasks:
-  - openshift_facts:
-      role: master
-      local_facts:
-        master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
+  tasks:
   - name: Update master count
-    modify_yaml:
-      dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
-      yaml_key: 'kubernetesMasterConfig.masterCount'
-      yaml_value: "{{ openshift.master.master_count }}"
-    notify:
-    - restart master
-  handlers:
-  - name: restart master
-    command: /usr/local/bin/master-restart "{{ item }}"
-    with_items:
-    - api
-    - controllers
-    notify: verify api server
-  - name: verify api server
-    command: >
-      curl --silent --tlsv1.2
-      --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
-      {{ openshift.master.api_url }}/healthz/ready
-    args:
-      # Disables the following warning:
-      # Consider using get_url or uri module rather than running curl
-      warn: no
-    register: api_available_output
-    until: api_available_output.stdout == 'ok'
-    retries: 120
-    delay: 1
-    changed_when: false
+    import_role:
+      name: openshift_control_plane
+      tasks_from: update_master_count.yml
 
-- import_playbook: set_network_facts.yml
+- import_playbook: ../../openshift-node/private/bootstrap.yml
 
 - import_playbook: ../../openshift-etcd/private/master_etcd_certificates.yml
 
 - import_playbook: config.yml
 
+- import_playbook: ../../openshift-node/private/join.yml
+
 - import_playbook: ../../openshift-loadbalancer/private/config.yml
 
-- import_playbook: ../../openshift-node/private/certificates.yml
-
-- import_playbook: ../../openshift-node/private/config.yml
+- import_playbook: ../../openshift-glusterfs/private/add_hosts.yml

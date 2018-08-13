@@ -1,12 +1,2 @@
 ---
-system_images_registry_dict:
-  openshift-enterprise: "registry.access.redhat.com"
-  origin: "docker.io"
-
-system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"
-
-openshift_use_crio_only: False
-openshift_crio_use_rpm: False
-
-l_is_system_container_image: "{{ openshift_use_master_system_container | default(openshift_use_system_containers | default(False)) | bool }}"
-l_use_cli_atomic_image: "{{ (openshift_use_crio_only | bool and not openshift_crio_use_rpm | bool) or (l_is_system_container_image | bool) }}"
+l_openshift_cli_image_backend: "{{ (openshift_use_crio_only | bool) | ternary('atomic', 'docker') }}"

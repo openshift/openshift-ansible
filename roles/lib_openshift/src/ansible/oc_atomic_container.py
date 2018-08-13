@@ -3,6 +3,7 @@
 
 # pylint: disable=wrong-import-position,too-many-branches,invalid-name,no-name-in-module, import-error
 import json
+import os
 
 from distutils.version import StrictVersion
 
@@ -28,9 +29,17 @@ def _uninstall(module, name):
     rc, out, err = module.run_command(args, check_rc=False)
     return rc, out, err, False
 
+def _ensure_service_file_is_removed(container):
+    '''atomic install won't overwrite existing service file, so it needs to be removed'''
+    service_path = '/etc/systemd/system/{}.service'.format(container)
+    if not os.path.exists(service_path):
+        return
+    os.remove(service_path)
 
 def do_install(module, container, image, values_list):
     ''' install a container and exit the module. '''
+    _ensure_service_file_is_removed(container)
+
     rc, out, err, changed = _install(module, container, image, values_list)
     if rc != 0:
         module.fail_json(rc=rc, msg=err)

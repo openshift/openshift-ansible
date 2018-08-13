@@ -1,4 +1,9 @@
 ---
+- name: delete router-metrics cluster role
+  oc_obj:
+    state: absent
+    kind: clusterrole
+    name: router-metrics
 
 # remove namespace - This will delete all the objects inside the namespace
 - name: Remove prometheus project

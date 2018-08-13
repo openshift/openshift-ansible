@@ -31,6 +31,9 @@ class OCServiceAccount(OpenShiftCLI):
         elif '\"%s\" not found' % self.config.name in result['stderr']:
             result['returncode'] = 0
             result['results'] = [{}]
+        elif 'namespaces \"%s\" not found' % self.config.namespace in result['stderr']:
+            result['returncode'] = 0
+            result['results'] = [{}]
 
         return result
 
@@ -78,7 +81,7 @@ class OCServiceAccount(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     # TODO: This function should be refactored into its individual parts.
     def run_ansible(params, check_mode):
-        '''run the ansible idempotent code'''
+        '''run the oc_serviceaccount module'''
 
         rconfig = ServiceAccountConfig(params['name'],
                                        params['namespace'],

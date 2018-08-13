@@ -2,10 +2,26 @@
 - name: Check for legacy service
   stat:
     path: /lib/systemd/system/calico.service
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: sym
 - fail:
     msg: You are running a systemd based installation of Calico. Please run the calico upgrade playbook to upgrade to a self-hosted installation.
   when: sym.stat.exists
+
+- name: Configure NetworkManager to ignore Calico interfaces
+  copy:
+    src: files/calico.conf
+    dest: /etc/NetworkManager/conf.d/
+  when: using_network_manager | default(true) | bool
+  register: nm
+
+- name: restart NetworkManager
+  systemd:
+    name: NetworkManager
+    state: restarted
+  when: nm.changed
 
 # TODO: Move into shared vars file
 - name: Load default node image

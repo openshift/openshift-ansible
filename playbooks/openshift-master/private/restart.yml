@@ -7,9 +7,9 @@
   roles:
   - openshift_facts
   post_tasks:
-  - include_tasks: tasks/restart_hosts.yml
+  - import_tasks: tasks/restart_hosts.yml
     when: openshift_rolling_restart_mode | default('services') == 'system'
   - import_role:
-      name: openshift_master
+      name: openshift_control_plane
       tasks_from: restart.yml
     when: openshift_rolling_restart_mode | default('services') == 'services'

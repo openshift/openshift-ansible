@@ -13,8 +13,6 @@
 #   8053 to avoid conflicts on port 53 and open port 8053 in the firewall
 # - Drop this script in /etc/NetworkManager/dispatcher.d/
 # - systemctl restart NetworkManager
-# - Configure node-config.yaml to set dnsIP: to the ip address of this
-#   node
 #
 # Test it:
 # host kubernetes.default.svc.cluster.local
@@ -44,8 +42,8 @@ if [[ $2 =~ ^(up|dhcp4-change|dhcp6-change)$ ]]; then
   # couldn't find an existing method to determine if the interface owns the
   # default route
   def_route=$(/sbin/ip route list match 0.0.0.0/0 | awk '{print $3 }')
-  def_route_int=$(/sbin/ip route get to ${def_route} | awk '{print $3}')
-  def_route_ip=$(/sbin/ip route get to ${def_route} | awk '{print $5}')
+  def_route_int=$(/sbin/ip route get to ${def_route} | awk -F 'dev' '{print $2}' | head -n1 | awk '{print $1}')
+  def_route_ip=$(/sbin/ip route get to ${def_route}  | awk -F 'src' '{print $2}' | head -n1 | awk '{print $1}')
   if [[ ${DEVICE_IFACE} == ${def_route_int} ]]; then
     if [ ! -f /etc/dnsmasq.d/origin-dns.conf ]; then
       cat << EOF > /etc/dnsmasq.d/origin-dns.conf
@@ -56,6 +54,7 @@ server=/30.172.in-addr.arpa/172.30.0.1
 enable-dbus
 dns-forward-max=5000
 cache-size=5000
+min-port=1024
 EOF
       # New config file, must restart
       NEEDS_RESTART=1
@@ -66,7 +65,7 @@ EOF
     # watermark
     if ! grep -q '99-origin-dns.sh' /etc/resolv.conf; then
       if [[ -z "${IP4_NAMESERVERS}" || "${IP4_NAMESERVERS}" == "${def_route_ip}" ]]; then
-            IP4_NAMESERVERS=`grep '^nameserver ' /etc/resolv.conf | awk '{ print $2 }'`
+            IP4_NAMESERVERS=`grep '^nameserver[[:blank:]]' /etc/resolv.conf | awk '{ print $2 }'`
       fi
       ######################################################################
       # Write out default nameservers for /etc/dnsmasq.d/origin-upstream-dns.conf
@@ -118,7 +117,7 @@ EOF
         echo 'search cluster.local' >> ${NEW_RESOLV_CONF}
       elif ! grep -q 'search cluster.local' ${NEW_RESOLV_CONF}; then
         # cluster.local should be in first three DNS names so that glibc resolver would work
-        sed -i -e 's/^search \(.\+\)\( cluster\.local\)\{0,1\}$/search cluster.local \1/' ${NEW_RESOLV_CONF}
+        sed -i -e 's/^search[[:blank:]]\(.\+\)\( cluster\.local\)\{0,1\}$/search cluster.local \1/' ${NEW_RESOLV_CONF}
       fi
       cp -Z ${NEW_RESOLV_CONF} /etc/resolv.conf
     fi

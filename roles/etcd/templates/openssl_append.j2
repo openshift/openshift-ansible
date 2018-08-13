@@ -39,7 +39,7 @@ subjectKeyIdentifier   = hash
 [ {{ etcd_ca_exts_server }} ]
 authorityKeyIdentifier = keyid,issuer:always
 basicConstraints       = critical,CA:FALSE
-extendedKeyUsage       = serverAuth
+extendedKeyUsage       = serverAuth,clientAuth
 keyUsage               = digitalSignature,keyEncipherment
 subjectKeyIdentifier   = hash
 

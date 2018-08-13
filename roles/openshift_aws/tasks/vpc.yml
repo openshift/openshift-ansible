@@ -1,4 +1,16 @@
 ---
+- name: query azs
+  aws_az_facts:
+  register: azs
+
+- fail:
+    msg: >
+      AWS VPC does NOT contain
+      {{ openshift_aws_vpc.subnets[openshift_aws_region] | map(attribute='az') | list | length }} availability zone(s).
+      Please pick another region!
+  when:
+  - ( azs.availability_zones | length ) < ( openshift_aws_vpc.subnets[openshift_aws_region] | map(attribute='az') | list | length )
+
 - name: Create AWS VPC
   ec2_vpc_net:
     state: present

@@ -22,5 +22,5 @@
     state: started
 
 # Dynamic NetworkManager based dispatcher
-- include_tasks: dnsmasq/network-manager.yml
+- import_tasks: dnsmasq/network-manager.yml
   when: network_manager_active | bool

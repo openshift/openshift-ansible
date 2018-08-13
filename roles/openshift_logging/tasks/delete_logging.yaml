@@ -113,19 +113,20 @@
 - command: >
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    get namespaces -o name {{ __default_logging_ops_projects | join(' ') }}
-  register: __logging_ops_projects
+    get namespaces -o jsonpath={.items[*].metadata.name}
+  register: __all_namespace_names
+
+- set_fact:
+    __logging_ops_projects: "{{ __all_namespace_names.stdout.split(' ') | intersect(__default_logging_ops_projects) }}"
 
 - name: Remove Annotation of Operations Projects
   command: >
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    annotate {{ project }} openshift.io/logging.ui.hostname-
-  with_items: "{{ __logging_ops_projects.stdout_lines }}"
+    annotate namespace/{{ project }} openshift.io/logging.ui.hostname-
+  with_items: "{{ __logging_ops_projects }}"
   loop_control:
     loop_var: project
-  when:
-    - __logging_ops_projects.stderr | length == 0
 
 ## EventRouter
 - import_role:
@@ -144,4 +145,3 @@
         value: ""
   when:
     - openshift_web_console_install | default(true) | bool
-    - openshift_version_gte_3_9

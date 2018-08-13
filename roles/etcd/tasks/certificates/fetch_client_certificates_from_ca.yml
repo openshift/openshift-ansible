@@ -2,6 +2,9 @@
 - name: Ensure CA certificate exists on etcd_ca_host
   stat:
     path: "{{ etcd_ca_cert }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: g_ca_cert_stat_result
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
@@ -17,6 +20,9 @@
 - name: Check status of external etcd certificatees
   stat:
     path: "{{ etcd_cert_config_dir }}/{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   with_items:
   - "{{ etcd_cert_prefix }}client.crt"
   - "{{ etcd_cert_prefix }}client.key"
@@ -77,6 +83,7 @@
     src: "{{ etcd_ca_cert }}"
     dest: "{{ etcd_generated_certs_dir}}/{{ etcd_cert_subdir }}/{{ etcd_cert_prefix }}ca.crt"
     state: hard
+    force: yes
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 

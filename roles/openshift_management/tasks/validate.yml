@@ -49,13 +49,13 @@
 - name: Validate Cloud Provider storage class
   assert:
     that:
-      - openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce'
+      - openshift_cloudprovider_kind in ['aws','azure','gce']
     msg: |
       openshift_management_storage_class is 'cloudprovider' but you have an
       invalid kind defined, '{{ openshift_cloudprovider_kind }}'. See
       'openshift_cloudprovider_kind' in the example inventories for
       the required parameters for your selected cloud
-      provider. Working providers: 'aws' and 'gce'.
+      provider. Working providers: 'aws', 'azure' and 'gce'.
   when:
     - openshift_management_storage_class == 'cloudprovider'
     - openshift_cloudprovider_kind is defined
@@ -70,7 +70,7 @@
       required. Search the example inventories for
       'openshift_cloudprovider_kind'. The required parameters for your
       selected cloud provider must be defined in your inventory as
-      well. Working providers: 'aws' and 'gce'.
+      well. Working providers: 'aws', 'azure' and 'gce'.
   when:
     - openshift_management_storage_class == 'cloudprovider'
 

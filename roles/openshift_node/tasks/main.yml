@@ -6,14 +6,14 @@
     - openshift_deployment_type == 'openshift-enterprise'
     - not openshift_use_crio | bool
 
-- include_tasks: dnsmasq_install.yml
-- include_tasks: dnsmasq.yml
+- import_tasks: dnsmasq_install.yml
+- import_tasks: dnsmasq.yml
 
 - name: setup firewall
   import_tasks: firewall.yml
 
 - name: Update journald config
-  include_tasks: journald.yml
+  import_tasks: journald.yml
 
 #### Disable SWAP #####
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
@@ -24,7 +24,7 @@
   when: openshift_disable_swap | default(true) | bool
 
 - name: include node installer
-  include_tasks: install.yml
+  import_tasks: install.yml
 
 - name: Restart cri-o
   systemd:
@@ -42,7 +42,6 @@
     name: NetworkManager
     enabled: yes
     state: restarted
-  when: openshift_node_bootstrap | bool
 
 # The atomic-openshift-node service will set this parameter on
 # startup, but if the network service is restarted this setting is
@@ -53,27 +52,34 @@
     sysctl_file: "/etc/sysctl.d/99-openshift.conf"
     reload: yes
 
-- include_tasks: registry_auth.yml
+# Required in some selinux policy versions see
+# https://bugzilla.redhat.com/show_bug.cgi?id=1587825
+# https://bugzilla.redhat.com/show_bug.cgi?id=1549765
+- name: Setting sebool container_manage_cgroup
+  seboolean:
+    name: container_manage_cgroup
+    state: yes
+    persistent: yes
+
+- import_tasks: registry_auth.yml
 
 - name: include standard node config
-  include_tasks: config.yml
+  import_tasks: config.yml
 
 #### Storage class plugins here ####
 - name: NFS storage plugin configuration
-  include_tasks: storage_plugins/nfs.yml
-  tags:
-    - nfs
+  import_tasks: storage_plugins/nfs.yml
 
 - name: GlusterFS storage plugin configuration
-  include_tasks: storage_plugins/glusterfs.yml
+  import_tasks: glusterfs.yml
   when: "'glusterfs' in osn_storage_plugin_deps"
 
 - name: Ceph storage plugin configuration
-  include_tasks: storage_plugins/ceph.yml
+  import_tasks: storage_plugins/ceph.yml
   when: "'ceph' in osn_storage_plugin_deps"
 
 - name: iSCSI storage plugin configuration
-  include_tasks: storage_plugins/iscsi.yml
+  import_tasks: storage_plugins/iscsi.yml
   when: "'iscsi' in osn_storage_plugin_deps"
 
 ##### END Storage #####

@@ -7,26 +7,17 @@
     msg: Operations logs destination is required
   when: not openshift_logging_mux_ops_host or openshift_logging_mux_ops_host == ''
 
+- fail:
+    msg: openshift_logging_mux_default_namespaces is not supported; use openshift_logging_mux_namespaces instead.
+  when: openshift_logging_mux_default_namespaces is defined
+
 - name: Ensure that Logging Mux has nodes to run on
   import_role:
-    name: openshift_master
+    name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
     openshift_master_ensure_nodes_selector: "{{ openshift_logging_mux_nodeselector | map_to_pairs }}"
     openshift_master_ensure_nodes_service: Logging Mux
-
-- name: Set default image variables based on openshift_deployment_type
-  include_vars: "{{ var_file_name }}"
-  with_first_found:
-  - "{{ openshift_deployment_type }}.yml"
-  - "default_images.yml"
-  loop_control:
-    loop_var: var_file_name
-
-- name: Set mux image facts
-  set_fact:
-    openshift_logging_mux_image_prefix: "{{ openshift_logging_mux_image_prefix | default(__openshift_logging_mux_image_prefix) }}"
-    openshift_logging_mux_image_version: "{{ openshift_logging_mux_image_version | default(__openshift_logging_mux_image_version) }}"
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
@@ -92,12 +83,12 @@
 
 # create Mux configmap
 - copy:
-    src: "{{ __base_file_dir }}/fluent.conf"
+    src: "fluent.conf"
     dest: "{{mktemp.stdout}}/fluent-mux.conf"
   changed_when: no
 
 - copy:
-    src: "{{ __base_file_dir }}/secure-forward.conf"
+    src: "secure-forward.conf"
     dest: "{{mktemp.stdout}}/secure-forward-mux.conf"
   changed_when: no
 
@@ -176,13 +167,13 @@
 # create Mux DC
 - name: Generating mux deploymentconfig
   template:
-    src: "{{ __base_file_dir }}/mux.j2"
+    src: "mux.j2"
     dest: "{{mktemp.stdout}}/templates/logging-mux-dc.yaml"
   vars:
     component: mux
     logging_component: mux
     deploy_name: "logging-{{ component }}"
-    image: "{{ openshift_logging_mux_image_prefix }}logging-fluentd:{{ openshift_logging_mux_image_version }}"
+    image: "{{ openshift_logging_mux_image }}"
     es_host: "{{ openshift_logging_mux_app_host }}"
     es_port: "{{ openshift_logging_mux_app_port }}"
     ops_host: "{{ openshift_logging_mux_ops_host }}"
@@ -222,7 +213,7 @@
     state: present
     name: "{{ item }}"
     node_selector: ""
-  with_items: "{{ openshift_logging_mux_namespaces | union(openshift_logging_mux_default_namespaces) }}"
+  with_items: "{{ openshift_logging_mux_namespaces }}"
 
 - name: Delete temp directory
   file:

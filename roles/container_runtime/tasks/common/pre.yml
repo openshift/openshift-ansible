@@ -1,5 +1,5 @@
 ---
-- include_tasks: udev_workaround.yml
+- import_tasks: udev_workaround.yml
   when: docker_udev_workaround | default(False) | bool
 
 - name: Add enterprise registry, if necessary

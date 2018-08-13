@@ -6,6 +6,25 @@
   hosts: "{{ l_base_packages_hosts | default('oo_all_hosts') }}"
   any_errors_fatal: true
   tasks:
+  - name: Determine if chrony is installed
+    command: rpm -q chrony
+    failed_when: false
+    register: chrony_installed
+
+  # chrony is installed on atomic host by default, so no need to worry about
+  # atomic here.
+  - name: Install ntp package
+    package: name=ntp state=present
+    when:
+    - openshift_clock_enabled | default(True) | bool
+    - chrony_installed.rc != 0
+    register: result
+    until: result is succeeded
+
+  - name: Start and enable ntpd/chronyd
+    command: timedatectl set-ntp true
+    when: openshift_clock_enabled | default(True) | bool
+
   - when:
     - not openshift_is_atomic | bool
     block:
@@ -18,24 +37,9 @@
       - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
       - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
       - "{{ 'python-ipaddress' if ansible_distribution != 'Fedora' else '' }}"
+      - libsemanage-python
       - yum-utils
+      - "{{ 'python3-docker' if ansible_distribution == 'Fedora' else 'python-docker' }}"
       when: item != ''
-      register: result
-      until: result is succeeded
-
-    - name: Ensure various deps for running system containers are installed
-      package:
-        name: "{{ item }}"
-        state: present
-      with_items:
-      - atomic
-      - ostree
-      - runc
-      when:
-      - >
-        (openshift_use_system_containers | default(False)) | bool
-        or (openshift_use_etcd_system_container | default(False)) | bool
-        or (openshift_use_node_system_container | default(False)) | bool
-        or (openshift_use_master_system_container | default(False)) | bool
       register: result
       until: result is succeeded

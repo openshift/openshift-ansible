@@ -14,6 +14,11 @@ kuryr_openstack_project_domain_name: default
 # Kuryr OpenShift namespace
 kuryr_namespace: openshift-infra
 
+# Kuryr health check server port
+kuryr_controller_healthcheck_port: 8082
+kuryr_cni_healthcheck_port: 8090
+
+
 # Whether to run the cni plugin in debug mode
 kuryr_cni_debug: "false"
 
@@ -29,6 +34,13 @@ bin_dir: /usr/bin
 # Default controller and CNI images
 openshift_openstack_kuryr_controller_image: kuryr/controller:latest
 openshift_openstack_kuryr_cni_image: kuryr/cni:latest
+
+# Enable kuryr ports pool by default
+kuryr_openstack_pool_driver: nested
+
+# Enable kuryr healthchecks probes by default
+enable_kuryr_controller_probes: True
+enable_kuryr_cni_probes: True
 
 # Path to the cni binaries
 cni_bin_dir: /opt/cni/bin
@@ -77,3 +89,17 @@ kuryr_clusterrole:
         - services
         - services/status
         - routes
+    - apiGroups:
+        - apiextensions.k8s.io/v1beta1
+      attributeRestrictions: null
+      verbs:
+        - "*"
+      resources:
+        - customresourcedefinitions
+    - apiGroups:
+        - openstack.org
+      attributeRestrictions: null
+      verbs:
+        - "*"
+      resources:
+        - kuryrnets

@@ -6,7 +6,7 @@
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl --silent --tlsv1.2
+    curl --silent --tlsv1.2 --max-time 2
     --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
     {{ openshift_node_master_api_url }}/healthz/ready
   args:
@@ -18,7 +18,7 @@
   retries: 120
   delay: 1
   changed_when: false
-  when: openshift_is_containerized | bool
+  when: openshift_is_atomic | bool
   delegate_to: "{{ openshift_master_host }}"
   run_once: true
 
@@ -35,4 +35,3 @@
   delegate_to: "{{ openshift_master_host }}"
 
 - include_tasks: config.yml
-- include_tasks: set_default_node_role.yml

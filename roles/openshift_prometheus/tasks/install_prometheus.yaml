@@ -4,7 +4,7 @@
 
 - name: Ensure that Prometheus has nodes to run on
   import_role:
-    name: openshift_master
+    name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
     openshift_master_ensure_nodes_selector: "{{ openshift_prometheus_node_selector | map_to_pairs }}"
@@ -51,19 +51,32 @@
 # TODO remove this when annotations are supported by oc_serviceaccount
 - name: annotate serviceaccount
   command: >
-    {{ openshift_client_binary }} annotate --overwrite -n {{ openshift_prometheus_namespace }}
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig annotate --overwrite -n {{ openshift_prometheus_namespace }}
     serviceaccount {{ openshift_prometheus_service_name }} {{ item }}
   with_items:
     "{{ openshift_prometheus_serviceaccount_annotations }}"
 
+# add required permissions to prometheus for scraping router metrics
+- name: Create router-metrics cluster role
+  oc_clusterrole:
+    state: present
+    name: router-metrics
+    rules:
+    - apiGroups: ["route.openshift.io"]
+      resources: ["routers/metrics"]
+      verbs: ["get"]
+
 # create clusterrolebinding for prometheus serviceaccount
-- name: Set cluster-reader permissions for prometheus
+- name: Set clusterrole permissions for prometheus
   oc_adm_policy_user:
     state: present
     namespace: "{{ openshift_prometheus_namespace }}"
     resource_kind: cluster-role
-    resource_name: cluster-reader
+    resource_name: "{{ item }}"
     user: "system:serviceaccount:{{ openshift_prometheus_namespace }}:{{ openshift_prometheus_service_name }}"
+  with_items:
+  - cluster-reader
+  - router-metrics
 
 # create view role for prometheus-reader serviceaccount
 - name: Set view permissions for prometheus reader
@@ -82,8 +95,8 @@
     labels:
       name: prometheus
     annotations:
-      oprometheus.io/scrape: 'true'
-      oprometheus.io/scheme: https
+      prometheus.io/scrape: 'true'
+      prometheus.io/scheme: https
       service.alpha.openshift.io/serving-cert-secret-name: prometheus-tls
     ports:
     - name: prometheus
@@ -187,6 +200,9 @@
 
 - stat:
     path: "{{ tempdir }}/prometheus.additional.rules"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: additional_rules_stat
 
 - template:

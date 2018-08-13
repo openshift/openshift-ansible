@@ -1,53 +1,34 @@
 ---
-- name: Gather facts
-  hosts: oo_etcd_to_config:oo_new_etcd_to_config
-  roles:
-  - openshift_etcd_facts
-  post_tasks:
-  - set_fact:
-      etcd_hostname: "{{ etcd_hostname }}"
-      etcd_ip: "{{ etcd_ip }}"
-
 - name: Configure etcd
   hosts: oo_new_etcd_to_config
   serial: 1
   any_errors_fatal: true
   pre_tasks:
-  - name: Add new etcd members to cluster
-    command: >
-      {{ r_etcd_common_etcdctl_command }}
-                       --cert-file {{ etcd_peer_cert_file }}
-                       --key-file {{ etcd_peer_key_file }}
-                       --ca-file {{ etcd_peer_ca_file }}
-                       -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_ip }}:{{ etcd_client_port }}
-                       member add {{ etcd_hostname }} {{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}
-    delegate_to: "{{ etcd_ca_host }}"
-    failed_when:
-    - etcd_add_check.rc == 1
-    - ("peerURL exists" not in etcd_add_check.stderr)
-    register: etcd_add_check
-    retries: 3
-    delay: 10
-    until: etcd_add_check.rc == 0
+  - import_role:
+      name: etcd
+      tasks_from: add_new_member.yml
   - import_role:
       name: etcd
       tasks_from: server_certificates.yml
     vars:
       etcd_peers: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
       etcd_certificates_etcd_hosts: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
-  roles:
-  - role: os_firewall
+  tasks:
+  - import_role:
+      name: os_firewall
     when: etcd_add_check.rc == 0
-  - role: openshift_etcd
+
+  - import_role:
+      name: etcd
     when: etcd_add_check.rc == 0
-    etcd_peers: "{{ groups.oo_etcd_to_config | union(groups.oo_new_etcd_to_config)| default([], true) }}"
-    etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
-    etcd_initial_cluster_state: "existing"
-    etcd_initial_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
-    etcd_ca_setup: False
-  - role: nickhammond.logrotate
-    when: etcd_add_check.rc == 0
-  post_tasks:
+    vars:
+      etcd_peers: "{{ groups.oo_etcd_to_config | union(groups.oo_new_etcd_to_config)| default([], true) }}"
+      etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+      etcd_initial_cluster_state: "existing"
+      etcd_initial_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
+      etcd_ca_setup: False
+
+  # etcd_hostname fact is set in add_new_member.yml called above.
   - name: Verify cluster is stable
     command: >
       {{ r_etcd_common_etcdctl_command }}
@@ -64,15 +45,24 @@
 - name: Update master etcd client urls
   hosts: oo_masters_to_config
   serial: 1
-  vars:
-    openshift_master_etcd_hosts: "{{ hostvars
-                                     | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config'] | default([]) ))
-                                     | lib_utils_oo_collect('openshift.common.hostname')
-                                     | default(none, true) }}"
-    openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
-  roles:
-  - role: openshift_master_facts
+  pre_tasks:
+  - set_fact:
+      openshift_master_etcd_hosts: "{{ hostvars
+                                       | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config'] | default([]) ))
+                                       | lib_utils_oo_collect('openshift.common.hostname')
+                                       | default(none, true) }}"
+      openshift_master_etcd_port: "{{ etcd_client_port | default('2379') }}"
+      openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                                  | lib_utils_oo_collect('openshift.common.ip') | default([]) | join(',')
+                                                  }}"
+  # This fact requires the facts set above, so needs to happen in it's own task.
+  - set_fact:
+      # lib_utils_oo_etcd_host_urls is a custom filter plugin in roles/lib_utils/filter_plugins/oo_filters.py
+      openshift_master_etcd_urls: "{{ openshift_master_etcd_hosts | lib_utils_oo_etcd_host_urls(l_use_ssl, openshift_master_etcd_port) }}"
+    vars:
+      l_use_ssl: "{{ openshift_master_etcd_use_ssl | default(True) | bool}}"
+
   post_tasks:
   - import_role:
-      name: openshift_master
+      name: openshift_control_plane
       tasks_from: update_etcd_client_urls.yml

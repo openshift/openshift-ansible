@@ -28,10 +28,10 @@ spec:
     spec:
       containers:
       - name: openshift-ansible
-        image: openshift/origin-ansible
+        image: docker.io/openshift/origin-ansible
         env:
         - name: PLAYBOOK_FILE
-          value: playbooks/certificate_expiry/easy-mode-upload.yaml
+          value: playbooks/openshift-checks/certificate_expiry/easy-mode-upload.yaml
         - name: INVENTORY_FILE
           value: /tmp/inventory/hosts       # from configmap vol below
         - name: ANSIBLE_PRIVATE_KEY_FILE    # from secret vol below

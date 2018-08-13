@@ -1,11 +1,19 @@
 ---
 - name: Checking for {{ cert_info.procure_component }}.crt
-  stat: path="{{generated_certs_dir}}/{{ cert_info.procure_component }}.crt"
+  stat:
+    path: "{{generated_certs_dir}}/{{ cert_info.procure_component }}.crt"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: component_cert_file
   check_mode: no
 
 - name: Checking for {{ cert_info.procure_component }}.key
-  stat: path="{{generated_certs_dir}}/{{ cert_info.procure_component }}.key"
+  stat:
+    path: "{{generated_certs_dir}}/{{ cert_info.procure_component }}.key"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: component_key_file
   check_mode: no
 

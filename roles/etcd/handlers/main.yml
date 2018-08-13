@@ -1,5 +1,3 @@
 ---
-
 - name: restart etcd
-  systemd: name={{ etcd_service }} state=restarted
-  when: not (etcd_service_status_changed | default(false) | bool)
+  command: "{{ l_etcd_restart_command }}"

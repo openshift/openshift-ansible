@@ -1,4 +1,4 @@
-heat_template_version: pike
+heat_template_version: {{ openshift_openstack_heat_template_version }}
 
 description: OpenShift cluster server
 
@@ -109,13 +109,21 @@ parameters:
     label: Security groups
     description: Security group resources
 
-{% if openshift_use_kuryr|default(false)|bool %}
   api_lb_pool:
     default: ''
     type: string
     label: API LoadBalancer pool ID
     description: API Loadbalancer pool resource
-{% endif %}
+
+  router_lb_pool_http:
+    type: string
+    label: Router LoadBalancer pool ID for HTTP
+    default: ""
+
+  router_lb_pool_https:
+    type: string
+    label: Router LoadBalancer pool ID for HTTPS
+    default: ""
 
 {% if openshift_use_kuryr|default(false)|bool %}
   pod_secgrp:
@@ -151,10 +159,10 @@ parameters:
       - range: { min: 1, max: 1024 }
         description: must be between 1 and 1024 Gb.
 
-  node_labels:
-    type: json
-    description: OpenShift Node Labels
-    default: {"region": "default" }
+  openshift_node_group_name:
+    type: string
+    default: ''
+    description: The openshift node group name for this server.
 
   scheduler_hints:
     type: json
@@ -197,6 +205,7 @@ conditions:
   no_data_subnet: {not: { get_param: attach_data_net} }
 {% endif %}
 
+
 resources:
 
   server:
@@ -222,7 +231,10 @@ resources:
 {% endif %}
 {% endif %}
       user_data:
-        get_file: user-data
+        str_replace:
+          template: {get_file: user-data}
+          params:
+            "%OPENSHIFT_NODE_CONFIG_NAME%": { get_param: openshift_node_group_name }
       user_data_format: RAW
       user_data_update_policy: IGNORE
       metadata:
@@ -231,7 +243,7 @@ resources:
         clusterid: {{ openshift_openstack_stack_name }}
         host-type: { get_param: type }
         sub-host-type:    { get_param: subtype }
-        node_labels: { get_param: node_labels }
+        openshift_node_group_name: { get_param: openshift_node_group_name }
 {% if openshift_openstack_dns_nameservers %}
         openshift_hostname: { get_param: name }
 {% endif %}
@@ -322,16 +334,34 @@ resources:
 {% endif %}
 
 
-{% if openshift_use_kuryr|default(false)|bool %}
-  lb_member:
-    type: OS::Neutron::LBaaS::PoolMember
+  api_lb_member:
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
     condition:
-      equals:
-        - get_param: type
-        - master
+      not: {equals: [{get_param: api_lb_pool}, ""]}
     properties:
       pool: { get_param: api_lb_pool }
-      protocol_port: {{ openshift_master_api_port|default(8443) }}
+      protocol_port: {{ openshift_master_api_port }}
       address: { get_attr: [server, first_address]}
+{% if openshift_openstack_lbaasv2_provider != "Octavia"  %}
       subnet: { get_param: subnet }
 {% endif %}
+
+  router_lb_pool_member_http:
+    condition:
+      not: {equals: [{get_param: router_lb_pool_http}, ""]}
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
+    properties:
+      pool: { get_param: router_lb_pool_http }
+      protocol_port: 80
+      address: { get_attr: [server, first_address]}
+      subnet: { get_param: subnet }
+
+  router_lb_pool_member_https:
+    condition:
+      not: {equals: [{get_param: router_lb_pool_https}, ""]}
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
+    properties:
+      pool: { get_param: router_lb_pool_https }
+      protocol_port: 443
+      address: { get_attr: [server, first_address]}
+      subnet: { get_param: subnet }

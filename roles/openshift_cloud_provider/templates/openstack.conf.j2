@@ -15,6 +15,9 @@ tenant-name = {{ openshift_cloudprovider_openstack_tenant_name }}
 {% if openshift_cloudprovider_openstack_region is defined %}
 region = {{ openshift_cloudprovider_openstack_region }}
 {% endif %}
+{% if openshift_cloudprovider_openstack_ca_file is defined %}
+ca-file = {{ openshift_openstack_ca_file_path }}
+{% endif %}
 {% if openshift_cloudprovider_openstack_lb_subnet_id is defined %}
 [LoadBalancer]
 subnet-id = {{ openshift_cloudprovider_openstack_lb_subnet_id }}

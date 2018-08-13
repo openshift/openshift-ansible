@@ -1,9 +1,6 @@
 ---
 - name: Generate new etcd CA
   hosts: oo_first_etcd
-  roles:
-  - role: openshift_clock
-  - role: openshift_etcd_facts
   tasks:
   - import_role:
       name: etcd

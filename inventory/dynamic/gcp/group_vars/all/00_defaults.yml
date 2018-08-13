@@ -3,6 +3,7 @@
 ansible_become: yes
 
 openshift_deployment_type: origin
+osm_etcd_image: "{{ etcd_image_dict[openshift_deployment_type] }}"
 
 # Debugging settings
 debug_level: 2
@@ -35,9 +36,8 @@ osm_cluster_network_cidr: 172.16.0.0/16
 osm_host_subnet_length: 9
 openshift_portal_net: 172.30.0.0/16
 
-# Default cluster configuration
-openshift_master_cluster_method: native
-openshift_schedulable: true
-# TODO: change to upstream conventions
-openshift_hosted_infra_selector: "role=infra"
-osm_default_node_selector: "role=app"
+# masters and infra are the same in CI
+openshift_gcp_node_group_mapping:
+  masters: 'node-config-master'
+  infra: 'node-config-master'
+  compute: 'node-config-compute'

@@ -16,7 +16,7 @@ set -o pipefail
 starttime=$(date +%s)
 
 # image name without repo or tag.
-image="${PREFIX:-openshift/origin-ansible}"
+image="${PREFIX:-docker.io/openshift/origin-ansible}"
 
 # existing local tag on the image we want to push
 source_tag="${OS_TAG:-latest}"

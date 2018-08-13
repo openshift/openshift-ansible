@@ -1,5 +1,0 @@
----
-__openshift_logging_kibana_image_prefix: "{{ openshift_logging_image_prefix | default('docker.io/openshift/origin-') }}"
-__openshift_logging_kibana_image_version: "{{ openshift_logging_image_version | default('latest') }}"
-__openshift_logging_kibana_proxy_image_prefix: "{{ openshift_logging_image_prefix | default('docker.io/openshift/origin-') }}"
-__openshift_logging_kibana_proxy_image_version: "{{ openshift_logging_image_version | default('latest') }}"

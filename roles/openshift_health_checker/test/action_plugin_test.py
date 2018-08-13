@@ -50,8 +50,18 @@ def fake_check(name='fake_check', tags=None, is_active=True, run_return=None, ru
 @pytest.fixture
 def plugin():
     task = FakeTask('openshift_health_check', {'checks': ['fake_check']})
-    plugin = ActionModule(task, None, PlayContext(), None, None, None)
+    plugin = ActionModule(task, FakeConnection(), PlayContext(), None, None, None)
     return plugin
+
+
+class FakeShell(object):
+    def __init__(self):
+        self.tmpdir = None
+
+
+class FakeConnection(object):
+    def __init__(self):
+        self._shell = FakeShell()
 
 
 class FakeTask(object):
@@ -59,6 +69,8 @@ class FakeTask(object):
         self.action = action
         self.args = args
         self.async = 0
+        self.async_val = 0
+        self._supports_async = True
 
 
 @pytest.fixture
@@ -149,7 +161,7 @@ def test_action_plugin_skip_disabled_checks(to_disable, plugin, task_vars, monke
 
 def test_action_plugin_run_list_checks(monkeypatch):
     task = FakeTask('openshift_health_check', {'checks': []})
-    plugin = ActionModule(task, None, PlayContext(), None, None, None)
+    plugin = ActionModule(task, FakeConnection(), PlayContext(), None, None, None)
     monkeypatch.setattr(plugin, 'load_known_checks', lambda *_: {})
     result = plugin.run()
 

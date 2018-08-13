@@ -45,7 +45,7 @@
     - docker_version is not defined
     - docker_upgrade | bool
     - pkg_check.rc == 0
-    - avail_docker_version.stdout == "" or avail_docker_version.stdout is version_compare(l_required_docker_version,'<')
+    - avail_docker_version.stdout == "" or avail_docker_version.stdout is version(l_required_docker_version,'<')
 
 # Default l_docker_upgrade to False, we'll set to True if an upgrade is required:
 - set_fact:
@@ -65,7 +65,7 @@
   when:
     - not openshift_is_atomic | bool
     - pkg_check.rc == 0
-    - curr_docker_version.stdout is version_compare(docker_version,'<')
+    - curr_docker_version.stdout is version(docker_version,'<')
 
 # Additional checks for Atomic hosts:
 - name: Determine available Docker
@@ -82,4 +82,4 @@
     msg: "This playbook requires access to Docker {{ l_required_docker_version }} or later"
   when:
     - openshift_is_atomic | bool
-    - l_docker_version.avail_version | default(l_docker_version.curr_version, true) is version_compare(l_required_docker_version,'<')
+    - l_docker_version.avail_version | default(l_docker_version.curr_version, true) is version(l_required_docker_version,'<')

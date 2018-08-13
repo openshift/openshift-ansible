@@ -1,4 +1,28 @@
 ---
+# lib_utils_oo_oreg_image is a custom filter defined in roles/lib_utils/filter_plugins/oo_filters.py
+# This filter attempts to combine oreg_url host with project/component from l_gluster*_image_dict.
+# "oreg.example.com/openshift3/ose-${component}:${version}"
+# becomes "oreg.example.com/rhgs3/rhgs-server-rhel7:latest"
+l_gluster_image_dict:
+  origin: "docker.io/gluster/gluster-centos:latest"
+  openshift-enterprise: "registry.redhat.io/rhgs3/rhgs-server-rhel7:latest"
+openshift_storage_glusterfs_image: "{{ l_gluster_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
+
+l_gluster_block_image_dict:
+  origin: "docker.io/gluster/glusterblock-provisioner:latest"
+  openshift-enterprise: "registry.redhat.io/rhgs3/rhgs-gluster-block-prov-rhel7:latest"
+openshift_storage_glusterfs_block_image: "{{ l_gluster_block_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
+
+l_gluster_s3_image_dict:
+  origin: "docker.io/gluster/gluster-object:latest"
+  openshift-enterprise: "registry.redhat.io/rhgs3/rhgs-s3-server-rhel7:latest"
+openshift_storage_glusterfs_s3_image: "{{ l_gluster_s3_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
+
+l_gluster_heketi_image_dict:
+  origin: "docker.io/heketi/heketi:latest"
+  openshift-enterprise: "registry.redhat.io/rhgs3/rhgs-volmanager-rhel7:latest"
+openshift_storage_glusterfs_heketi_image: "{{ l_gluster_heketi_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
+
 openshift_storage_glusterfs_timeout: 300
 openshift_storage_glusterfs_is_native: True
 openshift_storage_glusterfs_name: 'storage'
@@ -6,19 +30,13 @@ openshift_storage_glusterfs_nodeselector: "glusterfs={{ openshift_storage_gluste
 openshift_storage_glusterfs_use_default_selector: False
 openshift_storage_glusterfs_storageclass: True
 openshift_storage_glusterfs_storageclass_default: False
-openshift_storage_glusterfs_image: "{{ 'rhgs3/rhgs-server-rhel7' | quote if openshift_deployment_type == 'openshift-enterprise' else 'gluster/gluster-centos' | quote }}"
-openshift_storage_glusterfs_version: 'latest'
 openshift_storage_glusterfs_block_deploy: True
-openshift_storage_glusterfs_block_image: "{{ 'rhgs3/rhgs-gluster-block-prov-rhel7' | quote if openshift_deployment_type == 'openshift-enterprise' else 'gluster/glusterblock-provisioner' | quote }}"
-openshift_storage_glusterfs_block_version: 'latest'
 openshift_storage_glusterfs_block_host_vol_create: True
 openshift_storage_glusterfs_block_host_vol_size: 100
 openshift_storage_glusterfs_block_host_vol_max: 15
 openshift_storage_glusterfs_block_storageclass: False
 openshift_storage_glusterfs_block_storageclass_default: False
 openshift_storage_glusterfs_s3_deploy: True
-openshift_storage_glusterfs_s3_image: "{{ 'rhgs3/rhgs-s3-server-rhel7' | quote if openshift_deployment_type == 'openshift-enterprise' else 'gluster/gluster-object' | quote }}"
-openshift_storage_glusterfs_s3_version: 'latest'
 openshift_storage_glusterfs_s3_account: "{{ omit }}"
 openshift_storage_glusterfs_s3_user: "{{ omit }}"
 openshift_storage_glusterfs_s3_password: "{{ omit }}"
@@ -31,8 +49,6 @@ openshift_storage_glusterfs_heketi_is_native: "{{ openshift_storage_glusterfs_is
 openshift_storage_glusterfs_heketi_is_missing: True
 openshift_storage_glusterfs_heketi_deploy_is_missing: True
 openshift_storage_glusterfs_heketi_cli: 'heketi-cli'
-openshift_storage_glusterfs_heketi_image: "{{ 'rhgs3/rhgs-volmanager-rhel7' | quote if openshift_deployment_type == 'openshift-enterprise' else 'heketi/heketi' | quote }}"
-openshift_storage_glusterfs_heketi_version: 'latest'
 openshift_storage_glusterfs_heketi_admin_key: "{{ omit }}"
 openshift_storage_glusterfs_heketi_user_key: "{{ omit }}"
 openshift_storage_glusterfs_heketi_topology_load: True
@@ -56,10 +72,8 @@ openshift_storage_glusterfs_registry_use_default_selector: "{{ openshift_storage
 openshift_storage_glusterfs_registry_storageclass: False
 openshift_storage_glusterfs_registry_storageclass_default: False
 openshift_storage_glusterfs_registry_image: "{{ openshift_storage_glusterfs_image }}"
-openshift_storage_glusterfs_registry_version: "{{ openshift_storage_glusterfs_version }}"
 openshift_storage_glusterfs_registry_block_deploy: "{{ openshift_storage_glusterfs_block_deploy }}"
 openshift_storage_glusterfs_registry_block_image: "{{ openshift_storage_glusterfs_block_image }}"
-openshift_storage_glusterfs_registry_block_version: "{{ openshift_storage_glusterfs_block_version }}"
 openshift_storage_glusterfs_registry_block_host_vol_create: "{{ openshift_storage_glusterfs_block_host_vol_create }}"
 openshift_storage_glusterfs_registry_block_host_vol_size: "{{ openshift_storage_glusterfs_block_host_vol_size }}"
 openshift_storage_glusterfs_registry_block_host_vol_max: "{{ openshift_storage_glusterfs_block_host_vol_max }}"
@@ -67,7 +81,6 @@ openshift_storage_glusterfs_registry_block_storageclass: False
 openshift_storage_glusterfs_registry_block_storageclass_default: False
 openshift_storage_glusterfs_registry_s3_deploy: "{{ openshift_storage_glusterfs_s3_deploy }}"
 openshift_storage_glusterfs_registry_s3_image: "{{ openshift_storage_glusterfs_s3_image }}"
-openshift_storage_glusterfs_registry_s3_version: "{{ openshift_storage_glusterfs_s3_version }}"
 openshift_storage_glusterfs_registry_s3_account: "{{ openshift_storage_glusterfs_s3_account }}"
 openshift_storage_glusterfs_registry_s3_user: "{{ openshift_storage_glusterfs_s3_user }}"
 openshift_storage_glusterfs_registry_s3_password: "{{ openshift_storage_glusterfs_s3_password }}"
@@ -81,7 +94,6 @@ openshift_storage_glusterfs_registry_heketi_is_missing: "{{ openshift_storage_gl
 openshift_storage_glusterfs_registry_heketi_deploy_is_missing: "{{ openshift_storage_glusterfs_heketi_deploy_is_missing }}"
 openshift_storage_glusterfs_registry_heketi_cli: "{{ openshift_storage_glusterfs_heketi_cli }}"
 openshift_storage_glusterfs_registry_heketi_image: "{{ openshift_storage_glusterfs_heketi_image }}"
-openshift_storage_glusterfs_registry_heketi_version: "{{ openshift_storage_glusterfs_heketi_version }}"
 openshift_storage_glusterfs_registry_heketi_admin_key: "{{ omit }}"
 openshift_storage_glusterfs_registry_heketi_user_key: "{{ omit }}"
 openshift_storage_glusterfs_registry_heketi_topology_load: "{{ openshift_storage_glusterfs_heketi_topology_load }}"
@@ -113,3 +125,6 @@ r_openshift_storage_glusterfs_os_firewall_allow:
   port: "3260/tcp"
 - service: rpcbind
   port: "111/tcp"
+
+# One retry every 10 seconds.
+openshift_glusterfs_cluster_health_check_retries: 120

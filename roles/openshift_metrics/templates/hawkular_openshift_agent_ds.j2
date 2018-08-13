@@ -24,7 +24,7 @@ spec:
 {% endfor %}
 {% endif %}
       containers:
-      - image: {{openshift_metrics_image_prefix}}metrics-hawkular-openshift-agent:{{openshift_metrics_image_version}}
+      - image: {{ openshift_metrics_hawkular_agent_image }}
         imagePullPolicy: IfNotPresent
         name: hawkular-openshift-agent
 {% if ((openshift_metrics_hawkular_agent_limits_cpu is defined and openshift_metrics_hawkular_agent_limits_cpu is not none)

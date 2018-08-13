@@ -1,32 +1,7 @@
 ---
-- name: Delete pre-existing glusterblock provisioner resources
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: "{{ item.kind }}"
-    name: "{{ item.name | default(omit) }}"
-    selector: "{{ item.selector | default(omit) }}"
-    state: absent
-  with_items:
-  - kind: "all,deploy,sa,clusterrole,clusterrolebinding"
-    selector: "glusterblock"
-  failed_when: False
-  when: glusterfs_wipe
-
-- name: Wait for glusterblock provisioner pods to terminate
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: pod
-    state: list
-    selector: "glusterfs=block-{{ glusterfs_name }}-provisioner-pod"
-  register: glusterblock_pod
-  until: "glusterblock_pod.results.results[0]['items'] | count == 0"
-  delay: 10
-  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
-  when: glusterfs_wipe
-
 - name: Copy initial glusterblock provisioner resource file
   copy:
-    src: "{{ openshift_examples_content_version }}/{{ item }}"
+    src: "{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - "glusterblock-provisioner.yml"
@@ -47,7 +22,6 @@
     create: True
     params:
       IMAGE_NAME: "{{ glusterfs_block_image }}"
-      IMAGE_VERSION: "{{ glusterfs_block_version }}"
       NAMESPACE: "{{ glusterfs_namespace }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
 

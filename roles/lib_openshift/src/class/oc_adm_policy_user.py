@@ -107,8 +107,11 @@ class PolicyUser(OpenShiftCLI):
             return False
 
         for binding in bindings:
+            if self.config.config_options['rolebinding_name']['value'] is not None and \
+                    binding['metadata']['name'] != self.config.config_options['rolebinding_name']['value']:
+                continue
             if binding['roleRef']['name'] == self.config.config_options['name']['value'] and \
-                    binding['userNames'] is not None and \
+                    'userNames' in binding and binding['userNames'] is not None and \
                     self.config.config_options['user']['value'] in binding['userNames']:
                 self.role_binding = binding
                 return True
@@ -151,11 +154,14 @@ class PolicyUser(OpenShiftCLI):
         if self.config.config_options['role_namespace']['value'] is not None:
             cmd.extend(['--role-namespace', self.config.config_options['role_namespace']['value']])
 
+        if self.config.config_options['rolebinding_name']['value'] is not None:
+            cmd.extend(['--rolebinding-name', self.config.config_options['rolebinding_name']['value']])
+
         return self.openshift_cmd(cmd, oadm=True)
 
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run the oc_adm_policy_user module'''
 
         state = params['state']
 
@@ -172,6 +178,7 @@ class PolicyUser(OpenShiftCLI):
                                     'resource_kind': {'value': params['resource_kind'], 'include': False},
                                     'name': {'value': params['resource_name'], 'include': False},
                                     'role_namespace': {'value': params['role_namespace'], 'include': False},
+                                    'rolebinding_name': {'value': params['rolebinding_name'], 'include': False},
                                    })
 
         policyuser = PolicyUser(nconfig, params['debug'])

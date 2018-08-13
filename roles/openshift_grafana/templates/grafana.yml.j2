@@ -26,7 +26,7 @@ spec:
 {% endif %}
       containers:
       - name: oauth-proxy
-        image: "{{ l_openshift_grafana_proxy_image_prefix }}oauth-proxy:{{ l_openshift_grafana_proxy_image_version }}"
+        image: "{{ openshift_grafana_proxy_image }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -67,7 +67,7 @@ spec:
           name: grafana-proxy-secrets
 
       - name: grafana
-        image: "{{ l_openshift_grafana_image_prefix }}{{ l_openshift_grafana_image }}:{{ l_openshift_grafana_image_version }}"
+        image: "{{ openshift_grafana_image }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -90,14 +90,12 @@ spec:
         volumeMounts:
         - mountPath: "/root/go/src/github.com/grafana/grafana/data"
           name: grafana-data
-        - mountPath: "/root/go/src/github.com/grafana/grafana/conf"
+        - mountPath: "/usr/share/grafana/conf"
           name: grafana-config
         - mountPath: /etc/tls/private
           name: grafana-tls-secret
         - mountPath: /etc/proxy/secrets
           name: grafana-proxy-secrets
-        command:
-         - "./bin/grafana-server"
 
       volumes:
       - name: grafana-config

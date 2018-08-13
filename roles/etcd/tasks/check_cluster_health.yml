@@ -1,2 +1,0 @@
----
-- include_tasks: migration/check_cluster_health.yml

@@ -33,3 +33,16 @@
 
   - when: openshift_aws_create_launch_config
     include_tasks: uninstall_launch_config.yml
+
+- name: get list of LCs
+  ec2_lc_facts:
+    region: "{{ openshift_aws_region }}"
+  register: l_launch_config_list
+
+- name: remove stray LCs for this node group
+  ec2_lc:
+    name: "{{ item.launch_configuration_name }}"
+    state: absent
+    region: "{{ openshift_aws_region }}"
+  when: item.launch_configuration_name is match("^" ~ openshift_aws_node_group.name ~ ".*")
+  with_items: "{{ l_launch_config_list.launch_configurations }}"

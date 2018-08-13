@@ -62,7 +62,7 @@ class OCScale(OpenShiftCLI):
     # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
-        '''perform the idempotent ansible logic'''
+        '''run the oc_scale module'''
 
         oc_scale = OCScale(params['name'],
                            params['namespace'],

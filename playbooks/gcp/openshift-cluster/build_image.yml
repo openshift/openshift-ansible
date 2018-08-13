@@ -26,7 +26,6 @@
   tasks:
   - name: Set facts
     set_fact:
-      openshift_node_bootstrap: True
       openshift_master_unsupported_embedded_etcd: True
 
   - name: Create the image instance disk
@@ -78,11 +77,14 @@
   tasks:
   - wait_for_connection:
 
-- hosts: nodes
+- name: Add custom repositories
+  hosts: nodes
+  handlers:
+  - import_tasks: ../../roles/openshift_repos/handlers/main.yml
   tasks:
-  - name: Set facts
-    set_fact:
-      openshift_node_bootstrap: True
+  - include_role:
+      name: openshift_gcp
+      tasks_from: add_custom_repositories.yml
 
 # This is the part that installs all of the software and configs for the instance
 # to become a node.
@@ -110,8 +112,16 @@
       zone: "{{ openshift_gcp_zone }}"
       instance_names: "{{ openshift_gcp_prefix }}build-image-instance"
       state: absent
+
   - name: Save the new image
-    command: gcloud --project "{{ openshift_gcp_project}}" compute images create "{{ openshift_gcp_image_name | default(openshift_gcp_image + '-' + lookup('pipe','date +%Y%m%d-%H%M%S')) }}" --source-disk "{{ openshift_gcp_prefix }}build-image-instance" --source-disk-zone "{{ openshift_gcp_zone }}" --family "{{ openshift_gcp_image }}"
+    command: >
+      gcloud
+      --project {{ openshift_gcp_project}} compute images create {{ (openshift_gcp_image_name | default(openshift_gcp_image + '-' + lookup('pipe','date +%Y%m%d-%H%M%S'))) | quote }}
+      --source-disk {{ (openshift_gcp_prefix + 'build-image-instance') | quote }}
+      --source-disk-zone {{ openshift_gcp_zone | quote }}
+      --family {{ openshift_gcp_image | quote }}
+      {% if openshift_gcp_licenses is defined %} --licenses {{ openshift_gcp_licenses | quote }}{% endif %}
+
   - name: Remove the image instance disk
     gce_pd:
       service_account_email: "{{ (lookup('file', openshift_gcp_iam_service_account_keyfile ) | from_json ).client_email }}"

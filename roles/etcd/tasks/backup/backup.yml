@@ -24,27 +24,10 @@
       {{ l_avail_disk.stdout }} Kb available.
   when: l_etcd_disk_usage.stdout|int*2 > l_avail_disk.stdout|int
 
-# For non containerized and non embedded we should have the correct version of
+# For non containerized we should have the correct version of
 # etcd installed already. So don't do anything.
 #
-# For containerized installs we now exec into etcd_container
-#
-# For embedded non containerized we need to ensure we have the latest version
-# etcd on the host.
-- name: Detecting Atomic Host Operating System
-  stat:
-    path: /run/ostree-booted
-  register: l_ostree_booted
-
-- name: Install latest etcd for embedded
-  package:
-    name: etcd
-    state: latest
-  when:
-  - r_etcd_common_embedded_etcd | bool
-  - not l_ostree_booted.stat.exists | bool
-  register: result
-  until: result is succeeded
+# For static pod installs we now exec into etcd_container
 
 - name: Check selinux label of '{{ etcd_data_dir }}'
   command: >
@@ -71,6 +54,9 @@
 - name: Check for v3 data store
   stat:
     path: "{{ etcd_data_dir }}/member/snap/db"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: l_v3_db
 
 - name: Copy etcd v3 data store

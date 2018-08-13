@@ -27,7 +27,7 @@
     local_facts:
       cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
       cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
-      api_port: "{{ openshift_master_api_port | default(None) }}"
+      api_port: "{{ openshift_master_api_port }}"
       api_url: "{{ openshift_master_api_url | default(None) }}"
       api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
       public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
@@ -38,62 +38,35 @@
       public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
       logging_public_url: "{{ openshift_master_logging_public_url | default(None) }}"
       logout_url: "{{ openshift_master_logout_url | default(None) }}"
-      extension_scripts: "{{ openshift_master_extension_scripts | default(None) }}"
-      extension_stylesheets: "{{ openshift_master_extension_stylesheets | default(None) }}"
-      extensions: "{{ openshift_master_extensions | default(None) }}"
-      etcd_hosts: "{{ openshift_master_etcd_hosts | default(None) }}"
-      etcd_port: "{{ openshift_master_etcd_port | default(None) }}"
-      etcd_use_ssl: "{{ openshift_master_etcd_use_ssl | default(None) }}"
-      etcd_urls: "{{ openshift_master_etcd_urls | default(None) }}"
-      embedded_kube: "{{ openshift_master_embedded_kube | default(None) }}"
-      embedded_dns: "{{ openshift_master_embedded_dns | default(None) }}"
       bind_addr: "{{ openshift_master_bind_addr | default(None) }}"
-      pod_eviction_timeout: "{{ openshift_master_pod_eviction_timeout | default(None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
       session_name: "{{ openshift_master_session_name | default(None) }}"
-      session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"
-      session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(None) }}"
-      session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(None) }}"
-      access_token_max_seconds: "{{ openshift_master_access_token_max_seconds | default(None) }}"
-      auth_token_max_seconds: "{{ openshift_master_auth_token_max_seconds | default(None) }}"
-      # oo_htpasswd_users_from_file is a custom filter in role lib_utils
-      htpasswd_users: "{{ openshift_master_htpasswd_users | default(lookup('file', openshift_master_htpasswd_file) | oo_htpasswd_users_from_file if openshift_master_htpasswd_file is defined else None) }}"
-      manage_htpasswd: "{{ openshift_master_manage_htpasswd | default(true) }}"
       ldap_ca: "{{ openshift_master_ldap_ca | default(lookup('file', openshift_master_ldap_ca_file) if openshift_master_ldap_ca_file is defined else None) }}"
       openid_ca: "{{ openshift_master_openid_ca | default(lookup('file', openshift_master_openid_ca_file) if openshift_master_openid_ca_file is defined else None) }}"
-      request_header_ca: "{{ openshift_master_request_header_ca | default(lookup('file', openshift_master_request_header_ca_file) if openshift_master_request_header_ca_file is defined else None) }}"
-      registry_url: "{{ oreg_url_master | default(oreg_url) | default(None) }}"
-      oauth_grant_method: "{{ openshift_master_oauth_grant_method | default(None) }}"
-      sdn_cluster_network_cidr: "{{ osm_cluster_network_cidr | default(None) }}"
-      sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
-      custom_cors_origins: "{{ osm_custom_cors_origins | default(None) }}"
+      registry_url: "{{ oreg_url | default(None) }}"
       registry_selector: "{{ openshift_registry_selector | default(None) }}"
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
-      master_count: "{{ openshift_master_count | default(None) }}"
       admission_plugin_config: "{{openshift_master_admission_plugin_config }}"
       kube_admission_plugin_config: "{{openshift_master_kube_admission_plugin_config | default(None) }}"  # deprecated, merged with admission_plugin_config
-      oauth_always_show_provider_selection: "{{ openshift_master_oauth_always_show_provider_selection | default(None) }}"
       image_policy_config: "{{ openshift_master_image_policy_config | default(None) }}"
-      dynamic_provisioning_enabled: "{{ openshift_master_dynamic_provisioning_enabled | default(None) }}"
-      max_requests_inflight: "{{ openshift_master_max_requests_inflight | default(None) }}"
-      api_env_vars: "{{ openshift_master_api_env_vars | default(None) }}"
-      controllers_env_vars: "{{ openshift_master_controllers_env_vars | default(None) }}"
-      audit_config: "{{ openshift_master_audit_config | default(None) }}"
-      scheduler_args: "{{ openshift_master_scheduler_args | default(None) }}"
+      image_policy_allowed_registries_for_import: "{{ openshift_master_image_policy_allowed_registries_for_import | default(None) }}"
 
 - name: Determine if scheduler config present
   stat:
     path: "{{ openshift_master_scheduler_conf }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: scheduler_config_stat
 
 - name: Set Default scheduler predicates and priorities
   set_fact:
     # openshift_master_facts_default_predicates is a custom lookup plugin in
     # role lib_utils
-    openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates', cloudprovider_enabled=has_cloudprovider) }}"
-    openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities', cloudprovider_enabled=has_cloudprovider) }}"
+    openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates') }}"
+    openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities') }}"
 
 - block:
   - name: Retrieve current scheduler config

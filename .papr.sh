@@ -10,32 +10,83 @@ if [ -n "${PAPR_BRANCH:-}" ]; then
 else
   target_branch=$PAPR_PULL_TARGET_BRANCH
 fi
+target_branch_in=${target_branch}
 if [[ "${target_branch}" =~ ^release- ]]; then
   target_branch="${target_branch/release-/}"
 else
   dnf install -y sed
   target_branch="$( git describe | sed 's/^openshift-ansible-\([0-9]*\.[0-9]*\)\.[0-9]*-.*/\1/' )"
 fi
+export target_branch
+
+# Need to define some git variables for rebase.
+git config --global user.email "ci@openshift.org"
+git config --global user.name "OpenShift Atomic CI"
+
+# Rebase existing branch on the latest code locally, as PAPR running doesn't do merges
+git fetch origin ${target_branch_in} && git rebase origin/${target_branch_in}
+
+PAPR_INVENTORY=${PAPR_INVENTORY:-.papr.inventory}
+PAPR_RUN_UPDATE=${PAPR_RUN_UPDATE:-0}
+PAPR_UPGRADE_FROM=${PAPR_UPGRADE_FROM:-0}
+PAPR_EXTRAVARS=""
+
+# Replace current branch with PAPR_UPGRADE_FROM
+if [[ "${PAPR_UPGRADE_FROM}" != "0" ]]; then
+  git branch new-code
+  git checkout release-${PAPR_UPGRADE_FROM}
+  git clean -fdx
+  PAPR_EXTRAVARS="-e openshift_release=${PAPR_UPGRADE_FROM}"
+fi
 
 pip install -r requirements.txt
 
+# Human-readable output
+export ANSIBLE_STDOUT_CALLBACK=debug
+
 # ping the nodes to check they're responding and register their ostree versions
-ansible -vvv -i .papr.inventory nodes -a 'rpm-ostree status'
+ansible -vv -i $PAPR_INVENTORY nodes -a 'rpm-ostree status'
+
+# Make sure hostname -f returns correct node name
+ansible -vv -i $PAPR_INVENTORY nodes -m setup
+ansible -vv -i $PAPR_INVENTORY nodes -a "hostnamectl set-hostname {{ ansible_default_ipv4.address }}"
+ansible -vv -i $PAPR_INVENTORY nodes -m setup -a "gather_subset=min"
 
 upload_journals() {
   mkdir journals
-  for node in master node1 node2; do
-    ssh ocp-$node 'journalctl --no-pager || true' > journals/ocp-$node.log
-  done
+  ansible -vvv -i $PAPR_INVENTORY all \
+    -m shell -a 'journalctl --no-pager > /tmp/journal'
+  ansible -vvv -i $PAPR_INVENTORY all \
+    -m fetch -a "src=/tmp/journal dest=journals/{{ inventory_hostname }}.log flat=yes"
+
+  # Split large files into parts, extracting a basename and preserving extention
+  find . -iname "*.log" -execdir sh -c 'split -b 4m --numeric-suffixes --additional-suffix=.log {} $(basename {} .log)_' \; -execdir rm -rf {} \;
 }
 
 trap upload_journals ERR
 
-# make all nodes ready for bootstrapping
-ansible-playbook -vvv -i .papr.inventory playbooks/openshift-node/private/image_prep.yml
+# run the prerequisites play
+ansible-playbook -vvv -i $PAPR_INVENTORY $PAPR_EXTRAVARS playbooks/prerequisites.yml
 
 # run the actual installer
-ansible-playbook -vvv -i .papr.inventory playbooks/deploy_cluster.yml -e "openshift_release=${target_branch}"
+ansible-playbook -vvv -i $PAPR_INVENTORY $PAPR_EXTRAVARS playbooks/deploy_cluster.yml
+
+# Restore the branch if needed
+if [[ "${PAPR_UPGRADE_FROM}" != "0" ]]; then
+  git checkout new-code
+  git clean -fdx
+  pip install -r requirements.txt
+fi
+
+# Run upgrade playbook
+if [[ "${PAPR_RUN_UPDATE}" != "0" ]]; then
+  update_version="$(echo $target_branch | sed 's/\./_/')"
+  # Create basic node-group configmaps for upgrade
+  ansible-playbook -vvv -i $PAPR_INVENTORY $PAPR_EXTRAVARS playbooks/openshift-master/openshift_node_group.yml
+  ansible-playbook -vvv -i $PAPR_INVENTORY playbooks/byo/openshift-cluster/upgrades/v${update_version}/upgrade.yml | tee update.log
+fi
+
+upload_journals
 
 ### DISABLING TESTS FOR NOW, SEE:
 ### https://github.com/openshift/openshift-ansible/pull/6132

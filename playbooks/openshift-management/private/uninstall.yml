@@ -5,4 +5,4 @@
   - name: Run the CFME Uninstall Role Tasks
     import_role:
       name: openshift_management
-      tasks_from: uninstall
+      tasks_from: uninstall.yml

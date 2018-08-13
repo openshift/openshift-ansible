@@ -8,7 +8,13 @@
   - role: openshift_web_console
     when:
     - openshift_web_console_install | default(true) | bool
-    - openshift_upgrade_target is version_compare('3.9','>=')
+
+- name: Install admin console
+  hosts: oo_first_master
+  roles:
+  - role: openshift_console
+    when:
+    - openshift_console_install | default(true) | bool
 
 # upgrade registry and router pods; we defer waiting for these pods
 # until after the next play to hopefully save some time polling.
@@ -38,6 +44,7 @@
 
 # Poll for registry and router pods, redeploy registry certs if needed.
 - import_playbook: ../../../openshift-hosted/private/upgrade_poll_and_check_certs.yml
+  when: openshift_hosted_manage_registry | default(True)
 
 # Check for warnings to be printed at the end of the upgrade:
 - name: Clean up and display warnings

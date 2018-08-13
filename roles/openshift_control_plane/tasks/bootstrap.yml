@@ -3,7 +3,7 @@
 # oc_serviceaccounts_kubeconfig
 - name: create service account kubeconfig with csr rights
   command: >
-    {{ openshift_client_binary }} serviceaccounts create-kubeconfig {{ openshift_master_csr_sa }} -n {{ openshift_master_csr_namespace }}
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig serviceaccounts create-kubeconfig {{ openshift_master_csr_sa }} -n {{ openshift_master_csr_namespace }}
   register: kubeconfig_out
   until: kubeconfig_out.rc == 0
   retries: 24
@@ -12,4 +12,4 @@
 - name: put service account kubeconfig into a file on disk for bootstrap
   copy:
     content: "{{ kubeconfig_out.stdout }}"
-    dest: "{{ openshift_master_config_dir }}/bootstrap.kubeconfig"
+    dest: "/etc/origin/master/bootstrap.kubeconfig"

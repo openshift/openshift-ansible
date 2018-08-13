@@ -19,17 +19,18 @@ From this role:
 | Name                                  | Default value                            | Description                                                                                                              |
 |---------------------------------------|------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
 | openshift_hosted_router_certificate   | None                                     | Dictionary containing "certfile", "keyfile" and "cafile" keys with values containing paths to local certificate files.   |
-| openshift_hosted_router_registryurl   | 'openshift3/ose-${component}:${version}' | The image to base the OpenShift router on.                                                                               |
+| openshift_hosted_router_registryurl   | 'registry.access.redhat.com/openshift3/ose-${component}:${version}' | The image to base the OpenShift router on.                                                                               |
 | openshift_hosted_router_replicas      | Number of nodes matching selector        | The number of replicas to configure.                                                                                     |
-| openshift_hosted_router_selector      | region=infra                             | Node selector used when creating router. The OpenShift router will only be deployed to nodes matching this selector.     |
+| openshift_hosted_router_selector      | node-role.kubernetes.io/infra=true       | Node selector used when creating router. The OpenShift router will only be deployed to nodes matching this selector.     |
 | openshift_hosted_router_name          | router                                   | The name of the router to be created.                                                                                    |
-| openshift_hosted_registry_registryurl | 'openshift3/ose-${component}:${version}' | The image to base the OpenShift registry on.                                                                             |
+| openshift_hosted_router_extended_validation | True                               | Whether to configure the router to perform extended validation on routes before admitting them. |
+| openshift_hosted_registry_registryurl | 'registry.access.redhat.com/openshift3/ose-${component}:${version}' | The image to base the OpenShift registry on.                                                                             |
 | openshift_hosted_registry_replicas    | Number of nodes matching selector        | The number of replicas to configure.                                                                                     |
-| openshift_hosted_registry_selector    | region=infra                             | Node selector used when creating registry. The OpenShift registry will only be deployed to nodes matching this selector. |
+| openshift_hosted_registry_selector    | node-role.kubernetes.io/infra=true                   | Node selector used when creating registry. The OpenShift registry will only be deployed to nodes matching this selector. |
 | openshift_hosted_registry_cert_expire_days | `730` (2 years)                     | Validity of the certificates in days. Works only with OpenShift version 1.5 (3.5) and later.                             |
 | openshift_hosted_registry_clusterip   | None                                     | Cluster IP for registry service                                                                                          |
 
-If you specify `openshift_hosted_registry_kind=glusterfs`, the following
+If you specify `openshift_hosted_registry_storage_kind=glusterfs`, the following
 variables also control configuration behavior:
 
 | Name                                         | Default value | Description                                                                  |
@@ -67,7 +68,7 @@ Example Playbook
       certfile: /path/to/my-router.crt
       keyfile: /path/to/my-router.key
       cafile: /path/to/my-router-ca.crt
-    openshift_hosted_router_registryurl: 'registry.access.redhat.com/openshift3/ose-haproxy-router:v3.0.2.0'
+    openshift_hosted_router_registryurl: 'registry.redhat.io/openshift3/ose-haproxy-router:v3.0.2.0'
     openshift_hosted_router_selector: 'type=infra'
     openshift_hosted_registry_storage_kind=glusterfs
     openshift_hosted_registry_storage_glusterfs_path=external_glusterfs_volume_name

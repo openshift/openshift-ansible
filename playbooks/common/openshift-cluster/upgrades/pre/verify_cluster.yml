@@ -18,7 +18,7 @@
     when:
     - openshift_pkg_version is defined
     - openshift_pkg_version != ""
-    - openshift_pkg_version.split('-',1).1 is version_compare(openshift_upgrade_target ,'<')
+    - openshift_pkg_version.split('-',1).1 is version(openshift_upgrade_target ,'<')
 
   - fail:
       msg: >
@@ -27,7 +27,7 @@
     when:
     - openshift_image_tag is defined
     - openshift_image_tag != ""
-    - openshift_image_tag.split('v',1).1 is version_compare(openshift_upgrade_target ,'<')
+    - openshift_image_tag.split('v',1).1 is version(openshift_upgrade_target ,'<')
 
   - set_fact:
       openshift_release: "{{ openshift_release[1:] }}"
@@ -39,8 +39,15 @@
         valid release for a {{ openshift_upgrade_target }} upgrade
     when:
     - openshift_release is defined
-    - not (openshift_release is version_compare(openshift_upgrade_target ,'='))
+    - not (openshift_release is version(openshift_upgrade_target ,'='))
 
+  # Ensure glusterfs clusters are healthy before starting an upgrade.
+  - import_role:
+      name: openshift_storage_glusterfs
+      tasks_from: check_cluster_health.yml
+    when: >
+          ('glusterfs' in groups and groups['glusterfs'] | length > 0)
+          or ('glusterfs_registry' in groups and groups['glusterfs_registry'] | length > 0)
 - name: Verify master processes
   hosts: oo_masters_to_config
   roles:
@@ -68,7 +75,9 @@
       local_facts:
         ha: "{{ groups.oo_masters_to_config | length > 1 }}"
 
-  - when: openshift_is_containerized | bool
+  - when:
+    - openshift_is_containerized | bool
+    - not openshift_is_bootstrapped | bool
     block:
     - set_fact:
         master_services:

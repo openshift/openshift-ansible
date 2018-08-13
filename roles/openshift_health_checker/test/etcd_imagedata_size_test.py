@@ -127,9 +127,9 @@ def test_check_etcd_key_size_calculates_correct_limit(ansible_mounts, tree, size
         etcd_max_image_data_size_bytes=size_limit,
         ansible_mounts=ansible_mounts,
         openshift=dict(
-            master=dict(etcd_hosts=["localhost"]),
             common=dict(config_base="/var/lib/origin")
-        )
+        ),
+        openshift_master_etcd_hosts=["localhost"]
     )
     if size_limit is None:
         task_vars.pop("etcd_max_image_data_size_bytes")
@@ -285,9 +285,9 @@ def test_etcd_key_size_check_calculates_correct_size(ansible_mounts, tree, root_
     task_vars = dict(
         ansible_mounts=ansible_mounts,
         openshift=dict(
-            master=dict(etcd_hosts=["localhost"]),
             common=dict(config_base="/var/lib/origin")
-        )
+        ),
+        openshift_master_etcd_hosts=["localhost"]
     )
 
     check = EtcdImageDataSize(execute_module, task_vars).run()
@@ -313,9 +313,9 @@ def test_etcdkeysize_module_failure():
             'size_total': 80 * 10**9,
         }],
         openshift=dict(
-            master=dict(etcd_hosts=["localhost"]),
             common=dict(config_base="/var/lib/origin")
-        )
+        ),
+        openshift_master_etcd_hosts=["localhost"]
     )
 
     check = EtcdImageDataSize(execute_module, task_vars).run()

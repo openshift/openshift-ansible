@@ -20,7 +20,6 @@
 - import_playbook: ../../../../init/version.yml
   vars:
     l_openshift_version_set_hosts: "oo_etcd_to_config:oo_nodes_to_upgrade:oo_masters_to_config:!oo_first_master"
-    l_openshift_version_check_hosts: "all:!all"
 
 # Ensure inventory sanity_checks are run.
 - import_playbook: ../../../../init/sanity_checks.yml
@@ -88,7 +87,7 @@
     - l_docker_upgrade_drain_result is failed
     - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
-  - include_tasks: tasks/upgrade.yml
+  - import_tasks: tasks/upgrade.yml
     when:
     - l_docker_upgrade is defined
     - l_docker_upgrade | bool

@@ -2,7 +2,7 @@
 - name: Gather OpenShift Logging Facts
   openshift_logging_facts:
     oc_bin: "{{openshift_client_binary}}"
-    openshift_logging_namespace: "{{openshift_logging_namespace}}"
+    openshift_logging_namespace: "{{ openshift_logging_namespace }}"
 
 ## This is include vs import because we need access to group/inventory variables
 - include_tasks: set_defaults_from_current.yml
@@ -58,14 +58,6 @@
 - include_tasks: generate_certs.yaml
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
-
-- set_fact:
-    __base_file_dir: "{{ '5.x' if openshift_logging_es5_techpreview | bool else '2.x' }}"
-    __es_version: "{{ '5.x' if openshift_logging_es5_techpreview | bool else '2.x' }}"
-
-- set_fact:
-    openshift_logging_image_version: "techpreview"
-  when: openshift_logging_es5_techpreview | bool
 
 ## Elasticsearch
 
@@ -308,6 +300,10 @@
     openshift_logging_curator_cpu_request: "{{ openshift_logging_curator_ops_cpu_request }}"
     openshift_logging_curator_memory_limit: "{{ openshift_logging_curator_ops_memory_limit }}"
     openshift_logging_curator_nodeselector: "{{ openshift_logging_curator_ops_nodeselector }}"
+    openshift_logging_curator_default_days: "{{ openshift_logging_curator_ops_default_days | default() }}"
+    openshift_logging_curator_run_hour: "{{ openshift_logging_curator_ops_run_hour | default() }}"
+    openshift_logging_curator_run_minute: "{{ openshift_logging_curator_ops_run_minute | default() }}"
+    openshift_logging_curator_run_timezone: "{{ openshift_logging_curator_ops_run_timezone | default() }}"
   when:
   - openshift_logging_use_ops | bool
 
@@ -341,10 +337,6 @@
   when:
     openshift_logging_install_eventrouter | default(false) | bool
 
-
-- include_tasks: update_master_config.yaml
-  when: not openshift_version_gte_3_9
-
 # Update asset config in openshift-web-console namespace
 - name: Add Kibana route information to web console asset config
   include_role:
@@ -356,4 +348,3 @@
       value: "https://{{ openshift_logging_kibana_hostname }}"
   when:
   - openshift_web_console_install | default(true) | bool
-  - openshift_version_gte_3_9

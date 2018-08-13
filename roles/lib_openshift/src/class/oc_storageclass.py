@@ -48,7 +48,6 @@ class OCStorageClass(OpenShiftCLI):
         self.delete()
         # pause here and attempt to wait for delete.
         # Better option would be to poll
-        import time
         time.sleep(5)
         return self.create()
 
@@ -62,21 +61,45 @@ class OCStorageClass(OpenShiftCLI):
             if 'is-default-class' in anno_key and anno_value != self.config.default_storage_class:
                 return True
 
+        # check if mount options have updated
+        if set(self.storage_class.get_mount_options()) != set(self.config.mount_options):
+            return True
+
+        # check if reclaim policy has been updated
+        if self.storage_class.get_reclaim_policy() != self.config.reclaim_policy:
+            return True
+
         return False
+
+    @staticmethod
+    def provisioner_name_qualified(provisioner_name):
+        pattern = re.compile(r'^[a-z0-9A-Z-_.]+\/[a-z0-9A-Z-_.]+$')
+        return pattern.match(provisioner_name)
 
     @staticmethod
     # pylint: disable=too-many-return-statements,too-many-branches
     # TODO: This function should be refactored into its individual parts.
     def run_ansible(params, check_mode):
-        '''run the ansible idempotent code'''
+        '''run the oc_storageclass module'''
+
+        # Make sure that the provisioner is fully qualified before using it
+        # E.g. if 'aws-efs' is provided as a provisioner, convert it to 'kubernetes.io/aws-efs'
+        # but if the name is already qualified  (e.g. 'openshift.org/aws-efs') then leave it be.
+        raw_provisioner_name = params['provisioner']
+        if OCStorageClass.provisioner_name_qualified(raw_provisioner_name):
+            qualified_provisioner_name = raw_provisioner_name
+        else:
+            qualified_provisioner_name = "kubernetes.io/{}".format(params['provisioner'])
 
         rconfig = StorageClassConfig(params['name'],
-                                     provisioner="kubernetes.io/{}".format(params['provisioner']),
+                                     provisioner=qualified_provisioner_name,
                                      parameters=params['parameters'],
                                      annotations=params['annotations'],
                                      api_version="storage.k8s.io/{}".format(params['api_version']),
                                      default_storage_class=params.get('default_storage_class', 'false'),
                                      kubeconfig=params['kubeconfig'],
+                                     mount_options=params['mount_options'],
+                                     reclaim_policy=params['reclaim_policy']
                                     )
 
         oc_sc = OCStorageClass(rconfig, verbose=params['debug'])

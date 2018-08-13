@@ -7,52 +7,10 @@
   - name: Load group name mapping variables
     include_vars: vars/cluster_hosts.yml
 
-  - name: Evaluate groups - g_etcd_hosts or g_new_etcd_hosts required
-    fail:
-      msg: This playbook requires g_etcd_hosts or g_new_etcd_hosts to be set
-    when: g_etcd_hosts is not defined and g_new_etcd_hosts is not defined
-
-  - name: Evaluate groups - g_master_hosts or g_new_master_hosts required
-    fail:
-      msg: This playbook requires g_master_hosts or g_new_master_hosts to be set
-    when: g_master_hosts is not defined and g_new_master_hosts is not defined
-
-  - name: Evaluate groups - g_node_hosts or g_new_node_hosts required
-    fail:
-      msg: This playbook requires g_node_hosts or g_new_node_hosts to be set
-    when: g_node_hosts is not defined and g_new_node_hosts is not defined
-
-  - name: Evaluate groups - g_lb_hosts required
-    fail:
-      msg: This playbook requires g_lb_hosts to be set
-    when: g_lb_hosts is not defined
-
-  - name: Evaluate groups - g_nfs_hosts required
-    fail:
-      msg: This playbook requires g_nfs_hosts to be set
-    when: g_nfs_hosts is not defined
-
   - name: Evaluate groups - g_nfs_hosts is single host
     fail:
       msg: The nfs group must be limited to one host
-    when: g_nfs_hosts | default([]) | length > 1
-
-  - name: Evaluate groups - g_glusterfs_hosts required
-    fail:
-      msg: This playbook requires g_glusterfs_hosts to be set
-    when: g_glusterfs_hosts is not defined
-
-  - name: Evaluate groups - Fail if no etcd hosts group is defined
-    fail:
-      msg: >
-        Running etcd as an embedded service is no longer supported. If this is a
-        new install please define an 'etcd' group with either one, three or five
-        hosts. These hosts may be the same hosts as your masters. If this is an
-        upgrade please see https://docs.openshift.com/container-platform/latest/install_config/upgrading/migrating_embedded_etcd.html
-        for documentation on how to migrate from embedded to external etcd.
-    when:
-    - g_etcd_hosts | default([]) | length == 0
-    - not (openshift_node_bootstrap | default(False))
+    when: g_nfs_hosts | length > 1
 
   - name: Evaluate oo_all_hosts
     add_host:
@@ -141,17 +99,6 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ g_new_node_hosts | default(g_node_hosts | default([], true), true) }}"
-    changed_when: no
-
-  # Skip adding the master to oo_nodes_to_config when g_new_node_hosts is
-  - name: Add master to oo_nodes_to_config
-    add_host:
-      name: "{{ item }}"
-      groups: oo_nodes_to_config
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ g_master_hosts | default([]) }}"
-    when: g_nodeonmaster | default(false) | bool and not g_new_node_hosts | default(false) | bool
     changed_when: no
 
   - name: Evaluate oo_lb_to_config

@@ -36,6 +36,7 @@ import atexit
 import copy
 import fcntl
 import json
+import time
 import os
 import re
 import shutil
@@ -162,7 +163,7 @@ class YeditException(Exception):  # pragma: no cover
     pass
 
 
-# pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods,too-many-instance-attributes
 class Yedit(object):  # pragma: no cover
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
@@ -175,6 +176,7 @@ class Yedit(object):  # pragma: no cover
                  content=None,
                  content_type='yaml',
                  separator='.',
+                 backup_ext=None,
                  backup=False):
         self.content = content
         self._separator = separator
@@ -182,6 +184,11 @@ class Yedit(object):  # pragma: no cover
         self.__yaml_dict = content
         self.content_type = content_type
         self.backup = backup
+        if backup_ext is None:
+            self.backup_ext = ".{}".format(time.strftime("%Y%m%dT%H%M%S"))
+        else:
+            self.backup_ext = backup_ext
+
         self.load(content_type=self.content_type)
         if self.__yaml_dict is None:
             self.__yaml_dict = {}
@@ -376,7 +383,7 @@ class Yedit(object):  # pragma: no cover
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, self.filename + '.orig')
+            shutil.copy(self.filename, '{}{}'.format(self.filename, self.backup_ext))
 
         # Try to set format attributes if supported
         try:
@@ -687,12 +694,7 @@ class Yedit(object):  # pragma: no cover
 
         curr_value = invalue
         if val_type == 'yaml':
-            try:
-                # AUDIT:maybe-no-member makes sense due to different yaml libraries
-                # pylint: disable=maybe-no-member
-                curr_value = yaml.safe_load(invalue, Loader=yaml.RoundTripLoader)
-            except AttributeError:
-                curr_value = yaml.safe_load(invalue)
+            curr_value = yaml.safe_load(str(invalue))
         elif val_type == 'json':
             curr_value = json.loads(invalue)
 
@@ -762,6 +764,7 @@ class Yedit(object):  # pragma: no cover
         yamlfile = Yedit(filename=params['src'],
                          backup=params['backup'],
                          content_type=params['content_type'],
+                         backup_ext=params['backup_ext'],
                          separator=params['separator'])
 
         state = params['state']
@@ -999,7 +1002,7 @@ class OpenShiftCLI(object):
             cmd.append(template_name)
         if params:
             param_str = ["{}={}".format(key, str(value).replace("'", r'"')) for key, value in params.items()]
-            cmd.append('-v')
+            cmd.append('-p')
             cmd.extend(param_str)
 
         results = self.openshift_cmd(cmd, output=True, input_data=template_data)
@@ -1331,9 +1334,10 @@ class Utils(object):  # pragma: no cover
                 version = version.split("-")[0]
 
             if version.startswith('v'):
-                versions_dict[tech + '_numeric'] = version[1:].split('+')[0]
-                # "v3.3.0.33" is what we have, we want "3.3"
-                versions_dict[tech + '_short'] = version[1:4]
+                version = version[1:]  # Remove the 'v' prefix
+                versions_dict[tech + '_numeric'] = version.split('+')[0]
+                # "3.3.0.33" is what we have, we want "3.3"
+                versions_dict[tech + '_short'] = "{}.{}".format(*version.split('.'))
 
         return versions_dict
 
@@ -1593,7 +1597,7 @@ class OCObject(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode=False):
-        '''perform the ansible idempotent code'''
+        '''run the oc_obj module'''
 
         ocobj = OCObject(params['kind'],
                          params['namespace'],
@@ -1620,9 +1624,11 @@ class OCObject(OpenShiftCLI):
         # Delete
         ########
         if state == 'absent':
-            # verify its not in our results
+            # verify it's not in our results
+            # pylint: disable=too-many-boolean-expressions
             if (params['name'] is not None or params['selector'] is not None) and \
                (len(api_rval['results']) == 0 or \
+               (not api_rval['results'][0]) or \
                ('items' in api_rval['results'][0] and len(api_rval['results'][0]['items']) == 0)):
                 return {'changed': False, 'state': state}
 

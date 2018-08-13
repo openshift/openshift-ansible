@@ -1,4 +1,4 @@
-{% raw %}
+{% raw -%}
 #!/usr/bin/ansible-playbook
 ---
 - hosts: localhost
@@ -10,25 +10,9 @@
       - regex: ^listen-address
         state: present
         line: "listen-address={{ ansible_default_ipv4.address }}"
-    node_dns:
-      file: /etc/dnsmasq.d/node-dnsmasq.conf
-      lines:
-      - regex: "^server=/in-addr.arpa/127.0.0.1$"
-        line: server=/in-addr.arpa/127.0.0.1
-      - regex: "^server=/cluster.local/127.0.0.1$"
-        line: server=/cluster.local/127.0.0.1
 
   tasks:
   - include_vars: openshift_settings.yaml
-
-  - name: set the data for node_dns
-    lineinfile:
-      create: yes
-      insertafter: EOF
-      path: "{{ node_dns.file }}"
-      regexp: "{{ item.regex }}"
-      line: "{{ item.line | default(omit) }}"
-    with_items: "{{ node_dns.lines }}"
 
   - name: set the data for origin_dns
     lineinfile:
@@ -41,13 +25,15 @@
     with_items: "{{ origin_dns.lines }}"
 
   - when:
-    - openshift_group_type is defined
-    - openshift_group_type != ''
-    - openshift_group_type != 'master'
+    - openshift_node_config_name is defined
+    - openshift_node_config_name != ''
     block:
     - name: determine the openshift_service_type
       stat:
         path: /etc/sysconfig/atomic-openshift-node
+        get_checksum: false
+        get_attributes: false
+        get_mime: false
       register: service_type_results
 
     - name: set openshift_service_type fact based on stat results
@@ -60,7 +46,7 @@
         line: "{{ item.line }}"
         regexp: "{{ item.regexp }}"
       with_items:
-      - line: "BOOTSTRAP_CONFIG_NAME=node-config-{{ openshift_group_type }}"
+      - line: "BOOTSTRAP_CONFIG_NAME={{ openshift_node_config_name }}"
         regexp: "^BOOTSTRAP_CONFIG_NAME=.*"
 {% endraw %}
 

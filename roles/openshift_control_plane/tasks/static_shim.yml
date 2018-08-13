@@ -6,5 +6,14 @@
     dest: "/usr/local/bin/"
     mode: 0500
   with_items:
-  - scripts/docker/master-logs
-  - scripts/docker/master-restart
+  - "scripts/{{ l_runtime }}/master-exec"
+  - "scripts/{{ l_runtime }}/master-logs"
+  - "scripts/{{ l_runtime }}/master-restart"
+  vars:
+    l_runtime: "{{ 'crio' if (openshift_use_crio | bool) else 'docker' }}"
+
+- name: Ensure cri-tools installed
+  package:
+    name: cri-tools
+    state: present
+  when: openshift_use_crio | bool

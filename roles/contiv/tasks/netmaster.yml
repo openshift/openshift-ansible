@@ -12,6 +12,7 @@
     src: "{{ contiv_current_release_directory }}/{{ item }}"
     dest: "{{ contiv_bin_dir }}/{{ item }}"
     state: link
+    force: yes
   with_items:
     - netmaster
     - netctl
@@ -41,6 +42,9 @@
     dest: /etc/systemd/system/netmaster.service
   notify: reload systemd
 
+- name: Netmaster | Flush handlers
+  meta: flush_handlers
+
 - name: Netmaster | Enable Netmaster
   service:
     name: netmaster
@@ -50,7 +54,6 @@
   service:
     name: netmaster
     state: started
-  register: netmaster_started
 
 - include_tasks: aci.yml
   when: contiv_fabric_mode == "aci"

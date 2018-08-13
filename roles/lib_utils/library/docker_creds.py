@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # pylint: disable=missing-docstring
 #
-# Copyright 2017 Red Hat, Inc. and/or its affiliates
+# Copyright 2017, 2018 Red Hat, Inc. and/or its affiliates
 # and other contributors as indicated by the @author tags.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,9 @@
 import base64
 import json
 import os
+import pipes
 
 from ansible.module_utils.basic import AnsibleModule
-
 
 DOCUMENTATION = '''
 ---
@@ -53,6 +53,11 @@ options:
         description:
             - This is the password to authenticate to the registry with.
         required: true
+    test_login:
+        description:
+            - Attempt to connect to registry with username + password provided.
+        default: true
+        required: false
 
 author:
     - "Michael Gugino <mgugino@redhat.com>"
@@ -66,6 +71,7 @@ EXAMPLES = '''
     registry: registry.example.com:443
     username: myuser
     password: mypassword
+    test_login: True
 '''
 
 
@@ -125,7 +131,31 @@ def load_config_file(module, dest):
         return {}
 
 
-def update_config(docker_config, registry, username, password):
+def gen_skopeo_cmd(registry, username, password, proxy_vars, image_name):
+    '''Generate skopeo command to run'''
+    skopeo_temp = ("{proxy_vars} timeout 10 skopeo inspect"
+                   " {creds} docker://{registry}/{image_name}")
+    # this will quote the entire creds argument to account for special chars.
+    creds = pipes.quote('--creds={}:{}'.format(username, password))
+    skopeo_args = {'proxy_vars': proxy_vars, 'creds': creds,
+                   'registry': registry, 'image_name': image_name}
+    return skopeo_temp.format(**skopeo_args).strip()
+
+
+def validate_registry_login(module, skopeo_command):
+    '''Attempt to use credentials to log into registry'''
+    # skopeo doesn't honor docker config file proxy settings; need to specify
+    # proxy vars on the cli.
+    rtnc, _, err = module.run_command(skopeo_command, use_unsafe_shell=True)
+    if rtnc:
+        result = {'failed': True,
+                  'changed': False,
+                  'msg': str(err),
+                  'state': 'unknown'}
+        module.fail_json(**result)
+
+
+def update_config(docker_config, registry, encoded_auth):
     '''Add our registry auth credentials into docker_config dict'''
 
     # Add anything that might be missing in our dictionary
@@ -134,15 +164,12 @@ def update_config(docker_config, registry, username, password):
     if registry not in docker_config['auths']:
         docker_config['auths'][registry] = {}
 
-    # base64 encode our username:password string
-    encoded_data = base64.b64encode('{}:{}'.format(username, password).encode())
-
     # check if the same value is already present for idempotency.
     if 'auth' in docker_config['auths'][registry]:
-        if docker_config['auths'][registry]['auth'] == encoded_data:
+        if docker_config['auths'][registry]['auth'] == encoded_auth:
             # No need to go further, everything is already set in file.
             return False
-    docker_config['auths'][registry]['auth'] = encoded_data
+    docker_config['auths'][registry]['auth'] = encoded_auth
     return True
 
 
@@ -168,7 +195,10 @@ def run_module():
         path=dict(aliases=['dest', 'name'], required=True, type='path'),
         registry=dict(type='str', required=True),
         username=dict(type='str', required=True),
-        password=dict(type='str', required=True, no_log=True)
+        password=dict(type='str', required=True, no_log=True),
+        test_login=dict(type='str', required=False, default=True),
+        proxy_vars=dict(type='str', required=False, default=''),
+        image_name=dict(type='str', required=True),
     )
 
     module = AnsibleModule(
@@ -181,6 +211,9 @@ def run_module():
     registry = module.params['registry']
     username = module.params['username']
     password = module.params['password']
+    test_login = module.params['test_login']
+    proxy_vars = module.params['proxy_vars']
+    image_name = module.params['image_name']
 
     if not check_dest_dir_exists(module, dest):
         create_dest_dir(module, dest)
@@ -190,13 +223,21 @@ def run_module():
         # in case there are other registries/settings already present.
         docker_config = load_config_file(module, dest)
 
+    # Test the credentials
+    if test_login:
+        skopeo_command = gen_skopeo_cmd(registry, username, password,
+                                        proxy_vars, image_name)
+        validate_registry_login(module, skopeo_command)
+
+    # base64 encode our username:password string
+    encoded_auth = base64.b64encode('{}:{}'.format(username, password).encode())
     # Put the registry auth info into the config dict.
-    changed = update_config(docker_config, registry, username, password)
+    changed = update_config(docker_config, registry, encoded_auth)
 
     if changed:
         write_config(module, docker_config, dest)
 
-    result = {'changed': changed}
+    result = {'changed': changed, 'rc': 0}
 
     module.exit_json(**result)
 

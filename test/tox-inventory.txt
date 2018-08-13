@@ -13,11 +13,9 @@ oo_first_etcd
 oo_etcd_hosts_to_backup
 oo_etcd_hosts_to_upgrade
 oo_etcd_to_migrate
-oo_hosts_containerized_managed_true
 oo_masters
 oo_masters_to_config
 oo_first_master
-oo_containerized_master_nodes
 oo_nodes_to_config
 oo_nodes_to_upgrade
 oo_nodes_use_kuryr
@@ -69,9 +67,6 @@ localhost
 [oo_first_master]
 localhost
 
-[oo_containerized_master_nodes]
-localhost
-
 [oo_nodes_to_config]
 localhost
 
@@ -103,7 +98,4 @@ localhost
 localhost
 
 [glusterfs_registry]
-localhost
-
-[oo_hosts_containerized_managed_true]
 localhost
