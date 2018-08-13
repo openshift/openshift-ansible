@@ -52,7 +52,7 @@
 
   - name: Update router environment variables
     shell: >
-      {{ openshift_client_binary }} env dc/router
+      {{ openshift_client_binary }} set env dc/router
       OPENSHIFT_CA_DATA="$(cat /etc/origin/master/ca.crt)"
       OPENSHIFT_CERT_DATA="$(cat /etc/origin/master/openshift-router.crt)"
       OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-router.key)"
