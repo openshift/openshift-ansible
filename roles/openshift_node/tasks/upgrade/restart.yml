@@ -47,10 +47,12 @@
 
 - name: Approve the node
   oc_adm_csr:
-    nodes: ["{{ openshift.node.nodename }}"]
-    timeout: 60
+    nodes: ["{{ openshift.node.nodename | lower }}"]
+    timeout: 180
     fail_on_timeout: true
   delegate_to: "{{ groups.oo_first_master.0 }}"
+  when:
+    - openshift_current_version is version_compare('3.10', '<')
 
 - name: Check status of node service
   async_status:
