@@ -1,0 +1,24 @@
+---
+- name: oVirt image template
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    # Contains encrypted `ovirt_engine_password` varibale using ansible-vault
+    - passwords.yml
+
+  vars:
+    ovirt_engine_url: https://ovirt-engine.example.com/ovirt-engine/api
+    ovirt_engine_user: admin@internal
+    ovirt_engine_cafile: /etc/pki/ovirt-engine/ca.pem
+    ovirt_qcow_url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+    ovirt_template_cluster: production
+    ovirt_template_name: centos7_template
+    ovirt_template_memory: 2GiB
+    ovirt_template_cpu: 2
+    ovirt_template_disk_size: 10GiB
+    ovirt_template_disk_storage: nfs
+
+  roles:
+    - oVirt.image-template

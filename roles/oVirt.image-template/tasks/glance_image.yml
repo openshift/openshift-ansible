@@ -1,0 +1,56 @@
+---
+- block:
+    - name: Check if template is correct
+      fail:
+        msg: "one of mandatory parameters ovirt_glance_image_provider or ovirt_glance_image is not defined"
+      when: "ovirt_glance_image_provider is undefined or ovirt_glance_image is undefined"
+
+    - name: Login to oVirt
+      ovirt_auth:
+        url: "{{ ovirt_engine_url | default(omit) }}"
+        username: "{{ ovirt_engine_user | default(omit) }}"
+        password: "{{ ovirt_engine_password | default(omit) }}"
+        ca_file: "{{ ovirt_engine_cafile | default(omit) }}"
+        insecure: "{{ ovirt_engine_insecure | default(true) }}"
+      when: ovirt_auth is undefined or not ovirt_auth
+      register: loggedin
+      tags:
+        - always
+
+    - name: Fetch storages
+      ovirt_storage_domains_facts:
+        auth: "{{ ovirt_auth }}"
+      tags:
+        - ovirt-template-image
+
+    - name: Find data domain
+      set_fact:
+        ovirt_disk_storage_domain: "{{ ovirt_storage_domains|json_query(the_query)|list|first}}"
+      vars:
+        the_query: "[?type=='data']"
+      tags:
+        - ovirt-template-image
+
+    - name: Import templates from glance
+      ovirt_templates:
+        auth: "{{ ovirt_auth }}"
+        state: imported
+        name: "{{ ovirt_template_name }}"
+        template_image_disk_name: "{{ ovirt_template_disk_name | default(omit) }}"
+        image_provider: "{{ ovirt_glance_image_provider }}"
+        image_disk: "{{ ovirt_glance_image }}"
+        storage_domain: "{{ ovirt_template_disk_storage | default(ovirt_disk_storage_domain.name) }}"
+        cluster: "{{ ovirt_template_cluster }}"
+        operating_system: "{{ ovirt_template_operating_system | default(omit) }}"
+        memory: "{{ ovirt_template_memory | default(omit) }}"
+        memory_guaranteed: "{{ ovirt_template_memory_guaranteed | default(omit) }}"
+        memory_max: "{{ ovirt_template_memory_max | default(omit) }}"
+
+  always:
+    - name: Logout from oVirt
+      ovirt_auth:
+        state: absent
+        ovirt_auth: "{{ ovirt_auth }}"
+      when: not loggedin.skipped | default(false)
+      tags:
+        - always

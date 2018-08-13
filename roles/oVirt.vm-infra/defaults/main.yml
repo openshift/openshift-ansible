@@ -1,0 +1,12 @@
+---
+ovirt_debug_vm_create: false
+ovirt_vm_infra_wait_for_ip: false
+
+# Create VMs timeouts:
+ovirt_vm_infra_create_single_timeout: 180
+ovirt_vm_infra_create_poll_interval: 15
+ovirt_vm_infra_create_all_timeout: "{{ ovirt_vm_infra_create_single_timeout * (ovirt_vm_infra_vms | length)|int }}"
+
+# Wait for IPs timeouts:
+ovirt_vm_infra_wait_for_ip_retries: 5
+ovirt_vm_infra_wait_for_ip_delay: 5

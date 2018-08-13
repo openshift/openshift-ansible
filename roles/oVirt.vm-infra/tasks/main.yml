@@ -1,0 +1,146 @@
+---
+- block:
+    - name: Check if VMs are correct
+      fail:
+        msg:"'ovirt_vm_infra_vms' variable does not contain mandatory parameter '{{ item[1] }}' "
+      when: item[1] not in item[0]
+      with_nested:
+        - "{{ ovirt_vm_infra_vms }}"
+        - ['name', 'profile']
+
+    - name: Login to oVirt
+      ovirt_auth:
+        url: "{{ ovirt_engine_url | default(omit) }}"
+        username: "{{ ovirt_engine_user | default(omit) }}"
+        password: "{{ ovirt_engine_password | default(omit) }}"
+        ca_file: "{{ ovirt_engine_cafile | default(omit) }}"
+        insecure: "{{ ovirt_engine_insecure | default(true) }}"
+      when: ovirt_auth is undefined
+      register: loggedin
+
+    - name: Create VMs
+      include_tasks: create_vms.yml
+      with_items: "{{ ovirt_vm_infra_vms }}"
+      loop_control:
+        loop_var: "current_vm"
+
+    - name: Wait for VMs to be added
+      async_status: "jid={{ item.ansible_job_id }}"
+      register: job_result
+      with_items: "{{ all_vms }}"
+      until: job_result.finished
+      retries: "{{ (ovirt_vm_infra_create_all_timeout|int // ovirt_vm_infra_create_poll_interval) + 1  }}"
+      delay: "{{ ovirt_vm_infra_create_poll_interval }}"
+
+    - name: Manage disks
+      ovirt_disks:
+        auth: "{{ ovirt_auth }}"
+        name: "{{ item.0.name }}_{{ item.1.name }}"
+        vm_name: "{{ item.0.name }}"
+        size: "{{ item.1.size | default(omit) }}"
+        format: "{{ item.1.format | default(omit) }}"
+        storage_domain: "{{ item.1.storage_domain | default(omit) }}"
+        interface: "{{ item.1.interface | default(omit) }}"
+        bootable: "{{ item.1.bootable | default(omit) }}"
+        wait: true
+      with_subelements:
+        - "{{ ovirt_vm_infra_vms }}"
+        - "profile.disks"
+        - flags:
+          skip_missing: true
+
+    - name: Manage profile NICs
+      ovirt_nics:
+        auth: "{{ ovirt_auth }}"
+        vm: "{{ item.0.name }}"
+        name: "{{ item.1.name | default(omit) }}"
+        interface: "{{ item.1.interface | default(omit) }}"
+        mac_address: "{{ item.1.mac_address | default(omit) }}"
+        profile: "{{ item.1.profile | default(omit) }}"
+        network: "{{ item.1.network | default(omit) }}"
+      with_subelements:
+        - "{{ ovirt_vm_infra_vms }}"
+        - "profile.nics"
+        - flags:
+          skip_missing: true
+
+    - name: Manage virtual machines NICs
+      ovirt_nics:
+        auth: "{{ ovirt_auth }}"
+        vm: "{{ item.0.name }}"
+        name: "{{ item.1.name | default(omit) }}"
+        interface: "{{ item.1.interface | default(omit) }}"
+        mac_address: "{{ item.1.mac_address | default(omit) }}"
+        profile: "{{ item.1.profile | default(omit) }}"
+        network: "{{ item.1.network | default(omit) }}"
+      with_subelements:
+        - "{{ ovirt_vm_infra_vms }}"
+        - "nics"
+        - flags:
+          skip_missing: true
+
+    - name: Manage VMs state
+      include_tasks: manage_state.yml
+      with_items: "{{ ovirt_vm_infra_vms }}"
+      loop_control:
+        loop_var: "current_vm"
+
+    - name: Wait for VMs to be started
+      no_log: "{{ not ovirt_debug_vm_create }}"
+      async_status: "jid={{ item.ansible_job_id }}"
+      register: job_result
+      with_items: "{{ started_vms }}"
+      until: job_result.finished
+      retries: "{{ (ovirt_vm_infra_create_all_timeout|int // ovirt_vm_infra_create_poll_interval) + 1  }}"
+      delay: "{{ ovirt_vm_infra_create_poll_interval }}"
+
+    # to_json|from_json in vms is WA for: https://github.com/ansible/ansible/issues/27299
+    - name: Apply tags from VM profiles
+      ovirt_tags:
+        auth: "{{ ovirt_auth }}"
+        name: "{{ item }}"
+        vms: "{{ ovirt_vm_infra_vms|to_json|from_json|json_query(query)|map(attribute='name') | list }}"
+      with_items: "{{ ovirt_vm_infra_vms | selectattr('tag', 'defined') | map(attribute='tag') | list | unique }}"
+      vars:
+        query: "[?contains(tag, '{{ item }}')]"
+
+    - name: Apply tags from VMs
+      ovirt_tags:
+        auth: "{{ ovirt_auth }}"
+        name: "{{ item }}"
+        vms: "{{ ovirt_vm_infra_vms|to_json|from_json|json_query(query)|map(attribute='name') | list }}"
+      with_items: "{{ ovirt_vm_infra_vms | selectattr('profile', 'defined') | map(attribute='profile') | selectattr('tag', 'defined') | map(attribute='tag') | list | unique }}"
+      vars:
+        query: "[?contains(profile.tag, '{{ item }}')]"
+        defined_vms: "{{ ovirt_vm_infra_vms | selectattr('profile.tag', 'defined') | list | unique }}"
+
+    - name: Apply any Affinity Groups
+      import_tasks: affinity_groups.yml
+
+    - block:
+        - name: Wait for VMs IP
+          ovirt_vms_facts:
+            auth: "{{ ovirt_auth }}"
+            pattern: "name={{ item.name }}"
+            fetch_nested: true
+            nested_attributes: ips
+          with_items:
+            - "{{ ovirt_vm_infra_vms }}"
+          until: "ovirt_vms | ovirtvmipv4| length > 0"
+          retries: "{{ ovirt_vm_infra_wait_for_ip_retries }}"
+          delay: "{{ ovirt_vm_infra_wait_for_ip_delay }}"
+          vars:
+            query: "reported_devices[*].ips[*].address"
+          when: "item.profile.state | default('present') != 'stopped'"
+
+        - name: Create inventory
+          include_tasks: create_inventory.yml
+
+      when: "ovirt_vm_infra_wait_for_ip"
+
+  always:
+    - name: Logout from oVirt
+      ovirt_auth:
+        state: absent
+        ovirt_auth: "{{ ovirt_auth }}"
+      when: not loggedin.skipped | default(false)
