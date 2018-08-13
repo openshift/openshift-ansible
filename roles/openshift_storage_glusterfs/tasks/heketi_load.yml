@@ -1,7 +1,21 @@
 ---
 - name: Set heketi-cli command
   set_fact:
-    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {%if not glusterfs_heketi_is_missing %}{{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% else %}{{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% endif %} {% endif %}{{ glusterfs_heketi_cli }} -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin {% if glusterfs_heketi_admin_key is defined %}--secret '{{ glusterfs_heketi_admin_key }}'{% endif %}"
+    glusterfs_heketi_client: "{{ l_oc_bin_prepend }} {{ glusterfs_heketi_cli }} -s http://{{ l_heketi_url }} --user admin {{ l_heketi_secret_key }}"
+  vars:
+    l_heketi_secret_string: "--secret '{{ glusterfs_heketi_admin_key }}'"
+    l_heketi_secret_key: "{{ (glusterfs_heketi_admin_key is defined) | ternary(l_heketi_secret_string, '') }}"
+    l_heketi_native_url: "{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}"
+    l_heketi_url: "{{ glusterfs_heketi_is_native | bool | ternary('localhost:8080', l_heketi_native_url) }}"
+    # The variables below are all combined to form an oc exec command to prepend
+    # to the gluster cli command, in case of containerized gluster installs.
+    l_oc_config: "--config={{ mktemp.stdout }}/admin.kubeconfig"
+    l_heketi_pod_name: "{{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}"
+    l_heketi_deploy_pod_name: "{{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}"
+    # heketi pod might not be deployed yet; need to use deploy-heketi pod in that case.
+    l_heketi_pod_to_use: "{{ glusterfs_heketi_is_missing | bool | ternary(l_heketi_deploy_pod_name, l_heketi_pod_name) }}"
+    l_oc_bin_command: "{{ openshift_client_binary }} {{ l_oc_config }} rsh --namespace={{ glusterfs_namespace }} {{ l_heketi_pod_to_use }}"
+    l_oc_bin_prepend: "{{ glusterfs_heketi_is_native | bool | ternary(l_oc_bin_command, '') }}"
 
 - name: Verify heketi service
   command: "{{ glusterfs_heketi_client }} cluster list"
