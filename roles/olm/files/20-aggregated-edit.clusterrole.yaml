@@ -10,5 +10,5 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
 rules:
 - apiGroups: ["operators.coreos.com"]
-  resources: ["*"]
+  resources: ["clusterserviceversions", "catalogsources", "installplans", "subscriptions"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
