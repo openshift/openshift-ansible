@@ -839,10 +839,6 @@ debug_level=2
 # Setting this variable to false will override that check.
 #openshift_hostname_check=true
 
-# openshift_use_dnsmasq is deprecated.  This must be true, or installs will fail
-# in versions >= 3.6
-#openshift_use_dnsmasq=False
-
 # Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
 # This is useful for POC environments where DNS may not actually be available yet or to set
 # options like 'strict-order' to alter dnsmasq configuration.
