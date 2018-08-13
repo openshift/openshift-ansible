@@ -668,6 +668,20 @@ def lib_utils_oo_oreg_image(image_default, oreg_url):
     return '/'.join([oreg_parts[0], image_parts[1], image_parts[2]])
 
 
+def lib_utils_oo_list_of_dict_to_dict_from_key(input_list, keyname):
+    '''Converts a list of dictionaries to a dictionary with keyname: dictionary
+
+       Example input: [{'name': 'first', 'url': 'x.com'}, {'name': 'second', 'url': 'y.com'}],
+                      'name'
+       Example output: {'first': {'url': 'x.com', 'name': 'first'}, 'second': {'url': 'y.com', 'name': 'second'}}'''
+    output_dict = {}
+    for item in input_list:
+        retrieved_val = item.get(keyname)
+        if keyname is not None:
+            output_dict[retrieved_val] = item
+    return output_dict
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -701,4 +715,5 @@ class FilterModule(object):
             "lib_utils_oo_etcd_host_urls": lib_utils_oo_etcd_host_urls,
             "lib_utils_mutate_htpass_provider": lib_utils_mutate_htpass_provider,
             "lib_utils_oo_oreg_image": lib_utils_oo_oreg_image,
+            "lib_utils_oo_list_of_dict_to_dict_from_key": lib_utils_oo_list_of_dict_to_dict_from_key,
         }
