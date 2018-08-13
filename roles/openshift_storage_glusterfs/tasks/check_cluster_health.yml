@@ -1,35 +1,15 @@
 ---
-# glusterfs_check_containerized is a custom module defined at
-# lib_utils/library/glusterfs_check_containerized.py
-- name: Check for cluster health of glusterfs
-  glusterfs_check_containerized:
-    oc_bin: "{{ first_master_client_binary }}"
-    oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
-    oc_namespace: "{{ openshift_storage_glusterfs_namespace }}"
-    cluster_name: "{{ openshift_storage_glusterfs_name }}"
-    exclude_node: "{{ openshift.common.hostname }}"
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  retries: "{{ openshift_glusterfs_cluster_health_check_retries | int}}"
-  delay: 10
-  register: glusterfs_check_containerized_res
-  until: glusterfs_check_containerized_res is succeeded
+- block:
+  - import_tasks: glusterfs_config_facts.yml
+  - import_tasks: cluster_health.yml
   when:
   - openshift_storage_glusterfs_is_native | bool
   - "'glusterfs' in groups"
   - "groups['glusterfs'] | length > 0"
 
-- name: Check for cluster health of glusterfs (registry)
-  glusterfs_check_containerized:
-    oc_bin: "{{ first_master_client_binary }}"
-    oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
-    oc_namespace: "{{ openshift_storage_glusterfs_registry_namespace }}"
-    cluster_name: "{{ openshift_storage_glusterfs_registry_name }}"
-    exclude_node: "{{ openshift.common.hostname }}"
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  retries: "{{ openshift_glusterfs_cluster_health_check_retries | int}}"
-  delay: 10
-  register: glusterfs_check_containerized_reg_res
-  until: glusterfs_check_containerized_reg_res is succeeded
+- block:
+  - import_tasks: glusterfs_registry_facts.yml
+  - import_tasks: cluster_health.yml
   when:
   - openshift_storage_glusterfs_registry_is_native | bool
   - "'glusterfs_registry' in groups"
