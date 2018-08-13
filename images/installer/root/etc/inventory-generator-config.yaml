@@ -15,6 +15,6 @@ openshift_deployment_type: origin
 
 openshift_release: 3.6
 openshift_image_tag: v3.6.0
-openshift_hosted_logging_deploy: null  # defaults to "true" if loggingPublicURL is set in master-config.yaml
+openshift_logging_install_logging: null  # defaults to "true" if loggingPublicURL is set in master-config.yaml
 openshift_logging_image_version: v3.6.0
 openshift_disable_check: ""

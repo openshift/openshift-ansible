@@ -12,7 +12,7 @@ class FluentdConfig(LoggingCheck):
     tags = ["health"]
 
     def is_active(self):
-        logging_deployed = self.get_var("openshift_hosted_logging_deploy", default=False)
+        logging_deployed = self.get_var("openshift_logging_install_logging", default=False)
 
         try:
             version = self.get_major_minor_version(self.get_var("openshift_image_tag"))

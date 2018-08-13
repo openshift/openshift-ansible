@@ -112,7 +112,7 @@ def test_is_active(groups, logging_deployed, is_active):
     task_vars = dict(
         ansible_host='this-host',
         groups=groups,
-        openshift_hosted_logging_deploy=logging_deployed,
+        openshift_logging_install_logging=logging_deployed,
     )
 
     assert LoggingCheck(None, task_vars).is_active() == is_active

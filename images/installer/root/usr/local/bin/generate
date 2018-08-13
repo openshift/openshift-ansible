@@ -298,13 +298,13 @@ def main():
 
     # contains host types (e.g. masters, nodes, etcd)
     host_groups = dict()
-    openshift_hosted_logging_deploy = False
+    openshift_logging_install_logging = False
     is_etcd_deployed = master_config.get("storage-backend", "") in ["etcd3", "etcd2", "etcd"]
 
     if asset_config and asset_config.get('loggingPublicURL'):
-        openshift_hosted_logging_deploy = True
+        openshift_logging_install_logging = True
 
-    openshift_hosted_logging_deploy = user_config.get("openshift_hosted_logging_deploy", openshift_hosted_logging_deploy)
+    openshift_logging_install_logging = user_config.get("openshift_logging_install_logging", openshift_logging_install_logging)
 
     m = Host("masters")
     m.address(master_config["masterIP"])
@@ -382,7 +382,7 @@ def main():
         inv_file_obj.write("openshift_disable_check={}\n".format(str(openshift_disable_check)))
     inv_file_obj.write("\n")
 
-    inv_file_obj.write("openshift_hosted_logging_deploy={}\n".format(str(openshift_hosted_logging_deploy)))
+    inv_file_obj.write("openshift_logging_install_logging={}\n".format(str(openshift_logging_install_logging)))
     inv_file_obj.write("\n")
 
     for group in host_groups:
