@@ -73,6 +73,20 @@
     resource_name: hostnetwork
   with_items: "{{ openshift_hosted_routers }}"
 
+- name: Set additional permissions for router service account if seamless reloads enabled.
+  oc_adm_policy_user:
+    user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
+    namespace: "{{ item.namespace }}"
+    resource_kind: scc
+    resource_name: privileged
+    state: "{{ 'present' if openshift_hosted_router_seamless_reload else 'absent' }}"
+  with_items: "{{ openshift_hosted_routers }}"
+
+- name: Configure seamless router restart
+  set_fact:
+    openshift_hosted_router_edits: "{{ openshift_hosted_router_seamless_edits | union(openshift_hosted_router_edits) }}"
+  when: openshift_hosted_router_seamless_reload|bool
+
 - name: Set additional permissions for router service account
   oc_adm_policy_user:
     user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
