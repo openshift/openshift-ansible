@@ -22,30 +22,35 @@ import shade
 OPENSHIFT_CLUSTER = os.getenv('OPENSHIFT_CLUSTER')
 
 
+def server_name(server):
+    '''Return the name to use as the nodename for ansible'''
+    return server.private_v4
+
+
 def base_openshift_inventory(cluster_hosts):
     '''Set the base openshift inventory.'''
     inventory = {}
 
-    masters = [server.name for server in cluster_hosts
+    masters = [server_name(server) for server in cluster_hosts
                if server.metadata['host-type'] == 'master']
 
-    etcd = [server.name for server in cluster_hosts
+    etcd = [server_name(server) for server in cluster_hosts
             if server.metadata['host-type'] == 'etcd']
     if not etcd:
         etcd = masters
 
-    infra_hosts = [server.name for server in cluster_hosts
+    infra_hosts = [server_name(server) for server in cluster_hosts
                    if server.metadata['host-type'] == 'node' and
                    server.metadata['sub-host-type'] == 'infra']
 
-    app = [server.name for server in cluster_hosts
+    app = [server_name(server) for server in cluster_hosts
            if server.metadata['host-type'] == 'node' and
            server.metadata['sub-host-type'] == 'app']
 
-    cns = [server.name for server in cluster_hosts
+    cns = [server_name(server) for server in cluster_hosts
            if server.metadata['host-type'] == 'cns']
 
-    load_balancers = [server.name for server in cluster_hosts
+    load_balancers = [server_name(server) for server in cluster_hosts
                       if server.metadata['host-type'] == 'lb']
 
     # NOTE: everything that should go to the `[nodes]` group:
@@ -147,7 +152,7 @@ def build_inventory():
     # cinder volumes used for docker storage
     docker_storage_mountpoints = get_docker_storage_mountpoints(volumes)
     for server in cluster_hosts:
-        inventory['_meta']['hostvars'][server.name] = _get_hostvars(
+        inventory['_meta']['hostvars'][server_name(server)] = _get_hostvars(
             server,
             docker_storage_mountpoints)
 
