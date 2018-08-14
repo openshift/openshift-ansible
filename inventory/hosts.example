@@ -552,7 +552,7 @@ debug_level=2
 #openshift_hosted_registry_storage_gcs_rootdirectory=/registry
 
 # Metrics deployment
-# See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
+# See: https://docs.openshift.com/container-platform/latest/install_config/cluster_metrics.html
 #
 # By default metrics are not automatically deployed, set this to enable them
 #openshift_metrics_install_metrics=true
@@ -778,7 +778,7 @@ debug_level=2
 # Configure custom named certificates (SNI certificates)
 #
 # https://docs.okd.io/latest/install_config/certificate_customization.html
-# https://docs.openshift.com/enterprise/latest/install_config/certificate_customization.html
+# https://docs.openshift.com/container-platform/latest/install_config/certificate_customization.html
 #
 # NOTE: openshift_master_named_certificates is cached on masters and is an
 # additive fact, meaning that each run with a different set of certificates

@@ -24,6 +24,6 @@ Custom hostname for the Satellite server (optional).
 
 ### `openshift_release`
 
-Version for the OpenShift Enterprise repositories.
+Version for the OpenShift Container Platform repositories.
 
 Example: `3.6`

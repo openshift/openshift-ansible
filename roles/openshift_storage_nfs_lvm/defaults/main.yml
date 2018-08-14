@@ -13,5 +13,5 @@ osnl_volume_group: openshiftvg
 # what to do with the volume after it is released.
 #
 # Valid values are "Retain" or "Recycle".
-# See https://docs.openshift.com/enterprise/3.0/architecture/additional_concepts/storage.html#pv-recycling-policy
+# See https://docs.openshift.com/container-platform/latest/architecture/additional_concepts/storage.html#pv-reclaim-policy
 osnl_volume_reclaim_policy: "Recycle"

@@ -65,7 +65,7 @@
 
   - name: Warn if pluginOrderOverride is in use in master-config.yaml
     debug:
-      msg: "WARNING pluginOrderOverride is being deprecated in master-config.yaml, please see https://docs.openshift.com/enterprise/latest/architecture/additional_concepts/admission_controllers.html for more information."
+      msg: "WARNING pluginOrderOverride is being deprecated in master-config.yaml, please see https://docs.openshift.com/container-platform/latest/architecture/additional_concepts/admission_controllers.html for more information."
     when:
     - not (grep_plugin_order_override is skipped)
     - grep_plugin_order_override.rc == 0
