@@ -18,8 +18,5 @@
   when:
   - dep_check.changed
 
-# for with_fileglob Ansible resolves the path relative to the roles/<rolename>/files directory
 - name: Assign deprecated variables to correct counterparts
-  include_tasks: "{{ item }}"
-  with_fileglob:
-  - "../tasks/__deprecations_*.yml"
+  import_tasks: __deprecations_logging.yml
