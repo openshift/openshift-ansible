@@ -56,6 +56,8 @@ openshift_aws_vpc:
     us-east-1:
     - cidr: 172.31.48.0/20
       az: "us-east-1c"
+# Uncomment to enable use of multi availability zone
+# Greenfield installs only!  Single-az to multi-az migration is not supported!
 #    - cidr: 172.31.32.0/20
 #      az: "us-east-1e"
 #    - cidr: 172.31.16.0/20
@@ -189,7 +191,7 @@ openshift_aws_elb_dict:
       name: "{{ openshift_aws_elb_infra_name }}"
       tags: "{{ openshift_aws_kube_tags }}"
 
-openshift_aws_node_group_config_master_volumes:
+openshift_aws_master_volumes:
 - device_name: /dev/sda1
   volume_size: 100
   volume_type: gp2
@@ -220,7 +222,7 @@ openshift_aws_ami_map:
   infra: "{{ openshift_aws_ami }}"
   compute: "{{ openshift_aws_ami }}"
 
-openshift_aws_master_group:
+openshift_aws_node_groups:
 - name: "{{ openshift_aws_clusterid }} master group"
   group: master
   node_group_config: node-config-master
@@ -229,7 +231,6 @@ openshift_aws_master_group:
     sub-host-type: default
     runtime: docker
 
-openshift_aws_node_groups:
 - name: "{{ openshift_aws_clusterid }} compute group"
   group: compute
   node_group_config: node-config-compute
@@ -254,22 +255,20 @@ openshift_aws_scale_group_health_check:
   type: EC2
 
 # these will be used during upgrade
-openshift_aws_master_group_config:
-  # The 'master' key is always required here.
-  master:
-    instance_type: "{{ openshift_aws_master_group_instance_type | default(openshift_aws_instance_type) }}"
-    volumes: "{{ openshift_aws_node_group_config_master_volumes }}"
-    health_check: "{{ openshift_aws_scale_group_health_check }}"
-    min_size: "{{ openshift_aws_master_group_min_size | default(3) }}"
-    max_size: "{{ openshift_aws_master_group_max_size | default(3) }}"
-    desired_size: "{{ openshift_aws_master_group_desired_size | default(3) }}"
-    wait_for_instances: True
-    termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
-    replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
-    iam_role: "{{ openshift_aws_iam_master_role_name | default(openshift_aws_iam_role_name) }}"
-    policy_name: "{{ openshift_aws_iam_master_role_policy_name | default(openshift_aws_iam_role_policy_name) }}"
-    policy_json: "{{ openshift_aws_iam_master_role_policy_json | default(openshift_aws_iam_role_policy_json) }}"
-    elbs: "{{ openshift_aws_elb_dict | json_query('master.[*][0][*].name') }}"
+openshift_aws_master_instance_config:
+  instance_type: "{{ openshift_aws_master_group_instance_type | default(openshift_aws_instance_type) }}"
+  volumes: "{{ openshift_aws_master_volumes }}"
+  health_check: "{{ openshift_aws_scale_group_health_check }}"
+  exact_count: "{{ openshift_aws_master_group_desired_size | default(3) }}"
+  termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
+  iam_role: "{{ openshift_aws_iam_master_role_name | default(openshift_aws_iam_role_name) }}"
+  policy_name: "{{ openshift_aws_iam_master_role_policy_name | default(openshift_aws_iam_role_policy_name) }}"
+  policy_json: "{{ openshift_aws_iam_master_role_policy_json | default(openshift_aws_iam_role_policy_json) }}"
+  elbs: "{{ openshift_aws_elb_dict | json_query('master.[*][0][*].name') }}"
+  groups:
+  - "{{ openshift_aws_clusterid }}"  # default sg
+  - "{{ openshift_aws_clusterid }}_master"  # node type sg
+  - "{{ openshift_aws_clusterid }}_master_k8s"  # node type sg k8s
 
 openshift_aws_node_group_config:
   # The 'compute' key is always required here.
@@ -306,6 +305,10 @@ openshift_aws_kube_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
 openshift_aws_elb_security_groups: "{{ openshift_aws_launch_config_security_groups }}"
 
 openshift_aws_launch_config_security_groups:
+  master:
+  - "{{ openshift_aws_clusterid }}"  # default sg
+  - "{{ openshift_aws_clusterid }}_master"  # node type sg
+  - "{{ openshift_aws_clusterid }}_master_k8s"  # node type sg k8s
   compute:
   - "{{ openshift_aws_clusterid }}"  # default sg
   - "{{ openshift_aws_clusterid }}_compute"  # node type sg
@@ -314,10 +317,6 @@ openshift_aws_launch_config_security_groups:
   - "{{ openshift_aws_clusterid }}"  # default sg
   - "{{ openshift_aws_clusterid }}_infra"  # node type sg
   - "{{ openshift_aws_clusterid }}_infra_k8s"  # node type sg k8s
-  master:
-  - "{{ openshift_aws_clusterid }}"  # default sg
-  - "{{ openshift_aws_clusterid }}_master"  # node type sg
-  - "{{ openshift_aws_clusterid }}_master_k8s"  # node type sg k8s
 
 openshift_aws_security_groups_tags: "{{ openshift_aws_kube_tags }}"
 

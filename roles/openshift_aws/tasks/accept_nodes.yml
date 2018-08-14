@@ -1,5 +1,5 @@
 ---
-- include_tasks: setup_master_group.yml
+- include_tasks: setup_master_instances.yml
 
 - name: fetch masters
   ec2_instance_facts:

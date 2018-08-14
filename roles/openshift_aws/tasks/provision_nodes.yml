@@ -2,7 +2,7 @@
 # Get bootstrap config token
 # bootstrap should be created on first master
 # need to fetch it and shove it into cloud data
-- include_tasks: setup_master_group.yml
+- include_tasks: setup_master_instances.yml
 
 - name: slurp down the bootstrap.kubeconfig
   slurp:
@@ -23,6 +23,7 @@
     l_node_group_config: "{{ openshift_aws_node_group_config }}"
   loop_control:
     loop_var: openshift_aws_node_group
+  when: "'master' not in openshift_aws_node_group.group"
 
 # instances aren't scaling fast enough here, we need to wait for them
 - when: openshift_aws_wait_for_ssh | bool
