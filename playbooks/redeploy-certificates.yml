@@ -5,8 +5,6 @@
 
 - import_playbook: openshift-master/private/redeploy-certificates.yml
 
-- import_playbook: openshift-node/private/redeploy-certificates.yml
-
 - import_playbook: openshift-etcd/private/restart.yml
   vars:
     g_etcd_certificates_expired: "{{ ('expired' in (hostvars | lib_utils_oo_select_keys(groups['etcd']) | lib_utils_oo_collect('check_results.check_results.etcd') | lib_utils_oo_collect('health'))) | bool }}"
