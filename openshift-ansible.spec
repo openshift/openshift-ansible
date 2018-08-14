@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.27
-Release:        2
+Version:        3.10.28
+Release:        1
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,72 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Aug 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.28-1
+- add conditional clauses for handling cnx versions (derekmcquay@gmail.com)
+- apply the container_runtime for calico (derekmcquay@gmail.com)
+- Require -hyperkube RPMs instead of -master (vrutkovs@redhat.com)
+- Don't require etcd RPM to be installable on masters (vrutkovs@redhat.com)
+- Don't require fast-datapath channel on RHEL (vrutkovs@redhat.com)
+- No longer require SDN to be installed on nodes (vrutkovs@redhat.com)
+- node restart: check that all vars are defined (vrutkovs@redhat.com)
+- Change multipath prio from const to alua (jarrpa@redhat.com)
+- Adding min-port to dnsmasq configuration (rhowe@redhat.com)
+- Ensure kernel-modules not installed on atomic (mgugino@redhat.com)
+- Fedora: Install kernel-modules (mgugino@redhat.com)
+- Conditionally skip node approval for incremental 3.10 upgrades
+  (rteague@redhat.com)
+- Update openshift_release version in sample inventory file
+  (dani_comnea@yahoo.com)
+- 'Wait for node to be ready' task should check that all vars are defined
+  (vrutkovs@redhat.com)
+- Fix prometheus annotations typo (vrutkovs@redhat.com)
+- Fix master env migrate module comments (mgugino@redhat.com)
+- move from latest to versioned repo (m.judeikis@gmail.com)
+- router-redeploy: don't check that annotations are missing
+  (vrutkovs@redhat.com)
+- Fix master config migration module (mgugino@redhat.com)
+- oc_obj should correctly identify 'results': [{}] as 'Object not found'
+  (mchappel@redhat.com)
+- updating doc for SSL cert (dcritch@redhat.com)
+- Adding support for an SSL certificate signed by the OpenStack cluster
+  (dcritch@redhat.com)
+- Don't get file checksum, attributes and mime type in stat module calls
+  (vrutkovs@redhat.com)
+- Sanity check htpasswd respect default (mgugino@redhat.com)
+- Fix glusterfs cluster check when condition (mgugino@redhat.com)
+- Ensure that monitoring operator has nodes to run (vrutkovs@redhat.com)
+- BZ-1608216 Set timeoutSeconds for readinessProbe on Cassandra RCs
+  (ruben.vp8510@gmail.com)
+- Reorganized OpenStack cloud provider documentation (tzumainn@redhat.com)
+- Set log-path = ~/openshift-ansible.log (sdodson@redhat.com)
+- Add atomic package to base and debug package lists
+  (nakayamakenjiro@gmail.com)
+- Remove callback plugin, artifact of a quick installer (vrutkovs@redhat.com)
+- Migrate old master env files to new location (mgugino@redhat.com)
+- Add configmap-generator templates (simaishi@redhat.com)
+- Disable the wifi collector in node_exporter (spasquie@redhat.com)
+- Fix openshift_logging on Python3 (christoffer.reijer@basalt.se)
+- check_htpasswd_provider: throw error if openshift_master_identity_providers
+  is not parsed into a list (vrutkovs@redhat.com)
+- Change the order of template_var calls in check_htpasswd_provider
+  (vrutkovs@redhat.com)
+- Make regex for the openshift_pkg_version simpler (nakayamakenjiro@gmail.com)
+- Add unit tests for check_pkg_version_format and check_release_format
+  (nakayamakenjiro@gmail.com)
+- Add format check of openshift_pkg_version and openshift_release
+  (nakayamakenjiro@gmail.com)
+- Sync grafana deployment. to openshift-monitoring. (mrsiano@gmail.com)
+- default_storage: configure rolebindings for azure-file storage backend
+  (arun.neelicattu@gmail.com)
+- default_storage: allow configuring mountOptions and reclaimPolicy
+  (arun.neelicattu@gmail.com)
+- lib_openshift/oc_storageclass: support mountOptions and reclaimPolicy
+  (arun.neelicattu@gmail.com)
+- Use ansible systemd module to check service status
+  (nakayamakenjiro@gmail.com)
+- Confirm iptables service status by checking command status
+  (nakayamakenjiro@gmail.com)
+
 * Fri Aug 03 2018 Scott Dodson <sdodson@redhat.com> 3.10.27-2
 - Disable papr on pull requests (sdodson@redhat.com)
 - Add step to remove all k8s_ containers (mgugino@redhat.com)
