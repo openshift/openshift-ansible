@@ -1,0 +1,79 @@
+---
+# Generate nsupdate information based on inventory facts
+# Requirements:
+#   - hosts added to ansible inventory through oVirt.vm-infra
+#   - vars
+#     openshift_rhv_nsupdate_server: localhost
+#     openshift_rhv_nsupdate_key:
+#       name: rndc-key
+#       secret: 'xxxxxxXxxxXxxxXxxxXx+x=='
+#       algorithm: hmac-md5
+
+# Reverse entries
+- name: Create NSUPDATE reverse pointer entries
+  set_fact:
+    records: >-
+      {{ records|default([]) }} + [
+      {
+      'record': '{{ hostvars[item]["ansible_host"].split(".")[3] }}',
+      'zone': '{{".".join(hostvars[item]["ansible_host"].split(".")[2::-1]) }}.in-addr.arpa',
+      'value': '{{ item }}.',
+      'type': 'PTR'
+      },
+      ]
+  with_items:
+  - "{{ groups['nodes'] }}"
+  - "{{ groups['lb'] }}"
+  tags:
+  - openshift_rhv
+
+# Public interface A records
+- name: Create NSUPDATE wildcard A entries
+  set_fact:
+    records: >-
+      {{ records|default([]) }} + [
+      {
+      'record': '*.{{ app_dns_prefix }}',
+      'zone': '{{ public_hosted_zone }}',
+      'type': 'A',
+      'value': {{ groups["infras"] | map("extract", hostvars, ["ansible_host"] ) | list }},
+      },
+      ]
+  tags:
+  - openshift_rhv
+
+- debug:
+    var: records
+
+- name: Create NSUPDATE public hostname entry
+  set_fact:
+    records: >-
+      {{ records|default([]) }} + [
+      {
+      'record': '{{ openshift_master_cluster_public_hostname.split(".")[0] }}',
+      'zone': '{{ ".".join(openshift_master_cluster_public_hostname.split(".")[1:]) }}',
+      'type': 'A',
+      'value': '{{ hostvars[groups["lb"].0]["ansible_host"] }}'
+      },
+      ]
+  tags:
+  - openshift_rhv
+
+# host A entries
+- name: Create NSUPDATE host A entries
+  set_fact:
+    records: >-
+      {{ records|default([]) }} + [
+      {
+      'record': '{{ item.split(".")[0] }}',
+      'zone': '{{ ".".join(item.split(".")[1:]) }}',
+      'type': 'A',
+      'value': '{{hostvars[item]["ansible_host"]}}',
+      },
+      ]
+  with_items:
+  - "{{ groups['nodes'] }}"
+  - "{{ groups['lb'] }}"
+  tags:
+  - openshift_rhv
+...

@@ -1,0 +1,17 @@
+---
+ovirt_image_path: /tmp
+ovirt_image_cache_download: true
+ovirt_template_cluster: Default
+ovirt_template_name: mytemplate
+ovirt_template_memory: 2GiB
+ovirt_template_cpu: 1
+ovirt_template_disk_size: 10GiB
+ovirt_template_operating_system: rhel_7x64
+ovirt_template_timeout: 600
+ovirt_template_disk_interface: virtio
+ovirt_template_nics:
+  - name: nic1
+    profile_name: ovirtmgmt
+    interface: virtio
+
+ovirt_disk_storage_domain: null

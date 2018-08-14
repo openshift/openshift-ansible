@@ -1,0 +1,62 @@
+---
+- name: oVirt infra
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    # Contains encrypted `ovirt_engine_password` varibale using ansible-vault
+    - passwords.yml
+
+  vars:
+    ovirt_engine_url: https://ovirt-engine.example.com/ovirt-engine/api
+    ovirt_engine_user: admin@internal
+    ovirt_engine_cafile: /etc/pki/ovirt-engine/ca.pem
+
+    ovirt_vm_infra_wait_for_ip: true
+    httpd_vm:
+      state: running
+      cluster: mycluster
+      template: mytemplate
+      memory: 1GiB
+      memory_max: 2GiB
+      cores: 1
+      root_password: '123456'
+
+    db_vm:
+      state: running
+      cluster: mycluster
+      template: mytemplate
+      memory: 1GiB
+      memory_max: 2GiB
+      cores: 1
+      tag: db
+      ssh_key: ssh-rsa AAAAB...Gx ondra@ondra
+
+    ovirt_vm_infra_vms:
+      - name: httpd-vm-1
+        profile: httpd_vm
+        tag: httpd
+      - name: db-vm-1
+        profile: db_vm
+      - name: db-vm-2
+        profile: db_vm
+
+  roles:
+    - oVirt.vm-infra
+
+- name: Print info about httpd VM
+  hosts: ovirt_tag_httpd
+
+  tasks:
+    - name: Print info about httpd VM
+      debug:
+        msg: "{{ hostvars }}"
+
+- name: Print info about db VMs
+  hosts: ovirt_tag_db
+
+  tasks:
+    - name: Print info about db VM
+      debug:
+        msg: "{{ hostvars }}"

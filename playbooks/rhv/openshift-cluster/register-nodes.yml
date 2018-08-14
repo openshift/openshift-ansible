@@ -1,0 +1,12 @@
+---
+- name: Subscribe nodes
+  hosts:
+    - nodes
+    - lb
+  vars:
+    openshift_version: "{{openshift_release|string}}"
+  tasks:
+    - import_role:
+        name: rhel_subscribe
+    - import_role:
+        name: openshift_repos

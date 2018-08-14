@@ -1,0 +1,99 @@
+[all:vars]
+app_dns_prefix=apps
+public_hosted_zone=example.com
+load_balancer_hostname=lb0.{{public_hosted_zone}}
+openshift_master_cluster_hostname="{{ load_balancer_hostname }}"
+openshift_master_cluster_public_hostname=openshift-master.{{ public_hosted_zone }}
+openshift_master_default_subdomain="{{ app_dns_prefix }}.{{ public_hosted_zone }}"
+openshift_public_hostname="{{openshift_master_cluster_public_hostname}}"
+
+[OSEv3:children]
+nodes
+masters
+etcd
+lb
+
+[OSEv3:vars]
+# General variables
+ansible_ssh_user=root
+console_port=8443
+debug_level=2
+deployment_type=openshift-enterprise
+openshift_debug_level="{{ debug_level }}"
+openshift_deployment_type="{{ deployment_type }}"
+openshift_master_cluster_method=native
+openshift_node_debug_level="{{ node_debug_level | default(debug_level, true) }}"
+openshift_release='3.10'
+openshift_vers=v3_10
+
+# RHV Specific Settings
+openshift_enable_service_catalog=False
+# openshift_cloudprovider_kind=ovirt
+# openshift_cloudprovider_ovirt_auth_url=
+# openshift_cloudprovider_ovirt_username=
+# openshift_cloudprovider_ovirt_password=
+
+# Pod Networking
+os_sdn_network_plugin_name=redhat/openshift-ovs-networkpolicy
+
+# Registry
+openshift_hosted_registry_replicas=1
+openshift_hosted_registry_storage_kind=nfs
+openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+openshift_hosted_registry_storage_host=
+openshift_hosted_registry_storage_nfs_directory=/var/lib/exports
+openshift_hosted_registry_storage_volume_name=registryvol
+openshift_hosted_registry_storage_volume_size=20Gi
+openshift_enable_unsupported_configurations=True
+
+# Authentication
+openshift_master_identity_providers="[{'name': 'htpasswd_auth', 'login': 'True', 'challenge': 'True', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]"
+openshift_master_htpasswd_users={'myuser': '$apr1$zAhyA9Ko$rBxBOwAwwtRuuaw8OtCwH0'}
+
+# Red Hat Subscription Management
+rhsub_pool=Red Hat OpenShift Container Platform*
+rhsub_user="{{ vault_rhsub_user }}"
+rhsub_password="{{ vault_rhsub_password }}"
+
+# Docker
+container_runtime_docker_storage_setup_device=/dev/vdb
+container_runtime_docker_storage_type=overlay2
+openshift_docker_use_system_container=False
+openshift_node_local_quota_per_fsgroup=512Mi
+openshift_use_system_containers=False
+
+[masters:vars]
+container_runtime_extra_storage="[{'device': '/dev/vdc', 'path': '/var/lib/origin/openshift.local.volumes', 'options': 'gquota', 'filesystem': 'xfs', 'format': 'True'}, {'device': '/dev/vdd', 'path': '/var/lib/etcd', 'hosts': 'masters', 'filesystem': 'xfs', 'format': 'True'}]"
+
+[nodes:vars]
+container_runtime_extra_storage="[{'device': '/dev/vdc', 'path': '/var/lib/origin/openshift.local.volumes', 'options': 'gquota', 'filesystem': 'xfs', 'format': 'True'}]"
+
+[masters]
+master0.example.com
+master1.example.com
+master2.example.com
+
+[etcd]
+master0.example.com
+master1.example.com
+master2.example.com
+
+[infras]
+infra0.example.com
+infra1.example.com
+infra2.example.com
+
+[lb]
+lb0.example.com
+
+[nodes]
+master0.example.com openshift_node_group_name=node-config-master
+master1.example.com openshift_node_group_name=node-config-master
+master2.example.com openshift_node_group_name=node-config-master
+infra0.example.com openshift_node_group_name=node-config-infra
+infra1.example.com openshift_node_group_name=node-config-infra
+infra2.example.com openshift_node_group_name=node-config-infra
+compute0.example.com openshift_node_group_name=node-config-compute
+compute1.example.com openshift_node_group_name=node-config-compute
+compute2.example.com openshift_node_group_name=node-config-compute
+# vim: set syntax=dosini

@@ -1,0 +1,21 @@
+---
+- name: Fetch created VMs
+  ovirt_vms_facts:
+    auth: "{{ ovirt_auth }}"
+    pattern: "name={{ ovirt_vm_infra_vms | map(attribute='name') | join(' or name=') }}"
+    fetch_nested: true
+    nested_attributes:
+      - ips
+      - name
+
+- name: Create inventory of VMs
+  no_log: false
+  add_host:
+    ansible_host: "{{ item | ovirtvmipv4 }}"
+    groups: "{{ (['ovirt_tag_'] * item.tags | length) | zip(item.tags | map(attribute='name') | list) | map('join') | list + ['ovirt_vm'] }}"
+    name: "{{ item.name }}"
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  with_items: "{{ ovirt_vms }}"
+  changed_when: false
+  loop_control:
+    label: "{{ item.name }}"

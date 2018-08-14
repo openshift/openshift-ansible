@@ -1,0 +1,55 @@
+---
+- name: Deploy oVirt template and virtual machines
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  pre_tasks:
+    - name: Log in to oVirt
+      ovirt_auth:
+        url: "{{ ovirt_engine_url }}"
+        username: "{{ ovirt_engine_user }}"
+        password: "{{ ovirt_engine_password }}"
+        ca_file: "{{ ovirt_engine_cafile | default(omit) }}"
+        insecure: "{{ ovirt_engine_insecure | default(true) }}"
+      tags:
+        - always
+    - name: Build virtual machine facts
+      import_role:
+        name: openshift_rhv
+        tasks_from: build_vm_list.yml
+
+  roles:
+    - oVirt.image-template
+    - oVirt.vm-infra
+
+  post_tasks:
+    - name: Logout from oVirt
+      ovirt_auth:
+        state: absent
+        ovirt_auth: "{{ ovirt_auth }}"
+      tags:
+        - always
+
+    - name: Generate DNS entries
+      import_role:
+        name: openshift_rhv
+        tasks_from: generate_nsupdate.yml
+      when:
+        - openshift_rhv_nsupdate_server is defined
+
+    - name: Apply changes to DNS server (optional)
+      nsupdate:
+        key_name: "{{ openshift_rhv_nsupdate_key.name }}"
+        key_secret: "{{ openshift_rhv_nsupdate_key.secret }}"
+        server: "{{ openshift_rhv_nsupdate_server }}"
+        zone: "{{ item.zone }}"
+        record: "{{ item.record }}"
+        value: "{{ item.value }}"
+        type: "{{ item.type|default(omit) }}"
+      with_items:
+        - "{{ records }}"
+      when:
+        - openshift_rhv_nsupdate_server is defined
+        - openshift_rhv_nsupdate_key is defined
+...

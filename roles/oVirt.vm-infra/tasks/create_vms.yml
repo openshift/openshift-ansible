@@ -1,0 +1,30 @@
+---
+- name: "Create VM {{ current_vm.name }}"
+  ovirt_vms:
+    auth: "{{ ovirt_auth }}"
+    state: "present"
+    name: "{{ current_vm.name }}"
+    clone: "{{ current_vm.clone | default(current_vm.profile.clone) | default(omit) }}"
+    cluster: "{{ current_vm.cluster | default(current_vm.profile.cluster) | default(omit) }}"
+    template: "{{ current_vm.template | default(current_vm.profile.template) | default(omit) }}"
+    template_version: "{{ current_vm.template_version | default(current_vm.profile.template_version) | default(omit) }}"
+    memory: "{{ current_vm.memory | default(current_vm.profile.memory) | default(omit) }}"
+    memory_max: "{{ current_vm.memory_max | default(current_vm.profile.memory_max) | default(omit) }}"
+    memory_guaranteed: "{{ current_vm.memory_guaranteed | default(current_vm.profile.memory_guaranteed) | default(omit) }}"
+    cpu_cores: "{{ current_vm.cores | default(current_vm.profile.cores) | default(omit) }}"
+    cpu_sockets: "{{ current_vm.sockets | default(current_vm.profile.sockets) | default(omit) }}"
+    cpu_shares: "{{ current_vm.cpu_shares | default(current_vm.profile.cpu_cores) | default(omit) }}"
+    cpu_threads: "{{ current_vm.cpu_threads | default(current_vm.profile.cpu_threads) | default(omit) }}"
+    custom_properties: "{{ current_vm.custom_properties | default(current_vm.profile.custom_properties) | default(omit) }}"
+    description: "{{ current_vm.description | default(current_vm.profile.description) | default(omit) }}"
+    high_availability: "{{ current_vm.high_availability | default(current_vm.profile.high_availability) | default(omit) }}"
+    high_availability_priority: "{{ current_vm.high_availability_priority | default(current_vm.profile.high_availability_priority) | default(omit) }}"
+    storage_domain: "{{ current_vm.storage_domain | default(current_vm.profile.storage_domain) | default(omit) }}"
+    timeout: "{{ ovirt_vm_infra_create_single_timeout }}"
+  changed_when: false
+  async: "{{ ovirt_vm_infra_create_single_timeout }}"
+  poll: 0
+  register: added_vm
+
+- set_fact:
+    all_vms: "{{ all_vms | default([]) + [added_vm] }}"

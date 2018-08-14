@@ -1,0 +1,170 @@
+---
+- name: Check if template is correct
+  fail:
+    msg: "mandatory parameter 'ovirt_qcow_url' is not defined"
+  when: "ovirt_qcow_url is undefined"
+
+- name: Check if {{ ovirt_image_path }} is directory
+  stat:
+    path: "{{ ovirt_image_path }}"
+  register: ovirt_image_path_st
+
+- name: Download the qcow image
+  get_url:
+    url: "{{ ovirt_qcow_url }}"
+    dest: "{{ ovirt_image_path_st.stat.isdir | ternary(ovirt_image_path~'/'~ovirt_qcow_url.rpartition('/')[-1], ovirt_image_path) | regex_replace('//', '/') }}"
+    force: "{{ not ovirt_image_cache_download }}"
+    checksum: "{{ ovirt_image_checksum | default(omit) }}"
+  register: downloaded_file
+  tags:
+    - ovirt-template-image
+
+- name: Check file type
+  command: "/usr/bin/file {{ downloaded_file.dest | quote }}"
+  changed_when: false
+  register: filetype
+  tags:
+    - ovirt-template-image
+
+- name: Fail if image is not qcow
+  fail:
+    msg: "The downloaded file is not valid QCOW file."
+  when: '"QCOW" not in filetype.stdout'
+  tags:
+    - ovirt-template-image
+
+- name: Calculate image size in GiB
+  set_fact:
+    qcow2_size: "{{ (filetype.stdout_lines[0].split()[5] | int / 2**30) | round(0, 'ceil') | int }}GiB"
+
+- block:
+    - name: Login to oVirt
+      ovirt_auth:
+        url: "{{ ovirt_engine_url | default(omit) }}"
+        username: "{{ ovirt_engine_user | default(omit) }}"
+        password: "{{ ovirt_engine_password | default(omit) }}"
+        ca_file: "{{ ovirt_engine_cafile | default(omit) }}"
+        insecure: "{{ ovirt_engine_insecure | default(true) }}"
+      when: ovirt_auth is undefined or not ovirt_auth
+      register: loggedin
+      tags:
+        - always
+
+    - name: Fetch the datacenter name
+      ovirt_datacenter_facts:
+        auth: "{{ ovirt_auth }}"
+        pattern: "Clusters.name = {{ ovirt_template_cluster }}"
+
+    - name: Fetch storages
+      ovirt_storage_domains_facts:
+        auth: "{{ ovirt_auth }}"
+        pattern: "datacenter={{ ovirt_datacenters[0].name }}"
+      when: ovirt_template_disk_storage is undefined
+      tags:
+        - ovirt-template-image
+
+    - name: Find data domain
+      set_fact:
+        ovirt_disk_storage_domain: "{{ ovirt_storage_domains|json_query(the_query)|list|first}}"
+      when: ovirt_template_disk_storage is undefined
+      vars:
+        the_query: "[?type=='data']"
+      tags:
+        - ovirt-template-image
+
+    - name: Check if template already exists
+      ovirt_templates_facts:
+        auth: "{{ ovirt_auth }}"
+        pattern: "name={{ ovirt_template_name }} and datacenter={{ ovirt_datacenters[0].name }}"
+      tags:
+        - ovirt-template-image
+
+    - name: Deploy the qcow image to oVirt engine
+      ovirt_disks:
+        auth: "{{ ovirt_auth }}"
+        name: "{{ ovirt_template_disk_name | default(ovirt_template_name) }}"
+        size: "{{ qcow2_size }}"
+        format: "{{ ovirt_template_disk_format | default(omit) }}"
+        image_path: "{{ downloaded_file.dest }}"
+        storage_domain: "{{ ovirt_template_disk_storage | default(ovirt_disk_storage_domain.name) }}"
+        force: "{{ ovirt_templates | length == 0 }}"
+      register: ovirt_disk
+      when: ovirt_templates | length == 0
+      tags:
+        - ovirt-template-image
+
+    - name: Create vm
+      ovirt_vms:
+        auth: "{{ ovirt_auth }}"
+        name: "{{ ovirt_vm_name }}"
+        state: stopped
+        cluster: "{{ ovirt_template_cluster }}"
+        memory: "{{ ovirt_template_memory | default(omit) }}"
+        memory_guaranteed: "{{ ovirt_template_memory_guaranteed | default(omit) }}"
+        memory_max: "{{ ovirt_template_memory_max | default(omit) }}"
+        cpu_cores: "{{ ovirt_template_cpu }}"
+        operating_system: "{{ ovirt_template_operating_system }}"
+        type: "{{ ovirt_template_type | default(omit) }}"
+        disks:
+          - id: "{{ ovirt_disk.id }}"
+            bootable: true
+            interface: "{{ ovirt_template_disk_interface }}"
+        nics: "{{ ovirt_template_nics }}"
+      when: ovirt_templates | length == 0
+      tags:
+        - ovirt-template-image
+
+    - block:
+        - name: Resize disk if smaller than ovirt_template_disk_size
+          ovirt_disks:
+            id: "{{ ovirt_disk.id }}"
+            vm_name: "{{ ovirt_vm_name }}"
+            auth: "{{ ovirt_auth }}"
+            size: "{{ ovirt_template_disk_size }}"
+
+        - name: Wait for resize
+          ovirt_disks:
+            id: "{{ ovirt_disk.id }}"
+            auth: "{{ ovirt_auth }}"
+          register: resized_disk
+          until: resized_disk.disk.provisioned_size != ovirt_disk.disk.provisioned_size
+          retries: 30
+          delay: 2
+      when:
+        - (ovirt_template_disk_size | regex_replace('GiB') | int) > (qcow2_size | regex_replace('GiB') | int)
+        - ovirt_templates | length == 0
+
+    - name: Create template
+      ovirt_templates:
+        auth: "{{ ovirt_auth }}"
+        name: "{{ ovirt_template_name }}"
+        vm: "{{ ovirt_vm_name }}"
+        cluster: "{{ ovirt_template_cluster }}"
+        timeout: "{{ ovirt_template_timeout }}"
+      when: ovirt_templates | length == 0
+      tags:
+        - ovirt-template-image
+
+  always:
+    - name: Remove downloaded image
+      file:
+        path: "{{ downloaded_file.dest }}"
+        state: absent
+      when: not ovirt_image_cache_download
+
+    - name: Remove vm
+      ovirt_vms:
+        auth: "{{ ovirt_auth }}"
+        state: absent
+        name: "{{ ovirt_vm_name }}"
+      when: ovirt_templates | length == 0
+      tags:
+        - ovirt-template-image
+
+    - name: Logout from oVirt
+      ovirt_auth:
+        state: absent
+        ovirt_auth: "{{ ovirt_auth }}"
+      when: not loggedin.skipped | default(false)
+      tags:
+        - always
