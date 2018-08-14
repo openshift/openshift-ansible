@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.14.0
+Release:        0.15.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,43 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Aug 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.15.0
+- Update old documentation links (mchappel@redhat.com)
+- Replace OpenShift Enterprise references with OpenShift Container Platform
+  (mchappel@redhat.com)
+- cluster-monitoring: pass through no_proxy setting
+  (sergiusz.urbaniak@gmail.com)
+- Add CentoOS Origin repo for 310 release (dani_comnea@yahoo.com)
+- cluster-monitoring: Fix OCP image names (fbranczyk@gmail.com)
+- Update documentation links, docs.openshift.org -> docs.okd.io
+  (vrutkovs@redhat.com)
+- Require -hyperkube RPMs instead of -master (vrutkovs@redhat.com)
+- [uninstall] Remove hyperkube package (norito.agetsuma@gmail.com)
+- Don't require etcd RPM to be installable on masters (vrutkovs@redhat.com)
+- Don't require fast-datapath channel on RHEL (vrutkovs@redhat.com)
+- No longer require SDN to be installed on nodes (vrutkovs@redhat.com)
+- Update release artifacts for OLM (cordell.evan@gmail.com)
+- GlusterFS: Upgrade playbook (jarrpa@redhat.com)
+- Ensure docker package always installed (mgugino@redhat.com)
+- re-order and required values (rcook@redhat.com)
+- Update route53 dns tasks (mgugino@redhat.com)
+- Refactor registry-console template and vars (mgugino@redhat.com)
+- Fix the ansible-service-broker URL (jmontleo@redhat.com)
+- [bz1552516] set the external url of prometheus (pgier@redhat.com)
+- Update console branding and doc URL for OKD (spadgett@redhat.com)
+- SCC recouncilation has to run with older oc, before node upgrade
+  (vrutkovs@redhat.com)
+- Switch to oc set env, since oc env is now removed (maszulik@redhat.com)
+- Add functionality for AWS DNS framework and route53 provider
+  (mazzystr@gmail.com)
+- matching the name values (rcook@redhat.com)
+- openshift_cluster_monitoring_operator: Fix enterprise images
+  (fbranczyk@gmail.com)
+- adding parameters to allow for load balancer creation (rcook@redhat.com)
+- Limiting additional fact collection to non-masters since we already collect
+  that information for masters (ewolinet@redhat.com)
+- Remove unnecessary passlib check (jkr@adorsys.de)
+
 * Sun Aug 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.14.0
 - Revert "Remove several unused vars" (sdodson@redhat.com)
 - Making the app nodes an optional return. (mbruzek@gmail.com)
