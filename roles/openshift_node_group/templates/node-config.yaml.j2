@@ -77,3 +77,5 @@ volumeConfig:
   localQuota:
     perFSGroup: null
 volumeDirectory: {{ openshift_node_group_node_data_dir }}/openshift.local.volumes
+proxyArguments:
+  metrics-bind-address: [":11257"]
