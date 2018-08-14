@@ -48,7 +48,7 @@ before attempting to pull any of the following images.
         docker.io/openshift/node (node + openshift-sdn + openvswitch rpm for client tools)
         docker.io/openshift/openvswitch (centos7 + openvswitch rpm, runs ovsdb ovsctl processes)
         registry.redhat.io/rhel7/etcd
-    OpenShift Enterprise
+    OpenShift Container Platform
         registry.access.redhat.com/openshift3/ose
         registry.access.redhat.com/openshift3/node
         registry.access.redhat.com/openshift3/openvswitch
