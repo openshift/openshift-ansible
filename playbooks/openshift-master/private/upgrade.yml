@@ -3,6 +3,29 @@
 # Upgrade Masters
 ###############################################################################
 
+# Some change makes critical outage on current cluster.
+- name: Confirm upgrade will not make critical changes
+  hosts: oo_first_master
+  tasks:
+  - name: Confirm Reconcile Security Context Constraints will not change current SCCs
+    command: >
+      {{ openshift_client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --additive-only=true -o name
+    register: check_reconcile_scc_result
+    when: openshift_reconcile_sccs_reject_change | default(true) | bool
+    until: check_reconcile_scc_result.rc == 0
+    retries: 3
+
+  - fail:
+      msg: >
+        Changes to bootstrapped SCCs have been detected. Please review the changes by running
+        "{{ openshift_client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --additive-only=true"
+        After reviewing the changes please apply those changes by adding the '--confirm' flag.
+        Do not modify the default SCCs. Customizing the default SCCs will cause this check to fail when upgrading.
+        If you require non standard SCCs please refer to https://docs.okd.io/latest/admin_guide/manage_scc.html
+    when:
+    - openshift_reconcile_sccs_reject_change | default(true) | bool
+    - check_reconcile_scc_result.stdout != '' or check_reconcile_scc_result.rc != 0
+
 # Create service signer cert when missing. Service signer certificate
 # is added to master config in the master_config_upgrade hook.
 - name: Determine if service signer cert must be created
@@ -232,4 +255,3 @@
       tasks_from: config.yml
     vars:
       openshift_master_host: "{{ groups.oo_first_master.0 }}"
-      openshift_manage_node_is_master: true

@@ -12,7 +12,7 @@ class MemoryAvailability(OpenShiftCheck):
     tags = ["preflight"]
 
     # Values taken from the official installation documentation:
-    # https://docs.openshift.org/latest/install_config/install/prerequisites.html#system-requirements
+    # https://docs.okd.io/latest/install_config/install/prerequisites.html#system-requirements
     recommended_memory_bytes = {
         "oo_masters_to_config": 16 * GIB,
         "oo_nodes_to_config": 8 * GIB,

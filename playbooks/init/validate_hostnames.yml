@@ -21,7 +21,7 @@
         Inventory setting: openshift_hostname={{ openshift_hostname | default ('undefined') }}
         This check can be overridden by setting openshift_hostname_check=false in
         the inventory.
-        See https://docs.openshift.org/latest/install_config/install/advanced_install.html#configuring-host-variables
+        See https://docs.okd.io/latest/install_config/install/advanced_install.html#configuring-host-variables
     when:
     - lookupip.stdout != '127.0.0.1'
     - lookupip.stdout not in ansible_all_ipv4_addresses
@@ -36,7 +36,7 @@
         Inventory setting: openshift_ip={{ openshift_ip }}
         This check can be overridden by setting openshift_ip_check=false in
         the inventory.
-        See https://docs.openshift.org/latest/install_config/install/advanced_install.html#configuring-host-variables
+        See https://docs.okd.io/latest/install_config/install/advanced_install.html#configuring-host-variables
     when:
     - openshift_ip is defined
     - openshift_ip not in ansible_all_ipv4_addresses

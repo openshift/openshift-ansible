@@ -154,7 +154,7 @@ created for you automatically.
 ## Complete Production Installation Documentation:
 
 - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
-- [OpenShift Origin](https://docs.openshift.org/latest/install/index.html)
+- [OpenShift Origin](https://docs.okd.io/latest/install/index.html)
 
 ## Containerized OpenShift Ansible
 
