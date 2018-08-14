@@ -147,6 +147,5 @@
 - name: Restart daemons
   command: /bin/true
   notify:
-    - restart master api
-    - restart master controllers
+    - restart master
   ignore_errors: true
