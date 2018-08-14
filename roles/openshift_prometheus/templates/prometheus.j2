@@ -233,6 +233,7 @@ spec:
       - name: alertmanager
         args:
         - --config.file=/etc/alertmanager/alertmanager.yml
+        - --web.external-url=https://{{ openshift_prometheus_alertmanager_hostname }}
         image: "{{ openshift_prometheus_alertmanager_image }}"
         imagePullPolicy: IfNotPresent
         resources:
