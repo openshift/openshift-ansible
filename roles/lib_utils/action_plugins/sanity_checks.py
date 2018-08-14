@@ -112,6 +112,8 @@ REMOVED_VARIABLES = (
     ('openshift_hosted_metrics_deploy', 'openshift_metrics_install_metrics'),
     ('openshift_hosted_metrics_storage_kind', 'openshift_metrics_storage_kind'),
     ('openshift_hosted_metrics_public_url', 'openshift_metrics_hawkular_hostname'),
+    ('openshift_node_labels', 'openshift_node_groups[<item>].labels'),
+    ('openshift_node_kubelet_args', 'openshift_node_groups[<item>].edits'),
 )
 
 # JSON_FORMAT_VARIABLES does not intende to cover all json variables, but
