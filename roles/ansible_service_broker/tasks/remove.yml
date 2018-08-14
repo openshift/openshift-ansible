@@ -118,7 +118,7 @@
     name: ansible-service-broker
     state: absent
     kind: ClusterServiceBroker
-  when: not "'not found' in get_apiservices.stdout"
+  when: not('not found' in get_apiservices.stdout)
 
 - name: remove openshift-ansible-service-broker project
   oc_project:
