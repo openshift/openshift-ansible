@@ -85,7 +85,7 @@
         groups: oo_elasticsearch_nodes
         ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
         ansible_become: "{{ g_sudo | default(omit) }}"
-      with_items: "{{ groups['OSEv3'] }}"
+      with_items: "{{ groups['oo_nodes_to_config'] }}"
       changed_when: no
       run_once: true
       delegate_to: localhost
