@@ -63,7 +63,7 @@ Requirements:
 
 - Ansible >= 2.6.0
 - Jinja >= 2.7
-- pyOpenSSL
+- python2-pyOpenSSL
 - python-lxml
 
 ----
@@ -71,7 +71,7 @@ Requirements:
 Fedora:
 
 ```
-dnf install -y ansible pyOpenSSL python-cryptography python-lxml
+dnf install -y ansible python2-pyOpenSSL python-cryptography python-lxml
 ```
 
 Additional requirements:

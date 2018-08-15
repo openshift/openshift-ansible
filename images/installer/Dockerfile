@@ -8,7 +8,7 @@ USER root
 COPY images/installer/origin-extra-root /
 
 # install ansible and deps
-RUN INSTALL_PKGS="python-lxml python-dns pyOpenSSL python2-cryptography openssl python2-passlib httpd-tools openssh-clients origin-clients iproute patch" \
+RUN INSTALL_PKGS="python-lxml python-dns python2-pyOpenSSL python2-cryptography openssl python2-passlib httpd-tools openssh-clients origin-clients iproute patch" \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
  && EPEL_PKGS="python2-boto python2-boto3 python2-crypto which python2-pip.noarch python-scandir python2-packaging azure-cli" \
  && EPEL_TESTING_PKGS="ansible" \
