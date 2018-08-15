@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.15.0
+Release:        0.16.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,23 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Aug 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.16.0
+- remove the olm project (jiazha@redhat.com)
+- fix ASB ClusterServiceBroker removal (jmontleo@redhat.com)
+- Cleanup logging and metrics deprecations (mgugino@redhat.com)
+- Adding default value for openshift_logging_storage_kind (ewolinet@redhat.com)
+- change default sc nam (davis.phillips@gmail.com)
+- update the commands to restart master api and controller
+  (siva_teja.areti@nokia.com)
+- fixing image defaults for logging (ewolinet@redhat.com)
+- node restart: check that all vars are defined (vrutkovs@redhat.com)
+- Revert "loopback_cluster_name: use api_hostname" (roignac@gmail.com)
+- CFME: set default value for openshift_hosted_infra_selector
+  (vrutkovs@redhat.com)
+- vgchange before vgremove update. (sarumuga@redhat.com)
+- To avoid I/O errors, carry out vg deactivate (using vgchange -an) and dmsetup
+  remove device. (sarumuga@redhat.com)
+
 * Tue Aug 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.15.0
 - Update old documentation links (mchappel@redhat.com)
 - Replace OpenShift Enterprise references with OpenShift Container Platform
