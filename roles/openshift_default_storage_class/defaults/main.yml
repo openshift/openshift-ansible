@@ -32,7 +32,7 @@ openshift_storageclass_defaults:
 
   vsphere:
     provisioner: vsphere-volume
-    name: standard
+    name: vsphere-standard
     parameters:
       datastore: "{{ openshift_cloudprovider_vsphere_datastore }}"
 
