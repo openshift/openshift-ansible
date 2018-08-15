@@ -432,7 +432,7 @@ class ActionModule(ActionBase):
         if found_invalid_json:
             msg = "Found invalid json format variables:\n"
             for item in found_invalid_json:
-                msg += "    {} specified in {} is invalid json format\n    Specific error: {}".format(item[1], item[0], item[2])
+                msg += "    {} specified in {} is invalid json format\n    {}".format(item[1], item[0], item[2])
             raise errors.AnsibleModuleError(msg)
         return None
 
