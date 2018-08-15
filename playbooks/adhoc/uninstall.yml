@@ -328,8 +328,13 @@
       dest=/etc/sysconfig/docker
       regexp='(ADD_REGISTRY|BLOCK_REGISTRY|INSECURE_REGISTRY)=.*'
 
-  - name: Remove docker storage contents
-    shell: rm -rf /var/lib/docker
+  - name: Stop docker service
+    service: name=docker state=stopped enabled=no
+    failed_when: false
+    register: l_docker_restart_docker_in_pb_result
+    until: not (l_docker_restart_docker_in_pb_result is failed)
+    retries: 3
+    delay: 30
 
   - name: Reset docker-storage-setup
     shell: docker-storage-setup --reset
