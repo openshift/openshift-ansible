@@ -28,7 +28,6 @@
 
   - set_fact:
       haproxy_routers: "{{ all_routers.results.results[0]['items'] |
-                           oo_pods_match_component(openshift_deployment_type, 'haproxy-router') |
                            oo_select_keys_from_list(['metadata']) }}"
     when:
     - all_routers.results.returncode == 0
