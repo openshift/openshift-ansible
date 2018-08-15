@@ -128,7 +128,7 @@
 
   # Runs "lvremove -ff <vg>; vgremove -fy <vg>; pvremove -fy <pv>" for every device found to be a physical volume.
 - name: Clear GlusterFS storage device contents
-  shell: "{% for line in item.stdout_lines %}{% set fields = line.split() %}{% if fields | count > 1 %}lvremove -ff {{ fields[1] }}; vgremove -fy {{ fields[1] }}; {% endif %}pvremove -fy {{ fields[0] }}; {% endfor %}"
+  shell: "{% for line in item.stdout_lines %}{% set fields = line.split() %}{% if fields | count > 1 %}lvremove -ff {{ fields[1] }}; vgchange -an {{ fields[1] }}; vgremove -fy {{ fields[1] }}; dmsetup remove {{ fields[1] }}; {% endif %}pvremove -fy {{ fields[0] }}; {% endfor %}"
   delegate_to: "{{ item.item }}"
   with_items: "{{ devices_info.results }}"
   register: clear_devices
