@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.28
+Version:        3.10.29
 Release:        1
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,17 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Aug 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.29-1
+- CFME: set default value for openshift_hosted_infra_selector
+  (vrutkovs@redhat.com)
+- vgchange before vgremove update. (sarumuga@redhat.com)
+- To avoid I/O errors, carry out vg deactivate (using vgchange -an) and dmsetup
+  remove device. (sarumuga@redhat.com)
+- Update glusterfs README about uninstall playbook (sarumuga@redhat.com)
+- Add CentoOS Origin repo for 310 release (dani_comnea@yahoo.com)
+- SCC recouncilation has to run with older oc, before node upgrade
+  (vrutkovs@redhat.com)
+
 * Tue Aug 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.28-1
 - add conditional clauses for handling cnx versions (derekmcquay@gmail.com)
 - apply the container_runtime for calico (derekmcquay@gmail.com)
