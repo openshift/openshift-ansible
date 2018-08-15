@@ -146,7 +146,7 @@ scrape_configs:
     # drop logging components managed by other scrape targets
     - source_labels: [__meta_kubernetes_namespace]
       action: drop
-      regex: '{{ openshift_logging_namespace | default('logging') }}'
+      regex: '{{ openshift_logging_namespace | default('openshift-logging') }}'
     # drop infrastructure components managed by other scrape targets
     - source_labels: [__meta_kubernetes_service_name]
       action: drop
@@ -199,7 +199,7 @@ scrape_configs:
   - role: endpoints
     namespaces:
       names:
-      - '{{ openshift_logging_namespace | default('logging') }}'
+      - '{{ openshift_logging_namespace | default('openshift-logging') }}'
 
   relabel_configs:
     # drop infrastructure components managed by other scrape targets
