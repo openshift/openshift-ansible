@@ -1,0 +1,7 @@
+---
+- name: Stage master certificates
+  hosts: oo_masters_to_config
+  tasks:
+  - import_role:
+      name: openshift_master_certificates
+      tasks_from: stage_csr_certs.yml

@@ -1,0 +1,132 @@
+---
+- name: Create master CSR subdir
+  local_action: command mkdir -p "{{ csr_local_staging_dir }}/master-{{ item }}"
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch admin CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/admin.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/admin.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch master.kubelet-client CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/master.kubelet-client.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/master.kubelet-client.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch master.proxy-client CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/master.proxy-client.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/master.proxy-client.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch master.server CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/master.server.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/master.server.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch openshift-master CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/openshift-master.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/openshift-master.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch openshift-aggregator CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/openshift-aggregator.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/openshift-aggregator.csr"
+    flat: yes
+  when: item == groups.oo_first_master.0
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch master.etcd-client CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/master.etcd-client.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/master.etcd-client.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch aggregator-front-proxy CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/aggregator-front-proxy.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/aggregator-front-proxy.csr"
+    flat: yes
+  when: item == groups.oo_first_master.0
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+
+- name: Fetch etcd.server CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/etcd.server.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/etcd.server.csr"
+    flat: yes
+  when: item == groups.oo_first_master.0
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+
+- name: Fetch service catalog CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/service-catalog.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/service-catalog.csr"
+    flat: yes
+  when: item == groups.oo_first_master.0
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+
+- name: Fetch openshift-router CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/openshift-router.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/openshift-router.csr"
+    flat: yes
+  when:
+  - item == groups.oo_first_master.0
+  - openshift_hosted_manage_registry | default(False) | bool
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+
+- name: Fetch registry CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/master-{{ item }}/registry.csr"
+    dest: "{{ csr_local_staging_dir }}/master-{{ item }}/registry.csr"
+    flat: yes
+  when:
+  - item == groups.oo_first_master.0
+  - openshift_hosted_manage_registry | default(False) | bool
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"

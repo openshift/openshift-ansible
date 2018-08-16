@@ -1,0 +1,100 @@
+---
+- name: Get staged node certificate filenames
+  find:
+    paths: "{{ csr_staging_dir_mktemp.path }}/node-{{ inventory_hostname }}"
+    patterns: "*.crt"
+  register: certs_to_copy
+
+- name: Copy all staged node certificates
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ openshift.common.config_base }}/node/"
+    owner: root
+    mode: 0644
+    remote_src: true
+  with_items: "{{ certs_to_copy.files }}"
+
+- name: Get staged node certificate key filenames
+  find:
+    paths: "{{ openshift.common.config_base }}/csr/node-{{ inventory_hostname }}"
+    patterns: "*.key"
+  register: keys_to_copy
+
+- name: Copy all staged node certificate keys
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ openshift.common.config_base }}/node/"
+    owner: root
+    mode: 0600
+    remote_src: true
+  with_items: "{{ keys_to_copy.files }}"
+
+# Update kubeconfig
+- name: Stat node cert
+  stat:
+    path: "{{ openshift.common.config_base }}/node/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.crt"
+  register: node_cert_stat
+
+- name: Stat node key
+  stat:
+    path: "{{ openshift.common.config_base }}/node/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.key"
+  register: node_key_stat
+
+- name: Stat ca
+  stat:
+    path: "{{ openshift.common.config_base }}/node/client-ca.crt"
+  register: node_ca_stat
+
+- name: Stat node kubeconfig
+  stat:
+    path: "{{ openshift.common.config_base }}/node/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.kubeconfig"
+  register: node_kc_stat
+
+- name: Get base64 of node cert
+  command: bash -c "cat {{ openshift.common.config_base }}/node/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.crt | base64 --wrap=0"
+  register: node_cert64
+  when:
+  - node_cert_stat.stat.exists
+  - node_key_stat.stat.exists
+  - node_ca_stat.stat.exists
+  - node_kc_stat.stat.exists
+
+- name: Get base64 of admin key
+  command: bash -c "cat {{ openshift.common.config_base }}/node/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.key | base64 --wrap=0"
+  register: node_key64
+  when:
+  - node_cert_stat.stat.exists
+  - node_key_stat.stat.exists
+  - node_ca_stat.stat.exists
+  - node_kc_stat.stat.exists
+
+- name: Get base64 of ca cert
+  command: bash -c "cat {{ openshift.common.config_base }}/node/client-ca.crt | base64 --wrap=0"
+  register: node_ca64
+  when:
+  - node_cert_stat.stat.exists
+  - node_key_stat.stat.exists
+  - node_ca_stat.stat.exists
+  - node_kc_stat.stat.exists
+
+- name: Replace cert info in kubeconfig
+  yedit:
+    src: "{{ openshift.common.config_base }}/node/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.kubeconfig"
+    edits:
+    - key: users[0].user.client-certificate-data
+      value: "{{ node_cert64.stdout }}"
+    - key: users[0].user.client-key-data
+      value: "{{ node_key64.stdout }}"
+    - key: clusters[0].cluster.certificate-authority-data
+      value: "{{ node_ca64.stdout }}"
+  when:
+  - node_cert_stat.stat.exists
+  - node_key_stat.stat.exists
+  - node_ca_stat.stat.exists
+  - node_kc_stat.stat.exists
+
+# Cleanup
+- name: Delete temp dir
+  file:
+    path: "{{ csr_staging_dir_mktemp.path }}"
+    state: absent

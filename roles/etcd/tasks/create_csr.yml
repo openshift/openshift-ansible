@@ -1,0 +1,71 @@
+---
+- name: Create CSR directory
+  file:
+    path: "{{ openshift_csr_dir }}"
+    state: directory
+    mode: 0700
+
+- name: Create etcd CSR subdir
+  file:
+    path: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}"
+    state: directory
+    mode: 0700
+
+- name: Create fragments dir
+  file:
+    path: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}/fragments"
+    state: directory
+    mode: 0700
+
+# Create the openssl config for CSRs
+- command: cp /etc/pki/tls/openssl.cnf ./
+  args:
+    chdir: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}/fragments"
+    creates: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}/fragments/openssl.cnf"
+
+- template:
+    dest: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}/fragments/openssl_append.cnf"
+    src: openssl_append.j2
+    backup: true
+
+- assemble:
+    src: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}/fragments"
+    dest: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}/openssl.cnf"
+
+- name: Stat the etcd server CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}/{{ etcd_cert_prefix}}server.csr"
+  register: etcd_server_csr_stat
+
+- name: Create the etcd server CSR
+  command: >
+    openssl req -new -keyout {{ etcd_cert_prefix }}server.key
+    -config openssl.cnf
+    -out {{ etcd_cert_prefix }}server.csr
+    -reqexts {{ etcd_req_ext }}_server -batch -nodes
+    -subj /CN={{ hostvars[inventory_hostname].openshift.common.hostname | lower }}
+  args:
+    chdir: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}"
+    creates: "{{ openshift_csr_dir ~ '/etcd-' ~ inventory_hostname ~ '/' ~ etcd_cert_prefix ~ 'server.csr' }}"
+  environment:
+    SAN: "IP:{{ hostvars[inventory_hostname].openshift.common.ip }},DNS:{{ hostvars[inventory_hostname].openshift.common.hostname | lower }}"
+  when: not etcd_server_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat the etcd peer CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}/{{ etcd_cert_prefix}}peer.csr"
+  register: etcd_peer_csr_stat
+
+- name: Create the etcd peer CSR
+  command: >
+    openssl req -new -keyout {{ etcd_cert_prefix }}peer.key
+    -config openssl.cnf
+    -out {{ etcd_cert_prefix }}peer.csr
+    -reqexts {{ etcd_req_ext }}_peer -batch -nodes
+    -subj /CN={{ hostvars[inventory_hostname].openshift.common.hostname | lower }}
+  args:
+    chdir: "{{ openshift_csr_dir }}/etcd-{{ inventory_hostname }}"
+    creates: "{{ openshift_csr_dir ~ '/etcd-' ~ inventory_hostname ~ '/' ~ etcd_cert_prefix ~ 'peer.csr' }}"
+  environment:
+    SAN: "IP:{{ hostvars[inventory_hostname].openshift.common.ip }},DNS:{{ hostvars[inventory_hostname].openshift.common.hostname | lower }}"
+  when: not etcd_peer_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool

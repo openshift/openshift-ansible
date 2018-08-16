@@ -1,0 +1,27 @@
+---
+- name: Create etcd CSR subdir
+  local_action: command mkdir -p "{{ csr_local_staging_dir }}/etcd-{{ item }}"
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_etcd_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch peer CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/etcd-{{ item }}/peer.csr"
+    dest: "{{ csr_local_staging_dir }}/etcd-{{ item }}/peer.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_etcd_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch server CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/etcd-{{ item }}/server.csr"
+    dest: "{{ csr_local_staging_dir }}/etcd-{{ item }}/server.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_etcd_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"

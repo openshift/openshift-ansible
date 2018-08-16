@@ -1,0 +1,49 @@
+---
+
+- name: Create CSR directory
+  file:
+    path: "{{ openshift_csr_dir }}"
+    state: directory
+    mode: 0700
+
+- name: Create CSR subdir
+  file:
+    path: "{{ openshift_csr_dir }}/node-{{ inventory_hostname }}"
+    state: directory
+    mode: 0700
+
+- name: Create the node server CSR openssl config
+  template:
+    src: server-openssl.cnf.j2
+    dest: "{{ openshift_csr_dir }}/node-{{ inventory_hostname }}/server-openssl.cnf"
+
+- name: Create the node client CSR openssl config
+  template:
+    src: client-openssl.cnf.j2
+    dest: "{{ openshift_csr_dir }}/node-{{ inventory_hostname }}/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname | lower }}-openssl.cnf"
+
+- name: Stat the node server CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/node-{{ inventory_hostname }}/server.csr"
+  register: node_server_csr_stat
+
+- name: Create the node server CSR
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/node-{{ inventory_hostname }}/server.key
+    -out {{ openshift_csr_dir }}/node-{{ inventory_hostname }}/server.csr
+    -config {{ openshift_csr_dir }}/node-{{ inventory_hostname }}/server-openssl.cnf
+    -reqexts req_ext
+  when: not node_server_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat the node client CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/node-{{ inventory_hostname }}/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname | lower }}.csr"
+  register: node_client_csr_stat
+
+- name: Create the node client CSR
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/node-{{ inventory_hostname }}/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname | lower }}.key
+    -out {{ openshift_csr_dir }}/node-{{ inventory_hostname }}/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname | lower }}.csr
+    -config {{ openshift_csr_dir }}/node-{{ inventory_hostname }}/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname | lower }}-openssl.cnf
+    -reqexts req_ext
+  when: not node_client_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool

@@ -1,0 +1,8 @@
+---
+# Generate new certificate signing requests and keys for all cluster certificates,
+# to be delivered to a CA to sign. Keys are left in the csr staging directory
+# on each host, and csr files are copied to localhost in playbooks/csr.tgz
+
+- import_playbook: init/main.yml
+
+- import_playbook: openshift-certificates/private/generate_csrs.yml

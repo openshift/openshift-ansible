@@ -1,0 +1,21 @@
+---
+- name: Update etcd CAs
+  hosts: oo_etcd_to_config
+  tasks:
+  - import_role:
+      name: etcd
+      tasks_from: update_cas.yml
+
+- name: Update master CAs
+  hosts: oo_masters_to_config
+  tasks:
+  - import_role:
+      name: openshift_master_certificates
+      tasks_from: update_cas.yml
+
+- name: Update node CAs
+  hosts: oo_nodes_to_config
+  tasks:
+  - import_role:
+      name: openshift_node_certificates
+      tasks_from: update_cas.yml

@@ -1,0 +1,20 @@
+[req]
+prompt = no
+distinguished_name = req_distinguished_name
+
+default_md = sha256
+
+[req_distinguished_name]
+CN={{ hostvars[inventory_hostname].openshift.common.ip }}
+
+[req_ext]
+subjectAltName = @alt_names
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature, keyEncipherment
+extendedKeyUsage=serverAuth
+
+[alt_names]
+{% for dns in [ hostvars[inventory_hostname].openshift.common.hostname, hostvars[inventory_hostname].openshift.common.ip ] %}
+DNS.{{ loop.index }} = {{ dns }}
+{% endfor %}
+IP.1 = {{ hostvars[inventory_hostname].openshift.common.ip }}

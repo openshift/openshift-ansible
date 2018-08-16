@@ -1,0 +1,233 @@
+---
+- name: Create CSR directory
+  file:
+    path: "{{ openshift_csr_dir }}"
+    state: directory
+    mode: 0700
+
+- name: Create host CSR subdir
+  file:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}"
+    state: directory
+    mode: 0700
+
+- name: Create the admin CSR openssl config
+  template:
+    src: client.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/admin-openssl.cnf"
+  vars:
+    req_attrs: { cn: "system:admin", org: [ "system:cluster-admins", "system:masters" ] }
+
+- name: Create the kubelet-client CSR openssl config
+  template:
+    src: client.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.kubelet-client-openssl.cnf"
+  vars:
+    req_attrs: { cn: "system:openshift-node-admin", org: [ "system:node-admins" ] }
+
+- name: Create the proxy-client CSR openssl config
+  template:
+    src: client.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.proxy-client-openssl.cnf"
+  vars:
+    req_attrs: { cn: "system:master-proxy", org: [] }
+
+- name: Create the master-server CSR openssl config
+  template:
+    src: server.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.server-openssl.cnf"
+
+- name: Create the master-client CSR openssl config
+  template:
+    src: client.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-master-openssl.cnf"
+  vars:
+    req_attrs: { cn: "system:openshift-master", org: [ "system:masters", "system:openshift-master" ] }
+
+- name: Create the aggregator-client CSR openssl config
+  template:
+    src: client.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-aggregator-openssl.cnf"
+  vars:
+    req_attrs: { cn: "system:openshift-aggregator", org: [] }
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Create the etcd-client CSR openssl config
+  template:
+    src: etcd_client.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/etcd-client-openssl.cnf"
+
+- name: Create the etcd.server CSR openssl config
+  template:
+    src: etcd_server.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/etcd.server-openssl.cnf"
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Create the aggregator-front-proxy CSR openssl config
+  template:
+    src: client.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/aggregator-front-proxy.cnf"
+  vars:
+    req_attrs: { cn: "aggregator-front-proxy", org: [] }
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Stat the service-catalog dir
+  stat:
+    path: "{{ openshift.common.config_base }}/service-catalog"
+  register: sc_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Create the service-catalog CSR openssl config
+  template:
+    src: sc_server.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/service-catalog.cnf"
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_stat.stat.exists
+
+# All masters
+- name: Stat admin CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/admin.csr"
+  register: admin_csr_stat
+
+- name: Create the CSR for admin
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/admin.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/admin.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/admin-openssl.cnf
+    -reqexts req_ext
+  when: not admin_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat openshift-master CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-master.csr"
+  register: openshift_master_csr_stat
+
+- name: Create the CSR for openshift-master
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-master.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-master.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-master-openssl.cnf
+    -reqexts req_ext
+  when: not openshift_master_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat master.kubelet-client CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.kubelet-client.csr"
+  register: kubelet_client_csr_stat
+
+- name: Create the CSR for master.kubelet-client
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.kubelet-client.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.kubelet-client.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.kubelet-client-openssl.cnf
+    -reqexts req_ext
+  when: not kubelet_client_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat master.proxy-client CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.proxy-client.csr"
+  register: master_proxy_client_csr_stat
+
+- name: Create the CSR for master.proxy-client
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.proxy-client.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.proxy-client.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.proxy-client-openssl.cnf
+    -reqexts req_ext
+  when: not master_proxy_client_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat master.server CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.server.csr"
+  register: master_server_csr_stat
+
+- name: Create the CSR for master.server
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.server.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.server.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.server-openssl.cnf
+    -reqexts req_ext
+  when: not master_server_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat master.etcd-client CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.etcd-client.csr"
+  register: master_etcd_client_csr_stat
+
+- name: Create the CSR for master.etcd-client
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.etcd-client.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/master.etcd-client.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/etcd-client-openssl.cnf
+    -reqexts req_ext
+  when: not master_etcd_client_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+# First master only
+- name: Stat etcd.server CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/etcd.server.csr"
+  register: etcd_server_csr_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Create the CSR for etcd.server
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/etcd.server.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/etcd.server.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/etcd.server-openssl.cnf
+    -reqexts req_ext
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - not etcd_server_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat openshift-aggregator CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-aggregator.csr"
+  register: openshift_aggregator_csr_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Create the CSR for openshift-aggregator
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-aggregator.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-aggregator.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-aggregator-openssl.cnf
+    -reqexts req_ext
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - not openshift_aggregator_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat aggregator-front-proxy CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/aggregator-front-proxy.csr"
+  register: aggregator_front_proxy_csr_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Create the CSR for the aggregator-front-proxy
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/aggregator-front-proxy.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/aggregator-front-proxy.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/aggregator-front-proxy.cnf
+    -reqexts req_ext
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - not aggregator_front_proxy_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool
+
+- name: Stat service-catalog CSR
+  stat:
+    path: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/service-catalog.csr"
+  register: sc_csr_stat
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_stat.stat.exists
+
+- name: Create the service catalog CSR
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/service-catalog.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/service-catalog.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/service-catalog.cnf
+    -reqexts req_ext
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_stat.stat.exists
+  - not sc_csr_stat.stat.exists or openshift_replace_generated_csrs | default(false) | bool

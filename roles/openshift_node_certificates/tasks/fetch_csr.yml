@@ -1,0 +1,27 @@
+---
+- name: Create node CSR subdir
+  local_action: command mkdir -p "{{ csr_local_staging_dir }}/node-{{ item }}"
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_nodes_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch system:node CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/node-{{ item }}/system:node:{{ hostvars[item].openshift.common.hostname | lower }}.csr"
+    dest: "{{ csr_local_staging_dir }}/node-{{ item }}/system:node:{{ hostvars[item].openshift.common.hostname | lower }}.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_nodes_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
+
+- name: Fetch server CSR
+  fetch:
+    src: "{{ openshift.common.config_base }}/csr/node-{{ item }}/server.csr"
+    dest: "{{ csr_local_staging_dir }}/node-{{ item }}/server.csr"
+    flat: yes
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_nodes_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: "{{ item }}"
