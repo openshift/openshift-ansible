@@ -6,7 +6,7 @@ openshift_management_project_description: CloudForms Management Engine
 # Number of retries when waiting for the app to start (retried every 30 seconds)
 openshift_management_pod_rollout_retries: 30
 # Node selector for project:
-openshift_management_nodeselector: "{{ openshift_hosted_infra_selector | default('node-role.kubernetes.io/infra=true') | map_from_pairs }}"
+openshift_management_nodeselector: "{{ openshift_hosted_infra_selector | default(['node-role.kubernetes.io/infra=true'])}}"
 
 ######################################################################
 # BASE TEMPLATE AND DATABASE OPTIONS
