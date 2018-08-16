@@ -15,7 +15,7 @@
   register: rh_subscribed
   changed_when: False
 
-- name: Register host
+- name: Register host using user/password
   redhat_subscription:
     username: "{{ rhsub_user }}"
     password: "{{ rhsub_pass }}"
@@ -23,6 +23,19 @@
   until: rh_subscription is succeeded
   when:
     - "'not registered' in rh_subscribed.stdout"
+    - rhsub_user is defined
+    - rhsub_pass is defined
+
+- name: Register host using activation key
+  redhat_subscription:
+    activationkey: "{{ rhsub_ak }}"
+    org_id: "{{ rhsub_orgid }}"
+  register: rh_subscription
+  until: rh_subscription is succeeded
+  when:
+    - "'not registered' in rh_subscribed.stdout"
+    - rhsub_ak is defined
+    - rhsub_orgid is defined
 
 - fail:
     msg: 'Unable to register host with Red Hat Subscription Manager'
