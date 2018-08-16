@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.16.0
+Release:        0.17.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,27 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Aug 16 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.17.0
+- Update for Bugzilla 1580256 (mazzystr@gmail.com)
+- Remove duplicated bootstrapped SCC check (vrutkovs@redhat.com)
+- cluster_monitoring_operator: update ClusterRole (lserven@gmail.com)
+- Default CFME nodeselector should be a list of str, not a dict
+  (vrutkovs@redhat.com)
+- Added support for ak when registering hosts (e.minguez@gmail.com)
+- Fix audit config interpolation (denis@gladkikh.email)
+- SDN check: Ignore node's canonical name (miciah.masters@gmail.com)
+- fix 1616278. Modify the default logging namespace (jcantril@redhat.com)
+- The file name has changed to heketi_get_key.yml (mbruzek@gmail.com)
+- Bug 1615275. Regenerate session_secret if it can't be used with oauth-proxy
+  (asherkho@redhat.com)
+- Set correct vars for registry console (vrutkovs@redhat.com)
+- Updating to only iterate over oo_nodes_to_config list for
+  oo_elasticsearch_nodes (ewolinet@redhat.com)
+- The l_glusterfs_count is a string need to cast to int for comparison.
+  (mbruzek@gmail.com)
+- Specify external URL for Prometheus (pat2man@gmail.com)
+- Remove unused/broken node cert plays (mgugino@redhat.com)
+
 * Wed Aug 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.16.0
 - remove the olm project (jiazha@redhat.com)
 - fix ASB ClusterServiceBroker removal (jmontleo@redhat.com)
