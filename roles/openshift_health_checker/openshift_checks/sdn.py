@@ -119,7 +119,7 @@ class SDNCheck(OpenShiftCheck):
         """
         self.register_file(path, self.read_command_output(command))
 
-    def read_command_output(self, command):
+    def read_command_output(self, command, utf8=True):
         """Execute the provided command using the command module
         and return its output.
 
@@ -141,7 +141,9 @@ class SDNCheck(OpenShiftCheck):
                 'RemoteCommandFailure',
                 'Failed to execute command on remote host: %s' % command)
 
-        return result['stdout'].encode('utf-8')
+        if utf8:
+            return result['stdout'].encode('utf-8')
+        return result['stdout']
 
     def check_master(self):
         """Gather diagnostic information on a master and ensure it can connect
@@ -425,7 +427,7 @@ class SDNCheck(OpenShiftCheck):
         """Look up the given IPv4 address using getent."""
         command = ' '.join(['/bin/getent', 'ahostsv4', addr])
         try:
-            out = self.read_command_output(command)
+            out = self.read_command_output(command, False)
         except OpenShiftCheckException as exc:
             raise OpenShiftCheckException(
                 'NameResolutionError',
@@ -433,7 +435,7 @@ class SDNCheck(OpenShiftCheck):
 
         for line in out.splitlines():
             record = line.split()
-            if record[1:3] == ['STREAM', addr]:
+            if record[1] == 'STREAM':
                 return record[0]
 
         return None
