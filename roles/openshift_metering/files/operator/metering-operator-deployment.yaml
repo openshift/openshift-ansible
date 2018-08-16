@@ -1,33 +1,33 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: metering-helm-operator
+  name: metering-operator
   labels:
-    app: metering-helm-operator
+    app: metering-operator
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: metering-helm-operator
+      app: metering-operator
   template:
     metadata:
       labels:
-        app: metering-helm-operator
+        app: metering-operator
     spec:
       securityContext:
         runAsNonRoot: true
       containers:
-      - name: metering-helm-operator
-        image: "quay.io/coreos/chargeback-helm-operator:0.6.1-latest"
+      - name: metering-operator
+        image: "quay.io/coreos/metering-helm-operator:0.7.0-latest"
         args: ["run-operator.sh"]
         imagePullPolicy: Always
         env:
         - name: HELM_RELEASE_CRD_NAME
           value: Metering
         - name: HELM_RELEASE_CRD_API_GROUP
-          value: chargeback.coreos.com
+          value: metering.openshift.io
         - name: HELM_CHART_PATH
           value: /openshift-metering-0.1.0.tgz
         - name: MY_POD_NAME
@@ -54,7 +54,7 @@ spec:
             memory: "25Mi"
             cpu: "50m"
       - name: tiller
-        image: "quay.io/coreos/chargeback-helm-operator:0.6.1-latest"
+        image: "quay.io/coreos/metering-helm-operator:0.7.0-latest"
         args: ["/tiller"]
         imagePullPolicy: Always
         env:
@@ -93,4 +93,4 @@ spec:
           timeoutSeconds: 1
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
-      serviceAccount: metering-helm-operator
+      serviceAccount: metering-operator
