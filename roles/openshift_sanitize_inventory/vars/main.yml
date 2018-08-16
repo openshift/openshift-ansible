@@ -74,3 +74,5 @@ __warn_deprecated_vars:
   - 'openshift_hosted_metrics_deployer_prefix'
   - 'openshift_hosted_metrics_deployer_version'
   - 'openshift_hosted_metrics_public_url'
+  # crio
+  - 'openshift_crio_use_rpm'

@@ -37,12 +37,6 @@
       openshift_is_atomic: "{{ ostree_booted.stat.exists }}"
       openshift_is_containerized: "{{ ostree_booted.stat.exists or (containerized | default(false) | bool) }}"
 
-  - name: Set use_crio to True if cri-o rpm is requested
-    set_fact:
-      openshift_use_crio: True
-    when:
-    - openshift_crio_use_rpm | default(False) | bool
-
   # TODO: Should this be moved into health checks??
   # Seems as though any check that happens with a corresponding fail should move into health_checks
   # Fail as early as possible if Atomic and old version of Docker
