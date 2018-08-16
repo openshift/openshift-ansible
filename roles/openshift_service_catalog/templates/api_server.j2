@@ -44,7 +44,7 @@ spec:
         - --cors-allowed-origins
         - {{ cors_allowed_origin }}
         - --enable-admission-plugins
-        - KubernetesNamespaceLifecycle,DefaultServicePlan,ServiceBindingsLifecycle,ServicePlanChangeValidator,BrokerAuthSarCheck
+        - NamespaceLifecycle,DefaultServicePlan,ServiceBindingsLifecycle,ServicePlanChangeValidator,BrokerAuthSarCheck
         - --feature-gates
         - OriginatingIdentity=true
 {% if openshift_service_catalog_namespaced_service_brokers_enabled | bool %}
