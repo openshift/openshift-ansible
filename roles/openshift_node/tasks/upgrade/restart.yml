@@ -34,6 +34,7 @@
   service:
     name: cri-o
     state: started
+    enabled: true
   when: openshift_use_crio | bool
 
 - name: Start node service
