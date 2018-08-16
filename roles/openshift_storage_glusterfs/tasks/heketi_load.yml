@@ -1,0 +1,26 @@
+---
+- name: Set heketi-cli command
+  set_fact:
+    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {%if heketi_pod is defined %}{{ heketi_pod.metadata.name }}{% elif deploy_heketi_pod is defined %}{{ deploy_heketi_pod.metadata.name }}{% endif %} {% endif %}{{ glusterfs_heketi_cli }} -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin {% if glusterfs_heketi_admin_key is defined %}--secret '{{ glusterfs_heketi_admin_key }}'{% endif %}"
+
+- name: Verify heketi service
+  command: "{{ glusterfs_heketi_client }} cluster list"
+  changed_when: False
+
+- name: Generate topology file
+  template:
+    src: "topology.json.j2"
+    dest: "{{ mktemp.stdout }}/topology.json"
+
+- name: Place heketi topology on heketi Pod
+  shell: "{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig exec --namespace={{ glusterfs_namespace }} -i {%if heketi_pod is defined %}{{ heketi_pod.metadata.name }}{% elif deploy_heketi_pod is defined %}{{ deploy_heketi_pod.metadata.name }}{% endif %} -- bash -c 'mkdir -p {{ mktemp.stdout }} && cat > {{ mktemp.stdout }}/topology.json' < {{ mktemp.stdout }}/topology.json"
+  when:
+  - glusterfs_heketi_is_native
+
+# If this command fails, check with
+# oc logs <heketi_pod>", then rsh to the glusterfs-storage-xyz pod and "vi /var/log/glusterfs/glusterd.log"
+# TODO(michaelgugino) Automate collecting a message about collecting this data
+- name: Load heketi topology
+  command: "{{ glusterfs_heketi_client }} topology load --json={{ mktemp.stdout }}/topology.json 2>&1"
+  register: topology_load
+  failed_when: "topology_load.rc != 0 or 'Unable' in topology_load.stdout"

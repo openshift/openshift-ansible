@@ -5,6 +5,7 @@ metadata:
   name: heketi
   labels:
     glusterfs: heketi-template
+    heketi: template
   annotations:
     description: Heketi service deployment template
     tags: glusterfs,heketi

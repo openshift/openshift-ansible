@@ -1,0 +1,34 @@
+---
+- name: Check for existing deploy-heketi pod
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    state: list
+    kind: pod
+    selector: "glusterfs=deploy-heketi-{{ glusterfs_name }}-pod"
+  register: deploy_heketi_pod_check
+
+- name: Check if need to deploy deploy-heketi
+  set_fact:
+    glusterfs_heketi_deploy_is_missing: False
+    deploy_heketi_pod: "{{ deploy_heketi_pod_check.results.results[0]['items'][0] }}"
+  when:
+  - "deploy_heketi_pod_check.results.results[0]['items'] | count > 0"
+  # deploy-heketi is not missing when there are one or more pods with matching labels whose 'Ready' status is True
+  - "deploy_heketi_pod_check.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count > 0"
+
+- name: Check for existing heketi pod
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    state: list
+    kind: pod
+    selector: "glusterfs=heketi-{{ glusterfs_name }}-pod"
+  register: heketi_pod_check
+
+- name: Check if need to deploy heketi
+  set_fact:
+    glusterfs_heketi_is_missing: False
+    heketi_pod: "{{ heketi_pod_check.results.results[0]['items'][0] }}"
+  when:
+  - "heketi_pod_check.results.results[0]['items'] | count > 0"
+  # heketi is not missing when there are one or more pods with matching labels whose 'Ready' status is True
+  - "heketi_pod_check.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count > 0"
