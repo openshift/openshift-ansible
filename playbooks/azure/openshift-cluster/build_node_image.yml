@@ -109,7 +109,7 @@
   gather_facts: no
   tasks:
   - set_fact:
-      openshift_rpm: "{{ hostvars[groups['nodes'][0]]['yum'].results | selectattr('name', 'match', '^(origin|atomic-openshift)$') | first }}"
+      openshift_rpm: "{{ hostvars[groups['nodes'][0]]['yum'].results | selectattr('name', 'match', '^(origin-hyperkube|atomic-openshift-hyperkube)$') | first }}"
   - name: create image
     import_tasks: tasks/create_image_from_vm.yml
     vars:
@@ -118,7 +118,7 @@
       image_tags:
         base_image: "{{ (input_image.stdout | from_json).name }}"
         kernel: "{{ hostvars[groups['nodes'][0]]['ansible_kernel'] }}"
-        openshift: "{{ openshift_rpm.name }}-{{ openshift_rpm.version }}-{{ openshift_rpm.release }}.{{ openshift_rpm.arch }}"
+        openshift: "{{ openshift_rpm.version }}-{{ openshift_rpm.release }}.{{ openshift_rpm.arch }}"
 
   - name: create blob
     import_tasks: tasks/create_blob_from_vm.yml
