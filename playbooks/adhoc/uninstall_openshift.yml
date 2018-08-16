@@ -49,23 +49,6 @@
     failed_when: false
     when: openshift_use_openshift_sdn | default(True) | bool
 
-- hosts: masters
-  become: yes
-  tasks:
-  - name: Stop services
-    service: name={{ item }} state=stopped
-    with_items:
-    - atomic-openshift-master
-    - atomic-openshift-master-api
-    - atomic-openshift-master-controllers
-    - openshift-master
-    - openshift-master-api
-    - openshift-master-controllers
-    - origin-master
-    - origin-master-api
-    - origin-master-controllers
-    failed_when: false
-
 - hosts: etcd
   become: yes
   tasks:
@@ -174,27 +157,6 @@
       when: openshift_use_openshift_sdn | default(True) | bool
 
     when: openshift_remove_all | default(true) | bool
-
-  - shell: atomic uninstall "{{ item }}"-master-api
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openshift-enterprise
-    - origin
-
-  - shell: atomic uninstall "{{ item }}"-master-controllers
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openshift-enterprise
-    - origin
-
-  - shell: atomic uninstall "{{ item }}"-master
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openshift-enterprise
-    - origin
 
   - shell: atomic uninstall "{{ item }}"-node
     changed_when: False
@@ -427,28 +389,7 @@
     with_items:
     - /etc/ansible/facts.d/openshift.fact
     - /etc/corosync
-    - /etc/openshift
-    - /etc/openshift-sdn
-    - /etc/systemd/system/atomic-openshift-master.service
-    - /etc/systemd/system/atomic-openshift-master-api.service
-    - /etc/systemd/system/atomic-openshift-master-controllers.service
-    - /etc/systemd/system/origin-master.service
-    - /etc/systemd/system/origin-master-api.service
-    - /etc/systemd/system/origin-master-controllers.service
-    - /etc/sysconfig/atomic-openshift-master-api
-    - /etc/sysconfig/atomic-openshift-master-controllers
-    - /etc/sysconfig/origin-master
-    - /etc/sysconfig/origin-master-api
-    - /etc/sysconfig/origin-master-controllers
-    - /etc/sysconfig/openshift-master
-    - /etc/sysconfig/origin-master
-    - /etc/sysconfig/origin-master-api
-    - /etc/sysconfig/origin-master-controllers
     - /usr/share/openshift/examples
-    - /usr/lib/systemd/system/atomic-openshift-master-api.service
-    - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
-    - /usr/lib/systemd/system/origin-master-api.service
-    - /usr/lib/systemd/system/origin-master-controllers.service
     - /usr/local/bin/openshift
     - /usr/local/bin/oadm
     - /usr/local/bin/oc
@@ -460,12 +401,6 @@
     with_items:
     - /etc/systemd/system/openvswitch.service
     when: openshift_use_openshift_sdn | default(True) | bool
-
-  # Since we are potentially removing the systemd unit files for separated
-  # master-api and master-controllers services, so we need to reload the
-  # systemd configuration manager
-  - name: Reload systemd manager configuration
-    command: systemctl daemon-reload
 
 - hosts: etcd
   become: yes

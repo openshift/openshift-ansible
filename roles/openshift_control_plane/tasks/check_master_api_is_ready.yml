@@ -8,14 +8,15 @@
   retries: 60
   delay: 5
 
-- name: "Collect API logs when API didn't become available"
-  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-api
-  register: l_api_log_output
+- name: Get API logs
+  command: >
+    /usr/local/bin/master-logs api api
+  register: control_plane_logs_api
+  ignore_errors: true
   when: openshift_apis is failed
 
-- name: "Dump API logs when the API didn't become availabale"
-  debug:
-    msg: "{{ l_api_log_output.stdout_lines }}"
+- debug:
+    msg: "{{ control_plane_logs_api.stdout_lines }}"
   when: openshift_apis is failed
 
 - fail:

@@ -1,13 +1,4 @@
 ---
-- name: Stop control plane services
-  service:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
-  - "{{ openshift_service_type }}-master-api"
-  - "{{ openshift_service_type }}-master-controllers"
-  failed_when: false
-
 - import_tasks: static_shim.yml
 
 - import_tasks: upgrade/upgrade_scheduler.yml
@@ -87,6 +78,3 @@
     key: "kubernetesMasterConfig.apiServerArguments.runtime-config"
     value: "{{ runtime_config.result | join(',') | regex_replace('(?:,)*apis/settings\\.k8s\\.io/v1alpha1=true','') }}"
   when: runtime_config.result
-
-- name: reload systemd units
-  command: systemctl daemon-reload
