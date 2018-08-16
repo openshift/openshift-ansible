@@ -40,12 +40,9 @@ azure_node_repos:
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
-  # TODO: Replace me post GA with https://mirror.openshift.com/libra/rhui-rhel-server-7-ose-3.10/
   - name: rhel-server-7-ose-3.10
-    baseurl: https://mirror.openshift.com/enterprise/all/3.10/latest/x86_64/os
+    baseurl: https://mirror.openshift.com/libra/rhui-rhel-server-7-ose-3.10/
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-    # TODO: Remove me post GA
-    gpgcheck: false
     sslclientcert: /var/lib/yum/client-cert.pem
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
