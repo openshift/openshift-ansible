@@ -10,11 +10,9 @@
   register: result
   until: result is succeeded
 
-- include_tasks: drop_etcdctl.yml
-  when:
-  - openshift_etcd_etcdctl_profile | default(true) | bool
+- import_tasks: drop_etcdctl.yml
 
-  # Start secondary etcd instance for third party integrations
+# Start secondary etcd instance for third party integrations
 # TODO: Determine an alternative to using thirdparty variable
 - block:
   - name: Create configuration directory
