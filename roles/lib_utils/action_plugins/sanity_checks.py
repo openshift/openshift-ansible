@@ -424,15 +424,15 @@ class ActionModule(ActionBase):
                 json_var = self.template_var(hostvars, host, var)
                 try:
                     json.loads(json_var)
-                except ValueError:
-                    found_invalid_json.append([var, json_var])
+                except ValueError as json_err:
+                    found_invalid_json.append([var, json_var, json_err])
                 except BaseException:
                     pass
 
         if found_invalid_json:
             msg = "Found invalid json format variables:\n"
             for item in found_invalid_json:
-                msg += "    {} specified in {} is invalid json format\n".format(item[1], item[0])
+                msg += "    {} specified in {} is invalid json format\n    {}".format(item[1], item[0], item[2])
             raise errors.AnsibleModuleError(msg)
         return None
 
