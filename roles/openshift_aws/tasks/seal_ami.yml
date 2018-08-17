@@ -13,17 +13,17 @@
 - when: openshift_aws_copy_base_ami_tags | default(False) | bool
   block:
   - name: fetch the ami used to create the instance
-    ec2_ami_find:
+    ec2_ami_facts:
       region: "{{ openshift_aws_region }}"
-      ami_id: "{{ instancesout.instances[0]['image_id'] }}"
+      image_ids: [ "{{ instancesout.instances[0]['image_id'] }}" ]
     register: original_ami_out
     retries: 20
     delay: 3
-    until: original_ami_out.results|length > 0
+    until: original_ami_out.images|length > 0
 
   - name: combine the tags of the original ami with newly created ami
     set_fact:
-      l_openshift_aws_ami_tags: "{{ original_ami_out.results[0]['tags'] | combine(openshift_aws_ami_tags) }}"
+      l_openshift_aws_ami_tags: "{{ original_ami_out.images[0]['tags'] | combine(openshift_aws_ami_tags) }}"
 
 - name: bundle ami
   ec2_ami:
