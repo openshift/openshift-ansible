@@ -132,6 +132,13 @@
     value: "{{ runtime_config.result | join(',') | regex_replace('(?:,)*apis/settings\\.k8s\\.io/v1alpha1=true','') }}"
   when: runtime_config.result
 
+# The master package gets updated due to the dependencies of the atomic-openshift
+# package when upgrading from 3.9 to 3.10.
+- name: Remove atomic-openshift-master package
+  package:
+    name: "{{ openshift_service_type }}-master"
+    state: absent
+
 - name: Remove old service information
   file:
     path: "{{ item }}"
