@@ -35,6 +35,18 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
+- name: Stop crio
+  service:
+    name: cri-o
+    state: stopped
+  when: openshift_use_crio | bool
+
+# TODO: Need to determine if this is needed long term
+# Upgrading cri-o requires that all pods be stopped
+- name: Clean up cri-o pods
+  script: clean-up-crio-pods.sh
+  when: openshift_use_crio | bool
+
 - name: Stop rpm based services
   service:
     name: "{{ item }}"
