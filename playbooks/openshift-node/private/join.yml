@@ -37,6 +37,10 @@
     debug:
       msg: "{{ l_nodes_to_join }}"
 
+  - name: Wait for node start
+    pause:
+      seconds: 5
+
   - name: Approve bootstrap nodes
     oc_adm_csr:
       nodes: "{{ l_nodes_to_join }}"
