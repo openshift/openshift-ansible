@@ -1,19 +1,19 @@
 ---
-l_os_cockpit_default_images_dict:
-  origin: 'docker.io/cockpit/${component}:${version}'
-  openshift-enterprise: 'registry.redhat.io/openshift3/ose-${component}:${version}'
-l_os_cockpit_default_images_default: "{{ l_os_cockpit_default_images_dict[openshift_deployment_type] }}"
-
 l_os_cockpit_image_version_dict:
   origin: 'latest'
   openshift-enterprise: "{{ openshift_image_tag }}"
 l_os_cockpit_image_version: "{{ l_os_cockpit_image_version_dict[openshift_deployment_type] }}"
 
+l_os_cockpit_image_format: "{{ l_os_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_os_cockpit_image_version) }}"
+
+l_openshift_cockit_search_dict:
+  origin: "openshift/${component}"
+  openshift-enterprise: "ose-${component}"
+l_openshift_cockit_search: "{{ l_openshift_cockit_search_dict[openshift_deployment_type] }}"
+
 l_openshift_cockpit_replace_dict:
-  origin: "kubernetes"
+  origin: "cockpit/kubernetes"
   openshift-enterprise: "registry-console"
 l_openshift_cockpit_replace: "{{ l_openshift_cockpit_replace_dict[openshift_deployment_type] }}"
 
-l_os_cockpit_image_url: "{{ oreg_url | default(l_os_cockpit_default_images_default) | regex_replace('${version}' | regex_escape, l_os_cockpit_image_version) }}"
-
-openshift_cockpit_deployer_image: "{{ l_os_cockpit_image_url | regex_replace('${component}' | regex_escape, l_openshift_cockpit_replace) }}"
+openshift_cockpit_deployer_image: "{{ l_os_cockpit_image_format | regex_replace(l_openshift_cockit_search | regex_escape, l_openshift_cockpit_replace) }}"
