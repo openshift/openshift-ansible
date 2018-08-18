@@ -1,6 +1,12 @@
 ---
 - include_tasks: certs.yml
 
+- name: Calico Master | Clean Calico etcd data
+  when: calico_cleanup_path is defined and calico_cleanup_path != ""
+  file:
+    state: absent
+    path: "{{ calico_cleanup_path }}"
+
 - name: Calico Master | oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:calico-node
   oc_adm_policy_user:
     user: system:serviceaccount:kube-system:calico-node
@@ -32,6 +38,22 @@
   command: mktemp -d /tmp/openshift-ansible-XXXXXXX
   register: mktemp
   changed_when: False
+
+- name: Calico Master | Write separate Calico etcd manifest
+  when: use_calico_etcd
+  template:
+    dest: "{{ mktemp.stdout }}/calico-etcd.yml"
+    src: calico-etcd.yml.j2
+
+- name: Calico Master | Launch separate Calico etcd
+  when: use_calico_etcd
+  command: >
+    {{ openshift_client_binary }} apply
+    -f {{ mktemp.stdout }}/calico-etcd.yml
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+  register: calico_etcd_create_output
+  failed_when: "calico_etcd_create_output.rc != 0"
+  changed_when: "('created' in calico_etcd_create_output.stdout) or ('configured' in calico_etcd_create_output.stdout)"
 
 - name: Calico Master | Parse node version
   set_fact:
