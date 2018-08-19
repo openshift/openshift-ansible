@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.17.0
+Release:        0.18.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,24 @@ BuildArch:     noarch
 
 
 %changelog
+* Sun Aug 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.18.0
+- Require Ansible 2.6.2 (rteague@redhat.com)
+- Remove 3.10 upgrade playbooks (rteague@redhat.com)
+- Use openshift_image_tag for registry-console upgrade (rteague@redhat.com)
+- Clean up GCP disks during deprovision (ironcladlou@gmail.com)
+- Skip base package check for openshift_ca role (vrutkovs@redhat.com)
+- Update search string for registry console (mgugino@redhat.com)
+- Revert "Set correct vars for registry console" (gugino.michael@yahoo.com)
+- service-catalog: use K8s NamespaceLifecycle admission controller
+  (jaboyd@redhat.com)
+- remove name from tag (m.judeikis@gmail.com)
+- Update sanity_checks.py (cwilkers@redhat.com)
+- Provide better error message for json sanity check (cwilkers@redhat.com)
+- Remove asb-user-access cluster-role when uninstalling ASB
+  (jmontleo@redhat.com)
+- Increase maximum number of open file descriptors for dnsmasq
+  (ichavero@redhat.com)
+
 * Thu Aug 16 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.17.0
 - Update for Bugzilla 1580256 (mazzystr@gmail.com)
 - Remove duplicated bootstrapped SCC check (vrutkovs@redhat.com)
