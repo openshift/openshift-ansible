@@ -37,12 +37,6 @@
     - rhsub_ak is defined
     - rhsub_orgid is defined
 
-- fail:
-    msg: 'Unable to register host with Red Hat Subscription Manager'
-  when:
-    - "'not registered' in rh_subscribed.stdout"
-    - rh_subscription.failed
-
 - name: Determine if OpenShift Pool Already Attached
   command: "subscription-manager list --consumed --pool-only --matches '*OpenShift*'"
   register: openshift_pool_attached
