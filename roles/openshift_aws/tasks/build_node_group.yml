@@ -22,10 +22,6 @@
     - "'results' in amiout"
     - amiout.results|length > 0
 
-# Need to set epoch time in one place to use for launch_config and scale_group
-- set_fact:
-    l_epoch_time: "{{ ansible_date_time.epoch }}"
-#
 # query asg's and determine if we need to create the others.
 # if we find more than 1 for each type, and this isn't an upgrade, then exit
 - name: query all asg's for this cluster
