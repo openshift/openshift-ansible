@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.29
+Version:        3.10.30
 Release:        1
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,32 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon Aug 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.30-1
+- Remove atomic-openshift-master package during upgrade (rteague@redhat.com)
+- Added support for ak when registering hosts (e.minguez@gmail.com)
+- The l_glusterfs_count is a string need to cast to int for comparison.
+  (mbruzek@gmail.com)
+- Default CFME nodeselector should be a list of str, not a dict
+  (vrutkovs@redhat.com)
+- The file name has changed to heketi_get_key.yml (mbruzek@gmail.com)
+- vgchange before vgremove update. (sarumuga@redhat.com)
+- To avoid I/O errors, carry out vg deactivate (using vgchange -an) and dmsetup
+  remove device. (sarumuga@redhat.com)
+- Remove system container cri-o during 3.10 upgrade (rteague@redhat.com)
+- Adding documentation in hosts.example (jcallen@redhat.com)
+- Add a license parameter to gcloud command (jcallen@redhat.com)
+- Fix audit config interpolation (denis@gladkikh.email)
+- Remove unused/broken node cert plays (mgugino@redhat.com)
+- Add quotes to node selector (rteague@redhat.com)
+- GlusterFS: Upgrade playbook (jarrpa@redhat.com)
+- Refactor glusterfs for scaleup (mgugino@redhat.com)
+- Remove hyperkube package (norito.agetsuma@gmail.com)
+- re-order and required values (rcook@redhat.com)
+- matching the name values (rcook@redhat.com)
+- adding parameters to allow for load balancer creation (rcook@redhat.com)
+- set the external url of prometheus (pgier@redhat.com)
+- re-enable GA repos for 3.10 (Mangirdas@Judeikis.LT)
+
 * Wed Aug 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.29-1
 - CFME: set default value for openshift_hosted_infra_selector
   (vrutkovs@redhat.com)
