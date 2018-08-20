@@ -15,6 +15,7 @@ data:
         org:  {{ ansible_service_broker_registry_organization }}
         tag:  {{ ansible_service_broker_registry_tag }}
         white_list: {{  ansible_service_broker_registry_whitelist | to_yaml }}
+        black_list: {{  ansible_service_broker_registry_blacklist | to_yaml }}
         auth_type: "{{ ansible_service_broker_registry_auth_type | default("") }}"
         auth_name: "{{ ansible_service_broker_registry_auth_name | default("") }}"
       - type: local_openshift
