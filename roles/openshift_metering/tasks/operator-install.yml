@@ -19,9 +19,9 @@
   - "files/operator/*.yaml"
   register: temp_operator_files
 
-- name: Update Metering Helm Operator deployment image
+- name: Update Metering Operator deployment image
   yedit:
-    src: "{{ mktemp.stdout }}/metering-manifests/operator/metering-helm-operator-deployment.yaml"
+    src: "{{ mktemp.stdout }}/metering-manifests/operator/metering-operator-deployment.yaml"
     edits:
     - key: spec.template.spec.containers[0].image
       value: "{{ openshift_metering_operator_image }}"
@@ -41,13 +41,13 @@
   yedit:
     src: "{{ mktemp.stdout }}/metering-manifests/operator/metering.yaml"
     edits:
-    - key: spec.presto.hive.config.dbConnectionURL
+    - key: spec.presto.spec.hive.config.dbConnectionURL
       value: "{{ openshift_metering_hive_metastore_db_url }}"
-    - key: spec.presto.hive.config.dbDriver
+    - key: spec.presto.spec.hive.config.dbDriver
       value: "{{ openshift_metering_hive_metastore_db_driver }}"
-    - key: spec.presto.hive.config.dbConnectionUsername
+    - key: spec.presto.spec.hive.config.dbConnectionUsername
       value: "{{ openshift_metering_hive_metastore_db_username }}"
-    - key: spec.presto.hive.config.dbConnectionPassword
+    - key: spec.presto.spec.hive.config.dbConnectionPassword
       value: "{{ openshift_metering_hive_metastore_db_password }}"
   when: openshift_metering_hive_metastore_db_use_custom | bool
 
@@ -55,13 +55,13 @@
   yedit:
     src: "{{ mktemp.stdout }}/metering-manifests/operator/metering.yaml"
     edits:
-    - key: spec.metering-operator.config.defaultStorage
+    - key: spec.reporting-operator.spec.config.defaultStorage
       value:
         create: true
         isDefault: true
         name: "{{ openshift_metering_default_storage_name }}"
         type: "{{ openshift_metering_default_storage_type }}"
-    - key: "spec.metering-operator.config.defaultStorage.{{ openshift_metering_default_storage_type }}"
+    - key: "spec.reporting-operator.spec.config.defaultStorage.{{ openshift_metering_default_storage_type }}"
       value: "{{ openshift_metering_default_storage_config[openshift_metering_default_storage_type] }}"
   when: openshift_metering_default_storage_use_custom | bool
 
@@ -83,13 +83,13 @@
   # make the edit
   when: item.value != ""
   with_items:
-  - key: spec.metering-operator.config.awsAccessKeyID
+  - key: spec.reporting-operator.spec.config.awsAccessKeyID
     value: "{{ openshift_metering_aws_access_key_id }}"
-  - key: spec.metering-operator.config.awsSecretAccessKey
+  - key: spec.reporting-operator.spec.config.awsSecretAccessKey
     value: "{{ openshift_metering_aws_secret_access_key }}"
-  - key: spec.presto.config.awsAccessKeyID
+  - key: spec.presto.spec.config.awsAccessKeyID
     value: "{{ openshift_metering_aws_access_key_id }}"
-  - key: spec.presto.config.awsSecretAccessKey
+  - key: spec.presto.spec.config.awsSecretAccessKey
     value: "{{ openshift_metering_aws_secret_access_key }}"
   # Hide secrets
   no_log: True
@@ -111,34 +111,52 @@
     description: Openshift Metering
     node_selector: ""
 
-- name: Create metering namespace viewer cluster role
+- name: Create reporting operator cluster role
   oc_clusterrole:
     state: present
-    name: "openshift-metering-namespace-viewer-{{ __openshift_metering_namespace }}"
+    name: "openshift-reporting-operator-{{ __openshift_metering_namespace }}"
     rules:
+    # Grant namespace viewer access to allow authing to cluster monitoring Prometheus
     - apiGroups: [""]
       resources: ["namespaces"]
       verbs: ["get"]
+    # Grant subject access review and token review access to allow metering
+    # auth-proxy to authenticate requests using openshift authentication
+    # methods
+    - apiGroups:
+      - authorization.k8s.io
+      resources:
+      - subjectaccessreviews
+      verbs:
+      - create
+    - apiGroups:
+      - authentication.k8s.io
+      resources:
+      - tokenreviews
+      verbs:
+      - create
 
-- name: Create namespace viewer clusterrolebinding
+# Grant access to reporting-operator so it can talk to prometheus and
+# authenticate it's API using auth-proxy
+- name: Create reporting operator clusterrolebinding
   oc_obj:
     state: present
     kind: ClusterRoleBinding
-    name: "openshift-metering-namespace-viewer-{{ __openshift_metering_namespace }}"
+    name: "openshift-reporting-operator-{{ __openshift_metering_namespace }}"
     content:
-      path: "{{ mktemp.stdout }}/openshift-metering-namespace-viewer-{{ __openshift_metering_namespace }}"
+      path: "{{ mktemp.stdout }}/openshift-reporting-operator-{{ __openshift_metering_namespace }}"
       data:
         apiVersion: v1
         kind: ClusterRoleBinding
         metadata:
-          name: "openshift-metering-namespace-viewer-{{ __openshift_metering_namespace }}"
+          name: "openshift-reporting-operator-{{ __openshift_metering_namespace }}"
         roleRef:
           apiGroup: rbac.authorization.k8s.io
           kind: ClusterRole
-          name: "openshift-metering-namespace-viewer-{{ __openshift_metering_namespace }}"
+          name: "openshift-reporting-operator-{{ __openshift_metering_namespace }}"
         subjects:
         - kind: ServiceAccount
-          name: metering
+          name: reporting-operator
           namespace: "{{ __openshift_metering_namespace }}"
 
 - name: Install Metering CRDs
@@ -155,7 +173,7 @@
   with_fileglob:
   - "files/crds/*.yaml"
 
-- name: Install Metering Helm Operator
+- name: Install Metering Operator
   oc_obj:
     state: present
     kind: "{{ obj.kind }}"

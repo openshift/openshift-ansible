@@ -13,20 +13,15 @@ openshift_monitoring_deploy: true
 
 ## Installation
 
-To install Openshift Metering, set this variable:
-
-```yaml
-openshift_metering_install: true
-```
-
-To uninstall, set:
-
-```yaml
-openshift_metering_install: false
-```
-
-Then run:
+To install Openshift Metering, run the install playbook:
 
 ```bash
 ansible-playbook playbooks/openshift-metering/config.yml
 ```
+
+To uninstall, run the uninstall playbook:
+
+```bash
+ansible-playbook playbooks/openshift-metering/uninstall.yml
+```
+
