@@ -7,8 +7,8 @@ openshift_grafana_state: present
 openshift_grafana_namespace: openshift-grafana
 openshift_grafana_pod_timeout: 300
 openshift_grafana_prometheus_namespace: "openshift-monitoring"
-openshift_grafana_prometheus_serviceaccount: "prometheus-k8s"
-openshift_grafana_prometheus_route: "prometheus-k8s"
+openshift_grafana_prometheus_serviceaccount: "prometheus"
+openshift_grafana_prometheus_route: "prometheus"
 openshift_grafana_serviceaccount_name: grafana
 openshift_grafana_serviceaccount_annotations: []
 l_openshift_grafana_serviceaccount_annotations:
