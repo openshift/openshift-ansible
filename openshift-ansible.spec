@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.40
+Version:        3.9.41
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,41 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.41-1
+- Fix conditional for cri-o system container removal (rteague@redhat.com)
+- Upgrade cri-o during 3.9 upgrade (rteague@redhat.com)
+- Update routers that are defined in openshift_hosted_routers
+  (sdodson@redhat.com)
+- CFME: set default value for openshift_hosted_infra_selector
+  (vrutkovs@redhat.com)
+- Default 3.9 to use RPM based CRI-O install (rteague@redhat.com)
+- [bz1552516] set the external url of prometheus (pgier@redhat.com)
+- Add CentoOS Origin repo for 39 release (dani_comnea@yahoo.com)
+- Adding min-port to dnsmasq configuration (rhowe@redhat.com)
+- Ensure kernel-modules not installed on atomic (mgugino@redhat.com)
+- Fedora: Install kernel-modules (mgugino@redhat.com)
+- oc_obj should correctly identify 'results': [{}] as 'Object not found'
+  (mchappel@redhat.com)
+- Revert "health checks: use etcd_image as it would work on Origin correctly"
+  (vrutkovs@redhat.com)
+- Don't get file checksum, attributes and mime type in stat module calls
+  (vrutkovs@redhat.com)
+- Disable papr on pull requests (sdodson@redhat.com)
+- adding unmount task below the backup task (bysnupy@hotmail.com)
+- bug 1597282. Quote selector to make it valid json (jcantril@redhat.com)
+- Allow disabling Network Manager managed dns (arun.neelicattu@gmail.com)
+- Allow shared_non_ops as kibana index mode (farandac@redhat.com)
+- Added node selector option for CFME role and fixed formatting issues
+  (dluong@redhat.com)
+- Support tabs in resolv.conf (vrutkovs@redhat.com)
+- Fix cpu_limit check in eventrouter template (vrutkovs@redhat.com)
+- Update Calico versions to the latest (v3.1.3) (mleung975@gmail.com)
+- Allow the 9k-10k port range for Prometheus (spasquie@redhat.com)
+- Adds openshift_fs_inotify_max_user_instances to the node tuned profile.
+  (jtudelag@redhat.com)
+- Make fs_inotify_max_user_watches configurable. (avesh.ncsu@gmail.com)
+- Fix openshift_logging on Python3 (christoffer.reijer@basalt.se)
+
 * Mon Jul 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.40-1
 - 
 
