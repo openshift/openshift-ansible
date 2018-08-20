@@ -36,7 +36,7 @@ def test_log_matches_high_traffic_msg(group_names, matched, failed, extra_words)
 
     task_vars = dict(
         group_names=group_names,
-        openshift_is_containerized=False,
+        openshift_is_atomic=False,
         openshift_service_type="origin"
     )
 
@@ -48,13 +48,13 @@ def test_log_matches_high_traffic_msg(group_names, matched, failed, extra_words)
     assert result.get("failed", False) == failed
 
 
-@pytest.mark.parametrize('openshift_is_containerized,expected_unit_value', [
+@pytest.mark.parametrize('openshift_is_atomic,expected_unit_value', [
     (False, "etcd"),
     (True, "etcd_container"),
 ])
-def test_systemd_unit_matches_deployment_type(openshift_is_containerized, expected_unit_value):
+def test_systemd_unit_matches_deployment_type(openshift_is_atomic, expected_unit_value):
     task_vars = dict(
-        openshift_is_containerized=openshift_is_containerized
+        openshift_is_atomic=openshift_is_atomic
     )
 
     def execute_module(module_name, args, *_):

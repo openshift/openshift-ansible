@@ -19,7 +19,6 @@
   # Since we're not calling openshift_facts we'll do this for now
   - set_fact:
       openshift_is_atomic: "{{ ostree_output.rc == 0 }}"
-      openshift_is_containerized: "{{ ostree_output.rc == 0 or containerized | default(false) | bool }}"
 
 - hosts: nodes:masters
   become: yes
