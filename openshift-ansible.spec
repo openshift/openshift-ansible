@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.18.0
+Release:        0.19.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon Aug 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.19.0
+- 
+
 * Sun Aug 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.18.0
 - Require Ansible 2.6.2 (rteague@redhat.com)
 - Remove 3.10 upgrade playbooks (rteague@redhat.com)
