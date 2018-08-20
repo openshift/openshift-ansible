@@ -14,9 +14,9 @@
   command: "{{ openshift_container_cli }} pull {{ openshift_cli_image }}"
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift_is_containerized | bool
+  when: openshift_is_atomic | bool
 
-- when: not openshift_is_containerized | bool
+- when: not openshift_is_atomic | bool
   block:
   - name: Check latest available OpenShift RPM version
     repoquery:

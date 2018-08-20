@@ -19,7 +19,6 @@
   # Since we're not calling openshift_facts we'll do this for now
   - set_fact:
       openshift_is_atomic: "{{ ostree_output.rc == 0 }}"
-      openshift_is_containerized: "{{ ostree_output.rc == 0 or containerized | default(false) | bool }}"
 
 # Stop services on all hosts prior to removing files.
 - hosts: nodes
@@ -430,13 +429,6 @@
     - etcd
     - etcd3
     - firewalld
-
-  - name: Stop additional atomic services
-    service: name={{ item }} state=stopped
-    when: openshift_is_containerized | bool
-    with_items:
-    - etcd_container
-    failed_when: false
 
   - name: Remove packages
     package:
