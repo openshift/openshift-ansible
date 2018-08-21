@@ -51,7 +51,7 @@ openshift_deployment_type=origin
 # use this to lookup the latest exact version of the container images, which is the tag actually used to configure
 # the cluster. For RPM installations we just verify the version detected in your configured repos matches this
 # release.
-openshift_release="3.9"
+#openshift_release="3.11"
 
 # default subdomain to use for exposed routes, you should have wildcard dns
 # for *.apps.test.example.com that points at your infra nodes which will run
@@ -73,12 +73,12 @@ debug_level=2
 # Specify an exact container image tag to install or configure.
 # WARNING: This value will be used for all hosts in containerized environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_image_tag=v3.9.0
+#openshift_image_tag=v3.11.0
 
 # Specify an exact rpm version to install or configure.
 # WARNING: This value will be used for all hosts in RPM based environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_pkg_version=-3.9.0
+#openshift_pkg_version=-3.11.0
 
 # If using Atomic Host, you may specify system container image registry for the nodes:
 #system_images_registry="docker.io"
@@ -763,9 +763,9 @@ debug_level=2
 #openshift_master_console_port=8443
 
 # set exact RPM version (include - prefix)
-#openshift_pkg_version=-3.9.0
+#openshift_pkg_version=-3.11.0
 # you may also specify version and release, ie:
-#openshift_pkg_version=-3.9.0-0.126.0.git.0.9351aae.el7
+#openshift_pkg_version=-3.11.0-0.126.0.git.0.9351aae.el7
 
 # Configure custom ca certificate
 #openshift_master_ca_certificate={'certfile': '/path/to/ca.crt', 'keyfile': '/path/to/ca.key'}
@@ -910,9 +910,6 @@ debug_level=2
 # (defaults for origin and openshift-enterprise, repsectively)
 #openshift_service_catalog_image="docker.io/openshift/origin-service-catalog:{{ openshift_image_tag }}""
 #openshift_service_catalog_image="registry.redhat.io/openshift3/ose-service-catalog:{{ openshift_image_tag }}"
-
-# TSB image tag
-#template_service_broker_version='v3.9'
 
 # Configure one of more namespaces whose templates will be served by the TSB
 #openshift_template_service_broker_namespaces=['openshift']
