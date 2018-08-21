@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.128
+Version:        3.6.173.0.129
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.129-1
+- 
+
 * Fri Jul 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.128-1
 - Set etcd_ca_host_group for embedded etcd (rteague@redhat.com)
 
