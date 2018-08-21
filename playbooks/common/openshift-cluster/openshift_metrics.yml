@@ -14,4 +14,5 @@
     include_role:
       name: openshift_metrics
       tasks_from: update_master_config.yaml
+    when: openshift_metrics_install_metrics | bool
     static: true
