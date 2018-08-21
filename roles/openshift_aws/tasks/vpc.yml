@@ -1,6 +1,7 @@
 ---
 - name: query azs
   aws_az_facts:
+    region: "{{ openshift_aws_region }}"
   register: azs
 
 - fail:
