@@ -720,7 +720,9 @@ an OpenShift Container Platform cluster
         # Not present
         pass
     else:
-        if cfg.get('etcdConfig', {}).get('servingInfo', {}).get('certFile', None) is not None:
+        if isinstance(cfg.get('etcdConfig'), dict) and \
+           isinstance(cfg.get('etcdConfig', {}).get('servingInfo'), dict) and \
+           cfg.get('etcdConfig', {}).get('servingInfo', {}).get('certFile') is not None:
             # This is embedded
             etcd_crt_name = cfg['etcdConfig']['servingInfo']['certFile']
         else:
