@@ -1188,12 +1188,7 @@ class OpenShiftFacts(object):
             Returns:
                 dict: The normalized provider facts
         """
-        provider_info = self.guess_host_provider()
-        provider_facts = normalize_provider_facts(
-            provider_info.get('name'),
-            provider_info.get('metadata')
-        )
-        return provider_facts
+        return dict()
 
     # Disabling too-many-branches and too-many-locals.
     # This should be cleaned up as a TODO item.
