@@ -485,11 +485,10 @@ def set_nodename(facts):
         # elif 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
         #     facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
         else:
-            facts['node']['nodename'] = facts['common']['hostname'].lower() 
-#            if 'bootstrapped' in facts['node'] and facts['node']['bootstrapped']:
-#                facts['node']['nodename'] = facts['common']['raw_hostname'].lower()
-#            else:
-#                facts['node']['nodename'] = facts['common']['hostname'].lower()
+            if 'bootstrapped' in facts['node'] and facts['node']['bootstrapped']:
+                facts['node']['nodename'] = facts['common']['raw_hostname'].lower()
+            else:
+                facts['node']['nodename'] = facts['common']['hostname'].lower()
     return facts
 
 
