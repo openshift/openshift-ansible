@@ -29,9 +29,9 @@
   register: crio_result
   when: not openshift_is_atomic | bool
 
-# Remove system container cri-o
+# Remove cri-o system container
 - when:
-  - crio_result is defined
+  - crio_result.stat is defined
   - crio_result.stat.exists
   - not openshift_is_atomic | bool
   block:
