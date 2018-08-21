@@ -8,3 +8,5 @@ __ansible_service_broker_registry_organization: null
 __ansible_service_broker_registry_tag: "{{ openshift_image_tag }}"
 __ansible_service_broker_registry_whitelist:
   - '.*-apb$'
+__ansible_service_broker_registry_blacklist:
+  - '.*automation-broker-apb$'
