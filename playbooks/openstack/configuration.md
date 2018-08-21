@@ -620,16 +620,20 @@ openshift_node_groups:
 ```
 
 
-### Namespace Subnet driver
+### Namespace Isolation drivers
 
 By default, kuryr is configured with the default subnet driver where all the
 pods are deployed on the same Neutron subnet. However, there is an option of
 enabling a different subnet driver, named namespace, which makes pods to be
-allocated on different subnets depending on the namespace they belong to. To
-enable this new kuryr subnet driver you need to uncomment:
+allocated on different subnets depending on the namespace they belong to.
+In addition to the subnet driver, to properly enable isolation between
+different namespaces (through OpenStack security groups) there is a need of
+also enabling the related security group driver for namespaces.
+To enable this new kuryr namespace isolation capability you need to uncomment:
 
 ```yaml
 openshift_kuryr_subnet_driver: namespace
+openshift_kuryr_sg_driver: namespace
 ```
 
 
@@ -856,7 +860,7 @@ openshift_openstack_num_nodes: 8  # 5 existing and 3 new
 
 ### 2. Scale the Cluster
 
-Next, run the appropriate playbook - either 
+Next, run the appropriate playbook - either
 `openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml`
 for master nodes or
 `openshift-ansible/playbooks/openstack/openshift-cluster/node-scaleup.yml`
