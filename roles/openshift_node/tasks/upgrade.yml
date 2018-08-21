@@ -31,9 +31,10 @@
 
 # Remove system container cri-o
 - when:
-  - crio_result is defined
-  - crio_result.stat.exists
   - not openshift_is_atomic | bool
+  - crio_result is defined
+  - crio_result.stat is defined
+  - crio_result.stat.exists
   block:
   - name: Uninstall cri-o system container
     command: atomic uninstall cri-o
