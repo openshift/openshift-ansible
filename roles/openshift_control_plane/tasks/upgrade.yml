@@ -138,6 +138,7 @@
   package:
     name: "{{ openshift_service_type }}-master"
     state: absent
+  when: not openshift_is_atomic | bool
 
 - name: Remove old service information
   file:
