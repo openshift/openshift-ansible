@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.61
+Version:        3.7.62
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.62-1
+- Remove pod filtering (ichavero@redhat.com)
+- Adding min-port to dnsmasq configuration (rhowe@redhat.com)
+- Fixes BZ 1596448 (scuppett@redhat.com)
+- Default openshift_use_openshift_sdn to true in playbooks and roles
+  (vrutkovs@redhat.com)
+- Adds openshift_fs_inotify_max_user_instances to the node tuned profile.
+  (jtudelag@redhat.com)
+- Make fs_inotify_max_user_watches configurable. (avesh.ncsu@gmail.com)
+- Add configmap-generator templates (simaishi@redhat.com)
+- Fix openshift_logging on Python3 (christoffer.reijer@basalt.se)
+- Adding sslcacert to additional repos (craig.munro@gmail.com)
+- Add documentation example (joel.pearson@gmail.com)
+- Add blockstorage version for openstack (joel.pearson@gmail.com)
+
 * Mon Jul 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.61-1
 - 
 
