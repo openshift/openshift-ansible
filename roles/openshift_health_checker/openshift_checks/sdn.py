@@ -58,7 +58,10 @@ class SDNCheck(OpenShiftCheck):
                 if not self.get_var('openshift_use_crio_only', default=False):
                     self.save_command_output('docker-version',
                                              ['/bin/docker', 'version'])
-                self.save_command_output('oc-version', ['/bin/oc', 'version'])
+                oc_executable = self.get_var('openshift_client_binary',
+                                             default='/bin/oc')
+                self.save_command_output('oc-version', [oc_executable,
+                                                        'version'])
                 self.register_file('os-version', None,
                                    '/etc/system-release-cpe')
             except OpenShiftCheckException as exc:
