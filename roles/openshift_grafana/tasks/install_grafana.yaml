@@ -180,7 +180,33 @@
       Content-Type: "Content-Type: application/json"
   register: add_ds
 
-- name: Regex set data soure name for openshift dashboard
+- block:
+  - name: Retrieve current grafana datasource
+    uri:
+      url: "{{ grafana_route }}/api/datasources/name/{{ grafana_datasource_name }}"
+      user: "{{ grafana_sa_token.stdout }}"
+      validate_certs: false
+      method: GET
+      status_code:
+      - 200
+    register: grafana_ds
+  - name: Update grafana datasource
+    uri:
+      url: "{{ grafana_route }}/api/datasources/{{ grafana_ds.json['id'] }}"
+      user: "{{ grafana_sa_token.stdout }}"
+      validate_certs: false
+      method: PUT
+      body: '{{ payload_data }}'
+      body_format: json
+      headers:
+        Content-Type: "Content-Type: application/json"
+      status_code:
+      - 200
+    register: update_ds
+  - debug: var=update_ds
+  when: add_ds.status == 409
+
+- name: Regex set data source name for openshift dashboard
   replace:
     path: "{{ mktemp.stdout }}/openshift-cluster-monitoring.json"
     regexp: '{{ item.regexp }}'
@@ -192,7 +218,7 @@
   - regexp: 'Xs'
     replace: '{{ grafana_graph_granularity }}'
 
-- name: Regex set data soure name for node exporter
+- name: Regex set data source name for node exporter
   replace:
     path: "{{ mktemp.stdout }}/node-exporter-full-dashboard.json"
     regexp: '{{ item.regexp }}'
@@ -214,13 +240,16 @@
     src: "{{ cluster_monitoring_dashboard }}"
   register: slurpfile
 
+- set_fact:
+    dashboard_data: '{{ slurpfile["content"] | b64decode | from_json | combine({ "dashboard": { "overwrite": true } }, recursive=True) }}'
+
 - name: Add openshift dashboard
   uri:
     url: "{{ grafana_route }}/api/dashboards/db"
     user: "{{ grafana_sa_token.stdout }}"
     force_basic_auth: true
     method: POST
-    body: '{{ slurpfile["content"] | b64decode }}'
+    body: '{{ dashboard_data | to_json }}'
     body_format: json
     status_code:
     - 200
@@ -234,13 +263,16 @@
     src: "{{ node_exporter_dashboard }}"
   register: slurpfile
 
+- set_fact:
+    dashboard_data: '{{ slurpfile["content"] | b64decode | from_json | combine({ "dashboard": { "overwrite": true } }, recursive=True) }}'
+
 - name: Add node exporter dashboard
   uri:
     url: "{{ grafana_route }}/api/dashboards/db"
     user: "{{ grafana_sa_token.stdout }}"
     force_basic_auth: true
     method: POST
-    body: '{{ slurpfile["content"] | b64decode }}'
+    body: '{{ dashboard_data | to_json }}'
     body_format: json
     status_code:
     - 200
