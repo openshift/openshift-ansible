@@ -26,10 +26,22 @@ git config --global user.name "OpenShift Atomic CI"
 # Rebase existing branch on the latest code locally, as PAPR running doesn't do merges
 git fetch origin ${target_branch_in} && git rebase origin/${target_branch_in}
 
-pip install -r requirements.txt
-
 PAPR_INVENTORY=${PAPR_INVENTORY:-.papr.inventory}
 PAPR_RUN_UPDATE=${PAPR_RUN_UPDATE:-0}
+PAPR_UPGRADE_FROM=${PAPR_UPGRADE_FROM:-0}
+PAPR_EXTRAVARS=""
+
+# Replace current branch with PAPR_UPGRADE_FROM
+if [[ "${PAPR_UPGRADE_FROM}" != "0" ]]; then
+  cp $PAPR_INVENTORY /tmp
+  git branch new-code
+  git checkout release-${PAPR_UPGRADE_FROM}
+  git clean -fdx
+  PAPR_EXTRAVARS="-e openshift_release=${PAPR_UPGRADE_FROM} -e openshift_image_tag=v${PAPR_UPGRADE_FROM}"
+  cp /tmp/$PAPR_INVENTORY .
+fi
+
+pip install -r requirements.txt
 
 # ping the nodes to check they're responding and register their ostree versions
 ansible -vvv -i $PAPR_INVENTORY nodes -a 'rpm-ostree status'
@@ -44,14 +56,22 @@ upload_journals() {
 
 trap upload_journals ERR
 
-# Store ansible log separately
-export ANSIBLE_LOG_PATH=ansible.log
+# run the prerequisites play
+ansible-playbook -vvv -i $PAPR_INVENTORY $PAPR_EXTRAVARS playbooks/prerequisites.yml
+DEPLOY_PLAYBOOK="playbooks/deploy_cluster.yml"
+if [ ! -f $DEPLOY_PLAYBOOK ]; then
+  DEPLOY_PLAYBOOK="playbooks/byo/config.yml"
+fi
+ansible-playbook -vvv -i $PAPR_INVENTORY $PAPR_EXTRAVARS $DEPLOY_PLAYBOOK
 
-# run the actual installer
-ansible-playbook -v -i $PAPR_INVENTORY playbooks/deploy_cluster.yml
+# Restore the branch if needed
+if [[ "${PAPR_UPGRADE_FROM}" != "0" ]]; then
+  git checkout new-code
+  git clean -fdx
+fi
 
-# Run upgrade playbook (to a minor version)
-if [[ "${PAPR_RUN_UPDATE:-0}" != "0" ]]; then
+# Run upgrade playbook
+if [[ "${PAPR_RUN_UPDATE}" != "0" ]]; then
   update_version="$(echo $target_branch | sed 's/\./_/')"
   ansible-playbook -v -i $PAPR_INVENTORY playbooks/byo/openshift-cluster/upgrades/v${update_version}/upgrade.yml
 fi
