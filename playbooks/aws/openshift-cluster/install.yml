@@ -1,10 +1,10 @@
 ---
-- name: Setup the master node group
+- name: Setup master instances
   hosts: localhost
   tasks:
   - import_role:
       name: openshift_aws
-      tasks_from: setup_master_group.yml
+      tasks_from: setup_master_instances.yml
 
 - name: set the master facts for hostname to elb
   hosts: masters
