@@ -45,7 +45,7 @@
 - set_fact:
     # Must have a trailing slash
     console_picker_developer_console_public_url: "{{ openshift.master.public_console_url }}/"
-  when: openshift_web_console_install | default(true) | bool
+  when: (openshift_web_console_enable_context_selector | default(true) | bool) and (openshift_web_console_install | default(true) | bool)
 
 - set_fact: console_cert={{ lookup('file', openshift_console_cert) }}
   when: openshift_console_cert is exists
@@ -70,8 +70,6 @@
       value: "{{ openshift_console_base_path | default('') }}"
     - key: clusterInfo#masterPublicURL
       value: "{{ openshift.master.public_api_url }}"
-    - key: clusterInfo#developerConsolePublicURL
-      value: "{{ console_picker_developer_console_public_url | default('') }}"
     - key: auth#oauthEndpointCAFile
       value: "{{ openshift_console_auth_ca_file }}"
     - key: auth#logoutRedirect
@@ -83,6 +81,16 @@
     separator: '#'
     state: present
   when: existing_config_map_data['console-config.yaml'] is not defined
+
+# Add the developer console URL to the console picker on upgrade, even if there is an existing config.
+- name: Add context selector URL
+  yedit:
+    src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
+    edits:
+    - key: clusterInfo#developerConsolePublicURL
+      value: "{{ console_picker_developer_console_public_url | default('') }}"
+    separator: '#'
+    state: present
 
 - slurp:
     src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
