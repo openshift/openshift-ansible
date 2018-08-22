@@ -6,21 +6,21 @@
   - (openshift_aws_ami == '' and openshift_aws_node_group.group not in openshift_aws_ami_map) or (openshift_aws_node_group.group in openshift_aws_ami_map and openshift_aws_ami_map[openshift_aws_node_group.group] == '')
   block:
   - name: fetch recently created AMI
-    ec2_ami_find:
+    ec2_ami_facts:
       region: "{{ openshift_aws_region }}"
-      sort: creationDate
-      sort_order: descending
-      name: "{{ openshift_aws_ami_name }}*"
-      ami_tags: "{{ openshift_aws_ami_tags }}"
-      no_result_action: fail
+      filters: "{ 'name': '{{ openshift_aws_ami_name }}*',
+             {%- for key in openshift_aws_ami_tags -%}
+                 'tag:{{ key }}': '{{ openshift_aws_ami_tags[key] }}',
+             {%- endfor -%} }"
     register: amiout
+    failed_when: "amiout.images|length == 0"
 
   - name: Set the openshift_aws_ami
     set_fact:
-      openshift_aws_ami: "{{ amiout.results[0].ami_id }}"
+      openshift_aws_ami: "{{ ( amiout.images | sort(attribute='creation_date') | map(attribute='image_id') | reverse | list )[0] }}"
     when:
-    - "'results' in amiout"
-    - amiout.results|length > 0
+    - "'images' in amiout"
+    - amiout.images|length > 0
 
 # query asg's and determine if we need to create the others.
 # if we find more than 1 for each type, and this isn't an upgrade, then exit
