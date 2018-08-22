@@ -788,6 +788,9 @@ debug_level=2
 # be added to the OpenShift CA bundle which allows for the named
 # certificate to be served for internal cluster communication.
 #
+# When a CA is provided it is combined with the certificate as a full chain
+# to ensure consumers are able to validate the certificate.
+#
 # If you would like openshift_master_named_certificates to be overwritten with
 # the provided value, specify openshift_master_overwrite_named_certificates.
 #openshift_master_overwrite_named_certificates=true

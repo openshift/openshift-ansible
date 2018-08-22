@@ -24,10 +24,17 @@
     state: directory
     mode: 0700
 
-- name: Land named certificates
+- name: Ensure temporary fragment directories exist for building full chain cert files
+  file:
+    path: "{{ named_certs_dir }}/fragments/{{ item.certfile | basename }}"
+    state: directory
+    mode: 0700
+  with_items: "{{ named_certificates }}"
+
+- name: Land named certificates in temporary fragment directories
   copy:
     src: "{{ item.certfile }}"
-    dest: "{{ named_certs_dir }}/{{ item.certfile | basename }}"
+    dest: "{{ named_certs_dir }}/fragments/{{ item.certfile | basename }}/00_{{ item.certfile | basename }}"
   with_items: "{{ named_certificates }}"
 
 - name: Land named certificate keys
@@ -39,7 +46,29 @@
 
 - name: Land named CA certificates
   copy:
-    src: "{{ item }}"
-    dest: "{{ named_certs_dir }}/{{ item | basename }}"
+    src: "{{ item.cafile }}"
+    dest: "{{ named_certs_dir }}/{{ item.cafile | basename }}"
     mode: 0600
-  with_items: "{{ named_certificates | lib_utils_oo_collect('cafile') }}"
+  with_items: "{{ named_certificates }}"
+  when: "'cafile' in item"
+
+- name: Land named CA certificates in temporary fragment directories
+  copy:
+    src: "{{ item.cafile }}"
+    dest: "{{ named_certs_dir }}/fragments/{{ item.certfile | basename }}/01_{{ item.cafile | basename }}"
+    mode: 0600
+  with_items: "{{ named_certificates }}"
+  when: "'cafile' in item"
+
+- name: Compile cert files from fragments
+  assemble:
+    src: "{{ named_certs_dir }}/fragments/{{ item.certfile | basename }}"
+    dest: "{{ named_certs_dir }}/{{ item.certfile | basename }}"
+    mode: 0600
+    validate: "openssl verify %s"
+  with_items: "{{ named_certificates }}"
+
+- name: Clear out fragments
+  file:
+    path: "{{ named_certs_dir }}/fragments"
+    state: absent
