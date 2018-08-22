@@ -25,7 +25,9 @@
     import_role:
       name: openshift_metrics
       tasks_from: update_master_config.yaml
-    when: not openshift.common.version_gte_3_9
+    when:
+      - not openshift.common.version_gte_3_9
+      - openshift_metrics_install_metrics | bool
 
 - name: Metrics Install Checkpoint End
   hosts: all
