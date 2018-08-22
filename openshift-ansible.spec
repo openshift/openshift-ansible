@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.19.0
+Release:        0.20.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,38 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Aug 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.20.0
+- Pass region to AWS az lookup (cewong@redhat.com)
+- SDN check: Use openshift_client_binary (miciah.masters@gmail.com)
+- RHV Provider Role and Playbooks (cwilkers@redhat.com)
+- Fix backcompat with OpenStack inventory (tomas@sedovic.cz)
+- update v3.9 to v3.11 used in the example hosts (gpei@redhat.com)
+- GlusterFS: Remove domain from heketi URL (jarrpa@redhat.com)
+- Bug 1615787 - Blacklist broker-apb (david.j.zager@gmail.com)
+- openshift-metering: Update playbook instructions (chance.zibolski@coreos.com)
+- openshift-metering: Update role to use new metering CRD group and schemas and
+  images helm operator image (chance.zibolski@coreos.com)
+- openshift-metering: Update role to allow creating routes
+  (chance.zibolski@coreos.com)
+- Removing unnecessary fail task (ewolinet@redhat.com)
+- Remove correct duplicated SCC check (vrutkovs@redhat.com)
+- Revert "Remove duplicated bootstrapped SCC check" (vrutkovs@redhat.com)
+- Revert "Skip base package check for openshift_ca role" (roignac@gmail.com)
+- Adding file rollover size and max count policies (ewolinet@redhat.com)
+- Rework node initialization procedure to prepull images earlier
+  (vrutkovs@redhat.com)
+- [RHPAM-1241] - Include RHPAM templates in OpenShift release
+  (fspolti@redhat.com)
+- Cleanup old sanitize inventory warnings (mgugino@redhat.com)
+- Override configmap directly on the install role
+  (alberto.rodriguez.peon@cern.ch)
+- Correct typo in config variable (AlbertoPeon@users.noreply.github.com)
+- Allow to override full Ansible Service Broker config map
+  (alberto.rodriguez.peon@cern.ch)
+- Changed sample inventory to reflect vars used in heat_stack.yaml.j2
+  (dluong@redhat.com)
+- Add kuryr namespace isolation support (ltomasbo@redhat.com)
+
 * Mon Aug 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.19.0
 - 
 
