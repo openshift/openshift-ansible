@@ -36,7 +36,7 @@
 - name: Calico Master | Parse node version
   set_fact:
     node_version: "{{ calico_node_image | regex_replace('^.*node:v?(.*)$', '\\1') }}"
-    cnx: "{{ calico_node_image | regex_replace('[^-]*', '\\0') }}"
+    cnx: "{{ calico_node_image | regex_replace('^.*/(.*)-node:.*$', '\\1') }}"
 
 - name: Calico Master | Write Calico v2
   template:
