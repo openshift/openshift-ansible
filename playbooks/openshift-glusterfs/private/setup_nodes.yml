@@ -14,5 +14,4 @@
       name: openshift_storage_glusterfs
       tasks_from: kernel_modules.yml
     when:
-    - "inventory_hostname not in groups['glusterfs']"
-    - "inventory_hostname not in groups['glusterfs_registry']"
+    - "inventory_hostname not in groups['oo_glusterfs_to_config']"
