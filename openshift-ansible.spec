@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.34
+Version:        3.10.35
 Release:        1
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,11 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Aug 22 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.35-1
+- python-scandir was renamed in EPEL (vrutkovs@redhat.com)
+- cluster monitoring operator: add nodeselector (vrutkovs@redhat.com)
+- Use openshift_image_tag for registry-console upgrade (rteague@redhat.com)
+
 * Tue Aug 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.34-1
 - Fix conditional for cri-o system container removal (rteague@redhat.com)
 
