@@ -37,15 +37,29 @@
 - import_tasks: heketi_setup.yml
   when: glusterfs_heketi_is_native
 
-- import_tasks: heketi_deploy_part1.yml
+# This must always be run. There are tasks further on in the play that require
+# require these variables to be properly set, even if the tasks are skipped, so
+# that Ansible can properly parse the tasks.
+- import_tasks: heketi_pod_check.yml
+
+- import_tasks: heketi_init_deploy.yml
   when:
   - glusterfs_heketi_is_native
   - glusterfs_heketi_deploy_is_missing
   - glusterfs_heketi_is_missing
 
 - import_tasks: heketi_load.yml
+  when:
+  - glusterfs_heketi_topology_load
 
-- import_tasks: heketi_deploy_part2.yml
+- import_tasks: heketi_init_db.yml
+  when:
+  - glusterfs_heketi_is_native
+  - not glusterfs_heketi_deploy_is_missing
+  - glusterfs_heketi_is_missing
+  - glusterfs_heketi_topology_load
+
+- import_tasks: heketi_deploy.yml
   when:
   - glusterfs_heketi_is_native
   - glusterfs_heketi_is_missing

@@ -66,7 +66,52 @@ REMOVED_VARIABLES = (
     ('oreg_auth_credentials_replace', 'Removed: Credentials are now always updated'),
     ('oreg_url_master', 'oreg_url'),
     ('oreg_url_node', 'oreg_url'),
-
+    ('openshift_cockpit_deployer_prefix', 'openshift_cockpit_deployer_image'),
+    ('openshift_cockpit_deployer_basename', 'openshift_cockpit_deployer_image'),
+    ('openshift_cockpit_deployer_version', 'openshift_cockpit_deployer_image'),
+    ('openshift_hosted_logging_elasticsearch_pvc_prefix', 'openshift_logging_es_pvc_prefix'),
+    ('logging_ops_hostname', 'openshift_logging_kibana_ops_hostname'),
+    ('openshift_hosted_logging_ops_hostname', 'openshift_logging_kibana_ops_hostname'),
+    ('openshift_hosted_logging_elasticsearch_cluster_size', 'logging_elasticsearch_cluster_size'),
+    ('openshift_hosted_logging_elasticsearch_ops_cluster_size', 'logging_elasticsearch_ops_cluster_size'),
+    ('openshift_hosted_logging_storage_kind', 'openshift_logging_storage_kind'),
+    ('openshift_hosted_logging_storage_host', 'openshift_logging_storage_host'),
+    ('openshift_hosted_logging_storage_labels', 'openshift_logging_storage_labels'),
+    ('openshift_hosted_logging_storage_volume_size', 'openshift_logging_storage_volume_size'),
+    ('openshift_hosted_loggingops_storage_kind', 'openshift_loggingops_storage_kind'),
+    ('openshift_hosted_loggingops_storage_host', 'openshift_loggingops_storage_host'),
+    ('openshift_hosted_loggingops_storage_labels', 'openshift_loggingops_storage_labels'),
+    ('openshift_hosted_loggingops_storage_volume_size', 'openshift_loggingops_storage_volume_size'),
+    ('openshift_hosted_logging_enable_ops_cluster', 'openshift_logging_use_ops'),
+    ('openshift_hosted_logging_image_pull_secret', 'openshift_logging_image_pull_secret'),
+    ('openshift_hosted_logging_hostname', 'openshift_logging_kibana_hostname'),
+    ('openshift_hosted_logging_kibana_nodeselector', 'openshift_logging_kibana_nodeselector'),
+    ('openshift_hosted_logging_kibana_ops_nodeselector', 'openshift_logging_kibana_ops_nodeselector'),
+    ('openshift_hosted_logging_journal_source', 'openshift_logging_fluentd_journal_source'),
+    ('openshift_hosted_logging_journal_read_from_head', 'openshift_logging_fluentd_journal_read_from_head'),
+    ('openshift_hosted_logging_fluentd_nodeselector_label', 'openshift_logging_fluentd_nodeselector'),
+    ('openshift_hosted_logging_elasticsearch_instance_ram', 'openshift_logging_es_memory_limit'),
+    ('openshift_hosted_logging_elasticsearch_nodeselector', 'openshift_logging_es_nodeselector'),
+    ('openshift_hosted_logging_elasticsearch_ops_nodeselector', 'openshift_logging_es_ops_nodeselector'),
+    ('openshift_hosted_logging_elasticsearch_ops_instance_ram', 'openshift_logging_es_ops_memory_limit'),
+    ('openshift_hosted_logging_storage_access_modes', 'openshift_logging_storage_access_modes'),
+    ('openshift_hosted_logging_master_public_url', 'openshift_logging_master_public_url'),
+    ('openshift_hosted_logging_deployer_prefix', 'openshift_logging_image_prefix'),
+    ('openshift_hosted_logging_deployer_version', 'openshift_logging_image_version'),
+    ('openshift_hosted_logging_deploy', 'openshift_logging_install_logging'),
+    ('openshift_hosted_logging_curator_nodeselector', 'openshift_logging_curator_nodeselector'),
+    ('openshift_hosted_logging_curator_ops_nodeselector', 'openshift_logging_curator_ops_nodeselector'),
+    ('openshift_hosted_metrics_storage_access_modes', 'openshift_metrics_storage_access_modes'),
+    ('openshift_hosted_metrics_storage_host', 'openshift_metrics_storage_host'),
+    ('openshift_hosted_metrics_storage_nfs_directory', 'openshift_metrics_storage_nfs_directory'),
+    ('openshift_hosted_metrics_storage_volume_name', 'openshift_metrics_storage_volume_name'),
+    ('openshift_hosted_metrics_storage_volume_size', 'openshift_metrics_storage_volume_size'),
+    ('openshift_hosted_metrics_storage_labels', 'openshift_metrics_storage_labels'),
+    ('openshift_hosted_metrics_deployer_prefix', 'openshift_metrics_image_prefix'),
+    ('openshift_hosted_metrics_deployer_version', 'openshift_metrics_image_version'),
+    ('openshift_hosted_metrics_deploy', 'openshift_metrics_install_metrics'),
+    ('openshift_hosted_metrics_storage_kind', 'openshift_metrics_storage_kind'),
+    ('openshift_hosted_metrics_public_url', 'openshift_metrics_hawkular_hostname'),
 )
 
 # JSON_FORMAT_VARIABLES does not intende to cover all json variables, but
@@ -379,15 +424,15 @@ class ActionModule(ActionBase):
                 json_var = self.template_var(hostvars, host, var)
                 try:
                     json.loads(json_var)
-                except ValueError:
-                    found_invalid_json.append([var, json_var])
+                except ValueError as json_err:
+                    found_invalid_json.append([var, json_var, json_err])
                 except BaseException:
                     pass
 
         if found_invalid_json:
             msg = "Found invalid json format variables:\n"
             for item in found_invalid_json:
-                msg += "    {} specified in {} is invalid json format\n".format(item[1], item[0])
+                msg += "    {} specified in {} is invalid json format\n    {}".format(item[1], item[0], item[2])
             raise errors.AnsibleModuleError(msg)
         return None
 

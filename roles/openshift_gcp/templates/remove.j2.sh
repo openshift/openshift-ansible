@@ -175,4 +175,17 @@ done
 # Network
 ( teardown "{{ openshift_gcp_network_name }}" compute networks ) &
 
+# Disks
+(
+    if ! disks=$( gcloud --project "{{ openshift_gcp_project }}" compute disks list --filter="users~projects/{{ openshift_gcp_project }}/zones/{{ openshift_gcp_zone }}/instances/{{ openshift_gcp_prefix }}-.*" --format="value[terminator=' '](name)" 2>/dev/null ); then
+        exit 0
+    fi
+    disks="${disks%?}"
+    if [[ -z "${disks}" ]]; then
+        echo "warning: No disks in use by {{ openshift_gcp_prefix }}" 1>&2
+        exit 0
+    fi
+    gcloud --project "{{ openshift_gcp_project }}" compute disks delete "${disks}"
+) &
+
 for i in `jobs -p`; do wait $i; done

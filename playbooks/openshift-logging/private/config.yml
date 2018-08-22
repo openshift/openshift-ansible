@@ -16,7 +16,7 @@
 # Normally we only collect this information for our master group entries
 # we want to also collect this for nodes so we can match group entries to nodes
 - name: Get common IP facts when necessary
-  hosts: all
+  hosts: oo_nodes_to_config:!oo_masters
   gather_facts: false
   tasks:
   - name: Gather Cluster facts
@@ -85,7 +85,7 @@
         groups: oo_elasticsearch_nodes
         ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
         ansible_become: "{{ g_sudo | default(omit) }}"
-      with_items: "{{ groups['OSEv3'] }}"
+      with_items: "{{ groups['oo_nodes_to_config'] }}"
       changed_when: no
       run_once: true
       delegate_to: localhost

@@ -120,7 +120,7 @@ https://github.com/openshift/openshift-ansible/blob/master/roles/openshift_cloud
 
 For more information, consult the [Configuring for OpenStack page in the OpenShift documentation][openstack-credentials].
 
-[openstack-credentials]: https://docs.openshift.org/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
+[openstack-credentials]: https://docs.okd.io/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
 
 If you would like to use additional parameters, create a custom cloud provider
 configuration file locally and specify it in `inventory/group_vars/OSEv3.yml`:
@@ -620,16 +620,20 @@ openshift_node_groups:
 ```
 
 
-### Namespace Subnet driver
+### Namespace Isolation drivers
 
 By default, kuryr is configured with the default subnet driver where all the
 pods are deployed on the same Neutron subnet. However, there is an option of
 enabling a different subnet driver, named namespace, which makes pods to be
-allocated on different subnets depending on the namespace they belong to. To
-enable this new kuryr subnet driver you need to uncomment:
+allocated on different subnets depending on the namespace they belong to.
+In addition to the subnet driver, to properly enable isolation between
+different namespaces (through OpenStack security groups) there is a need of
+also enabling the related security group driver for namespaces.
+To enable this new kuryr namespace isolation capability you need to uncomment:
 
 ```yaml
 openshift_kuryr_subnet_driver: namespace
+openshift_kuryr_sg_driver: namespace
 ```
 
 
@@ -839,6 +843,9 @@ Adding more nodes to the cluster is a simple process: we need to update the
 node cloud in `inventory/group_vars/all/yml`, then run the appropriate
 scaleup playbook.
 
+**NOTE**: the dynamic inventory used for scaling is different. Make sure you
+use `scaleup_inventory.py` for all the operations below.
+
 
 ### 1. Update The Inventory
 
@@ -856,7 +863,7 @@ openshift_openstack_num_nodes: 8  # 5 existing and 3 new
 
 ### 2. Scale the Cluster
 
-Next, run the appropriate playbook - either 
+Next, run the appropriate playbook - either
 `openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml`
 for master nodes or
 `openshift-ansible/playbooks/openstack/openshift-cluster/node-scaleup.yml`
@@ -864,7 +871,7 @@ for other nodes. For example:
 
 ```
 $ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py \
+  -i openshift-ansible/playbooks/openstack/scaleup_inventory.py \
   -i inventory \
   openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml
 ```

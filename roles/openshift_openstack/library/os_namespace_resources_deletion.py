@@ -35,7 +35,8 @@ DOCUMENTATION = '''
 module: os_namespace_resources_deletion
 short_description: Delete network resources associated to the namespace
 description:
-    - Detach namespace's subnet from the router and delete the network
+    - Detach namespace's subnet from the router and delete the network and the
+      associated security groups
 author:
     - "Luis Tomas Bolivar <ltomasbo@redhat.com>"
 '''
@@ -51,6 +52,7 @@ def main():
             router_id=dict(default=False, type='str'),
             subnet_id=dict(default=False, type='str'),
             net_id=dict(default=False, type='str'),
+            sg_id=dict(default=False, type='str'),
         ),
         supports_check_mode=True,
     )
@@ -89,6 +91,12 @@ def main():
     # pylint: disable=broad-except
     except Exception:
         module.fail_json(msg='Failed to delete Neutron Network associated to the namespace')
+
+    try:
+        adapter.delete('/security-groups/' + module.params['sg_id'])
+    # pylint: disable=broad-except
+    except Exception:
+        module.fail_json(msg='Failed to delete Security groups associated to the namespace')
 
     module.exit_json(
         changed=True)

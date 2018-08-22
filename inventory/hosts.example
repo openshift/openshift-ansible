@@ -51,7 +51,7 @@ openshift_deployment_type=origin
 # use this to lookup the latest exact version of the container images, which is the tag actually used to configure
 # the cluster. For RPM installations we just verify the version detected in your configured repos matches this
 # release.
-openshift_release="3.9"
+#openshift_release="3.11"
 
 # default subdomain to use for exposed routes, you should have wildcard dns
 # for *.apps.test.example.com that points at your infra nodes which will run
@@ -73,12 +73,12 @@ debug_level=2
 # Specify an exact container image tag to install or configure.
 # WARNING: This value will be used for all hosts in containerized environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_image_tag=v3.9.0
+#openshift_image_tag=v3.11.0
 
 # Specify an exact rpm version to install or configure.
 # WARNING: This value will be used for all hosts in RPM based environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_pkg_version=-3.9.0
+#openshift_pkg_version=-3.11.0
 
 # If using Atomic Host, you may specify system container image registry for the nodes:
 #system_images_registry="docker.io"
@@ -89,17 +89,17 @@ debug_level=2
 #openshift_install_examples=true
 
 # Configure logoutURL in the master config for console customization
-# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#changing-the-logout-url
+# See: https://docs.okd.io/latest/install_config/web_console_customization.html#changing-the-logout-url
 #openshift_master_logout_url=http://example.com
 
 # Configure extensions in the master config for console customization
-# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
+# See: https://docs.okd.io/latest/install_config/web_console_customization.html#serving-static-files
 #openshift_master_oauth_templates={'login': '/path/to/login-template.html'}
 # openshift_master_oauth_template is deprecated.  Use openshift_master_oauth_templates instead.
 #openshift_master_oauth_template=/path/to/login-template.html
 
 # Configure imagePolicyConfig in the master config
-# See: https://docs.openshift.org/latest/admin_guide/image_policy.html
+# See: https://docs.okd.io/latest/admin_guide/image_policy.html
 #openshift_master_image_policy_config={"maxImagesBulkImportedPerRepository": 3, "disableScheduledImport": true}
 # This setting overrides allowedRegistriesForImport in openshift_master_image_policy_config. By default, all registries are allowed.
 #openshift_master_image_policy_allowed_registries_for_import=["docker.io", "*.docker.io", "*.redhat.com", "gcr.io", "quay.io", "registry.centos.org", "registry.redhat.io", "*.amazonaws.com"]
@@ -552,7 +552,7 @@ debug_level=2
 #openshift_hosted_registry_storage_gcs_rootdirectory=/registry
 
 # Metrics deployment
-# See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
+# See: https://docs.openshift.com/container-platform/latest/install_config/cluster_metrics.html
 #
 # By default metrics are not automatically deployed, set this to enable them
 #openshift_metrics_install_metrics=true
@@ -763,9 +763,9 @@ debug_level=2
 #openshift_master_console_port=8443
 
 # set exact RPM version (include - prefix)
-#openshift_pkg_version=-3.9.0
+#openshift_pkg_version=-3.11.0
 # you may also specify version and release, ie:
-#openshift_pkg_version=-3.9.0-0.126.0.git.0.9351aae.el7
+#openshift_pkg_version=-3.11.0-0.126.0.git.0.9351aae.el7
 
 # Configure custom ca certificate
 #openshift_master_ca_certificate={'certfile': '/path/to/ca.crt', 'keyfile': '/path/to/ca.key'}
@@ -777,8 +777,8 @@ debug_level=2
 
 # Configure custom named certificates (SNI certificates)
 #
-# https://docs.openshift.org/latest/install_config/certificate_customization.html
-# https://docs.openshift.com/enterprise/latest/install_config/certificate_customization.html
+# https://docs.okd.io/latest/install_config/certificate_customization.html
+# https://docs.openshift.com/container-platform/latest/install_config/certificate_customization.html
 #
 # NOTE: openshift_master_named_certificates is cached on masters and is an
 # additive fact, meaning that each run with a different set of certificates
@@ -839,10 +839,6 @@ debug_level=2
 # Setting this variable to false will override that check.
 #openshift_hostname_check=true
 
-# openshift_use_dnsmasq is deprecated.  This must be true, or installs will fail
-# in versions >= 3.6
-#openshift_use_dnsmasq=False
-
 # Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
 # This is useful for POC environments where DNS may not actually be available yet or to set
 # options like 'strict-order' to alter dnsmasq configuration.
@@ -873,7 +869,7 @@ debug_level=2
 # configuration into Builds. Proxy related values will default to the global proxy
 # config values. You only need to set these if they differ from the global proxy settings.
 # See BuildDefaults documentation at
-# https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
+# https://docs.okd.io/latest/admin_guide/build_defaults_overrides.html
 #openshift_builddefaults_http_proxy=http://USER:PASSWORD@HOST:PORT
 #openshift_builddefaults_https_proxy=https://USER:PASSWORD@HOST:PORT
 #openshift_builddefaults_no_proxy=mycorp.com
@@ -894,7 +890,7 @@ debug_level=2
 # These options configure the BuildOverrides admission controller which injects
 # configuration into Builds.
 # See BuildOverrides documentation at
-# https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
+# https://docs.okd.io/latest/admin_guide/build_defaults_overrides.html
 #openshift_buildoverrides_force_pull=true
 #openshift_buildoverrides_image_labels=[{'name':'imagelabelname1','value':'imagelabelvalue1'}]
 #openshift_buildoverrides_nodeselectors={'nodelabel1':'nodelabelvalue1'}
@@ -914,9 +910,6 @@ debug_level=2
 # (defaults for origin and openshift-enterprise, repsectively)
 #openshift_service_catalog_image="docker.io/openshift/origin-service-catalog:{{ openshift_image_tag }}""
 #openshift_service_catalog_image="registry.redhat.io/openshift3/ose-service-catalog:{{ openshift_image_tag }}"
-
-# TSB image tag
-#template_service_broker_version='v3.9'
 
 # Configure one of more namespaces whose templates will be served by the TSB
 #openshift_template_service_broker_namespaces=['openshift']

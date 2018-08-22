@@ -61,7 +61,7 @@ Install base dependencies:
 
 Requirements:
 
-- Ansible >= 2.6.0
+- Ansible >= 2.6.2
 - Jinja >= 2.7
 - pyOpenSSL
 - python-lxml
@@ -153,8 +153,8 @@ created for you automatically.
 
 ## Complete Production Installation Documentation:
 
-- [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
-- [OpenShift Origin](https://docs.openshift.org/latest/install/index.html)
+- [OpenShift Container Platform](https://docs.openshift.com/container-platform/latest/install_config/install/advanced_install.html)
+- [OpenShift Origin](https://docs.okd.io/latest/install/index.html)
 
 ## Containerized OpenShift Ansible
 

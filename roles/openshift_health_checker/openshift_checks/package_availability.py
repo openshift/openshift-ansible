@@ -36,13 +36,12 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
         return [
             "{rpm_prefix}".format(rpm_prefix=rpm_prefix),
             "{rpm_prefix}-clients".format(rpm_prefix=rpm_prefix),
-            "{rpm_prefix}-master".format(rpm_prefix=rpm_prefix),
+            "{rpm_prefix}-hyperkube".format(rpm_prefix=rpm_prefix),
             "bash-completion",
             "cockpit-bridge",
             "cockpit-docker",
             "cockpit-system",
             "cockpit-ws",
-            "etcd",
             "httpd-tools",
         ]
 
@@ -52,7 +51,6 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
         return [
             "{rpm_prefix}".format(rpm_prefix=rpm_prefix),
             "{rpm_prefix}-node".format(rpm_prefix=rpm_prefix),
-            "{rpm_prefix}-sdn-ovs".format(rpm_prefix=rpm_prefix),
             "bind",
             "ceph-common",
             "dnsmasq",

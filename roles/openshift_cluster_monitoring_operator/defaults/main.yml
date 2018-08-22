@@ -1,18 +1,13 @@
 ---
 openshift_cluster_monitoring_operator_namespace: openshift-monitoring
 
-l_openshift_cluster_monitoring_operator_ocp_image_registry: "{{ system_images_registry_dict[openshift_deployment_type] }}/openshift3/"
-
 l_openshift_cluster_monitoring_operator_image_dicts:
-  origin: quay.io/coreos/cluster-monitoring-operator
-  openshift-enterprise: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}ose-cluster-monitoring-operator"
+  origin: 'quay.io/coreos/cluster-monitoring-operator:v0.1.0'
+  openshift-enterprise: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'cluster-monitoring-operator') }}"
 
-l_openshift_cluster_monitoring_operator_version_dicts:
-  origin: v0.1.0
-  openshift-enterprise: "{{ openshift_image_tag }}"
+openshift_cluster_monitoring_operator_image: "{{ l_openshift_cluster_monitoring_operator_image_dicts[openshift_deployment_type] }}"
 
-openshift_cluster_monitoring_operator_image: "{{ l_openshift_cluster_monitoring_operator_image_dicts[openshift_deployment_type] }}:{{ l_openshift_cluster_monitoring_operator_version_dicts[openshift_deployment_type] }}"
-
+l_openshift_cluster_monitoring_non_standard_reg_url: "{{ oreg_url | default(l_osm_registry_url_default) }}"
 l_openshift_cluster_monitoring_image_dicts:
   origin:
     prometheus_operator: quay.io/coreos/prometheus-operator
@@ -26,16 +21,16 @@ l_openshift_cluster_monitoring_image_dicts:
     kube_rbac_proxy: quay.io/coreos/kube-rbac-proxy
     oauth_proxy: openshift/oauth-proxy
   openshift-enterprise:
-    prometheus_operator: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}ose-prometheus-operator"
-    prometheus: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}prometheus"
-    alertmanager: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}prometheus-alertmanager"
-    node_exporter: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}prometheus-node-exporter"
-    prometheus_config_reloader: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}ose-prometheus-config-reloader"
-    configmap_reloader: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}ose-configmap-reload"
-    grafana: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}ose-grafana"
-    kube_state_metrics: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}ose-kube-state-metrics"
-    kube_rbac_proxy: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}ose-kube-rbac-proxy"
-    oauth_proxy: "{{l_openshift_cluster_monitoring_operator_ocp_image_registry}}oauth-proxy"
+    prometheus_operator: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'prometheus-operator') }}"
+    prometheus: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'prometheus') }}"
+    alertmanager: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'prometheus-alertmanager') }}"
+    node_exporter: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'prometheus-node-exporter') }}"
+    prometheus_config_reloader: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'prometheus-config-reloader') }}"
+    configmap_reloader: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'configmap-reloader') }}"
+    grafana: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'grafana') }}"
+    kube_state_metrics: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'kube-state-metrics') }}"
+    kube_rbac_proxy: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'kube-rbac-proxy') }}"
+    oauth_proxy: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'oauth-proxy') }}"
 
 openshift_cluster_monitoring_operator_prometheus_operator_repo: "{{l_openshift_cluster_monitoring_image_dicts[openshift_deployment_type]['prometheus_operator']}}"
 openshift_cluster_monitoring_operator_prometheus_repo: "{{l_openshift_cluster_monitoring_image_dicts[openshift_deployment_type]['prometheus']}}"

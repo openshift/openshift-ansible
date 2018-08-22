@@ -222,10 +222,10 @@ data:
     service_subnets_driver = default
 
     # The driver to determine Neutron security groups for pods (string value)
-    pod_security_groups_driver = default
+    pod_security_groups_driver = {{ openshift_kuryr_sg_driver|default('default') }}
 
     # The driver to determine Neutron security groups for services (string value)
-    service_security_groups_driver = default
+    service_security_groups_driver = {{ openshift_kuryr_sg_driver|default('default') }}
 
     # The driver that provides VIFs for Kubernetes Pods. (string value)
     pod_vif_driver = nested-vlan
@@ -316,6 +316,12 @@ data:
     [namespace_subnet]
     pod_subnet_pool = {{ kuryr_openstack_pod_subnet_pool_id }}
     pod_router = {{ kuryr_openstack_pod_router_id }}
+{% endif %}
+
+{% if openshift_kuryr_sg_driver|default('default') == 'namespace' %}
+    [namespace_sg]
+    sg_allow_from_namespaces = {{ kuryr_openstack_sg_allow_from_namespace_id }}
+    sg_allow_from_default = {{ kuryr_openstack_sg_allow_from_default_id }}
 {% endif %}
 
     # Time (in seconds) that Kuryr controller waits for LBaaS to be activated

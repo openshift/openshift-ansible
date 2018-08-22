@@ -1,4 +1,4 @@
-# This deletes *ALL* Origin and OpenShift Enterprise content installed by
+# This deletes *ALL* Origin and OpenShift Container Platform content installed by
 # ansible.  This includes:
 #
 #    configuration
@@ -109,6 +109,7 @@
         - atomic-openshift-docker-excluder
         - atomic-openshift-node
         - atomic-openshift-sdn-ovs
+        - atomic-openshift-hyperkube
         - cockpit-bridge
         - cockpit-docker
         - cockpit-system
@@ -124,6 +125,7 @@
         - origin-clients
         - origin-node
         - origin-sdn-ovs
+        - origin-hyperkube
         - tuned-profiles-atomic-openshift-node
         - tuned-profiles-origin-node
         register: result

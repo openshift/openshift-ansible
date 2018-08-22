@@ -1,30 +1,58 @@
 ---
-- name: Remove alm-operator-serviceaccount ServiceAccount manifest
+- name: Remove olm-operator-serviceaccount ServiceAccount manifest
   oc_obj:
     state: absent
     kind: ServiceAccount
-    name: alm-operator-serviceaccount
+    name: olm-operator-serviceaccount
     namespace: operator-lifecycle-manager
 
-- name: Remove alm-operator-binding ClusterRoleBinding manifest
+- name: Remove olm-operator-binding-operator-lifecycle-manager ClusterRoleBinding manifest
   oc_obj:
     state: absent
     kind: ClusterRoleBinding
-    name: alm-operator-binding
+    name: olm-operator-binding-operator-lifecycle-manager
     namespace: operator-lifecycle-manager
 
-- name: Remove tectonic-ocs ConfigMap manifest
+- name: Remove clusterserviceversions.operators.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: clusterserviceversions.operators.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove catalogsources.operators.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: catalogsources.operators.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove installplans.operators.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: installplans.operators.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove subscriptions.operators.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: subscriptions.operators.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove ocs ConfigMap manifest
   oc_obj:
     state: absent
     kind: ConfigMap
-    name: tectonic-ocs
+    name: ocs
     namespace: operator-lifecycle-manager
 
-- name: Remove tectonic-ocs CatalogSource-v1 manifest
+- name: Remove ocs CatalogSource manifest
   oc_obj:
     state: absent
-    kind: CatalogSource-v1
-    name: tectonic-ocs
+    kind: CatalogSource
+    name: ocs
     namespace: operator-lifecycle-manager
 
 - name: Remove alm-operator Deployment manifest
@@ -41,44 +69,16 @@
     name: catalog-operator
     namespace: operator-lifecycle-manager
 
-- name: Remove upstream-components ConfigMap manifest
+- name: Remove aggregate-olm-edit ClusterRole manifest
   oc_obj:
     state: absent
-    kind: ConfigMap
-    name: upstream-components
+    kind: ClusterRole
+    name: aggregate-olm-edit
     namespace: operator-lifecycle-manager
 
-- name: Remove upstream-components CatalogSource-v1 manifest
+- name: Remove aggregate-olm-view ClusterRole manifest
   oc_obj:
     state: absent
-    kind: CatalogSource-v1
-    name: upstream-components
-    namespace: operator-lifecycle-manager
-
-- name: Remove clusterserviceversion-v1s.app.coreos.com CustomResourceDefinition manifest
-  oc_obj:
-    state: absent
-    kind: CustomResourceDefinition
-    name: clusterserviceversion-v1s.app.coreos.com
-    namespace: operator-lifecycle-manager
-
-- name: Remove catalogsource-v1s.app.coreos.com CustomResourceDefinition manifest
-  oc_obj:
-    state: absent
-    kind: CustomResourceDefinition
-    name: catalogsource-v1s.app.coreos.com
-    namespace: operator-lifecycle-manager
-
-- name: Remove installplan-v1s.app.coreos.com CustomResourceDefinition manifest
-  oc_obj:
-    state: absent
-    kind: CustomResourceDefinition
-    name: installplan-v1s.app.coreos.com
-    namespace: operator-lifecycle-manager
-
-- name: Remove subscription-v1s.app.coreos.com CustomResourceDefinition manifest
-  oc_obj:
-    state: absent
-    kind: CustomResourceDefinition
-    name: subscription-v1s.app.coreos.com
+    kind: ClusterRole
+    name: aggregate-olm-view
     namespace: operator-lifecycle-manager

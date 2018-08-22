@@ -74,7 +74,7 @@ def find_playbooks():
     all_playbooks = set()
     included_playbooks = set()
 
-    exclude_dirs = ('adhoc', 'tasks')
+    exclude_dirs = ('adhoc', 'tasks', 'rhv')
     for yaml_file in find_files(
             os.path.join(os.getcwd(), 'playbooks'),
             exclude_dirs, None, r'^[^\.].*\.ya?ml$'):

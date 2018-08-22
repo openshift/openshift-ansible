@@ -68,3 +68,4 @@ data:
     http:
       httpProxy: {{ openshift.common.http_proxy  | default('') }}
       httpsProxy: {{ openshift.common.https_proxy  | default('') }}
+      noProxy: {{ openshift.common.no_proxy  | default('') }}

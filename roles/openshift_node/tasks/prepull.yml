@@ -1,0 +1,16 @@
+---
+- name: Check that node image is present
+  command: 'docker images -q "{{ osn_image }}"'
+  register: node_image
+
+# This task runs async to save time while the node is being configured
+- name: Pre-pull node image
+  docker_image:
+    name: "{{ osn_image }}"
+  environment:
+    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+  when: node_image.stdout_lines == []
+  # 10 minutes to pull the image
+  async: 600
+  poll: 0
+  register: image_prepull

@@ -41,3 +41,16 @@
         (glusterfs_ds.results.results[0].status.numberReady | default(0) < glusterfs_ds.results.results[0].status.desiredNumberScheduled | default(glusterfs_nodes | count))
 
 - import_tasks: wait_for_pods.yml
+
+- name: Get GlusterFS pods
+  set_fact:
+    glusterfs_pods: "{{ glusterfs_pods_wait.results.results[0]['items'] }}"
+  when:
+  - glusterfs_restart
+
+- include_tasks: glusterfs_restart_pod.yml
+  vars:
+    restart_node: "{{ item }}"
+  with_items: "{{ glusterfs_pods | default([]) }}"
+  when:
+  - glusterfs_restart

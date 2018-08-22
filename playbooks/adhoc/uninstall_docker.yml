@@ -1,4 +1,4 @@
-# This deletes *ALL* Origin and OpenShift Enterprise content installed by
+# This deletes *ALL* Origin and OpenShift Container Platform content installed by
 # ansible.  This includes:
 #
 #    configuration
