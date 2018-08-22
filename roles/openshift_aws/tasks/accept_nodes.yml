@@ -32,11 +32,12 @@
   debug:
     msg: "{{ mastersout.instances[0].public_ip_address }}"
 
-- name: approve nodes
-  oc_adm_csr:
-    #approve_all: True
-    nodes: "{{ instancesout.instances|map(attribute='private_dns_name') | list  }}"
-    timeout: 60
-    fail_on_timeout: "{{ openshift_aws_node_accept_fail_on_timeout | default(false) | bool }}"
-  register: nodeout
+- name: Approve node certificates when bootstrapping
+  oc_csr_approve:
+    oc_bin: "{{ hostvars[groups.masters.0]['first_master_client_binary'] }}"
+    oc_conf: "{{ hostvars[groups.masters.0].openshift.common.config_base }}/master/admin.kubeconfig"
+    node_list: "{{ instancesout.instances|map(attribute='private_dns_name') | list  }}"
+  register: aws_csr_approve
+  retries: 30
+  until: aws_csr_approve is succeeded
   delegate_to: "{{ groups.masters.0 }}"
