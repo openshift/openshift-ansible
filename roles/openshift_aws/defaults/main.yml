@@ -142,6 +142,8 @@ openshift_aws_elb_dict:
         instance_port: "{{ openshift_master_api_port }}"
         ssl_certificate_id: "{{ openshift_aws_elb_cert_arn }}"
       name: "{{ openshift_aws_elb_master_external_name }}"
+      # Set scheme [internal|internet-facing]
+      scheme: internet-facing
       tags: "{{ openshift_aws_kube_tags }}"
     internal:
       cross_az_load_balancing: False
@@ -163,6 +165,8 @@ openshift_aws_elb_dict:
         instance_protocol: tcp
         instance_port: "{{ openshift_master_api_port }}"
       name: "{{ openshift_aws_elb_master_internal_name }}"
+      # Set scheme [internal|internet-facing]
+      scheme: internal
       tags: "{{ openshift_aws_kube_tags }}"
   infra:
     external:
@@ -187,6 +191,8 @@ openshift_aws_elb_dict:
         instance_port: 443
         proxy_protocol: True
       name: "{{ openshift_aws_elb_infra_name }}"
+      # Set scheme [internal|internet-facing]
+      scheme: internet-facing
       tags: "{{ openshift_aws_kube_tags }}"
 
 openshift_aws_node_group_config_master_volumes:

@@ -16,7 +16,7 @@
     health_check: "{{ item.value.health_check }}"
     instance_ids: "{{ item.value.instance_ids | default(omit) }}"
     listeners: "{{ item.value.listeners }}"
-    scheme: "{{ (item.key == 'internal') | ternary('internal','internet-facing') }}"
+    scheme: "{{ item.value.scheme | default('internal') }}"
     tags: "{{ item.value.tags }}"
     wait: True
   register: new_elb
