@@ -208,7 +208,7 @@ debug_level=2
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
 # LDAP auth
-#openshift_master_identity_providers=[{'name': 'my_ldap_provider', 'challenge': 'true', 'login': 'true', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['dn'], 'email': ['mail'], 'name': ['cn'], 'preferredUsername': ['uid']}, 'bindDN': '', 'bindPassword': '', 'ca': 'my-ldap-ca.crt', 'insecure': 'false', 'url': 'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
+#openshift_master_identity_providers=[{'name': 'my_ldap_provider', 'challenge': 'true', 'login': 'true', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['dn'], 'email': ['mail'], 'name': ['cn'], 'preferredUsername': ['uid']}, 'bindDN': '', 'bindPassword': '', 'insecure': 'false', 'url': 'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
 #
 # Configure LDAP CA certificate
 # Specify either the ASCII contents of the certificate or the path to
@@ -222,7 +222,7 @@ debug_level=2
 #openshift_master_ldap_ca_file=<path to local ca file to use>
 
 # OpenID auth
-#openshift_master_identity_providers=[{"name": "openid_auth", "login": "true", "challenge": "false", "kind": "OpenIDIdentityProvider", "client_id": "my_client_id", "client_secret": "my_client_secret", "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {"authorize": "https://myidp.example.com/oauth2/authorize", "token": "https://myidp.example.com/oauth2/token"}, "ca": "my-openid-ca-bundle.crt"}]
+#openshift_master_identity_providers=[{"name": "openid_auth", "login": "true", "challenge": "false", "kind": "OpenIDIdentityProvider", "client_id": "my_client_id", "client_secret": "my_client_secret", "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {"authorize": "https://myidp.example.com/oauth2/authorize", "token": "https://myidp.example.com/oauth2/token"}]
 #
 # Configure OpenID CA certificate
 # Specify either the ASCII contents of the certificate or the path to
@@ -236,7 +236,7 @@ debug_level=2
 #openshift_master_openid_ca_file=<path to local ca file to use>
 
 # Request header auth
-#openshift_master_identity_providers=[{"name": "my_request_header_provider", "challenge": "true", "login": "true", "kind": "RequestHeaderIdentityProvider", "challengeURL": "https://www.example.com/challenging-proxy/oauth/authorize?${query}", "loginURL": "https://www.example.com/login-proxy/oauth/authorize?${query}", "clientCA": "my-request-header-ca.crt", "clientCommonNames": ["my-auth-proxy"], "headers": ["X-Remote-User", "SSO-User"], "emailHeaders": ["X-Remote-User-Email"], "nameHeaders": ["X-Remote-User-Display-Name"], "preferredUsernameHeaders": ["X-Remote-User-Login"]}]
+#openshift_master_identity_providers=[{"name": "my_request_header_provider", "challenge": "true", "login": "true", "kind": "RequestHeaderIdentityProvider", "challengeURL": "https://www.example.com/challenging-proxy/oauth/authorize?${query}", "loginURL": "https://www.example.com/login-proxy/oauth/authorize?${query}", "clientCommonNames": ["my-auth-proxy"], "headers": ["X-Remote-User", "SSO-User"], "emailHeaders": ["X-Remote-User-Email"], "nameHeaders": ["X-Remote-User-Display-Name"], "preferredUsernameHeaders": ["X-Remote-User-Login"]}]
 #
 # Configure request header CA certificate
 # Specify either the ASCII contents of the certificate or the path to

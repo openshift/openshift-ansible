@@ -78,7 +78,7 @@
 
 - name: Create the ldap ca file if needed
   copy:
-    dest: "{{ item.ca if 'ca' in item and '/' in item.ca else '/etc/origin/master/' ~ item.ca | default('ldap_ca.crt') }}"
+    dest: "/etc/origin/master/ldap_ca.crt"
     content: "{{ openshift.master.ldap_ca }}"
     mode: 0600
     backup: yes
@@ -89,26 +89,24 @@
 
 - name: Create the openid ca file if needed
   copy:
-    dest: "{{ item.ca if 'ca' in item and '/' in item.ca else '/etc/origin/master/' ~ item.ca | default('openid_ca.crt') }}"
+    dest: "/etc/origin/master/openid_ca.crt"
     content: "{{ openshift.master.openid_ca }}"
     mode: 0600
     backup: yes
   when:
   - openshift.master.openid_ca is defined
   - item.kind == 'OpenIDIdentityProvider'
-  - item.ca | default('') != ''
   with_items: "{{ openshift_master_identity_providers }}"
 
 - name: Create the request header ca file if needed
   copy:
-    dest: "{{ item.clientCA if 'clientCA' in item and '/' in item.clientCA else '/etc/origin/master/' ~ item.clientCA | default('request_header_ca.crt') }}"
+    dest: "/etc/origin/master/request_header_ca.crt"
     content: "{{ openshift_master_request_header_ca }}"
     mode: 0600
     backup: yes
   when:
   - openshift_master_request_header_ca != l_osm_request_header_none
   - item.kind == 'RequestHeaderIdentityProvider'
-  - item.clientCA | default('') != ''
   with_items: "{{ openshift_master_identity_providers }}"
 
 - name: Set fact of all etcd host IPs
