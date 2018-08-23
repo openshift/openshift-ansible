@@ -31,6 +31,9 @@ openshift_use_crio: False
 openshift_use_crio_only: False
 openshift_crio_enable_docker_gc: True
 openshift_crio_pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
+openshift_container_cli: "{{ openshift_use_crio | bool | ternary('crictl', 'docker') }}"
+openshift_crio_docker_gc_node_selector:
+  runtime: 'cri-o'
 
 # osm_default_subdomain is an old migrated fact, can probably be removed.
 osm_default_subdomain: "router.default.svc.cluster.local"
@@ -132,20 +135,66 @@ openshift_node_groups:
     labels:
       - 'node-role.kubernetes.io/master=true'
     edits: []
+  - name: node-config-master-crio
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
   - name: node-config-infra
     labels:
       - 'node-role.kubernetes.io/infra=true'
     edits: []
+  - name: node-config-infra-crio
+    labels:
+      - 'node-role.kubernetes.io/infra=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
   - name: node-config-compute
     labels:
       - 'node-role.kubernetes.io/compute=true'
     edits: []
+  - name: node-config-compute-crio
+    labels:
+      - 'node-role.kubernetes.io/compute=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
   - name: node-config-master-infra
     labels:
-      - 'node-role.kubernetes.io/infra=true,node-role.kubernetes.io/master=true'
+      - 'node-role.kubernetes.io/master=true'
+      - 'node-role.kubernetes.io/infra=true'
     edits: []
+  - name: node-config-master-infra-crio
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+      - 'node-role.kubernetes.io/infra=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
   - name: node-config-all-in-one
     labels:
-      - 'node-role.kubernetes.io/infra=true,node-role.kubernetes.io/master=true,node-role.kubernetes.io/compute=true'
+      - 'node-role.kubernetes.io/master=true'
+      - 'node-role.kubernetes.io/infra=true'
+      - 'node-role.kubernetes.io/compute=true'
     edits: []
+  - name: node-config-all-in-one-crio
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+      - 'node-role.kubernetes.io/infra=true'
+      - 'node-role.kubernetes.io/compute=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
+
+openshift_node_group_edits_crio:
+  - key: kubeletArguments.container-runtime
+    value:
+      - "remote"
+  - key: kubeletArguments.container-runtime-endpoint
+    value:
+      - "{{ openshift_crio_var_sock }}"
+  - key: kubeletArguments.image-service-endpoint
+    value:
+      - "{{ openshift_crio_var_sock }}"
+  - key: kubeletArguments.runtime-request-timeout
+    value:
+      - "10m"
+
 openshift_master_manage_htpasswd: True
