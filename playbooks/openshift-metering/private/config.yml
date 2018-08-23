@@ -19,7 +19,7 @@
   tasks:
   - include_role:
       name: openshift_metering
-      tasks_from: install
+      tasks_from: install.yml
 
 - name: Openshift Metering Install Checkpoint End
   hosts: all
