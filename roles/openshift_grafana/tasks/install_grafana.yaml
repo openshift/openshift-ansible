@@ -203,7 +203,6 @@
       status_code:
       - 200
     register: update_ds
-  - debug: var=update_ds
   when: add_ds.status == 409
 
 - name: Regex set data source name for openshift dashboard
@@ -241,7 +240,7 @@
   register: slurpfile
 
 - set_fact:
-    dashboard_data: '{{ slurpfile["content"] | b64decode | from_json | combine({ "dashboard": { "overwrite": true } }, recursive=True) }}'
+    dashboard_data: '{{ slurpfile["content"] | b64decode | from_json | combine({ "dashboard": { "overwrite": true } }, recursive=True) | to_json }}'
 
 - name: Add openshift dashboard
   uri:
@@ -249,7 +248,7 @@
     user: "{{ grafana_sa_token.stdout }}"
     force_basic_auth: true
     method: POST
-    body: '{{ dashboard_data | to_json }}'
+    body: '{{ dashboard_data }}'
     body_format: json
     status_code:
     - 200
@@ -264,7 +263,7 @@
   register: slurpfile
 
 - set_fact:
-    dashboard_data: '{{ slurpfile["content"] | b64decode | from_json | combine({ "dashboard": { "overwrite": true } }, recursive=True) }}'
+    dashboard_data: '{{ slurpfile["content"] | b64decode | from_json | combine({ "dashboard": { "overwrite": true } }, recursive=True) | to_json }}'
 
 - name: Add node exporter dashboard
   uri:
@@ -272,7 +271,7 @@
     user: "{{ grafana_sa_token.stdout }}"
     force_basic_auth: true
     method: POST
-    body: '{{ dashboard_data | to_json }}'
+    body: '{{ dashboard_data }}'
     body_format: json
     status_code:
     - 200
