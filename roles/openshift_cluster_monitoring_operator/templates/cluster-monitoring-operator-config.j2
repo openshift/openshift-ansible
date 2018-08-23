@@ -65,7 +65,15 @@ data:
       baseImage: {{ openshift_cluster_monitoring_operator_kube_rbac_proxy_image }}
     auth:
       baseImage: {{ openshift_cluster_monitoring_operator_proxy_image }}
+{% if 'http_proxy' in openshift.common or 'https_proxy' in openshift.common or 'no_proxy' in openshift.common %}
     http:
-      httpProxy: {{ openshift.common.http_proxy  | default('') }}
-      httpsProxy: {{ openshift.common.https_proxy  | default('') }}
-      noProxy: {{ openshift.common.no_proxy  | default('') }}
+{% endif %}
+{% if 'http_proxy' in openshift.common %}
+      httpProxy: {{ openshift.common.http_proxy }}
+{% endif %}
+{% if 'https_proxy' in openshift.common %}
+      httpsProxy: {{ openshift.common.https_proxy }}
+{% endif %}
+{% if 'no_proxy' in openshift.common %}
+      noProxy: {{ openshift.common.no_proxy }}
+{% endif %}
