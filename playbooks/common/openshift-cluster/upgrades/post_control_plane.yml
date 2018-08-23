@@ -27,13 +27,10 @@
   # create and update in one step.
   - role: openshift_examples
     when: openshift_install_examples | default(true) | bool
-  - openshift_hosted_templates
   # Update the existing templates
   - role: openshift_examples
     when: openshift_install_examples | default(true) | bool
     openshift_examples_import_command: replace
-  - role: openshift_hosted_templates
-    openshift_hosted_templates_import_command: replace
 
 # Poll for registry and router pods, redeploy registry certs if needed.
 - import_playbook: ../../../openshift-hosted/private/upgrade_poll_and_check_certs.yml

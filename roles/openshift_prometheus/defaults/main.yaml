@@ -19,19 +19,19 @@ l_openshift_prometheus_version_dict:
     node_exporter: "{{ openshift_image_tag }}"
 
 l_openshift_prometheus_alertmanager_version: "{{ l_openshift_prometheus_version_dict[openshift_deployment_type]['alert_manager'] }}"
-l_openshift_prometheus_alertmanager_image: "{{ l_os_logging_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_openshift_prometheus_alertmanager_version) }}"
+l_openshift_prometheus_alertmanager_image: "{{ l_os_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_openshift_prometheus_alertmanager_version) }}"
 openshift_prometheus_alertmanager_image: "{{ l_openshift_prometheus_alertmanager_image | regex_replace(l_os_logging_non_standard_reg_search | regex_escape, 'prometheus-alertmanager') }}"
 
 l_openshift_prometheus_alertbuffer_version: "{{ l_openshift_prometheus_version_dict[openshift_deployment_type]['alert_buffer'] }}"
-l_openshift_prometheus_alertbuffer_image: "{{ l_os_logging_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_openshift_prometheus_alertbuffer_version) }}"
+l_openshift_prometheus_alertbuffer_image: "{{ l_os_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_openshift_prometheus_alertbuffer_version) }}"
 openshift_prometheus_alertbuffer_image: "{{ l_openshift_prometheus_alertbuffer_image | regex_replace(l_os_logging_non_standard_reg_search | regex_escape, 'prometheus-alert-buffer') }}"
 
 l_openshift_prometheus_node_exporter_version: "{{ l_openshift_prometheus_version_dict[openshift_deployment_type]['node_exporter'] }}"
-l_openshift_prometheus_node_exporter_image: "{{ l_os_logging_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_openshift_prometheus_node_exporter_version) }}"
+l_openshift_prometheus_node_exporter_image: "{{ l_os_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_openshift_prometheus_node_exporter_version) }}"
 openshift_prometheus_node_exporter_image: "{{ l_openshift_prometheus_node_exporter_image | regex_replace(l_os_logging_non_standard_reg_search | regex_escape, 'prometheus-node-exporter') }}"
 
 l_openshift_prometheus_version: "{{ l_openshift_prometheus_version_dict[openshift_deployment_type]['prometheus'] }}"
-l_openshift_prometheus_image: "{{ l_os_logging_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_openshift_prometheus_version) }}"
+l_openshift_prometheus_image: "{{ l_os_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_openshift_prometheus_version) }}"
 openshift_prometheus_image: "{{ l_openshift_prometheus_image | regex_replace(l_os_logging_non_standard_reg_search | regex_escape, 'prometheus') }}"
 
 openshift_prometheus_proxy_image: "{{ l2_os_logging_proxy_image }}"
