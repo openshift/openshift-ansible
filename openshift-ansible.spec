@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.21.0
+Release:        0.22.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,16 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Aug 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.22.0
+- Log driver for JSON should be json-file (umohnani@redhat.com)
+- cluster-monitoring: Add port definition to cluster-monitoring-operator
+  (fbranczyk@gmail.com)
+- cluster-monitoring: conditionally render proxy settings
+  (sergiusz.urbaniak@gmail.com)
+- Reorder master install tasks (rteague@redhat.com)
+- openshift-control-plane: check whether the sync pods are ready before
+  selecting nodes (pgier@redhat.com)
+
 * Thu Aug 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.21.0
 - if the cluster's arch is power (ppc64le) don't install default catalog.
   create v3.11 imagestreams, quickstart, and db-templates that support ppc64le
