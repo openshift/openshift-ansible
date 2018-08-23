@@ -637,6 +637,17 @@ debug_level=2
 #openshift_persistentlocalstorage_path=/mnt/local-storage
 #openshift_persistentlocalstorage_provisionner_image=quay.io/external_storage/local-volume-provisioner:v1.0.1
 
+# Cluster monitoring
+#
+# Cluster monitoring is enabled by default, disable it by setting
+# openshift_cluster_monitoring_operator_install=false
+#
+# Cluster monitoring configuration variables allow setting the amount of
+# storage requested through PersistentVolumeClaims.
+#
+# openshift_cluster_monitoring_operator_prometheus_storage_capacity="50Gi"
+# openshift_cluster_monitoring_operator_alertmanager_storage_capacity="2Gi"
+
 # Logging deployment
 #
 # Currently logging deployment is disabled by default, enable it by setting this
