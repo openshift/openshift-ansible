@@ -303,6 +303,10 @@
         - "/tmp/{{ __master_shared_resource_viewer_file }}"
         delete_after: true
       when: __shared_resource_viewer_protected is not defined
+      retries: 10
+      delay: 5
+      register: fixup_shared_resource_viewer_role_result
+      until: fixup_shared_resource_viewer_role_result|succeeded
 
   - name: Reconcile Security Context Constraints
     command: >
