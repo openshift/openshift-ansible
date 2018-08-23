@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.20.0
+Release:        0.21.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,24 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Aug 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.21.0
+- if the cluster's arch is power (ppc64le) don't install default catalog.
+  create v3.11 imagestreams, quickstart, and db-templates that support ppc64le
+  (jeyoung@redhat.com)
+- GlusterFS: Run kernel_modules.yml once on all nodes (jarrpa@redhat.com)
+- Replace deprecated ec2_ami_find module with ec2_ami_facts
+  (mazzystr@gmail.com)
+- Allow override set scheme (mazzystr@gmail.com)
+- Remove old code related to Atomic Enterprise changes (rteague@redhat.com)
+- python-scandir was renamed in EPEL (vrutkovs@redhat.com)
+- openshift-prometheus: change node_exporter service port to 9101
+  (pgier@redhat.com)
+- Commit to remove openshift_master_cluster_hostname override
+  (mazzystr@gmail.com)
+- Change aws launch_config & autoscale group name to contain deployment serial
+  (mazzystr@gmail.com)
+- Master services are gone in 3.10 (vrutkovs@redhat.com)
+
 * Tue Aug 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.20.0
 - Pass region to AWS az lookup (cewong@redhat.com)
 - SDN check: Use openshift_client_binary (miciah.masters@gmail.com)
