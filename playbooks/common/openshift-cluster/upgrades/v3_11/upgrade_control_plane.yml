@@ -68,25 +68,6 @@
     - openshift_reconcile_sccs_reject_change | default(true) | bool
     - check_reconcile_scc_result.stdout != '' or check_reconcile_scc_result.rc != 0
 
-- name: Flag pre-upgrade checks complete for hosts without errors
-  hosts: oo_masters_to_config:oo_etcd_to_config
-  tasks:
-  - set_fact:
-      pre_upgrade_complete: True
-
-- import_playbook: label_nodes.yml
-
-# To upgrade, we need masters to be capable of signing certificates
-- hosts: oo_masters
-  serial: 1
-  tasks:
-  - name: Enable core bootstrapping components
-    include_tasks: ../../../../openshift-master/private/tasks/enable_bootstrap.yml
-  - name: Place shim commands on the masters before we begin the upgrade
-    import_role:
-      name: openshift_control_plane
-      tasks_from: static_shim
-
 # TODO: need to verify settings about the bootstrap configs
 # 1. Does network policy match the master config
 
@@ -100,20 +81,13 @@
 
 - name: Configure components that must be available prior to upgrade
   hosts: oo_first_master
-  pre_tasks:
-  - name: Enable core bootstrapping components
-    include_tasks: ../../../../openshift-master/private/tasks/enable_bootstrap_config.yml
-  - name: Ensure the master bootstrap config has bootstrapping config
-    import_role:
-      name: openshift_node_group
-      tasks_from: upgrade
-  - name: Enable node configuration reconciliation
-    import_role:
-      name: openshift_node_group
-      tasks_from: sync
   roles:
   - role: openshift_sdn
     when: openshift_use_openshift_sdn | default(True) | bool
+
+- import_playbook: ../upgrade_control_plane.yml
+  vars:
+    openshift_release: '3.11'
 
 - name: Update master nodes
   hosts: oo_masters
@@ -132,9 +106,6 @@
           ('glusterfs' in groups and inventory_hostname in groups['glusterfs'])
           or ('glusterfs_registry' in groups and inventory_hostname in groups['glusterfs_registry'])
 
-- import_playbook: ../upgrade_control_plane.yml
-  vars:
-    openshift_release: '3.11'
 
 - import_playbook: ../post_control_plane.yml
 
