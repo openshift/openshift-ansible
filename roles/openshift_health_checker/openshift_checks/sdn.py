@@ -52,17 +52,26 @@ class SDNCheck(OpenShiftCheck):
                 self.register_file('resolv.conf', None, '/etc/resolv.conf')
                 self.save_command_output('modules', ['/sbin/lsmod'])
                 self.save_command_output('sysctl', ['/sbin/sysctl', '-a'])
-                if self.get_var('openshift_use_crio', default=False):
+
+                use_crio = self.get_var('openshift_use_crio', default=False)
+                use_crio = self.template_var(use_crio)
+                if use_crio:
                     self.save_command_output('crio-version',
                                              ['/bin/crictl', 'version'])
-                if not self.get_var('openshift_use_crio_only', default=False):
+
+                use_crio_only = self.get_var('openshift_use_crio_only',
+                                             default=False)
+                use_crio_only = self.template_var(use_crio_only)
+                if not use_crio_only:
                     self.save_command_output('docker-version',
                                              ['/bin/docker', 'version'])
+
                 oc_executable = self.get_var('openshift_client_binary',
                                              default='/bin/oc')
                 oc_executable = self.template_var(oc_executable)
                 self.save_command_output('oc-version', [oc_executable,
                                                         'version'])
+
                 self.register_file('os-version', None,
                                    '/etc/system-release-cpe')
             except OpenShiftCheckException as exc:
@@ -154,6 +163,7 @@ class SDNCheck(OpenShiftCheck):
         to kubelets."""
         if self.want_full_results:
             conf_base_path = self.get_var('openshift.common.config_base')
+            conf_base_path = self.template_var(conf_base_path)
             master_conf_path = os.path.join(conf_base_path, 'master',
                                             'master-config.yaml')
             self.register_file('master-config.yaml', None, master_conf_path)
@@ -226,6 +236,7 @@ class SDNCheck(OpenShiftCheck):
         """Gather diagnostic information on a node and perform connectivity
         checks on pods and services."""
         node_name = self.get_var('openshift', 'node', 'nodename', default=None)
+        node_name = self.template_var(node_name)
         if not node_name:
             self.register_failure('Could not determine node name.')
             return
@@ -240,17 +251,21 @@ class SDNCheck(OpenShiftCheck):
         if self.want_full_results:
             try:
                 service_prefix = self.get_var('openshift_service_type')
-                if self._templar is not None:
-                    service_prefix = self._templar.template(service_prefix)
+                service_prefix = self.template_var(service_prefix)
                 self.save_service_logs('%s-node' % service_prefix)
 
-                if self.get_var('openshift_use_crio', default=False):
+                use_crio = self.get_var('openshift_use_crio', default=False)
+                use_crio = self.template_var(use_crio)
+                if use_crio:
                     self.save_command_output('crio-unit-file',
                                              ['/bin/systemctl',
                                               'cat', 'crio.service'])
                     self.save_command_output('crio-ps', ['/bin/crictl', 'ps'])
 
-                if not self.get_var('openshift_use_crio_only', default=False):
+                use_crio_only = self.get_var('openshift_use_crio_only',
+                                             default=False)
+                use_crio_only = self.template_var(use_crio_only)
+                if not use_crio_only:
                     self.save_command_output('docker-unit-file',
                                              ['/bin/systemctl',
                                               'cat', 'docker.service'])
@@ -313,7 +328,9 @@ class SDNCheck(OpenShiftCheck):
         """Return an array comprising a command and arguments that can be used
         to execute commands inside the specified container running in a pod in
         the specified namespace."""
-        if self.get_var('openshift_use_crio', default=False):
+        use_crio = self.get_var('openshift_use_crio', default=False)
+        use_crio = self.template_var(use_crio)
+        if use_crio:
             container_id = self.read_command_output([
                 '/bin/crictl', 'ps', '-l', '-a', '-q',
                 '--label=io.kubernetes.container.name=%s' % container_name,
