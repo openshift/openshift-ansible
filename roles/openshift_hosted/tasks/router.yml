@@ -61,22 +61,22 @@
 - name: Create the router service account(s)
   oc_serviceaccount:
     name: "{{ item.serviceaccount }}"
-    namespace: "{{ item.namespace }}"
+    namespace: "{{ item.namespace | default('default') }}"
     state: present
   with_items: "{{ openshift_hosted_routers }}"
 
 - name: Grant the router service account(s) access to the appropriate scc
   oc_adm_policy_user:
-    user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
-    namespace: "{{ item.namespace }}"
+    user: "system:serviceaccount:{{ item.namespace | default('default') }}:{{ item.serviceaccount }}"
+    namespace: "{{ item.namespace | default('default') }}"
     resource_kind: scc
     resource_name: hostnetwork
   with_items: "{{ openshift_hosted_routers }}"
 
 - name: Set additional permissions for router service account
   oc_adm_policy_user:
-    user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
-    namespace: "{{ item.namespace }}"
+    user: "system:serviceaccount:{{ item.namespace | default('default') }}:{{ item.serviceaccount }}"
+    namespace: "{{ item.namespace | default('default') }}"
     resource_kind: cluster-role
     resource_name: cluster-reader
   when: item.namespace == 'default'
