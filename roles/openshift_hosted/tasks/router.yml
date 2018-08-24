@@ -79,7 +79,6 @@
     namespace: "{{ item.namespace | default('default') }}"
     resource_kind: cluster-role
     resource_name: cluster-reader
-  when: item.namespace == 'default'
   with_items: "{{ openshift_hosted_routers }}"
 
 - name: Create OpenShift router
