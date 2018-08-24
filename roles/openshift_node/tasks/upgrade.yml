@@ -57,32 +57,15 @@
 - import_tasks: upgrade/restart.yml
 
 - name: Approve node certificates when bootstrapping
-  oc_adm_csr:
-    nodes: "{{ openshift.node.nodename | lower }}"
-    timeout: 180
-    fail_on_timeout: true
+  oc_csr_approve:
+    oc_bin: "{{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }}"
+    oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    node_list:
+    - "{{ openshift.node.nodename | lower }}"
   delegate_to: "{{ groups.oo_first_master.0 }}"
-  ignore_errors: true
-
-- name: Wait for node to be ready
-  oc_obj:
-    state: list
-    kind: node
-    name: "{{ openshift.node.nodename | lower }}"
-  register: node_output
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  until:
-  - node_output.results is defined
-  - node_output.results.returncode is defined
-  - node_output.results.returncode == 0
-  - node_output.results.results is defined
-  - node_output.results.results | length  > 0
-  - node_output.results.results[0].status is defined
-  - node_output.results.results[0].status.conditions is defined
-  - node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
-  # Give the node three minutes to come back online.
-  retries: 36
-  delay: 5
+  register: node_upgrade_oc_csr_approve
+  retries: 30
+  until: node_upgrade_oc_csr_approve is succeeded
 
 - import_tasks: journald.yml
 
