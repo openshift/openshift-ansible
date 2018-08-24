@@ -88,6 +88,19 @@
       content: "{{ oreg_url }}"
     when: oreg_url is defined
 
+  - name: create a file with image name
+    copy:
+      content: |
+        ---
+        image_name: {{ openshift_azure_output_image_name }}
+        base_image: {{ (hostvars['localhost'].input_image.stdout | from_json).name }}
+        subscription: {{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}
+        resource_group: {{ openshift_azure_output_image_ns }}
+      dest: /etc/origin/image.yml
+      owner: root
+      group: root
+      mode: '0440'
+
   - name: run waagent deprovision
     shell: sleep 2 && waagent -deprovision+user -force
     async: 1
@@ -98,7 +111,6 @@
   tasks:
   - set_fact:
       openshift_rpm: "{{ hostvars[groups['nodes'][0]]['yum'].results | selectattr('name', 'match', '^(origin|atomic-openshift)$') | first }}"
-
   - name: create image
     import_tasks: tasks/create_image_from_vm.yml
     vars:
