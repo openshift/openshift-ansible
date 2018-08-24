@@ -60,6 +60,7 @@ class SDNCheck(OpenShiftCheck):
                                              ['/bin/docker', 'version'])
                 oc_executable = self.get_var('openshift_client_binary',
                                              default='/bin/oc')
+                oc_executable = self.template_var(oc_executable)
                 self.save_command_output('oc-version', [oc_executable,
                                                         'version'])
                 self.register_file('os-version', None,
