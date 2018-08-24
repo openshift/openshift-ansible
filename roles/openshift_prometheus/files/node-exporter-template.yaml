@@ -37,9 +37,9 @@ objects:
     clusterIP: None
     ports:
     - name: scrape
-      port: 9101
+      port: 9100
       protocol: TCP
-      targetPort: 9101
+      targetPort: 9100
     selector:
       app: prometheus-node-exporter
 - apiVersion: extensions/v1beta1
@@ -67,9 +67,8 @@ objects:
           name: node-exporter
           args:
           - --no-collector.wifi
-          - --web.listen-address=:9101
           ports:
-          - containerPort: 9101
+          - containerPort: 9100
             name: scrape
           resources:
             requests:
