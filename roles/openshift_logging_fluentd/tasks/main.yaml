@@ -149,6 +149,21 @@
       - name: ops-cert
         path: "{{ openshift_logging_fluentd_ops_cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
 
+- name: Copy cluster-logging priority class definition
+  copy:
+    src: "logging_priority_class.yaml"
+    dest: "{{ tempdir }}/templates/logging_priority_class.yaml"
+
+- name: Set cluster-logging priority class definition
+  oc_obj:
+    state: present
+    name: cluster-logging
+    namespace: "{{ openshift_logging_fluentd_namespace }}"
+    kind: priorityclass
+    files:
+      - "{{ tempdir }}/templates/logging_priority_class.yaml"
+    delete_after: true
+
 # create Fluentd daemonset
 # this should change based on the type of fluentd deployment to be done...
 # TODO: pass in aggregation configurations
