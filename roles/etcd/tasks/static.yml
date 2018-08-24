@@ -17,6 +17,8 @@
   poll: 0
   register: etcd_prepull
 
+- import_tasks: drop_etcdctl.yml
+
 - name: setup firewall
   import_tasks: firewall.yml
 
