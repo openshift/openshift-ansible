@@ -14,7 +14,7 @@
 - name: Create the scale group
   ec2_asg:
     name: "{{ l_node_group_name }}"
-    launch_config_name: "{{ openshift_aws_node_group.name }}-{{ openshift_aws_ami_map[openshift_aws_node_group.group] | default(openshift_aws_ami) }}-{{ l_epoch_time }}"
+    launch_config_name: "{{ openshift_aws_node_group.name }}-{{ openshift_aws_ami_map[openshift_aws_node_group.group] | default(openshift_aws_ami) }}-{{ l_deployment_serial }}"
     health_check_period: "{{ l_node_group_config[openshift_aws_node_group.group].health_check.period }}"
     health_check_type: "{{ l_node_group_config[openshift_aws_node_group.group].health_check.type }}"
     min_size: "{{ l_node_group_config[openshift_aws_node_group.group].min_size }}"
