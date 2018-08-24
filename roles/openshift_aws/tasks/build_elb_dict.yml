@@ -9,4 +9,4 @@
 # roles/lib_utils/filters/oo_filters.py
 - name: set elb fact dictionary
   set_fact:
-    l_openshift_aws_elb_facts: "{{ elb_res | lib_utils_oo_list_of_dict_to_dict_from_key('name')}}"
+    l_openshift_aws_elb_facts: "{{ elb_res['elbs'] | lib_utils_oo_list_of_dict_to_dict_from_key('name')}}"
