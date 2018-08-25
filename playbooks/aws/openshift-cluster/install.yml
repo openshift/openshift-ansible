@@ -1,5 +1,5 @@
 ---
-- name: Setup the master node group
+- name: Setup master instances
   hosts: localhost
   tasks:
   - import_role:

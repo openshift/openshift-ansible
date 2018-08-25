@@ -1,13 +1,10 @@
 ---
-- include_tasks: vpc_and_subnet_id.yml
+- import_tasks: vpc_and_subnet_id.yml
 
-- name: include scale group creation for master
-  include_tasks: build_node_group.yml
-  with_items: "{{ openshift_aws_master_group }}"
-  vars:
-    l_node_group_config: "{{ openshift_aws_master_group_config }}"
-  loop_control:
-    loop_var: openshift_aws_node_group
+- import_tasks: provision_ec2_facts.yml
+
+- name: include master instance creation
+  import_tasks: provision_ec2.yml
 
 - name: fetch newly created instances
   ec2_instance_facts:
@@ -20,6 +17,12 @@
   retries: 20
   delay: 3
   until: instancesout.instances|length > 0
+
+- name: include ec2 register
+  include_tasks: elb_reg.yml
+  loop: "{{ openshift_aws_elb_dict['master'] | dict2items }}"
+  loop_control:
+    loop_var: l_elb
 
 - name: wait for ssh to become available
   wait_for:
