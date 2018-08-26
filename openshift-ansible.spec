@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.22.0
+Release:        0.23.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,21 @@ BuildArch:     noarch
 
 
 %changelog
+* Sun Aug 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.23.0
+- Commit to enable standalone master instances in aws (mazzystr@gmail.com)
+- SDN check: Expand openshift_client_binary variable (miciah.masters@gmail.com)
+- Don't set reclaim policy to empty string (mawong@redhat.com)
+- Add support to static pods for etcd helpers (sdodson@redhat.com)
+- Creating a priority class for cluster-logging fluentd and configuring fluentd
+  to use it (ewolinet@redhat.com)
+- Refactor csr approvals: oc_csr_approve (mgugino@redhat.com)
+- Change aws launch_config & autoscale group name to contain deployment serial
+  (mazzystr@gmail.com)
+- Move filters (mateus.caruccio@getupcloud.com)
+- Overwrite grafana datasource and dashboards (mateus.caruccio@getupcloud.com)
+- Dont fail when datasource or dashboard already exists
+  (mateus.caruccio@getupcloud.com)
+
 * Thu Aug 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.22.0
 - Log driver for JSON should be json-file (umohnani@redhat.com)
 - cluster-monitoring: Add port definition to cluster-monitoring-operator
