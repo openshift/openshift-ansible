@@ -6,6 +6,3 @@ __deprecation_header: "[DEPRECATION WARNING]: The following are deprecated varia
 __warn_deprecated_vars:
   # logging
   - 'openshift_logging_namespace'
-  # labels and kubelet args
-  - 'openshift_node_labels'
-  - 'openshift_node_kubelet_args'

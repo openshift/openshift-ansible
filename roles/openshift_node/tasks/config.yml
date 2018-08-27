@@ -2,11 +2,6 @@
 - name: Install the systemd units
   import_tasks: systemd_units.yml
 
-- file:
-    dest: "{{ l2_openshift_node_kubelet_args['config'] }}"
-    state: directory
-  when: ('config' in l2_openshift_node_kubelet_args) | bool
-
 - name: Configure Node Environment Variables
   lineinfile:
     dest: /etc/sysconfig/{{ openshift_service_type }}-node
