@@ -35,6 +35,7 @@ openshift_image_default: "{{ l_os_registry_url | regex_replace('${component}' | 
 openshift_cli_image: "{{ (system_images_registry == 'docker') | ternary(openshift_image_default, (openshift_image_default.split('/')|length==2) | ternary(system_images_registry + '/' + openshift_image_default, openshift_image_default)) }}"
 system_openshift_cli_image: "{{ (system_images_registry == 'docker') | ternary('docker:' + openshift_cli_image, openshift_cli_image) }}"
 osn_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'node') }}"
+osn_pod_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
 osm_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'control-plane') }}"
 
 repoquery_cmd: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0', 'repoquery --plugins') }}"
