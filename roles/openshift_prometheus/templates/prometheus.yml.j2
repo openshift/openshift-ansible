@@ -232,7 +232,7 @@ scrape_configs:
       action: replace
       target_label: kubernetes_name
 
-# Scrape config for node-exporter, which is expected to be running on port 9101.
+# Scrape config for node-exporter, which is expected to be running on port 9102.
 - job_name: 'kubernetes-nodes-exporter'
 
   tls_config:
@@ -270,7 +270,7 @@ scrape_configs:
   relabel_configs:
   - source_labels: [__address__]
     regex: '(.*):10250'
-    replacement: '${1}:9101'
+    replacement: '${1}:9102'
     target_label: __address__
   - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]
     target_label: __instance__
