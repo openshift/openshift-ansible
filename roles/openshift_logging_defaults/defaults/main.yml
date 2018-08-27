@@ -26,3 +26,4 @@ openshift_logging_fluentd_image: "{{ l_os_registry_url | regex_replace('${compon
 openshift_logging_kibana_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'logging-kibana5') }}"
 openshift_logging_kibana_proxy_image: "{{ l2_os_logging_proxy_image }}"
 openshift_logging_mux_image: "{{ openshift_logging_fluentd_image }}"
+openshift_logging_eventrouter_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'logging-eventrouter') }}"
