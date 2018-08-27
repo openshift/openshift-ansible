@@ -15,6 +15,7 @@
 
 - name: Only target nodes that have not yet been bootstrapped
   hosts: localhost
+  connection: local
   tasks:
   - add_host:
       name: "{{ item }}"
