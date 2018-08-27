@@ -1,5 +1,5 @@
 ---
-- name: Ensure RHEL rhui repositories are disabled
+- name: Discover enabled RHEL rhui repositories
   command: bash -c "yum -q --noplugins repolist | grep -v 'repo id' | grep 'rhui'"
   register: repo_rhui
   changed_when: "repo_rhui.rc != 1"
