@@ -19,7 +19,7 @@ system_osn_image: "{{ (system_images_registry == 'docker') | ternary('docker:' +
 openshift_node_env_vars: {}
 
 # Create list of 'k=v' pairs.
-l_node_kubelet_node_labels: "{{ openshift_node_labels | default({}) | lib_utils_oo_dict_to_keqv_list }}"
+l_node_kubelet_node_labels: "{{ openshift_node_labels | default({}) | from_yaml | lib_utils_oo_dict_to_keqv_list }}"
 
 openshift_node_kubelet_args_dict:
   aws:
