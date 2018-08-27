@@ -29,9 +29,12 @@
     name: "openshift-bootstrap-update.timer"
     state: started
 
-- name: Bootstrap all nodes that were identified with bootstrap metadata
-  run_once: true
-  oc_adm_csr:
-    nodes: "{{ groups['all'] | map('extract', hostvars) | selectattr('gce_metadata.bootstrap', 'match', 'true') | map(attribute='gce_name') | list }}"
-    timeout: 60
+- name: Approve node certificates when bootstrapping
+  oc_csr_approve:
+    oc_bin: "{{ hostvars[groups.masters.0]['first_master_client_binary'] }}"
+    oc_conf: "{{ hostvars[groups.masters.0].openshift.common.config_base }}/master/admin.kubeconfig"
+    node_list: "{{ groups['all'] | map('extract', hostvars) | selectattr('gce_metadata.bootstrap', 'match', 'true') | map(attribute='gce_name') | list }}"
+  register: gcp_csr_approve
+  retries: 30
+  until: gcp_csr_approve is succeeded
   when: groups['all'] | map('extract', hostvars) | selectattr('gce_metadata.bootstrap', 'match', 'true') | map(attribute='gce_name') | list | length > 0
