@@ -2,9 +2,9 @@
 # Creates a dictionary for use with oVirt.vm-infra role
 # https://github.com/oVirt/ovirt-ansible-vm-infra
 - fail:
-    msg: "The openshift_rhv_dns_zone variable is required."
+    msg: "The openshift_ovirt_dns_zone variable is required."
   when:
-  - openshift_rhv_dns_zone is not defined
+  - openshift_ovirt_dns_zone is not defined
 - name: Create virtual machine list fact
   set_fact:
     vms: >-
@@ -12,14 +12,14 @@
       {% for iter in range(item.count) -%}
       {% if iter > 0 -%},{% endif -%}
       {
-      'name': '{{ item.name }}{{ iter }}.{{ openshift_rhv_dns_zone }}',
+      'name': '{{ item.name }}{{ iter }}.{{ openshift_ovirt_dns_zone }}',
       'tag': 'openshift_{{ item.profile }}',
       'cloud_init':
       {
-      'host_name': '{{ item.name }}{{ iter }}.{{ openshift_rhv_dns_zone }}',
-      'authorized_ssh_keys': '{{ openshift_rhv_ssh_key }}'
+      'host_name': '{{ item.name }}{{ iter }}.{{ openshift_ovirt_dns_zone }}',
+      'authorized_ssh_keys': '{{ openshift_ovirt_ssh_key }}'
       },
-      'profile':  {{ openshift_rhv_vm_profile[ item.profile ] }} ,
+      'profile':  {{ openshift_ovirt_vm_profile[ item.profile ] }} ,
       }
       {% endfor -%}
       ]
@@ -28,18 +28,18 @@
       {% if item.count > 1 -%}
       {
       'name': '{{ item.name }}_ag',
-      'cluster': '{{ openshift_rhv_cluster }}',
+      'cluster': '{{ openshift_ovirt_cluster }}',
       'vm_enforcing': 'false',
       'vm_rule': 'negative',
       'vms': [
       {% for iter in range(item.count) -%}
-      '{{ item.name }}{{ iter }}.{{ openshift_rhv_dns_zone }}',
+      '{{ item.name }}{{ iter }}.{{ openshift_ovirt_dns_zone }}',
       {% endfor -%}
       ]
       }
       {% endif -%}
       ]
-  with_items: "{{ openshift_rhv_vm_manifest }}"
+  with_items: "{{ openshift_ovirt_vm_manifest }}"
   tags:
-  - openshift_rhv
+  - openshift_ovirt
 ...
