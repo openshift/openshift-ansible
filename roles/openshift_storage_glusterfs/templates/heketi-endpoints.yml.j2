@@ -9,7 +9,7 @@ metadata:
 subsets:
 - addresses:
 {% for node in glusterfs_nodes %}
-  - ip: {{ hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip) }}
+  - ip: {{ hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip if "openshift" in hostvars[node] else "") }}
 {% endfor %}
   ports:
   - port: 1
