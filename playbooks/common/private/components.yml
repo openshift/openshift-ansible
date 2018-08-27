@@ -20,7 +20,7 @@
 - import_playbook: ../../openshift-hosted/private/config.yml
 
 - import_playbook: ../../openshift-monitoring/private/config.yml
-  when: openshift_monitoring_deploy | default(false) | bool
+  when: openshift_cluster_monitoring_operator_install | default(true) | bool
 
 - import_playbook: ../../openshift-metering/private/config.yml
   when: openshift_metering_install | default(false) | bool
