@@ -40,6 +40,8 @@
     owner: root
     group: root
 
+- import_tasks: registry_auth.yml
+
 - name: Create config parent directory if it does not exist
   file:
     path: "/etc/origin/master"

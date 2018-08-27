@@ -1,4 +1,6 @@
 ---
+- import_tasks: registry_auth.yml
+
 - import_tasks: static_shim.yml
 
 - import_tasks: upgrade/upgrade_scheduler.yml

@@ -15,7 +15,6 @@
   when:
   - oreg_auth_user is defined
   register: master_oreg_auth_credentials_create
-  notify: restart master
   retries: 3
   delay: 5
   until: master_oreg_auth_credentials_create is succeeded
