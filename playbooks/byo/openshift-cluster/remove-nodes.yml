@@ -1,0 +1,8 @@
+---
+- include: initialize_groups.yml
+
+- include: ../../common/openshift-cluster/remove_nodes.yml
+  vars:
+    openshift_nodes_to_remove: "{{ nodes_to_remove | default([]) }}"
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: "{{ debug_level | default(2) }}"
