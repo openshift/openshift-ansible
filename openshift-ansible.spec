@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.23.0
+Release:        0.24.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,12 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon Aug 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.24.0
+- openshift-prometheus: change node_exporter service port to 9102
+  (pgier@redhat.com)
+- Revert "openshift-prometheus: change node_exporter service port to 9101"
+  (pgier@redhat.com)
+
 * Sun Aug 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.23.0
 - Commit to enable standalone master instances in aws (mazzystr@gmail.com)
 - SDN check: Expand openshift_client_binary variable (miciah.masters@gmail.com)
