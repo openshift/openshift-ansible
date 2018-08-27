@@ -20,8 +20,14 @@
 # TODO: temporary until we fix apply for image stream tags
 - name: Remove the image stream tag
   command: >
-    {{ openshift_client_binary }} delete -n openshift-infra istag node:v3.10 --ignore-not-found
+    {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    delete -n openshift-infra istag node:v3.10 --ignore-not-found
+  register: l_os_istag_del
+  # The istag might not be there, so we want to not fail in that case.
+  failed_when:
+    - l_os_istag_del.rc != 0
+    - "'have a resource type' not in l_os_istag_del.stderr"
 
 - name: Apply the config
   command: >
