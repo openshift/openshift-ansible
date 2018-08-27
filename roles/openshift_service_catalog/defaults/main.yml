@@ -1,4 +1,5 @@
 ---
+openshift_service_catalog_install: true
 openshift_service_catalog_remove: false
 
 # Feature Gates

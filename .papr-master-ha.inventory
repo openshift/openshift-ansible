@@ -12,7 +12,7 @@ openshift_master_default_subdomain="{{ lookup('env', 'RHCI_ocp_master1_IP') }}.x
 openshift_check_min_host_disk_gb=1.5
 openshift_check_min_host_memory_gb=1.9
 openshift_portal_net=172.30.0.0/16
-openshift_enable_service_catalog=false
+openshift_service_catalog_install=false
 debug_level=4
 openshift_docker_options="--log-driver=journald"
 

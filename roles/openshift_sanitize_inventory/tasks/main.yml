@@ -45,6 +45,15 @@
     - openshift_cloudprovider_kind is defined
     - openshift_cloudprovider_kind == 'aws'
 
+- name: Ensure openshift_service_catalog_remove and openshift_service_catalog_install are mutually exclusive
+  fail:
+    msg: >
+      Ensure that openshift_service_catalog_remove and openshift_service_catalog_install are mutually exclusive,
+      do not set both to true. openshift_service_catalog_install defaults to true.
+  when:
+    - openshift_service_catalog_remove | default(false) | bool
+    - openshift_service_catalog_install | default(true) | bool
+
 - name: Ensure ansible_service_broker_remove and ansible_service_broker_install are mutually exclusive
   fail:
     msg: >

@@ -12,7 +12,7 @@ lb
 ansible_user=root
 openshift_deployment_type=origin
 #openshift_deployment_type=openshift-enterprise
-openshift_enable_service_catalog=False
+openshift_service_catalog_install=False
 
 # Hostnames
 load_balancer_hostname=lb0.{{openshift_rhv_dns_zone}}

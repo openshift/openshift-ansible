@@ -8,7 +8,7 @@
       name: openshift_service_catalog
       tasks_from: install.yml
     when:
-    - openshift_enable_service_catalog | default(true) | bool
+    - openshift_service_catalog_install | default(true) | bool
   - import_role:
       name: ansible_service_broker
       tasks_from: install.yml

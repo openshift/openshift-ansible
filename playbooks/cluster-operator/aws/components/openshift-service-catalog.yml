@@ -22,4 +22,4 @@
 
 - name: Run openshift-service-catalog playbook
   import_playbook: ../../../openshift-service-catalog/private/config.yml
-  when: openshift_enable_service_catalog | default(true) | bool
+  when: openshift_service_catalog_install | default(true) | bool

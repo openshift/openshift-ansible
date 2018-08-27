@@ -161,3 +161,7 @@ openshift_node_groups:
       - 'node-role.kubernetes.io/infra=true,node-role.kubernetes.io/master=true,node-role.kubernetes.io/compute=true'
     edits: []
 openshift_master_manage_htpasswd: True
+
+
+#Backwards compatibility with old inventory files
+openshift_service_catalog_install: "{{ openshift_enable_service_catalog | default(openshift_service_catalog_install) }}"

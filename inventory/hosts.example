@@ -901,7 +901,7 @@ debug_level=2
 #openshift_buildoverrides_json='{"BuildOverrides":{"configuration":{"apiVersion":"v1","kind":"BuildDefaultsConfig","forcePull":"true"}}}'
 
 # Enable service catalog
-#openshift_enable_service_catalog=true
+#openshift_service_catalog_install=true
 
 # Enable template service broker (requires service catalog to be enabled, above)
 #template_service_broker_install=true
