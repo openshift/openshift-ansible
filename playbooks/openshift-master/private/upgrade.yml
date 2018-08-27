@@ -71,10 +71,17 @@
 # Set openshift_master_facts separately. In order to reconcile
 # admission_config's, we currently must run openshift_master_facts and
 # then run openshift_facts.
-- name: Set OpenShift master facts
+- name: Set OpenShift master facts and image prepull
   hosts: oo_masters_to_config
   roles:
   - openshift_master_facts
+  tasks:
+  - import_role:
+      name: openshift_control_plane
+      tasks_from: pre_pull.yml
+  - import_role:
+      name: openshift_control_plane
+      tasks_from: pre_pull_poll.yml
 
 - name: configure vsphere svc account
   hosts: oo_first_master
