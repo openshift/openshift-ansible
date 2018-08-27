@@ -6,5 +6,3 @@ openshift_logging_eventrouter_cpu_limit: null
 openshift_logging_eventrouter_cpu_request: 100m
 openshift_logging_eventrouter_memory_limit: 128Mi
 openshift_logging_eventrouter_namespace: default
-
-openshift_logging_eventrouter_image: "{{ l_os_registry_url | regex_replace(l_openshift_logging_search | regex_escape, 'logging-eventrouter') }}"
