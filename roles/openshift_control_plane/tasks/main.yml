@@ -10,21 +10,7 @@
   when:
   - openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods
 
-- name: Check that origin image is present
-  command: 'docker images -q "{{ osm_image }}"'
-  register: control_plane_image
-
-# This task runs async to save time while the master is being configured
-- name: Pre-pull Origin image
-  docker_image:
-    name: "{{ osm_image }}"
-  environment:
-    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
-  when: control_plane_image.stdout_lines == []
-  # 10 minutes to pull the image
-  async: 600
-  poll: 0
-  register: image_prepull
+- import_tasks: pre_pull.yml
 
 - name: Open up firewall ports
   import_tasks: firewall.yml
@@ -159,28 +145,7 @@
   # copy to this location to bypass initial bootstrap request
   - /etc/origin/node/node.kubeconfig
 
-- name: Check status of control plane image pre-pull
-  async_status:
-    jid: "{{ image_prepull.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  when: control_plane_image.stdout_lines == []
-  retries: 20
-  delay: 30
-  failed_when: false
-
-- name: Check status of etcd image pre-pull
-  async_status:
-    jid: "{{ etcd_prepull.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  when:
-  - etcd_image_exists is defined
-  - "'stdout_lines' in etcd_image_exists"
-  - etcd_image_exists.stdout_lines == []
-  retries: 20
-  delay: 30
-  failed_when: false
+- import_tasks: pre_pull_poll.yml
 
 - name: Start and enable self-hosting node
   systemd:
