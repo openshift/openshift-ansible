@@ -41,6 +41,13 @@
     - openshift_release is defined
     - not (openshift_release is version_compare(openshift_upgrade_target ,'='))
 
+  # Ensure glusterfs clusters are healthy before starting an upgrade.
+  - import_role:
+      name: openshift_storage_glusterfs
+      tasks_from: check_cluster_health.yml
+    when: >
+          ('glusterfs' in groups and groups['glusterfs'] | length > 0)
+          or ('glusterfs_registry' in groups and groups['glusterfs_registry'] | length > 0)
 - name: Verify master processes
   hosts: oo_masters_to_config
   roles:
