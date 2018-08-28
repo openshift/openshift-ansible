@@ -61,7 +61,6 @@
       role: node
       local_facts:
         sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
-        bootstrapped: "{{ openshift_is_bootstrapped }}"
 
 - name: Initialize etcd host variables
   hosts: oo_masters_to_config

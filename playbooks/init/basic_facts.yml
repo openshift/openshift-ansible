@@ -32,17 +32,6 @@
     - openshift_deployment_type is undefined
     - deployment_type is defined
 
-  - name: check for node already bootstrapped
-    stat:
-      path: "/etc/origin/node/bootstrap-node-config.yaml"
-      get_checksum: false
-      get_attributes: false
-      get_mime: false
-    register: bootstrap_node_config_path_check
-  - name: initialize_facts set fact openshift_is_bootstrapped
-    set_fact:
-      openshift_is_bootstrapped: "{{ openshift_is_bootstrapped|default(False) or bootstrap_node_config_path_check.stat.exists }}"
-
   - name: initialize_facts set fact openshift_is_atomic and openshift_is_containerized
     set_fact:
       openshift_is_atomic: "{{ ostree_booted.stat.exists }}"

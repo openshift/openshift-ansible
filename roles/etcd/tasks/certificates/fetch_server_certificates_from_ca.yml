@@ -5,7 +5,6 @@
     state: present
   when:
   - not etcd_is_atomic | bool
-  - not openshift_is_bootstrapped | bool
   register: result
   until: result is succeeded
 
