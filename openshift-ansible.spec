@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.37
+Version:        3.10.38
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Aug 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.38-1
+- Add %%{?dist} back into Release (sdodson@redhat.com)
+
 * Tue Aug 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.37-1
 - Ensure connection local on local host play (mgugino@redhat.com)
 
