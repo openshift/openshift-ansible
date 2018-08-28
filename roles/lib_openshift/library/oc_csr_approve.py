@@ -219,9 +219,10 @@ def verify_server_csrs(module, result, oc_bin, oc_conf, node_list):
     while not_ready_nodes_server:
         nodes_server_ready = get_ready_nodes_server(module, oc_bin, oc_conf,
                                                     not_ready_nodes_server)
+
         # if we have same number of nodes_server_ready now, all of the previous
         # not_ready_nodes are now ready.
-        if len(nodes_server_ready) == len(not_ready_nodes_server):
+        if not len(not_ready_nodes_server - set(nodes_server_ready)):
             break
         attempts += 1
         if attempts > 9:
@@ -231,6 +232,7 @@ def verify_server_csrs(module, result, oc_bin, oc_conf, node_list):
             msg = "Some nodes still not ready after approving server certs: {}"
             msg = msg.format(", ".join(missing_nodes))
             result['msg'] = msg
+            module.fail_json(**result)
 
 
 def run_module():

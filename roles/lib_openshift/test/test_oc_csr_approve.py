@@ -52,7 +52,6 @@ def test_get_ready_nodes():
     with patch(RUN_CMD_MOCK) as call_mock:
         call_mock.return_value = (0, oc_get_nodes_stdout, '')
         ready_nodes = oc_csr_approve.get_ready_nodes(module, 'oc', '/dev/null')
-    print(ready_nodes)
     assert ready_nodes == ['fedora1.openshift.io', 'fedora3.openshift.io']
 
 
@@ -152,6 +151,28 @@ def test_get_csrs_server():
     assert csr_dict['csr-2cxkp'] == 'fedora2.mguginolocal.com'
 
 
+def test_verify_server_csrs():
+    module = DummyModule({})
+    oc_bin = 'oc'
+    oc_conf = '/dev/null'
+    result = {}
+    ready_nodes_server = ['fedora1.openshift.io']
+    node_list = ['fedora1.openshift.io']
+    with patch('oc_csr_approve.get_ready_nodes_server') as call_mock:
+        call_mock.return_value = ready_nodes_server
+        # This should silently return
+        oc_csr_approve.verify_server_csrs(module, result, oc_bin, oc_conf,
+                                          node_list)
+
+    node_list = ['fedora1.openshift.io', 'fedora2.openshift.io']
+    with patch('oc_csr_approve.get_ready_nodes_server') as call_mock:
+        call_mock.return_value = ready_nodes_server
+        with pytest.raises(Exception) as err:
+            oc_csr_approve.verify_server_csrs(module, result, oc_bin, oc_conf,
+                                              node_list)
+        assert 'after approving server certs: fedora2.openshift.io' in str(err)
+
+
 if __name__ == '__main__':
     test_parse_subject_cn()
     test_get_ready_nodes()
@@ -160,3 +181,4 @@ if __name__ == '__main__':
     test_approve_csrs()
     test_get_ready_nodes_server()
     test_get_csrs_server()
+    test_verify_server_csrs()
