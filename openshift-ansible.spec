@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.24.0%{?dist}
+Release:        0.25.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,32 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Aug 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.25.0
+- Fix etcd helper function template error (sdodson@redhat.com)
+- Remove openshift_is_bootstrapped variable (rteague@redhat.com)
+- Fix server csr while loop oc_csr_approve (mgugino@redhat.com)
+- Add %%{?dist} back into specfile release (sdodson@redhat.com)
+- Prefix identity provider's CA files with identity provider names
+  (vrutkovs@redhat.com)
+- Dissalow custom CA file path for providers with CA path (vrutkovs@redhat.com)
+- Add support for ak/orgid (e.minguez@gmail.com)
+- make azure load balancer creation parameters as options (weshi@redhat.com)
+- small typo in comment for vpc (emailscottcollier@gmail.com)
+- Add networkmanager check to sanity checks (mgugino@redhat.com)
+- Ensure default StorageClass reclaimPolicy is set to nil instead of
+  emptystring when reclaim_policy undefined (mawong@redhat.com)
+- Add failed_when to 'Remove the image stream tag' tasks (mgugino@redhat.com)
+- Ensure master image is pre-pulled on upgrade (mgugino@redhat.com)
+- Updating logging eventrouter image name to match ose naming pattern
+  (ewolinet@redhat.com)
+- Rename task name in role rhel_repos (mazzystr@gmail.com)
+- Update the naming of openshift on rhv to ovirt (sradco@redhat.com)
+- Unify cluster-monitoring install variables (fbranczyk@gmail.com)
+- Fix aws elb dictionary fact for dns (mgugino@redhat.com)
+- Cleanup upgrades - control plane + registry_auth (mgugino@redhat.com)
+- Update pause image value in crio.conf after upgrade (umohnani@redhat.com)
+- node kubelet args fail instead of warn (mgugino@redhat.com)
+
 * Mon Aug 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.24.0
 - openshift-prometheus: change node_exporter service port to 9102
   (pgier@redhat.com)
