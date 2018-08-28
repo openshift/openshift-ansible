@@ -3,7 +3,7 @@
 # command flags are different between the two. Should work on stand
 # alone etcd hosts and master + etcd hosts too because we use the peer keys.
 etcdctl2() {
- cmd="/usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file { etcd_peer_ca_file }} -C https://`hostname`:2379 ${@}"
+ cmd="/usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} -C https://`hostname`:2379 ${@}"
  if [[ -f /usr/local/bin/master-exec ]]; then
    /usr/local/bin/master-exec etcd etcd /bin/bash -c "$cmd"
  else
@@ -12,7 +12,7 @@ etcdctl2() {
 }
 
 etcdctl3() {
- cmd="ETCDCTL_API=3 /usr/bin/etcdctl --cert {{ etcd_peer_cert_file }} --key {{ etcd_peer_key_file }} --cacert { etcd_peer_ca_file }} --endpoints https://`hostname`:2379 ${@}"
+ cmd="ETCDCTL_API=3 /usr/bin/etcdctl --cert {{ etcd_peer_cert_file }} --key {{ etcd_peer_key_file }} --cacert {{ etcd_peer_ca_file }} --endpoints https://`hostname`:2379 ${@}"
  if [[ -f /usr/local/bin/master-exec ]]; then
    /usr/local/bin/master-exec etcd etcd /bin/bash -c "$cmd"
  else
