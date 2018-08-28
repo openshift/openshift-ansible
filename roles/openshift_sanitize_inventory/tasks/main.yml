@@ -93,11 +93,7 @@
         or openshift_cloudprovider_azure_tenant_id is not defined
         or openshift_cloudprovider_azure_subscription_id is not defined
         or openshift_cloudprovider_azure_resource_group is not defined
-        or openshift_cloudprovider_azure_cloud is not defined
         or openshift_cloudprovider_azure_location is not defined
-        or openshift_cloudprovider_azure_vnet_name is not defined
-        or openshift_cloudprovider_azure_security_group_name is not defined
-        or openshift_cloudprovider_azure_availability_set_name is not defined
 
 - name: Ensure removed web console extension variables are not set
   fail:
