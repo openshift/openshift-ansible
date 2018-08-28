@@ -17,3 +17,18 @@
   # node_group_checks is a custom action plugin defined in lib_utils.
   - name: Validate openshift_node_groups and openshift_node_group_name
     node_group_checks: {}
+
+# l_networkman_check_hosts may be passed in via playbooks/deploy_cluster.yml
+# and master/node scaleup plays
+- name: Verify Node NetworkManager
+  # We only want to run this on new installs and node/master scaleup.
+  hosts: "{{ l_networkman_check_hosts | default('all:!all') }}"
+  tasks:
+  - name: Check for NetworkManager service
+    command: 'systemctl show NetworkManager'
+    register: nm_show
+    changed_when: false
+    ignore_errors: True
+  - fail: msg="Currently, NetworkManager must be installed and enabled prior to installation."
+    when:
+    - not ('ActiveState=active' in nm_show.stdout) | bool
