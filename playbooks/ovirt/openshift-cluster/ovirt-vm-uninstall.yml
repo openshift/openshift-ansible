@@ -16,7 +16,7 @@
         - always
     - name: Build virtual machine facts
       import_role:
-        name: openshift_rhv
+        name: openshift_ovirt
         tasks_from: build_vm_list.yml
 
   tasks:

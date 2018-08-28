@@ -1,16 +1,16 @@
-# RHV Playbooks
+# oVirt Playbooks
 ## Provisioning
-This subdirectory contains the Ansible playbooks used to deploy 
-an OpenShift Container Platform environment on Red Hat Virtualization
+This subdirectory contains the Ansible playbooks used to deploy
+an OpenShift Container Platform environment on oVirt.
 
 ### Where do I start?
 Choose a host from which Ansible plays will be executed. This host must have
-the ability to access the web interface of the RHV cluster engine and the
+the ability to access the web interface of the oVirt cluster engine and the
 network on which the OpenShift nodes will be installed. We will refer to
 this host as the *bastion*.
 
 #### oVirt Ansible Roles
-The oVirt project maintains Ansible roles for managing an oVirt or RHV cluster.
+The oVirt project maintains Ansible roles for managing an oVirt cluster.
 These should be installed on the *bastion* host according to the instructions
 at the [oVirt Ansible Roles page](https://github.com/ovirt/ovirt-ansible/).
 
@@ -25,7 +25,7 @@ for details.
 After populating inventory and variables files with the proper values,
 (see [The OpenShift Advanced Installation Documentation](https://docs.openshift.com/container-platform/latest/install_config/install/advanced_install.html)
 ) a series of Ansible playbooks from this subdirectory will provision a set of
-nodes on the RHV (or oVirt) cluster, prepare them for OpenShift installation,
+nodes on the oVirt cluster, prepare them for OpenShift installation,
 and deploy an OpenShift cluster on them.
 
 #### Step 1 Inventory
@@ -33,17 +33,17 @@ The [`inventory.example`](inventory.example) file here is provided as an example
 environment. It is up to the user to add additional OpenShift specific variables to this file to configure
 required elements such as the registry, storage, authentication, and networking.
 
-One required variable added for this environment is the `openshift_rhv_dns_zone`. As this is used to construct
+One required variable added for this environment is the `openshift_ovirt_dns_zone`. As this is used to construct
 hostnames during VM creation, it is essential that this be set to the default dns zone for those nodes' hostnames.
 
-#### Step 2 RHV Provisioning Variables
+#### Step 2 oVirt Provisioning Variables
 
 Fill out a provisioning variables file (example [`provisioning-vars.yaml.example`](provisioning-vars.yaml.example)
-with values from your RHV environment, making sure to fill in all commented values.
+with values from your oVirt environment, making sure to fill in all commented values.
 
-*Red Hat Virtualization Certificate*
+*oVirt Engine internal Certificate*
 
-A copy of the `/etc/pki/ovirt-engine/ca.pem` from the RHV engine will need to
+A copy of the `/etc/pki/ovirt-engine/ca.pem` from the oVirt engine will need to
 be downloaded to the *bastion* and its location set in the `engine_cafile` variable. Replace the
 example server in the following command to download the certificate:
 
@@ -52,13 +52,13 @@ $ curl --output ca.pem 'http://engine.example.com/ovirt-engine/services/pki-reso
 
 ```
 
-#### Step 3 Provision Virtual Machines in RHV
+#### Step 3 Provision Virtual Machines in oVirt
 Once all the variables in the `provisioning_vars.yaml` file are set, use the
 [`ovirt-vm-infra.yml`](openshift-cluster/ovirt-vm-infra.yml) playbook to begin
 provisioning.
 
 ```
-ansible-playbook -i inventory -e@provisioning_vars.yml ${PATH_TO_OPENSHIFT_ANSIBLE}/playbooks/rhv/openshift-cluster/ovirt-vm-infra.yml
+ansible-playbook -i inventory -e@provisioning_vars.yml ${PATH_TO_OPENSHIFT_ANSIBLE}/playbooks/ovirt/openshift-cluster/ovirt-vm-infra.yml
 ```
 
 #### Step 4 Update DNS

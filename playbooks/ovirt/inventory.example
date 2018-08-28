@@ -1,5 +1,5 @@
 [all:vars]
-openshift_rhv_dns_zone=  # example.com
+openshift_ovirt_dns_zone=  # example.com
 
 [OSEv3:children]
 nodes
@@ -15,10 +15,10 @@ openshift_deployment_type=origin
 openshift_enable_service_catalog=False
 
 # Hostnames
-load_balancer_hostname=lb0.{{openshift_rhv_dns_zone}}
+load_balancer_hostname=lb0.{{openshift_ovirt_dns_zone}}
 openshift_master_cluster_hostname="{{ load_balancer_hostname }}"
-openshift_master_cluster_public_hostname=openshift-master.{{ openshift_rhv_dns_zone }}
-openshift_master_default_subdomain=apps.{{ openshift_rhv_dns_zone }}
+openshift_master_cluster_public_hostname=openshift-master.{{ openshift_ovirt_dns_zone }}
+openshift_master_default_subdomain=apps.{{ openshift_ovirt_dns_zone }}
 openshift_public_hostname="{{openshift_master_cluster_public_hostname}}"
 
 # Docker setup for extra disks on nodes
