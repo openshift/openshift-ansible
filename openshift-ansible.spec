@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.36
+Version:        3.10.37
 Release:        1
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Aug 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.37-1
+- Ensure connection local on local host play (mgugino@redhat.com)
+
 * Mon Aug 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.36-1
 - Move filters (mateus.caruccio@getupcloud.com)
 - Overwrite grafana datasource and dashboards (mateus.caruccio@getupcloud.com)
