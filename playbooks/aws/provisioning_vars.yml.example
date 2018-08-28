@@ -14,12 +14,8 @@
 # Deployment type must be specified.
 openshift_deployment_type: # 'origin' or 'openshift-enterprise'
 
-# openshift_release must be specified.  Use whatever version of openshift
-# that is supported by openshift-ansible that you wish.
-openshift_release: # v3.7
-
 # This will be dependent on the version provided by the yum repository
-openshift_pkg_version: # -3.7.0
+#openshift_pkg_version: # -3.10.0
 
 # OpenShift api port
 # Fulfills a chicken/egg scenario with how Ansible treats host inventory file
