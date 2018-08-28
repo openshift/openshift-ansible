@@ -2,8 +2,6 @@
 r_etcd_common_backup_tag: ''
 r_etcd_common_backup_sufix_name: ''
 
-l_etcd_bootstrapped: '{{ openshift.node.bootstrapped }}'
-
 l_etcd_static_pod: "{{ (inventory_hostname in groups['oo_masters']) | bool }}"
 
 # runc, docker, static pod, host

@@ -1,9 +1,4 @@
 ---
-- name: Gather node information
-  openshift_facts:
-    role: node
-    local_facts:
-      bootstrapped: true
 
 - name: Copy master bootstrap config locally
   slurp:

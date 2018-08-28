@@ -25,7 +25,8 @@
 - name: install components
   import_playbook: ../../common/private/components.yml
 
-- hosts: primary_master
+- name: Copy the kubeconfig, used by CI to determine when the containers are ready
+  hosts: oo_first_master
   gather_facts: no
   tasks:
   - name: Retrieve cluster configuration

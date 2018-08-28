@@ -13,10 +13,6 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- name: Only target nodes that have not yet been bootstrapped
-  hosts: localhost
-  tasks:
-
 - import_playbook: disable_excluders.yml
 
 - import_playbook: configure_nodes.yml
