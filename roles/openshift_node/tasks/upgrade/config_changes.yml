@@ -27,6 +27,9 @@
 - name: Update systemd units
   import_tasks: ../systemd_units.yml
 
+- name: Add AWS configuration
+  import_tasks: ../aws.yml
+
 # NOTE: This is needed to make sure we are using the correct set
 #       of systemd unit files. The RPMs lay down defaults but
 #       the install/upgrade may override them in /etc/systemd/system/.
