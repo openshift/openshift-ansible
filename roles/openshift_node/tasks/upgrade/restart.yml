@@ -47,13 +47,15 @@
   failed_when: false
 
 - name: Approve the node
-  oc_adm_csr:
-    nodes: ["{{ openshift.node.nodename | lower }}"]
-    timeout: 180
-    fail_on_timeout: true
+  oc_csr_approve:
+    oc_bin: "{{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }}"
+    oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    node_list:
+      - "{{ openshift.node.nodename | lower }}"
   delegate_to: "{{ groups.oo_first_master.0 }}"
-  when:
-    - openshift_current_version is version_compare('3.10', '<')
+  register: node_upgrade_oc_csr_approve
+  retries: 30
+  until: node_upgrade_oc_csr_approve is succeeded
 
 - name: Check status of node service
   async_status:
