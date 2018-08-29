@@ -2,9 +2,14 @@
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when:
-    - (not ansible_selinux or ansible_selinux.status != 'enabled' or ansible_selinux.mode != 'enforcing' or ansible_selinux.config_mode != 'enforcing')
+    - (not ansible_selinux or ansible_selinux.status != 'enabled')
     - openshift_deployment_type == 'openshift-enterprise'
     - not openshift_use_crio | bool
+
+- name: "Verify SELinux is enforcing"
+  fail:
+    msg: "SELinux is required for OpenShift and has been detected as '{{ ansible_selinux.config_mode }}'"
+  when: ansible_selinux.mode != 'enforcing' or ansible_selinux.config_mode != "enforcing"
 
 - name: Start node image prepull
   import_tasks: prepull.yml
