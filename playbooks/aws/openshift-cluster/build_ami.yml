@@ -30,6 +30,9 @@
       openshift_node_image_prep_packages:
       - cloud-init
       - cloud-utils-growpart
+  - import_role:
+      name: openshift_version
+      tasks_from: first_master.yml
 
 # This is the part that installs all of the software and configs for the instance
 # to become a node.
