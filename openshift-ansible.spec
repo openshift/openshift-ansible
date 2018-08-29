@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.39
+Version:        3.10.40
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,11 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Aug 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.40-1
+- Ensure default StorageClass reclaimPolicy is set to nil instead of
+  emptystring when reclaim_policy undefined (mawong@redhat.com)
+- Don't set reclaim policy to empty string (mawong@redhat.com)
+
 * Wed Aug 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.39-1
 - Fix etcd helper function template error (sdodson@redhat.com)
 - Fix server csr while loop oc_csr_approve (mgugino@redhat.com)
