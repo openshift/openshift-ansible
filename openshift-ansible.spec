@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.38
+Version:        3.10.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,12 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Aug 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.39-1
+- Fix etcd helper function template error (sdodson@redhat.com)
+- Fix server csr while loop oc_csr_approve (mgugino@redhat.com)
+- Add support for ak/orgid (e.minguez@gmail.com)
+- Remove unnecessary passlib check (jkr@adorsys.de)
+
 * Tue Aug 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.38-1
 - Add %%{?dist} back into Release (sdodson@redhat.com)
 
