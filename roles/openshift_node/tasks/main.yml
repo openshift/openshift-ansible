@@ -53,14 +53,7 @@
     sysctl_file: "/etc/sysctl.d/99-openshift.conf"
     reload: yes
 
-# Required in some selinux policy versions see
-# https://bugzilla.redhat.com/show_bug.cgi?id=1587825
-# https://bugzilla.redhat.com/show_bug.cgi?id=1549765
-- name: Setting sebool container_manage_cgroup
-  seboolean:
-    name: container_manage_cgroup
-    state: yes
-    persistent: yes
+- import_tasks: selinux_container_cgroup.yml
 
 - import_tasks: registry_auth.yml
 
