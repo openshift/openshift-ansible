@@ -8,7 +8,6 @@
     when:
     - openshift_deployment_type == 'openshift-enterprise'
     - ansible_distribution == "RedHat"
-    - rhsub_user is defined
-    - rhsub_pass is defined
+    - (rhsub_user is defined and rhsub_pass is defined) or (rhsub_ak is defined and rhsub_orgid is defined)
   - role: openshift_repos
   - role: os_update_latest
