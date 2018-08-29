@@ -1,0 +1,37 @@
+---
+- name: Remove 'signed-by' service annotations to regenerate TLS secrets
+  command: >
+    {{ openshift_client_binary }} annotate service/{{ item }}
+    service.alpha.openshift.io/serving-cert-signed-by-
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    -n openshift-ansible-service-broker
+  with_items:
+    - asb
+    - asb-etcd
+
+- name: Remove ASB pods
+  oc_obj:
+    selector: "deploymentconfig={{ item }}"
+    kind: pod
+    state: absent
+    namespace: openshift-ansible-service-broker
+  with_items:
+    - asb
+    - asb-etcd
+
+- name: Verify that the ASB is running
+  oc_obj:
+    namespace: openshift-ansible-service-broker
+    kind: deploymentconfig
+    state: list
+    name: "{{ item }}"
+  register: asb_deployment
+  until:
+    - asb_deployment.results.results[0].status.readyReplicas is defined
+    - asb_deployment.results.results[0].status.readyReplicas > 0
+  retries: 60
+  delay: 10
+  changed_when: false
+  with_items:
+    - asb
+    - asb-etcd
