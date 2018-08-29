@@ -95,10 +95,10 @@
   tasks:
   - import_role:
       name: openshift_node
-      tasks_from: upgrade_pre
+      tasks_from: upgrade_pre.yml
   - import_role:
       name: openshift_node
-      tasks_from: upgrade
+      tasks_from: upgrade.yml
   - import_role:
       name: openshift_storage_glusterfs
       tasks_from: check_cluster_health.yml
@@ -113,7 +113,7 @@
   tasks:
   - import_role:
       name: openshift_web_console
-      tasks_from: remove_old_asset_config
+      tasks_from: remove_old_asset_config.yml
 
 # This is a one time migration. No need to save it in the 3.11.
 # https://bugzilla.redhat.com/show_bug.cgi?id=1565736

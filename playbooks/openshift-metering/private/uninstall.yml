@@ -19,7 +19,7 @@
   tasks:
   - include_role:
       name: openshift_metering
-      tasks_from: uninstall
+      tasks_from: uninstall.yml
 
 - name: Openshift Metering Uninstall Checkpoint End
   hosts: all
