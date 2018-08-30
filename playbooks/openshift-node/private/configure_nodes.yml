@@ -15,6 +15,7 @@
   - role: openshift_node
   - role: tuned
   - role: nickhammond.logrotate
+  - role: container_runtime
   tasks:
   - import_role:
       name: openshift_storage_glusterfs
