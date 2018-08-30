@@ -34,6 +34,16 @@
 - import_tasks: glusterfs_deploy.yml
   when: glusterfs_is_native
 
+- name: Start glusterd (external)
+  service:
+    name: glusterd
+    state: started
+    enabled: yes
+  delegate_to: "{{ item }}"
+  with_items: "{{ glusterfs_nodes | default([]) }}"
+  when:
+  - not glusterfs_is_native | bool
+
 - import_tasks: heketi_setup.yml
   when: glusterfs_heketi_is_native
 
