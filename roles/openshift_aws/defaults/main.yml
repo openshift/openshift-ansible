@@ -245,7 +245,6 @@ openshift_aws_node_groups:
     host-type: node
     sub-host-type: compute
     runtime: docker
-
 - name: "{{ openshift_aws_clusterid }} infra group"
   group: infra
   node_group_config: node-config-infra
