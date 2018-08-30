@@ -9,7 +9,7 @@ metadata:
 {% endif %}
 provisioner: gluster.org/glusterblock
 parameters:
-  resturl: "http://{% if glusterfs_heketi_is_native %}{{ glusterfs_heketi_route }}{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %}"
+  resturl: "http://{% if glusterfs_heketi_is_native %}heketi-{{ glusterfs_name }}.{{ glusterfs_namespace }}.svc:{{ glusterfs_heketi_port }}{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %}"
   restuser: "admin"
   chapauthenabled: "true"
   hacount: "3"
