@@ -8,7 +8,8 @@
 
   - name: set expire date
     set_fact:
-      sas_expire: "{{ lookup('pipe', 'date -d \"14 days\" +\"%Y-%m-%dT%H:%M:00Z\"') }}"
+      sas_start: "{{ lookup('pipe', 'date -u +\"%Y-%m-%dT%H:%M:00Z\"') }}"
+      sas_expire: "{{ lookup('pipe', 'date -ud \"14 days\" +\"%Y-%m-%dT%H:%M:00Z\"') }}"
       disk: "{{ image_name }}.vhd"
 
   - name: fetch the image for the tags
@@ -23,7 +24,7 @@
 
   - name: generate sas url for the container
     command: |
-      az storage container generate-sas --name {{ openshift_azure_container }} --account-name {{ openshift_azure_storage_account }} --permissions rl --expiry {{ sas_expire }} --output=json
+      az storage container generate-sas --name {{ openshift_azure_container }} --account-name {{ openshift_azure_storage_account }} --permissions rl --start {{ sas_start }} --expiry {{ sas_expire }} --output=json
     register: sasurl
 
   - name: set the sas URLS
