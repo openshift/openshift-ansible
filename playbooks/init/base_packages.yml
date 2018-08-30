@@ -14,7 +14,9 @@
   # chrony is installed on atomic host by default, so no need to worry about
   # atomic here.
   - name: Install ntp package
-    package: name=ntp state=present
+    package:
+      name: ntp
+      state: present
     when:
     - openshift_clock_enabled | default(True) | bool
     - chrony_installed.rc != 0
@@ -30,16 +32,16 @@
     block:
     - name: Ensure openshift-ansible installer package deps are installed
       package:
-        name: "{{ item }}"
+        name: "{{ pkg_list | join(',') }}"
         state: present
-      with_items:
-      - iproute
-      - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
-      - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
-      - "{{ 'python-ipaddress' if ansible_distribution != 'Fedora' else '' }}"
-      - libsemanage-python
-      - yum-utils
-      - "{{ 'python3-docker' if ansible_distribution == 'Fedora' else 'python-docker' }}"
-      when: item != ''
+      vars:
+        pkg_list:
+        - iproute
+        - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
+        - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
+        - "{{ 'python-ipaddress' if ansible_distribution != 'Fedora' else '' }}"
+        - libsemanage-python
+        - yum-utils
+        - "{{ 'python3-docker' if ansible_distribution == 'Fedora' else 'python-docker' }}"
       register: result
       until: result is succeeded

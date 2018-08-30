@@ -6,7 +6,9 @@
   import_tasks: firewall.yml
 
 - name: Install etcd
-  package: name=etcd state=present
+  package:
+    name: etcd
+    state: present
   register: result
   until: result is succeeded
 

@@ -1,14 +1,15 @@
 ---
 - name: Install iSCSI storage plugin dependencies
   package:
-    name: "{{ item }}"
+    name: "{{ pkg_list | join(',') }}"
     state: present
   when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
-  with_items:
-    - iscsi-initiator-utils
-    - device-mapper-multipath
+  vars:
+    pkg_list:
+      - iscsi-initiator-utils
+      - device-mapper-multipath
 
 - name: restart services
   systemd:

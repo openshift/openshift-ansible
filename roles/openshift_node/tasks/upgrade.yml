@@ -22,15 +22,16 @@
 
 - name: Ensure cri-o is updated
   package:
-    name: "{{ crio_pkgs | join (',') }}"
+    name: "{{ pkg_list | join (',') }}"
     state: latest
   when:
   - openshift_use_crio | bool
   register: crio_update
+  until: crio_update is succeeded
   vars:
-    crio_pkgs:
-    - "cri-o"
-    - "cri-tools"
+    pkg_list:
+    - cri-o
+    - cri-tools
 
 - name: Remove CRI-O default configuration files
   file:

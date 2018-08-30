@@ -3,7 +3,9 @@
   import_tasks: firewall.yml
 
 - name: Install nfs-utils
-  package: name=nfs-utils state=present
+  package:
+    name: nfs-utils
+    state: present
   register: result
   until: result is succeeded
 
