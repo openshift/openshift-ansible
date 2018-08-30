@@ -38,6 +38,7 @@ options:
     - node
     - pod
     - namespace
+    - route
     aliases: []
   labels:
     description:
@@ -89,4 +90,14 @@ EXAMPLES = '''
         value: master
       - key: environment
         value: production
+
+- name: Add a single label to a route
+  oc_label:
+    name: docker-registry
+    state: add
+    kind: route
+    labels:
+      - key: router
+        value: public
+
 '''
