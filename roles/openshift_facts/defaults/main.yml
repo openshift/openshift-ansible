@@ -43,6 +43,7 @@ repoquery_installed: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --l
 openshift_use_crio: False
 openshift_use_crio_only: False
 openshift_crio_enable_docker_gc: True
+openshift_crio_var_sock: "unix:///var/run/crio/crio.sock"
 
 # osm_default_subdomain is an old migrated fact, can probably be removed.
 osm_default_subdomain: "router.default.svc.cluster.local"

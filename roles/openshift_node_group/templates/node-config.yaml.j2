@@ -28,9 +28,9 @@ kubeletArguments:
   container-runtime:
   - remote
   container-runtime-endpoint:
-  - {{ l_crio_var_sock }}
+  - {{ openshift_crio_var_sock }}
   image-service-endpoint:
-  - {{ l_crio_var_sock }}
+  - {{ openshift_crio_var_sock }}
   runtime-request-timeout:
   - 10m
 {% endif %}

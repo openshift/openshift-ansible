@@ -41,6 +41,14 @@
   - "/etc/cni/net.d/100-crio-bridge.conf"
   when: crio_update is changed
 
+- name: Ensure crictl.yaml runtime-endpoint is updated
+  yedit:
+    src: /etc/crictl.yaml
+    key: runtime-endpoint
+    value: "{{ openshift_crio_var_sock }}"
+  when:
+  - openshift_use_crio | default(False) | bool
+
 - name: install pre-pulled rpms.
   import_tasks: upgrade/rpm_upgrade_install.yml
   when: not openshift_is_atomic | bool

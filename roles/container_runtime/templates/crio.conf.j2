@@ -27,7 +27,7 @@ storage_option = [
 [crio.api]
 
 # listen is the path to the AF_LOCAL socket on which crio will listen.
-listen = "{{ l_crio_var_sock }}"
+listen = "/var/run/crio/crio.sock"
 
 # stream_address is the IP address on which the stream server will listen
 stream_address = ""
