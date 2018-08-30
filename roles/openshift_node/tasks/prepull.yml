@@ -1,6 +1,6 @@
 ---
 - name: Check that node image is present
-  command: 'docker images -q "{{ osn_image }}"'
+  command: "{{ openshift_container_cli }} images -q {{ osn_image }}"
   register: node_image
 
 # This task runs async to save time while the node is being configured
