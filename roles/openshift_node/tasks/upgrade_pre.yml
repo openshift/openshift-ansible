@@ -22,18 +22,6 @@
   until: result is succeeded
   when: not openshift_is_atomic | bool
 
-- name: Check Docker image count
-  shell: "docker images -aq | wc -l"
-  register: docker_image_count
-  when:
-  - l_docker_upgrade is defined
-  - l_docker_upgrade | bool
-
-- debug: var=docker_image_count.stdout
-  when:
-  - l_docker_upgrade is defined
-  - l_docker_upgrade | bool
-
 # Prepull the rpms for docker upgrade, but don't install
 - name: download docker upgrade rpm
   command: "{{ ansible_pkg_mgr }} install -y --downloadonly docker{{ '-' + docker_version }}"

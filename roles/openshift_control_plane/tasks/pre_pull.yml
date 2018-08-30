@@ -1,6 +1,6 @@
 ---
 - name: Check that origin image is present
-  command: 'docker images -q "{{ osm_image }}"'
+  command: "{{ openshift_container_cli }} images -q {{ osm_image }}"
   register: control_plane_image
 
 # This task runs async to save time while the master is being configured

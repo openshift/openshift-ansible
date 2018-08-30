@@ -11,8 +11,7 @@
   when: oreg_auth_user is defined
 
 - name: Verify containers are available for upgrade
-  command: >
-    docker pull {{ openshift_cli_image }}
+  command: "{{ openshift_container_cli }} pull {{ openshift_cli_image }}"
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift_is_containerized | bool
