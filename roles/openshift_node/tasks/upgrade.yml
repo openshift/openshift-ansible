@@ -73,6 +73,9 @@
   import_tasks: upgrade/rpm_upgrade_install.yml
   when: not openshift_is_containerized | bool
 
+# TODO(michaelgugino): Remove in 3.12
+- import_tasks: selinux_container_cgroup.yml
+
 - include_tasks: "{{ node_config_hook }}"
   when: node_config_hook is defined
 
