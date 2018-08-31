@@ -24,6 +24,9 @@
       name: openshift_openstack
       tasks_from: node-configuration.yml
 
+- name: install NetworkManager
+  import_playbook: ../../openshift-node/private/network_manager.yml
+
 - name: run the cluster deploy
   import_playbook: ../../deploy_cluster.yml
 
