@@ -1,6 +1,8 @@
 ---
 - name: Install httpd-tools if needed
-  package: name=httpd-tools state=present
+  package:
+    name: httpd-tools
+    state: present
   when:
   - item.kind == 'HTPasswdPasswordIdentityProvider'
   - not openshift_is_atomic | bool

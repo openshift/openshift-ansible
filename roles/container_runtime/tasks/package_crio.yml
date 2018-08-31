@@ -32,14 +32,14 @@
 
 - name: Install cri-o
   package:
-    name: "{{ crio_pkgs | join(',') }}"
+    name: "{{ pkg_list | join(',') }}"
     state: latest
   register: result
   until: result is succeeded
   vars:
-    crio_pkgs:
-      - "cri-o"
-      - "cri-tools"
+    pkg_list:
+      - cri-o
+      - cri-tools
       - atomic
       - skopeo
 

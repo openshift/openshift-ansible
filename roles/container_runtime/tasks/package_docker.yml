@@ -22,14 +22,14 @@
 # Note: The curr_docker_version.stdout check can be removed when https://github.com/ansible/ansible/issues/33187 gets fixed.
 - name: Install Docker
   package:
-    name: "{{ l_docker_pkg_list | join(',') }}"
+    name: "{{ pkg_list | join(',') }}"
     state: present
   when:
   - not (openshift_is_atomic | bool)
   register: result
   until: result is succeeded
   vars:
-    l_docker_pkg_list:
+    pkg_list:
     - "docker{{ '-' + docker_version if docker_version is defined else '' }}"
     - atomic
     - skopeo

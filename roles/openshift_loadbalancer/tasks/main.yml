@@ -8,7 +8,9 @@
   import_tasks: firewall.yml
 
 - name: Install haproxy
-  package: name=haproxy state=present
+  package:
+    name: haproxy
+    state: present
   register: result
   until: result is succeeded
 
