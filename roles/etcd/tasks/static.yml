@@ -49,58 +49,8 @@
     dest: "{{ etcd_conf_file }}"
     backup: true
 
-- name: Create temp directory for static pods
-  command: mktemp -d /tmp/openshift-ansible-XXXXXX
-  register: mktemp
-  changed_when: false
-
-- name: Prepare etcd static pod
-  copy:
-    src: "{{ item }}"
-    dest: "{{ mktemp.stdout }}"
-    mode: 0600
-  with_items:
-  - etcd.yaml
-
-- name: Update etcd static pod
-  yedit:
-    src: "{{ mktemp.stdout }}/{{ item }}"
-    edits:
-    - key: spec.containers[0].image
-      value: "{{ etcd_image }}"
-  with_items:
-  - etcd.yaml
-
-- name: Set etcd host as a probe target host
-  yedit:
-    src: "{{ mktemp.stdout }}/{{ item }}"
-    edits:
-    - key: spec.containers[0].livenessProbe.exec.command
-      value:
-      - "etcdctl"
-      - "--cert-file"
-      - "{{ etcd_peer_cert_file }}"
-      - "--key-file"
-      - "{{ etcd_peer_key_file }}"
-      - "--ca-file"
-      - "{{ etcd_peer_ca_file }}"
-      - "-C"
-      - "{{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
-      - "cluster-health"
-  with_items:
-  - etcd.yaml
-
 - name: Deploy etcd static pod
-  copy:
-    remote_src: true
-    src: "{{ mktemp.stdout }}/{{ item }}"
-    dest: "{{ etcd_static_pod_location }}"
+  template:
+    src: etcd.yaml.j2
+    dest: "{{ etcd_static_pod_location }}/etcd.yaml"
     mode: 0600
-  with_items:
-  - etcd.yaml
-
-- name: Remove temp directory
-  file:
-    state: absent
-    name: "{{ mktemp.stdout }}"
-  changed_when: False
