@@ -44,6 +44,7 @@ openshift_use_crio: False
 openshift_use_crio_only: False
 openshift_crio_enable_docker_gc: True
 openshift_crio_var_sock: "unix:///var/run/crio/crio.sock"
+openshift_crio_pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
 
 # osm_default_subdomain is an old migrated fact, can probably be removed.
 osm_default_subdomain: "router.default.svc.cluster.local"
