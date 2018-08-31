@@ -181,6 +181,10 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
+{% if calico_image_credentials is defined %}
+      imagePullSecrets:
+        - name: calico-pull-secret
+{% endif %}
       nodeSelector:
         projectcalico.org/ds-ready: "true"
       hostNetwork: true
