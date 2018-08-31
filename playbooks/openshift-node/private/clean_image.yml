@@ -27,3 +27,24 @@
     file:
       state: absent
       path: "/var/lib/cloud/"
+  - when: openshift_aws_ami_set_gquota_on_slash | default(false)
+    block:
+    - name: fetch uuid of root vol
+      command: blkid /dev/xvda2 -s UUID -o value
+      register: rootvoluuid
+    - name: ensure gquota option for root vol in /etc/fstab
+      lineinfile:
+        line: "UUID={{ rootvoluuid.stdout }} /                       xfs     defaults,gquota 0 0"
+        path: /etc/fstab
+        regexp: "^UUID={{ rootvoluuid.stdout }}"
+        state: present
+    - name: set rootvol flags in grub conf
+      lineinfile:
+        line: 'GRUB_CMDLINE_LINUX="console=ttyS0,115200n8 console=tty0 net.ifnames=0 crashkernel=auto rootflags=gquota"'
+        path: /etc/default/grub
+        regexp: 'GRUB_CMDLINE_LINUX="console=ttyS0,115200n8 console=tty0 net.ifnames=0 crashkernel=auto"'
+        state: present
+      register: etcdefaultgrub
+    - name: recreate grub2 config
+      command: grub2-mkconfig -o /boot/grub2/grub.cfg
+      when: etcdefaultgrub.changed
