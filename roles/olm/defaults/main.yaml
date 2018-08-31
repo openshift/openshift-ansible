@@ -1,3 +1,5 @@
 ---
 operator_lifecycle_manager_remove: false
 operator_lifecycle_manager_install: true
+olm_operator_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'operator-lifecycle-manager') }}"
+olm_catalog_operator_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'operator-lifecycle-manager') }}"

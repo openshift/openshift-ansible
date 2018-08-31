@@ -55,11 +55,11 @@
     name: ocs
     namespace: operator-lifecycle-manager
 
-- name: Remove alm-operator Deployment manifest
+- name: Remove olm-operator Deployment manifest
   oc_obj:
     state: absent
     kind: Deployment
-    name: alm-operator
+    name: olm-operator
     namespace: operator-lifecycle-manager
 
 - name: Remove catalog-operator Deployment manifest
