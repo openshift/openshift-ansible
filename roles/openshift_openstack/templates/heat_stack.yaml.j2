@@ -15,11 +15,11 @@ outputs:
     description: IPs of the etcds
     value: { get_attr: [ etcd, private_ip ] }
 
-  {% if openshift_openstack_etcd_floating_ip | default(True) | bool %}
+{% if openshift_openstack_etcd_floating_ip | default(True) | bool %}
   etcd_floating_ips:
     description: Floating IPs of the etcds
     value: { get_attr: [ etcd, floating_ip ] }
-  {% endif %}
+{% endif %}
 
   master_names:
     description: Name of the masters
@@ -29,11 +29,11 @@ outputs:
     description: IPs of the masters
     value: { get_attr: [ masters, private_ip ] }
 
-  {% if openshift_openstack_master_floating_ip | default(True) | bool %}
+{% if openshift_openstack_master_floating_ip | default(True) | bool %}
   master_floating_ips:
     description: Floating IPs of the masters
     value: { get_attr: [ masters, floating_ip ] }
-  {% endif %}
+{% endif %}
 
   node_names:
     description: Name of the nodes
@@ -43,11 +43,11 @@ outputs:
     description: IPs of the nodes
     value: { get_attr: [ compute_nodes, private_ip ] }
 
-  {% if openshift_openstack_app_floating_ip | default(True) | bool %}
+{% if openshift_openstack_app_floating_ip | default(True) | bool %}
   node_floating_ips:
     description: Floating IPs of the nodes
     value: { get_attr: [ compute_nodes, floating_ip ] }
-  {% endif %}
+{% endif %}
 
   infra_names:
     description: Name of the nodes
@@ -57,18 +57,19 @@ outputs:
     description: IPs of the nodes
     value: { get_attr: [ infra_nodes, private_ip ] }
 
-  {% if openshift_openstack_infra_floating_ip | default(True) | bool %}
+{% if openshift_openstack_infra_floating_ip | default(True) | bool %}
   infra_floating_ips:
     description: Floating IPs of the nodes
     value: { get_attr: [ infra_nodes, floating_ip ] }
-  {% endif %}
+{% endif %}
 {% endif %}
 
   public_api_ip:
     description: IP address for the API/UI endpoint
-{% if openshift_openstack_use_lbaas_load_balancer %}
-    # TODO(shadower): Handle setups without floating IPs
+{% if openshift_openstack_use_lbaas_load_balancer and openshift_openstack_load_balancer_floating_ip %}
     value: { get_attr: [api_lb_floating_ip, floating_ip_address] }
+{% elif openshift_openstack_use_lbaas_load_balancer and not openshift_openstack_load_balancer_floating_ip %}
+    value: { get_attr: [api_lb, vip_address] }
 {% elif openshift_openstack_use_vm_load_balancer %}
     value: { get_attr: [loadbalancer, resource.0, floating_ip] }
 {% else %}
@@ -77,8 +78,10 @@ outputs:
 
   public_router_ip:
     description: IP address of the apps/router endpoint
-{% if openshift_openstack_use_lbaas_load_balancer %}
+{% if openshift_openstack_use_lbaas_load_balancer and openshift_openstack_load_balancer_floating_ip %}
     value: { get_attr: [router_lb_floating_ip, floating_ip_address] }
+{% elif openshift_openstack_use_lbaas_load_balancer and not openshift_openstack_load_balancer_floating_ip %}
+    value: { get_attr: [router_lb, vip_address] }
 {% else %}
     # NOTE(shadower): The VM-based loadbalancer only supports master nodes
     value: { get_attr: [infra_nodes, resource.0, floating_ip] }
@@ -716,7 +719,7 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name or not openshift_openstack_load_balencer_floating_ip | default(True) | bool %}
+{% if openshift_openstack_provider_network_name or not openshift_openstack_load_balancer_floating_ip | default(True) | bool %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_lb_volume_size }}
@@ -1036,7 +1039,7 @@ resources:
 
 
 {% if openshift_openstack_use_lbaas_load_balancer %}
-  {% if openshift_openstack_load_balencer_floating_ip | default(True) | bool %}
+{% if openshift_openstack_load_balancer_floating_ip | default(True) | bool %}
   api_lb_floating_ip:
     condition: { not: no_floating }
     depends_on:
@@ -1047,14 +1050,14 @@ resources:
     properties:
       floating_network: {{ openshift_openstack_external_network_name }}
       port_id: { get_attr: [api_lb, vip_port_id] }
-  {% endif %}
+{% endif %}
 
   router_lb:
     type: OS::{{ openshift_openstack_lbaasv2_provider }}::LoadBalancer
     properties:
       vip_subnet: { get_resource: subnet }
 
-  {% if openshift_openstack_load_balencer_floating_ip | default(True) | bool %}
+{% if openshift_openstack_load_balancer_floating_ip | default(True) | bool %}
   router_lb_floating_ip:
     condition: { not: no_floating }
     depends_on:
@@ -1067,7 +1070,7 @@ resources:
     properties:
       floating_network: {{ openshift_openstack_external_network_name }}
       port_id: { get_attr: [router_lb, vip_port_id] }
-  {% endif %}
+{% endif %}
 
   router_lb_listener_http:
     type: OS::{{ openshift_openstack_lbaasv2_provider }}::Listener
