@@ -91,6 +91,7 @@ options:
     - node
     - pod
     - namespace
+    - route
     aliases: []
   labels:
     description:
@@ -142,6 +143,16 @@ EXAMPLES = '''
         value: master
       - key: environment
         value: production
+
+- name: Add a single label to a route
+  oc_label:
+    name: docker-registry
+    state: add
+    kind: route
+    labels:
+      - key: router
+        value: public
+
 '''
 
 # -*- -*- -*- End included fragment: doc/label -*- -*- -*-
@@ -1786,7 +1797,7 @@ def main():
                        choices=['present', 'absent', 'list', 'add']),
             debug=dict(default=False, type='bool'),
             kind=dict(default='node', type='str',
-                      choices=['node', 'pod', 'namespace']),
+                      choices=['node', 'pod', 'namespace', 'route']),
             name=dict(default=None, type='str'),
             namespace=dict(default=None, type='str'),
             labels=dict(default=None, type='list'),
