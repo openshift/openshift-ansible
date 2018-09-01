@@ -158,7 +158,7 @@ class LDAPPasswordIdentityProvider(IdentityProviderBase):
             pref_user = self._idp['attributes'].pop('preferred_username')
             self._idp['attributes']['preferredUsername'] = pref_user
 
-        self._idp['ca'] = '/etc/origin/master/{}_ldap_ca.crt'.format(self._idp['name'])
+        self._idp['ca'] = '/etc/origin/master/{}_ldap_ca.crt'.format(idp['name'])
 
     def validate(self):
         ''' validate this idp instance '''
@@ -221,7 +221,7 @@ class RequestHeaderIdentityProvider(IdentityProviderBase):
                            ['nameHeaders', 'name_headers'],
                            ['preferredUsernameHeaders', 'preferred_username_headers']]
         self._idp['clientCA'] = \
-            '/etc/origin/master/{}_request_header_ca.crt'.format(self._idp['name'])
+            '/etc/origin/master/{}_request_header_ca.crt'.format(idp['name'])
 
     def validate(self):
         ''' validate this idp instance '''
@@ -362,7 +362,7 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
         if 'extra_authorize_parameters' in self._idp:
             self._idp['extraAuthorizeParameters'] = self._idp.pop('extra_authorize_parameters')
 
-        self._idp['ca'] = '/etc/origin/master/{}_openid_ca.crt'.format(self._idp['name'])
+        self._idp['ca'] = '/etc/origin/master/{}_openid_ca.crt'.format(idp['name'])
 
     def validate(self):
         ''' validate this idp instance '''
