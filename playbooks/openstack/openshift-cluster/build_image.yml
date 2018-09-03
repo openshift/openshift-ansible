@@ -141,6 +141,22 @@
 # to become a node.
 - import_playbook: ../../openshift-node/private/image_prep.yml
 
+- name: Finish image preparation
+  hosts: nodes
+  become: yes
+  tasks:
+  - name: Update to latest package versions
+    import_role:
+      name: os_update_latest
+    when:
+    - ansible_distribution == "RedHat"
+
+  - name: Unsubscribe image
+    import_role:
+      name: rhel_unsubscribe
+    when:
+    - ansible_distribution == "RedHat"
+    - (rhsub_user is defined and rhsub_pass is defined) or (rhsub_ak is defined and rhsub_orgid is defined)
 
 - name: Commit image
   hosts: localhost
