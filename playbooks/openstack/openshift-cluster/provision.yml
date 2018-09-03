@@ -43,18 +43,7 @@
 
 - import_playbook: ../../init/basic_facts.yml
 
-- name: Optionally subscribe the RHEL nodes
-  any_errors_fatal: true
-  hosts: oo_all_hosts
-  become: yes
-  gather_facts: yes
-  tasks:
-  - name: Subscribe RHEL instances
-    import_role:
-      name: rhel_subscribe
-    when:
-    - ansible_distribution == "RedHat"
-    - (rhsub_user is defined and rhsub_pass is defined) or (rhsub_ak is defined and rhsub_orgid is defined)
+- import_playbook: ../../byo/rhel_subscribe.yml
 
 - name: Show information about the deployed cluster
   import_playbook: cluster-info.yml
