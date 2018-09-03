@@ -123,6 +123,7 @@ JSON_FORMAT_VARIABLES = (
     'openshift_buildoverrides_json',
     'openshift_master_admission_plugin_config',
     'openshift_master_audit_config',
+    'openshift_master_jenkins_pipeline_config',
     'openshift_crio_docker_gc_node_selector',
     'openshift_master_image_policy_allowed_registries_for_import',
     'openshift_master_image_policy_config',

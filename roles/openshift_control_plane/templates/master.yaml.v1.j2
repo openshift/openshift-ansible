@@ -63,6 +63,9 @@ imageConfig:
   format: {{ openshift_imageconfig_format }}
   latest: {{ openshift_master_image_config_latest }}
 imagePolicyConfig:{{ openshift.master.image_policy_config | default({}) | combine({"internalRegistryHostname":"docker-registry.default.svc:5000"}) | lib_utils_to_padded_yaml(level=1) }}
+{% if openshift.master.jenkins_pipeline_config is defined %}
+jenkinsPipelineConfig:{{ openshift.master.jenkins_pipeline_config | lib_utils_to_padded_yaml(level=1) }}
+{% endif %}
 kubeletClientInfo:
 {# TODO: allow user specified kubelet port #}
   ca: ca-bundle.crt

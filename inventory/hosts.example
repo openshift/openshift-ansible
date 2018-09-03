@@ -950,6 +950,9 @@ debug_level=2
 # exist
 #openshift_master_audit_config={"enabled": "true", "auditFilePath": "/var/lib/origin/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": "14", "maximumFileSizeMegabytes": "500", "maximumRetainedFiles": "5"}
 
+# Set jenkins pipelines config
+# openshift_master_jenkins_pipeline_config={"autoProvisionEnabled": "true", "templateNamespace": "openshift", "templateName": "jenkins-persistent", "serviceName": "jenkins-persistent-svc"}
+
 # Enable origin repos that point at Centos PAAS SIG, defaults to true, only used
 # by openshift_deployment_type=origin
 #openshift_enable_origin_repo=false
