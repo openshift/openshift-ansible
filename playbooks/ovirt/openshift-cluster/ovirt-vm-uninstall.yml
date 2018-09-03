@@ -26,7 +26,7 @@
         state: absent
         name: "{{ item.name }}"
       with_items:
-        - "{{ ovirt_vm_infra_vms }}"
+        - "{{ vms }}"
 
   post_tasks:
     - name: Logout from oVirt
