@@ -26,7 +26,7 @@ defined:
 | openshift_grafana_namespace                  | openshift-grafana | Default grafana namespace                    |
 | openshift_grafana_timeout                    | 300               | Default pod wait timeout                     |
 | openshift_grafana_prometheus_namespace       | openshift-metrics | Default prometheus namespace                 |
-| openshift_grafana_prometheus_serviceaccount  | promethus         | Prometheus service account                   |
+| openshift_grafana_prometheus_serviceaccount  | prometheus        | Prometheus service account                   |
 | openshift_grafana_serviceaccount_name        | grafana           | Grafana service account name                 |
 | openshift_grafana_datasource_name            | prometheus        | Default datasource name                      |
 | openshift_grafana_node_exporter              | false             | Do we want to deploy node exported dashboard |
