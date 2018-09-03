@@ -4,6 +4,10 @@
 # pods utilizing gluster volumes.
 # This playbooks is not intended for scaleup of existing clusters that already
 # have gluster deployed.
+
+- import_playbook: ../../init/basic_facts.yml
+- import_playbook: ../../init/evaluate_groups.yml
+
 - name: Install gluster node dependencies for pod volume support
   hosts: oo_nodes_to_config
   tasks:
