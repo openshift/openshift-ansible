@@ -11,7 +11,7 @@
   run_once: True
 
 - name: Create tar of OpenShift examples
-  local_action: command tar -C "{{ role_path }}/files/{{ content_version }}/{{ hosted_deployment_type }}" -cvf "{{ copy_hosted_templates_mktemp.stdout }}/openshift-hosted-templates.tar" .
+  local_action: command tar -C "{{ role_path }}/files/latest/{{ hosted_deployment_type }}" -cvf "{{ copy_hosted_templates_mktemp.stdout }}/openshift-hosted-templates.tar" .
   args:
     # Disables the following warning:
     # Consider using unarchive module rather than running tar

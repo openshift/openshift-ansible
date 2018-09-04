@@ -26,7 +26,7 @@
 
 - name: Copy gluster-s3 PVCs template file
   copy:
-    src: "{{ openshift.common.examples_content_version }}/{{ item }}"
+    src: "{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - "gluster-s3-pvcs-template.yml"
@@ -69,7 +69,7 @@
 
 - name: Copy gluster-s3 template file
   copy:
-    src: "{{ openshift.common.examples_content_version }}/{{ item }}"
+    src: "{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - "gluster-s3-template.yml"

@@ -48,12 +48,12 @@
 
 - name: Generate heketi endpoints
   template:
-    src: "{{ openshift.common.examples_content_version }}/heketi-endpoints.yml.j2"
+    src: "{{ openshift.common. }}/heketi-endpoints.yml.j2"
     dest: "{{ mktemp.stdout }}/heketi-endpoints.yml"
 
 - name: Generate heketi service
   template:
-    src: "{{ openshift.common.examples_content_version }}/heketi-service.yml.j2"
+    src: "{{ openshift.common. }}/heketi-service.yml.j2"
     dest: "{{ mktemp.stdout }}/heketi-service.yml"
 
 - name: Create heketi endpoints
@@ -76,7 +76,7 @@
 
 - name: Copy heketi template
   copy:
-    src: "{{ openshift.common.examples_content_version }}/heketi-template.yml"
+    src: "{{ openshift.common. }}/heketi-template.yml"
     dest: "{{ mktemp.stdout }}/heketi-template.yml"
 
 - name: Create heketi template

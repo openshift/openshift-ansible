@@ -65,7 +65,7 @@
 
 - name: Copy GlusterFS DaemonSet template
   copy:
-    src: "{{ openshift.common.examples_content_version }}/glusterfs-template.yml"
+    src: "glusterfs-template.yml"
     dest: "{{ mktemp.stdout }}/glusterfs-template.yml"
 
 - name: Create GlusterFS template
