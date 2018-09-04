@@ -4,7 +4,7 @@
   register: setup_storage
 
 - name: Copy heketi-storage list
-  shell: "{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {{ deploy_heketi_pod.metadata.name }} cat /tmp/heketi-storage.json > {{ mktemp.stdout }}/heketi-storage.json"
+  shell: "{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {{ heketi_pod_name }} cat /tmp/heketi-storage.json > {{ mktemp.stdout }}/heketi-storage.json"
 
 # Need `command` here because heketi-storage.json contains multiple objects.
 - name: Copy heketi DB to GlusterFS volume
@@ -45,3 +45,7 @@
     name: "heketi-storage-endpoints"
   - kind: "secret"
     name: "heketi-{{ glusterfs_name | default }}-topology-secret"
+
+- name: Set deploy-heketi deployed fact
+  set_fact:
+    glusterfs_heketi_deploy_is_missing: True
