@@ -3,53 +3,55 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "A simple Camel route in Karaf container. This quickstart shows a simple Apache Camel application that logs a message to the server log every 5th second.",
+      "openshift.io/display-name": "Red Hat Fuse 7.0 Camel A-MQ with Karaf",
+      "openshift.io/provider-display-name": "Red Hat, Inc.",
+      "description": "Camel route using ActiveMQ in Karaf container. This quickstart shows how to use Camel in a Karaf Container using Blueprint to connect to the A-MQ xPaaS message broker on OpenShift that should already be installed, one simple way to run a A-MQ service is following the documentation of the A-MQ xPaaS image for OpenShift related to the amq62-basic template.",
       "tags": "quickstart,java,karaf,fis,jboss-fuse",
-      "iconClass": "icon-jboss",
+      "iconClass": "icon-rh-integration",
       "version": "2.0"
     },
-    "name": "s2i-karaf2-camel-log"
+    "name": "s2i-fuse70-karaf-camel-amq"
   },
   "labels": {
-    "template": "s2i-karaf2-camel-log"
+    "template": "s2i-fuse70-karaf-camel-amq"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-karaf2-camel-log",
+      "value": "s2i-fuse70-karaf-camel-amq",
       "description": "The name assigned to the application."
     },
     {
       "name": "GIT_REPO",
       "displayName": "Git Repository URL",
-      "value": "https://github.com/fabric8-quickstarts/karaf2-camel-log.git",
+      "value": "https://github.com/fabric8-quickstarts/karaf-camel-amq.git",
       "required": true,
       "description": "The URL of the repository with your application source code."
     },
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf2-camel-log-1.0.0.redhat-000022",
+      "value": "karaf-camel-amq-1.0.0.fuse-000031-redhat-2",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
       "name": "SERVICE_NAME",
       "displayName": "Service Name",
-      "value": "s2i-karaf2-camel-log",
+      "value": "s2i-fuse70-karaf-camel-amq",
       "description": "Exposed Service name."
     },
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "2.0",
+      "value": "1.0",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000022",
+      "value": "1.0.0.fuse-000031-redhat-2",
       "description": "The application version."
     },
     {
@@ -83,16 +85,33 @@
       "from": "[a-zA-Z0-9]{40}"
     },
     {
+      "name": "ACTIVEMQ_SERVICE_NAME",
+      "displayName": "ActiveMQ Broker Service",
+      "required": true,
+      "value": "broker-amq-tcp",
+      "description": "Set this to the name of the TCP service of the ActiveMQ broker. You may need to create a broker first."
+    },
+    {
+      "name": "ACTIVEMQ_USERNAME",
+      "displayName": "ActiveMQ Broker Username",
+      "description": "The username used to authenticate with the ActiveMQ broker. Leave it empty if authentication is disabled."
+    },
+    {
+      "name": "ACTIVEMQ_PASSWORD",
+      "displayName": "ActiveMQ Broker Password",
+      "description": "The password used to authenticate with the ActiveMQ broker. Leave it empty if authentication is disabled."
+    },
+    {
       "name": "CPU_REQUEST",
       "displayName": "CPU request",
       "value": "0.2",
       "required": true,
-      "description": "The amount of CPU to requests."
+      "description": "The amount of CPU to request."
     },
     {
       "name": "MEMORY_REQUEST",
       "displayName": "Memory request",
-      "value": "1.5G",
+      "value": "128Mi",
       "required": true,
       "description": "The amount of memory required for the container to run."
     },
@@ -106,9 +125,23 @@
     {
       "name": "MEMORY_LIMIT",
       "displayName": "Memory limit",
-      "value": "2G",
+      "value": "512Mi",
       "required": true,
       "description": "The amount of memory the container is limited to use."
+    },
+    {
+      "name": "BUILD_MEMORY_REQUEST",
+      "displayName": "Build Memory request",
+      "value": "0.7G",
+      "required": true,
+      "description": "The amount of memory to request for builds."
+    },
+    {
+      "name": "BUILD_MEMORY_LIMIT",
+      "displayName": "Build Memory limit",
+      "value": "0.8G",
+      "required": true,
+      "description": "The amount of memory the build container is limited to use."
     }
   ],
   "objects": [
@@ -122,7 +155,7 @@
           "component": "${APP_NAME}",
           "container": "karaf",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
@@ -142,7 +175,7 @@
           "component": "${APP_NAME}",
           "container": "karaf",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
@@ -182,7 +215,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "${IMAGE_STREAM_NAMESPACE}",
-              "name": "fis-karaf-openshift:${BUILDER_VERSION}"
+              "name": "jboss-fuse70-karaf-openshift:${BUILDER_VERSION}"
             },
             "forcePull": true,
             "incremental": true,
@@ -212,7 +245,14 @@
             "name": "${APP_NAME}:latest"
           }
         },
-        "resources": {}
+        "resources": {
+          "requests": {
+            "memory": "${BUILD_MEMORY_REQUEST}"
+          },
+          "limits": {
+            "memory": "${BUILD_MEMORY_LIMIT}"
+          }
+        }
       },
       "status": {
         "lastVersion": 0
@@ -228,15 +268,12 @@
           "component": "${APP_NAME}",
           "container": "karaf",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
       },
       "spec": {
-        "strategy": {
-          "resources": {}
-        },
         "triggers": [
           {
             "type": "ConfigChange"
@@ -261,7 +298,7 @@
           "container": "karaf",
           "deploymentconfig": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         },
@@ -273,7 +310,7 @@
               "container": "karaf",
               "deploymentconfig": "${APP_NAME}",
               "group": "quickstarts",
-              "project": "${APP_NAME}",
+              "app": "${APP_NAME}",
               "provider": "s2i",
               "version": "${APP_VERSION}"
             }
@@ -314,6 +351,15 @@
                       "fieldPath" : "metadata.namespace"
                     }
                   }
+                }, {
+                  "name": "ACTIVEMQ_SERVICE_NAME",
+                  "value": "${ACTIVEMQ_SERVICE_NAME}"
+                }, {
+                  "name": "ACTIVEMQ_USERNAME",
+                  "value": "${ACTIVEMQ_USERNAME}"
+                }, {
+                  "name": "ACTIVEMQ_PASSWORD",
+                  "value": "${ACTIVEMQ_PASSWORD}"
                 } ],
                 "resources": {
                   "requests": {

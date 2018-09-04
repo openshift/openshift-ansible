@@ -3,30 +3,36 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "iconClass": "icon-eap",
-            "tags": "eap,javaee,java,jboss,hidden",
-            "version": "1.5.0",
-            "openshift.io/display-name": "JBoss EAP CD + MongoDB (Ephemeral with https)",
+            "iconClass": "icon-datagrid",
+            "tags": "datagrid,jboss",
+            "version": "1.1",
+            "openshift.io/display-name": "Red Hat JBoss Data Grid 7.2 + MySQL (with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
-            "description": "An example JBoss Enterprise Application Platform continuous delivery application with a MongoDB database. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap-cd/README.adoc.",
-            "template.openshift.io/long-description": "This template defines resources needed to develop JBoss Enterprise Application Server continuous delivery based application, including a build configuration, application deployment configuration, database deployment configuration for MongoDB using ephemeral (temporary) storage and secure communication using https.",
-            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
+            "description": "An example Red Hat JBoss Data Grid application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.2 based applications, including a deployment configuration, using MySQL database for persistence and secure communication using https.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-data-grid/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
-        "name": "eap-cd-mongodb-s2i"
+        "name": "datagrid72-mysql-persistent"
     },
     "labels": {
-        "template": "eap-cd-mongodb-s2i",
-        "xpaas": "1.5.0"
+        "template": "datagrid72-mysql-persistent"
     },
-    "message": "A new EAP CD and MongoDB based application with SSL support has been created in your project. The username/password for accessing the MongoDB database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD} (Admin password is \"${DB_ADMIN_PASSWORD}\"). Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
+    "message": "A new data grid service (using MySQL with persistent storage) has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\". The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
         {
             "displayName": "Application Name",
             "description": "The name for the application.",
             "name": "APPLICATION_NAME",
-            "value": "eap-app",
+            "value": "datagrid-app",
             "required": true
+        },
+        {
+            "displayName": "Custom http Route Hostname",
+            "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
+            "name": "HOSTNAME_HTTP",
+            "value": "",
+            "required": false
         },
         {
             "displayName": "Custom https Route Hostname",
@@ -36,51 +42,44 @@
             "required": false
         },
         {
-            "displayName": "Git Repository URL",
-            "description": "Git source URI for application",
-            "name": "SOURCE_REPOSITORY_URL",
-            "value": "https://github.com/jboss-openshift/openshift-quickstarts",
-            "required": true
-        },
-        {
-            "displayName": "Git Reference",
-            "description": "Git branch/tag reference",
-            "name": "SOURCE_REPOSITORY_REF",
-            "value": "1.3",
-            "required": false
-        },
-        {
-            "displayName": "Context Directory",
-            "description": "Path within Git project to build; empty for root project directory.",
-            "name": "CONTEXT_DIR",
-            "value": "todolist/todolist-mongodb",
-            "required": false
-        },
-        {
-            "displayName": "Database JNDI Name",
-            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/mongodb",
-            "name": "DB_JNDI",
+            "displayName": "Username",
+            "description": "User name for JDG user.",
+            "name": "USERNAME",
             "value": "",
             "required": false
         },
         {
-            "displayName": "Database Name",
-            "description": "Database name",
-            "name": "DB_DATABASE",
-            "value": "root",
-            "required": true
-        },
-        {
-            "displayName": "Queues",
-            "description": "Queue names, separated by commas. These queues will be automatically created when the broker starts. Also, they will be made accessible as JNDI resources in EAP. Note that all queues used by the application *must* be specified here in order to be created automatically on the remote AMQ broker.",
-            "name": "MQ_QUEUES",
+            "displayName": "Password",
+            "description": "The password to access the JDG Caches. Must be different than username; must not be root, admin, or administrator; must contain at least 8 characters, 1 alphabetic character(s), 1 digit(s), and 1 non-alphanumeric symbol(s). (optional)",
+            "name": "PASSWORD",
             "value": "",
             "required": false
         },
         {
-            "displayName": "Topics",
-            "description": "Topic names, separated by commas. These topics will be automatically created when the broker starts. Also, they will be made accessible as JNDI resources in EAP. Note that all topics used by the application *must* be specified here in order to be created automatically on the remote AMQ broker.",
-            "name": "MQ_TOPICS",
+            "displayName": "JDG User Roles/Groups",
+            "description": "Comma delimited list of roles/groups associated with the JDG user",
+            "name": "ADMIN_GROUP",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Hotrod Authentication",
+            "description": "Enable Hotrod Authentication",
+            "name": "HOTROD_AUTHENTICATION",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Container Security Role Mapper",
+            "description": "Defines which role mapper to use for cache authentication",
+            "name": "CONTAINER_SECURITY_ROLE_MAPPER",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Container Security Roles",
+            "description": "Comma delimited list of role names and assigned permissions",
+            "name": "CONTAINER_SECURITY_ROLES",
             "value": "",
             "required": false
         },
@@ -88,7 +87,7 @@
             "displayName": "Server Keystore Secret Name",
             "description": "The name of the secret containing the keystore file",
             "name": "HTTPS_SECRET",
-            "value": "eap7-app-secret",
+            "value": "datagrid-app-secret",
             "required": true
         },
         {
@@ -96,13 +95,6 @@
             "description": "The name of the keystore file within the secret",
             "name": "HTTPS_KEYSTORE",
             "value": "keystore.jks",
-            "required": false
-        },
-        {
-            "displayName": "Server Keystore Type",
-            "description": "The type of the keystore file (JKS or JCEKS)",
-            "name": "HTTPS_KEYSTORE_TYPE",
-            "value": "",
             "required": false
         },
         {
@@ -118,6 +110,36 @@
             "name": "HTTPS_PASSWORD",
             "value": "",
             "required": false
+        },
+        {
+            "displayName": "Database JNDI Name",
+            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/mysql",
+            "name": "DB_JNDI",
+            "value": "java:/jboss/datasources/mysql",
+            "required": false
+        },
+        {
+            "displayName": "Database Name",
+            "description": "Database name",
+            "name": "DB_DATABASE",
+            "value": "root",
+            "required": true
+        },
+        {
+            "displayName": "Database Username",
+            "description": "Database user name",
+            "name": "DB_USERNAME",
+            "from": "user[a-zA-Z0-9]{3}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "displayName": "Database Password",
+            "description": "Database user password",
+            "name": "DB_PASSWORD",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
         },
         {
             "displayName": "Datasource Minimum Pool Size",
@@ -138,69 +160,40 @@
             "required": false
         },
         {
-            "displayName": "MongoDB No Preallocation",
-            "description": "Disable data file preallocation.",
-            "name": "MONGODB_NOPREALLOC",
+            "displayName": "MySQL Lower Case Table Names",
+            "description": "Sets how the table names are stored and compared.",
+            "name": "MYSQL_LOWER_CASE_TABLE_NAMES",
             "required": false
         },
         {
-            "displayName": "MongoDB Small Files",
-            "description": "Set MongoDB to use a smaller default data file size.",
-            "name": "MONGODB_SMALLFILES",
+            "displayName": "MySQL Maximum number of connections",
+            "description": "The maximum permitted number of simultaneous client connections.",
+            "name": "MYSQL_MAX_CONNECTIONS",
             "required": false
         },
         {
-            "displayName": "MongoDB Quiet",
-            "description": "Runs MongoDB in a quiet mode that attempts to limit the amount of output.",
-            "name": "MONGODB_QUIET",
+            "displayName": "MySQL FullText Minimum Word Length",
+            "description": "The minimum length of the word to be included in a FULLTEXT index.",
+            "name": "MYSQL_FT_MIN_WORD_LEN",
             "required": false
         },
         {
-            "displayName": "AMQ cluster password",
-            "description": "AMQ cluster admin password",
-            "name": "MQ_CLUSTER_PASSWORD",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
-            "required": true
+            "displayName": "MySQL FullText Maximum Word Length",
+            "description": "The maximum length of the word to be included in a FULLTEXT index.",
+            "name": "MYSQL_FT_MAX_WORD_LEN",
+            "required": false
         },
         {
-            "displayName": "Database Username",
-            "description": "Database user name",
-            "name": "DB_USERNAME",
-            "from": "user[a-zA-Z0-9]{3}",
-            "generate": "expression",
-            "required": true
+            "displayName": "MySQL AIO",
+            "description": "Controls the innodb_use_native_aio setting value if the native AIO is broken.",
+            "name": "MYSQL_AIO",
+            "required": false
         },
         {
-            "displayName": "Database Password",
-            "description": "Database user password",
-            "name": "DB_PASSWORD",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
-            "required": true
-        },
-        {
-            "displayName": "Database admin password",
-            "description": "Database admin password",
-            "name": "DB_ADMIN_PASSWORD",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
-            "required": true
-        },
-        {
-            "displayName": "Github Webhook Secret",
-            "description": "GitHub trigger secret",
-            "name": "GITHUB_WEBHOOK_SECRET",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
-            "required": true
-        },
-        {
-            "displayName": "Generic Webhook Secret",
-            "description": "Generic build trigger secret",
-            "name": "GENERIC_WEBHOOK_SECRET",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
+            "displayName": "Database Volume Capacity",
+            "description": "Size of persistent storage for database volume.",
+            "name": "VOLUME_CAPACITY",
+            "value": "1Gi",
             "required": true
         },
         {
@@ -211,10 +204,59 @@
             "required": true
         },
         {
+            "displayName": "Infinispan Connectors",
+            "description": "Comma-separated list of connector types that should be configured (defaults to 'memcached,hotrod,rest')",
+            "name": "INFINISPAN_CONNECTORS",
+            "value": "hotrod,memcached,rest",
+            "required": false
+        },
+        {
+            "displayName": "Cache Names",
+            "description": "Comma-separated list of caches to configure.  By default, a distributed-cache, with a mode of SYNC will be configured for each entry.",
+            "name": "CACHE_NAMES",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Datavirt Cache Names",
+            "description": "Comma-separated list of caches to configure for use by Red Hat JBoss Data Virtualization for materialization of views.  Three caches will be created for each named cache: <name>, <name>_staging and <name>_alias.",
+            "name": "DATAVIRT_CACHE_NAMES",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Default Cache Type",
+            "description": "Default cache type for all caches. If empty then distributed will be the default",
+            "name": "CACHE_TYPE_DEFAULT",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Encryption Requires SSL Client Authentication?",
+            "description": "Whether to require client certificate authentication. Defaults to false",
+            "name": "ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Memcached Cache Name",
+            "description": "The name of the cache to expose through this memcached connector",
+            "name": "MEMCACHED_CACHE",
+            "value": "default_memcached",
+            "required": false
+        },
+        {
+            "displayName": "REST Security Domain",
+            "description": "The domain, declared in the security subsystem, that should be used to authenticate access to the REST endpoint",
+            "name": "REST_SECURITY_DOMAIN",
+            "value": "",
+            "required": false
+        },
+        {
             "displayName": "JGroups Secret Name",
             "description": "The name of the secret containing the keystore file",
             "name": "JGROUPS_ENCRYPT_SECRET",
-            "value": "eap7-app-secret",
+            "value": "datagrid-app-secret",
             "required": false
         },
         {
@@ -247,37 +289,10 @@
             "required": true
         },
         {
-            "displayName": "Deploy Exploded Archives",
-            "description": "Controls whether exploded deployment content should be automatically deployed",
-            "name": "AUTO_DEPLOY_EXPLODED",
-            "value": "false",
-            "required": false
-        },
-        {
-            "displayName": "Maven mirror URL",
-            "description": "Maven mirror to use for S2I builds",
-            "name": "MAVEN_MIRROR_URL",
-            "value": "",
-            "required": false
-        },
-        {
-            "displayName": "Maven Additional Arguments",
-            "description": "Maven additional arguments to use for S2I builds",
-            "name": "MAVEN_ARGS_APPEND",
-            "value": "",
-            "required": false
-        },
-        {
-            "description": "List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.",
-            "name": "ARTIFACT_DIR",
-            "value": "",
-            "required": false
-        },
-        {
-            "displayName": "MongoDB Image Stream Tag",
-            "description": "The tag to use for the \"mongodb\" image stream.  Typically, this aligns with the major.minor version of MongoDB.",
-            "name": "MONGODB_IMAGE_STREAM_TAG",
-            "value": "3.2",
+            "displayName": "MySQL Image Stream Tag",
+            "description": "The tag to use for the \"mysql\" image stream.  Typically, this aligns with the major.minor version of MySQL.",
+            "name": "MYSQL_IMAGE_STREAM_TAG",
+            "value": "5.7",
             "required": true
         },
         {
@@ -308,8 +323,8 @@
                     "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
-                    "description": "The web server's http port.",
-                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mongodb\", \"kind\": \"Service\"}]"
+                    "description": "The web server's HTTP port.",
+                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mysql\", \"kind\": \"Service\"}]"
                 }
             }
         },
@@ -333,8 +348,8 @@
                     "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
-                    "description": "The web server's https port.",
-                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mongodb\", \"kind\": \"Service\"}]"
+                    "description": "The web server's HTTPS port.",
+                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mysql\", \"kind\": \"Service\"}]"
                 }
             }
         },
@@ -344,16 +359,66 @@
             "spec": {
                 "ports": [
                     {
-                        "port": 27017,
-                        "targetPort": 27017
+                        "port": 11211,
+                        "targetPort": 11211
                     }
                 ],
                 "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}-mongodb"
+                    "deploymentConfig": "${APPLICATION_NAME}"
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-mongodb",
+                "name": "${APPLICATION_NAME}-memcached",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "Memcached service for clustered applications.",
+                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mysql\", \"kind\": \"Service\"}]"
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "ports": [
+                    {
+                        "port": 11333,
+                        "targetPort": 11333
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}-hotrod",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "Hot Rod service for clustered applications.",
+                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mysql\", \"kind\": \"Service\"}]"
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "ports": [
+                    {
+                        "port": 3306,
+                        "targetPort": 3306
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}-mysql"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}-mysql",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -398,10 +463,11 @@
                     "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
-                    "description": "Route for application's http service."
+                    "description": "Route for application's HTTP service."
                 }
             },
             "spec": {
+                "host": "${HOSTNAME_HTTP}",
                 "to": {
                     "name": "${APPLICATION_NAME}"
                 }
@@ -417,7 +483,7 @@
                     "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
-                    "description": "Route for application's https service."
+                    "description": "Route for application's HTTPS service."
                 }
             },
             "spec": {
@@ -428,88 +494,6 @@
                 "tls": {
                     "termination": "passthrough"
                 }
-            }
-        },
-        {
-            "kind": "ImageStream",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                }
-            }
-        },
-        {
-            "kind": "BuildConfig",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                }
-            },
-            "spec": {
-                "source": {
-                    "type": "Git",
-                    "git": {
-                        "uri": "${SOURCE_REPOSITORY_URL}",
-                        "ref": "${SOURCE_REPOSITORY_REF}"
-                    },
-                    "contextDir": "${CONTEXT_DIR}"
-                },
-                "strategy": {
-                    "type": "Source",
-                    "sourceStrategy": {
-                        "env": [
-                            {
-                                "name": "MAVEN_MIRROR_URL",
-                                "value": "${MAVEN_MIRROR_URL}"
-                            },
-                            {
-                                "name": "MAVEN_ARGS_APPEND",
-                                "value": "${MAVEN_ARGS_APPEND}"
-                            },
-                            {
-                                "name": "ARTIFACT_DIR",
-                                "value": "${ARTIFACT_DIR}"
-                            }
-                        ],
-                        "forcePull": true,
-                        "from": {
-                            "kind": "ImageStreamTag",
-                            "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "eap-cd-openshift:13"
-                        }
-                    }
-                },
-                "output": {
-                    "to": {
-                        "kind": "ImageStreamTag",
-                        "name": "${APPLICATION_NAME}:latest"
-                    }
-                },
-                "triggers": [
-                    {
-                        "type": "GitHub",
-                        "github": {
-                            "secret": "${GITHUB_WEBHOOK_SECRET}"
-                        }
-                    },
-                    {
-                        "type": "Generic",
-                        "generic": {
-                            "secret": "${GENERIC_WEBHOOK_SECRET}"
-                        }
-                    },
-                    {
-                        "type": "ImageChange",
-                        "imageChange": {}
-                    },
-                    {
-                        "type": "ConfigChange"
-                    }
-                ]
             }
         },
         {
@@ -535,7 +519,8 @@
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
-                                "name": "${APPLICATION_NAME}:latest"
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "jboss-datagrid72-openshift:1.1"
                             }
                         }
                     },
@@ -556,11 +541,11 @@
                         }
                     },
                     "spec": {
-                        "terminationGracePeriodSeconds": 75,
+                        "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
-                                "image": "${APPLICATION_NAME}",
+                                "image": "jboss-datagrid72-openshift",
                                 "imagePullPolicy": "Always",
                                 "resources": {
                                     "limits": {
@@ -569,12 +554,12 @@
                                 },
                                 "volumeMounts": [
                                     {
-                                        "name": "eap-keystore-volume",
-                                        "mountPath": "/etc/eap-secret-volume",
+                                        "name": "datagrid-keystore-volume",
+                                        "mountPath": "/etc/datagrid-secret-volume",
                                         "readOnly": true
                                     },
                                     {
-                                        "name": "eap-jgroups-keystore-volume",
+                                        "name": "datagrid-jgroups-keystore-volume",
                                         "mountPath": "/etc/jgroups-encrypt-secret-volume",
                                         "readOnly": true
                                     }
@@ -584,7 +569,7 @@
                                         "command": [
                                             "/bin/bash",
                                             "-c",
-                                            "/opt/eap/bin/livenessProbe.sh"
+                                            "/opt/datagrid/bin/livenessProbe.sh"
                                         ]
                                     },
                                     "initialDelaySeconds": 60
@@ -594,7 +579,7 @@
                                         "command": [
                                             "/bin/bash",
                                             "-c",
-                                            "/opt/eap/bin/readinessProbe.sh"
+                                            "/opt/datagrid/bin/readinessProbe.sh"
                                         ]
                                     }
                                 },
@@ -618,12 +603,67 @@
                                         "name": "ping",
                                         "containerPort": 8888,
                                         "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "memcached",
+                                        "containerPort": 11211,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "hotrod-internal",
+                                        "containerPort": 11222,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "hotrod",
+                                        "containerPort": 11333,
+                                        "protocol": "TCP"
                                     }
                                 ],
                                 "env": [
                                     {
+                                        "name": "USERNAME",
+                                        "value": "${USERNAME}"
+                                    },
+                                    {
+                                        "name": "PASSWORD",
+                                        "value": "${PASSWORD}"
+                                    },
+                                    {
+                                        "name": "ADMIN_GROUP",
+                                        "value": "${ADMIN_GROUP}"
+                                    },
+                                    {
+                                        "name": "HOTROD_AUTHENTICATION",
+                                        "value": "${HOTROD_AUTHENTICATION}"
+                                    },
+                                    {
+                                        "name": "CONTAINER_SECURITY_ROLE_MAPPER",
+                                        "value": "${CONTAINER_SECURITY_ROLE_MAPPER}"
+                                    },
+                                    {
+                                        "name": "CONTAINER_SECURITY_ROLES",
+                                        "value": "${CONTAINER_SECURITY_ROLES}"
+                                    },
+                                    {
+                                        "name": "HTTPS_KEYSTORE_DIR",
+                                        "value": "/etc/datagrid-secret-volume"
+                                    },
+                                    {
+                                        "name": "HTTPS_KEYSTORE",
+                                        "value": "${HTTPS_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "HTTPS_NAME",
+                                        "value": "${HTTPS_NAME}"
+                                    },
+                                    {
+                                        "name": "HTTPS_PASSWORD",
+                                        "value": "${HTTPS_PASSWORD}"
+                                    },
+                                    {
                                         "name": "DB_SERVICE_PREFIX_MAPPING",
-                                        "value": "${APPLICATION_NAME}-mongodb=DB"
+                                        "value": "${APPLICATION_NAME}-mysql=DB"
                                     },
                                     {
                                         "name": "DB_JNDI",
@@ -642,8 +682,8 @@
                                         "value": "${DB_DATABASE}"
                                     },
                                     {
-                                        "name": "DB_ADMIN_PASSWORD",
-                                        "value": "${DB_ADMIN_PASSWORD}"
+                                        "name": "TX_DATABASE_PREFIX_MAPPING",
+                                        "value": "${APPLICATION_NAME}-mysql=DB"
                                     },
                                     {
                                         "name": "DB_MIN_POOL_SIZE",
@@ -658,6 +698,22 @@
                                         "value": "${DB_TX_ISOLATION}"
                                     },
                                     {
+                                        "name": "DEFAULT_JDBC_STORE_TYPE",
+                                        "value": "string"
+                                    },
+                                    {
+                                        "name": "DEFAULT_JDBC_STORE_DATASOURCE",
+                                        "value": "${DB_JNDI}"
+                                    },
+                                    {
+                                        "name": "MEMCACHED_JDBC_STORE_TYPE",
+                                        "value": "string"
+                                    },
+                                    {
+                                        "name": "MEMCACHED_JDBC_STORE_DATASOURCE",
+                                        "value": "${DB_JNDI}"
+                                    },
+                                    {
                                         "name": "JGROUPS_PING_PROTOCOL",
                                         "value": "openshift.DNS_PING"
                                     },
@@ -670,48 +726,52 @@
                                         "value": "8888"
                                     },
                                     {
-                                        "name": "HTTPS_KEYSTORE_DIR",
-                                        "value": "/etc/eap-secret-volume"
+                                        "name": "INFINISPAN_CONNECTORS",
+                                        "value": "${INFINISPAN_CONNECTORS}"
                                     },
                                     {
-                                        "name": "HTTPS_KEYSTORE",
-                                        "value": "${HTTPS_KEYSTORE}"
+                                        "name": "CACHE_NAMES",
+                                        "value": "${CACHE_NAMES}"
                                     },
                                     {
-                                        "name": "HTTPS_KEYSTORE_TYPE",
-                                        "value": "${HTTPS_KEYSTORE_TYPE}"
+                                        "name": "DATAVIRT_CACHE_NAMES",
+                                        "value": "${DATAVIRT_CACHE_NAMES}"
                                     },
                                     {
-                                        "name": "HTTPS_NAME",
+                                        "name": "CACHE_TYPE_DEFAULT",
+                                        "value": "${CACHE_TYPE_DEFAULT}"
+                                    },
+                                    {
+                                        "name": "ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH",
+                                        "value": "${ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH}"
+                                    },
+                                    {
+                                        "name": "HOTROD_SERVICE_NAME",
+                                        "value": "${APPLICATION_NAME}-hotrod"
+                                    },
+                                    {
+                                        "name": "HOTROD_ENCRYPTION",
                                         "value": "${HTTPS_NAME}"
                                     },
                                     {
-                                        "name": "HTTPS_PASSWORD",
-                                        "value": "${HTTPS_PASSWORD}"
+                                        "name": "MEMCACHED_CACHE",
+                                        "value": "${MEMCACHED_CACHE}"
                                     },
                                     {
-                                        "name": "MQ_CLUSTER_PASSWORD",
-                                        "value": "${MQ_CLUSTER_PASSWORD}"
-                                    },
-                                    {
-                                        "name": "MQ_QUEUES",
-                                        "value": "${MQ_QUEUES}"
-                                    },
-                                    {
-                                        "name": "MQ_TOPICS",
-                                        "value": "${MQ_TOPICS}"
+                                        "name": "REST_SECURITY_DOMAIN",
+                                        "value": "${REST_SECURITY_DOMAIN}"
                                     },
                                     {
                                         "name": "JGROUPS_ENCRYPT_SECRET",
                                         "value": "${JGROUPS_ENCRYPT_SECRET}"
                                     },
                                     {
-                                        "name": "JGROUPS_ENCRYPT_KEYSTORE_DIR",
-                                        "value": "/etc/jgroups-encrypt-secret-volume"
-                                    },
-                                    {
                                         "name": "JGROUPS_ENCRYPT_KEYSTORE",
                                         "value": "${JGROUPS_ENCRYPT_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_KEYSTORE_DIR",
+                                        "value": "/etc/jgroups-encrypt-secret-volume"
                                     },
                                     {
                                         "name": "JGROUPS_ENCRYPT_NAME",
@@ -724,23 +784,19 @@
                                     {
                                         "name": "JGROUPS_CLUSTER_PASSWORD",
                                         "value": "${JGROUPS_CLUSTER_PASSWORD}"
-                                    },
-                                    {
-                                        "name": "AUTO_DEPLOY_EXPLODED",
-                                        "value": "${AUTO_DEPLOY_EXPLODED}"
                                     }
                                 ]
                             }
                         ],
                         "volumes": [
                             {
-                                "name": "eap-keystore-volume",
+                                "name": "datagrid-keystore-volume",
                                 "secret": {
                                     "secretName": "${HTTPS_SECRET}"
                                 }
                             },
                             {
-                                "name": "eap-jgroups-keystore-volume",
+                                "name": "datagrid-jgroups-keystore-volume",
                                 "secret": {
                                     "secretName": "${JGROUPS_ENCRYPT_SECRET}"
                                 }
@@ -754,7 +810,7 @@
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${APPLICATION_NAME}-mongodb",
+                "name": "${APPLICATION_NAME}-mysql",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 }
@@ -769,12 +825,12 @@
                         "imageChangeParams": {
                             "automatic": true,
                             "containerNames": [
-                                "${APPLICATION_NAME}-mongodb"
+                                "${APPLICATION_NAME}-mysql"
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "mongodb:${MONGODB_IMAGE_STREAM_TAG}"
+                                "name": "mysql:${MYSQL_IMAGE_STREAM_TAG}"
                             }
                         }
                     },
@@ -784,89 +840,113 @@
                 ],
                 "replicas": 1,
                 "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}-mongodb"
+                    "deploymentConfig": "${APPLICATION_NAME}-mysql"
                 },
                 "template": {
                     "metadata": {
-                        "name": "${APPLICATION_NAME}-mongodb",
+                        "name": "${APPLICATION_NAME}-mysql",
                         "labels": {
-                            "deploymentConfig": "${APPLICATION_NAME}-mongodb",
+                            "deploymentConfig": "${APPLICATION_NAME}-mysql",
                             "application": "${APPLICATION_NAME}"
                         }
                     },
                     "spec": {
-                        "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
-                                "name": "${APPLICATION_NAME}-mongodb",
-                                "image": "mongodb",
+                                "name": "${APPLICATION_NAME}-mysql",
+                                "image": "mysql",
                                 "imagePullPolicy": "Always",
                                 "ports": [
                                     {
-                                        "containerPort": 27017,
+                                        "containerPort": 3306,
                                         "protocol": "TCP"
                                     }
                                 ],
                                 "readinessProbe": {
                                     "timeoutSeconds": 1,
-                                    "initialDelaySeconds": 3,
+                                    "initialDelaySeconds": 5,
                                     "exec": {
-                                        "command": [ "/bin/sh", "-i", "-c", "mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval=\"quit()\""]
+                                        "command": [ "/bin/sh", "-i", "-c",
+                                            "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"]
                                     }
                                 },
                                 "livenessProbe": {
                                     "timeoutSeconds": 1,
                                     "initialDelaySeconds": 30,
                                     "tcpSocket": {
-                                        "port": 27017
+                                        "port": 3306
                                     }
                                 },
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/lib/mysql/data",
+                                        "name": "${APPLICATION_NAME}-mysql-pvol"
+                                    }
+                                ],
                                 "env": [
                                     {
-                                        "name": "MONGODB_USER",
+                                        "name": "MYSQL_USER",
                                         "value": "${DB_USERNAME}"
                                     },
                                     {
-                                        "name": "MONGODB_PASSWORD",
+                                        "name": "MYSQL_PASSWORD",
                                         "value": "${DB_PASSWORD}"
                                     },
                                     {
-                                        "name": "MONGODB_DATABASE",
+                                        "name": "MYSQL_DATABASE",
                                         "value": "${DB_DATABASE}"
                                     },
                                     {
-                                        "name": "MONGODB_ADMIN_PASSWORD",
-                                        "value": "${DB_ADMIN_PASSWORD}"
+                                        "name": "MYSQL_LOWER_CASE_TABLE_NAMES",
+                                        "value": "${MYSQL_LOWER_CASE_TABLE_NAMES}"
                                     },
                                     {
-                                        "name": "MONGODB_NOPREALLOC",
-                                        "value": "${MONGODB_NOPREALLOC}"
+                                        "name": "MYSQL_MAX_CONNECTIONS",
+                                        "value": "${MYSQL_MAX_CONNECTIONS}"
                                     },
                                     {
-                                        "name": "MONGODB_SMALLFILES",
-                                        "value": "${MONGODB_SMALLFILES}"
+                                        "name": "MYSQL_FT_MIN_WORD_LEN",
+                                        "value": "${MYSQL_FT_MIN_WORD_LEN}"
                                     },
                                     {
-                                        "name": "MONGODB_QUIET",
-                                        "value": "${MONGODB_QUIET}"
-                                    }
-                                ],
-                                "volumeMounts": [
+                                        "name": "MYSQL_FT_MAX_WORD_LEN",
+                                        "value": "${MYSQL_FT_MAX_WORD_LEN}"
+                                    },
                                     {
-                                        "mountPath": "/var/lib/mongodb/data",
-                                        "name": "${APPLICATION_NAME}-data"
+                                        "name": "MYSQL_AIO",
+                                        "value": "${MYSQL_AIO}"
                                     }
                                 ]
                             }
                         ],
                         "volumes": [
                             {
-                                "emptyDir": {
-                                    "medium": ""
-                                },
-                                "name": "${APPLICATION_NAME}-data"
+                                "name": "${APPLICATION_NAME}-mysql-pvol",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-mysql-claim"
+                                }
                             }
                         ]
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-mysql-claim",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${VOLUME_CAPACITY}"
                     }
                 }
             }

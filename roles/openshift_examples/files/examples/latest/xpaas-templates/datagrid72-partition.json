@@ -4,20 +4,19 @@
     "metadata": {
         "annotations": {
             "iconClass": "icon-datagrid",
-            "tags": "datagrid,jboss",
-            "version": "1.4.15",
-            "openshift.io/display-name": "JBoss Data Grid 7.1 (Ephemeral, no https)",
+            "tags": "datagrid,jboss,hidden",
+            "version": "1.1",
+            "openshift.io/display-name": "Red Hat JBoss Data Grid 7.2 (Ephemeral, no https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
-            "description": "An example JBoss Data Grid application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
-            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.1 based application, including a deployment configuration, using using ephemeral (temporary) storage and communication using http.",
+            "description": "An example Red Hat JBoss Data Grid application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.2 based applications, including a deployment configuration, using ephemeral (temporary) storage and communication using http.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-data-grid/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
-        "name": "datagrid71-basic"
+        "name": "datagrid72-partition"
     },
     "labels": {
-        "template": "datagrid71-basic",
-        "xpaas": "1.4.15"
+        "template": "datagrid72-partition"
     },
     "message": "A new data grid service has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\".",
     "parameters": [
@@ -46,34 +45,6 @@
             "displayName": "Password",
             "description": "The password to access the JDG Caches. Must be different than username; must not be root, admin, or administrator; must contain at least 8 characters, 1 alphabetic character(s), 1 digit(s), and 1 non-alphanumeric symbol(s). (optional)",
             "name": "PASSWORD",
-            "value": "",
-            "required": false
-        },
-        {
-            "displayName": "JDG User Roles/Groups",
-            "description": "Comma delimited list of roles/groups associated with the JDG user",
-            "name": "ADMIN_GROUP",
-            "value": "",
-            "required": false
-        },
-        {
-            "displayName": "Hotrod Authentication",
-            "description": "Enable Hotrod Authentication",
-            "name": "HOTROD_AUTHENTICATION",
-            "value": "",
-            "required": false
-        },
-        {
-            "displayName": "Container Security Role Mapper",
-            "description": "Defines which role mapper to use for cache authentication",
-            "name": "CONTAINER_SECURITY_ROLE_MAPPER",
-            "value": "",
-            "required": false
-        },
-        {
-            "displayName": "Container Security Roles",
-            "description": "Comma delimited list of role names and assigned permissions",
-            "name": "CONTAINER_SECURITY_ROLES",
             "value": "",
             "required": false
         },
@@ -113,17 +84,38 @@
             "required": false
         },
         {
-            "displayName": "Encryption Requires SSL Client Authentication?",
-            "description": "",
-            "name": "ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH",
+            "displayName": "Memcached Cache Name",
+            "description": "The name of the cache to expose through this memcached connector",
+            "name": "MEMCACHED_CACHE",
+            "value": "default_memcached",
+            "required": false
+        },
+        {
+            "displayName": "ADMIN_GROUP",
+            "description": "Comma delimited list of groups/roles for the Application Realm User",
+            "name": "ADMIN_GROUP",
             "value": "",
             "required": false
         },
         {
-            "displayName": "Memcached Cache Name",
-            "description": "The name of the cache to expose through this memcached connector (defaults to 'default')",
-            "name": "MEMCACHED_CACHE",
-            "value": "default",
+            "displayName": "HOTROD_AUTHENTICATION",
+            "description": "True/False for HotRod Authentication",
+            "name": "HOTROD_AUTHENTICATION",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "CONTAINER_SECURITY_ROLE_MAPPER",
+            "description": "Container Role Mapper",
+            "name": "CONTAINER_SECURITY_ROLE_MAPPER",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "CONTAINER_SECURITY_ROLES",
+            "description": "Comma Delimited List of Container Roles",
+            "name": "CONTAINER_SECURITY_ROLES",
+            "value": "",
             "required": false
         },
         {
@@ -140,6 +132,20 @@
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
             "required": true
+        },
+        {
+            "displayName": "Datagrid Volume Size",
+            "description": "Size of the volume used by Datagrid for persisting metadata.",
+            "name": "VOLUME_CAPACITY",
+            "value": "1Gi",
+            "required": true
+        },
+        {
+            "displayName": "Split Data?",
+            "description": "Split the data directory for each node in a mesh, this is now the default behaviour.",
+            "name": "DATAGRID_SPLIT",
+            "value": "true",
+            "required": false
         },
         {
             "description": "Container memory limit",
@@ -225,6 +231,30 @@
             "kind": "Service",
             "apiVersion": "v1",
             "spec": {
+                "ports": [
+                    {
+                        "port": 8787,
+                        "targetPort": 8787
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}-debug",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "Hot Rod service for clustered applications."
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
                 "clusterIP": "None",
                 "ports": [
                     {
@@ -291,7 +321,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid71-openshift:1.3"
+                                "name": "jboss-datagrid72-openshift:1.1"
                             }
                         }
                     },
@@ -316,13 +346,19 @@
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
-                                "image": "jboss-datagrid71-openshift",
+                                "image": "jboss-datagrid72-openshift",
                                 "imagePullPolicy": "Always",
                                 "resources": {
                                     "limits": {
                                         "memory": "${MEMORY_LIMIT}"
                                     }
                                 },
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/opt/datagrid/standalone/partitioned_data",
+                                        "name": "${APPLICATION_NAME}-datagrid-pvol"
+                                    }
+                                ],
                                 "livenessProbe": {
                                     "exec": {
                                         "command": [
@@ -372,6 +408,11 @@
                                         "name": "hotrod",
                                         "containerPort": 11333,
                                         "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "debug",
+                                        "containerPort": 8787,
+                                        "protocol": "TCP"
                                     }
                                 ],
                                 "env": [
@@ -382,22 +423,6 @@
                                     {
                                         "name": "PASSWORD",
                                         "value": "${PASSWORD}"
-                                    },
-                                    {
-                                        "name": "ADMIN_GROUP",
-                                        "value": "${ADMIN_GROUP}"
-                                    },
-                                    {
-                                        "name": "HOTROD_AUTHENTICATION",
-                                        "value": "${HOTROD_AUTHENTICATION}"
-                                    },
-                                    {
-                                        "name": "CONTAINER_SECURITY_ROLE_MAPPER",
-                                        "value": "${CONTAINER_SECURITY_ROLE_MAPPER}"
-                                    },
-                                    {
-                                        "name": "CONTAINER_SECURITY_ROLES",
-                                        "value": "${CONTAINER_SECURITY_ROLES}"
                                     },
                                     {
                                         "name": "JGROUPS_PING_PROTOCOL",
@@ -428,10 +453,6 @@
                                         "value": "${CACHE_TYPE_DEFAULT}"
                                     },
                                     {
-                                        "name": "ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH",
-                                        "value": "${ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH}"
-                                    },
-                                    {
                                         "name": "HOTROD_SERVICE_NAME",
                                         "value": "${APPLICATION_NAME}-hotrod"
                                     },
@@ -446,10 +467,58 @@
                                     {
                                         "name": "JGROUPS_CLUSTER_PASSWORD",
                                         "value": "${JGROUPS_CLUSTER_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "ADMIN_GROUP",
+                                        "value": "${ADMIN_GROUP}"
+                                    },
+                                    {
+                                        "name": "HOTROD_AUTHENTICATION",
+                                        "value": "${HOTROD_AUTHENTICATION}"
+                                    },
+                                    {
+                                        "name": "CONTAINER_SECURITY_ROLE_MAPPER",
+                                        "value": "${CONTAINER_SECURITY_ROLE_MAPPER}"
+                                    },
+                                    {
+                                        "name": "CONTAINER_SECURITY_ROLES",
+                                        "value": "${CONTAINER_SECURITY_ROLES}"
+                                    },
+                                    {
+                                        "name": "DATAGRID_SPLIT",
+                                        "value": "${DATAGRID_SPLIT}"
                                     }
                                 ]
                             }
+                        ],
+                        "volumes": [
+                            {
+                                "name": "${APPLICATION_NAME}-datagrid-pvol",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-datagrid-claim"
+                                }
+                            }
                         ]
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-datagrid-claim",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteMany"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${VOLUME_CAPACITY}"
                     }
                 }
             }

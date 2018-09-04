@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-processserver",
             "tags": "processserver,jboss",
-            "version": "1.4.14",
+            "version": "1.4.15",
             "openshift.io/display-name": "JBoss BPM Suite 6.4 intelligent process server (no https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example BPM Suite application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "processserver64-basic-s2i",
-        "xpaas": "1.4.14"
+        "xpaas": "1.4.15"
     },
     "message": "A new BPMS application has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}.",
     "parameters": [
@@ -25,7 +25,7 @@
             "displayName": "KIE Container Deployment",
             "description": "The KIE Container deployment configuration in format: containerId=groupId:artifactId:version|c2=g2:a2:v2",
             "name": "KIE_CONTAINER_DEPLOYMENT",
-            "value": "processserver-library=org.openshift.quickstarts:processserver-library:1.3.0.Final",
+            "value": "processserver-library=org.openshift.quickstarts:processserver-library:1.4.0.Final",
             "required": false
         },
         {

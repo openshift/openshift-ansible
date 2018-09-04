@@ -5,13 +5,14 @@ metadata:
   annotations:
     description: Application template for an immultable KIE server in a production environment, for Red Hat Process Automation Manager 7.0
     iconClass: icon-jboss
-    tags: rhpam,jboss,xpaas
-    version: 1.4.0
+    tags: rhpam,jboss,kieserver,immutable
+    version: "1.2"
     openshift.io/display-name: Red Hat Process Automation Manager 7.0 immutable production environment
+    template.openshift.io/bindable: "false"
   name: rhpam70-prod-immutable-kieserver
 labels:
   template: rhpam70-prod-immutable-kieserver
-  xpaas: 1.4.0
+  rhpam: "1.2"
 message: A new environment has been set up for Red Hat Process Automation Manager 7. The username/password for accessing the KIE server is ${KIE_SERVER_USER}/${KIE_SERVER_PWD}.
 parameters:
 - displayName: Application Name
@@ -19,17 +20,6 @@ parameters:
   name: APPLICATION_NAME
   value: myapp
   required: true
-- displayName: EAP Admin User
-  description: EAP administrator username
-  name: ADMIN_USERNAME
-  value: eapadmin
-  required: false
-- displayName: EAP Admin Password
-  description: EAP administrator password
-  name: ADMIN_PASSWORD
-  from: "[a-zA-Z]{6}[0-9]{1}!"
-  generate: expression
-  required: false
 - displayName: KIE Admin User
   description: KIE administrator username
   name: KIE_ADMIN_USER
@@ -65,11 +55,16 @@ parameters:
   name: IMAGE_STREAM_NAMESPACE
   value: openshift
   required: true
+- displayName: KIE Server ImageStream Name
+  description: The name of the image stream to use for KIE Execution Server. Default is "rhpam70-kieserver-openshift".
+  name: KIE_SERVER_IMAGE_STREAM_NAME
+  value: "rhpam70-kieserver-openshift"
+  required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.2".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
-  required: false
+  value: "1.2"
+  required: true
 - displayName: KIE Server Monitor User
   description: KIE server monitor username, for optional use of the business-central-monitor (Sets the org.kie.server.controller.user system property)
   name: KIE_SERVER_MONITOR_USER
@@ -151,7 +146,7 @@ parameters:
   value: enabled
   required: false
 - displayName: Execution Server Custom http Route Hostname
-  description: 'Custom hostname for http service route.  Leave blank for default hostname,
+  description: 'Custom hostname for http service route, if set will also configure the KIE_SERVER_HOST. Leave blank for default hostname,
     e.g.: <application-name>-kieserver-<project>.<default-domain-suffix>'
   name: EXECUTION_SERVER_HOSTNAME_HTTP
   value: ''
@@ -161,6 +156,11 @@ parameters:
     hostname, e.g.: secure-<application-name>-kieserver-<project>.<default-domain-suffix>'
   name: EXECUTION_SERVER_HOSTNAME_HTTPS
   value: ''
+  required: false
+- displayName: Use the secure route name to set KIE_SERVER_HOST.
+  description: Use https for the KIE_SERVER_HOST when it is not explicit configured to a custom value.
+  name: EXECUTION_SERVER_USE_SECURE_ROUTE_NAME
+  value: 'false'
   required: false
 - displayName: KIE Server Keystore Secret Name
   description: The name of the secret containing the keystore file
@@ -222,22 +222,33 @@ parameters:
 - displayName: Maven mirror URL
   description: Maven mirror to use for S2I builds
   name: MAVEN_MIRROR_URL
-  value: ''
   required: false
 - displayName: Maven repository URL
   description: Fully qualified URL to a Maven repository.
   name: MAVEN_REPO_URL
-  value: ''
   required: false
 - displayName: Maven repository username
-  description: Username to access the Maven repository.
+  description: Username to access the Maven repository, if required.
   name: MAVEN_REPO_USERNAME
-  value: ''
   required: false
 - displayName: Maven repository password
-  description: Password to access the Maven repository.
+  description: Password to access the Maven repository, if required.
   name: MAVEN_REPO_PASSWORD
-  value: ''
+  required: false
+- displayName: Name of the Maven service hosted by Business Central
+  description: The service name for the optional business central, where it can be reached, to allow service lookups (for maven repo usage), if required
+  name: BUSINESS_CENTRAL_MAVEN_SERVICE
+  example: "myapp-rhpamcentr"
+  required: false
+- displayName: Username for the Maven service hosted by Business Central
+  description: Username to access the Maven service hosted by Business Central inside EAP.
+  name: BUSINESS_CENTRAL_MAVEN_USERNAME
+  example: "mavenUser"
+  required: false
+- displayName: Password for the Maven service hosted by Business Central
+  description: Password to access the Maven service hosted by Business Central inside EAP.
+  name: BUSINESS_CENTRAL_MAVEN_PASSWORD
+  example: "maven1!"
   required: false
 - description: List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.
   name: ARTIFACT_DIR
@@ -264,6 +275,21 @@ parameters:
   value: LocalContainersStartupStrategy
   required: true
 objects:
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-kieserver"
+    labels:
+      application: "${APPLICATION_NAME}"
+- kind: RoleBinding
+  apiVersion: v1
+  metadata:
+     name: "${APPLICATION_NAME}-kieserver-view"
+  subjects:
+  - kind: ServiceAccount
+    name: "${APPLICATION_NAME}-kieserver"
+  roleRef:
+    name: view
 - kind: Service
   apiVersion: v1
   spec:
@@ -386,7 +412,7 @@ objects:
         from:
           kind: ImageStreamTag
           namespace: "${IMAGE_STREAM_NAMESPACE}"
-          name: "rhpam70-kieserver-openshift:${IMAGE_STREAM_TAG}"
+          name: "${KIE_SERVER_IMAGE_STREAM_NAME}:${IMAGE_STREAM_TAG}"
     output:
       to:
         kind: ImageStreamTag
@@ -432,6 +458,7 @@ objects:
           application: "${APPLICATION_NAME}"
           service: "${APPLICATION_NAME}-kieserver"
       spec:
+        serviceAccountName: "${APPLICATION_NAME}-kieserver"
         terminationGracePeriodSeconds: 60
         containers:
         - name: "${APPLICATION_NAME}-kieserver"
@@ -494,28 +521,38 @@ objects:
             value: "${KIE_SERVER_MONITOR_PWD}"
           - name: KIE_SERVER_CONTROLLER_SERVICE
             value: "${KIE_SERVER_MONITOR_SERVICE}"
+          - name: KIE_SERVER_CONTROLLER_PROTOCOL
+            value: "ws"
           - name: KIE_SERVER_ID
             value: "${KIE_SERVER_ID}"
           - name: KIE_SERVER_HOST
-            valueFrom:
-              fieldRef:
-                fieldPath: status.podIP
+            value: "${EXECUTION_SERVER_HOSTNAME_HTTP}"
+          - name: EXECUTION_SERVER_ROUTE_NAME
+            value: "${APPLICATION_NAME}-kieserver"
+          - name: EXECUTION_SERVER_USE_SECURE_ROUTE_NAME
+            value: "${EXECUTION_SERVER_USE_SECURE_ROUTE_NAME}"
           - name: KIE_SERVER_USER
             value: "${KIE_SERVER_USER}"
           - name: KIE_SERVER_PWD
             value: "${KIE_SERVER_PWD}"
           - name: KIE_SERVER_CONTAINER_DEPLOYMENT
             value: "${KIE_SERVER_CONTAINER_DEPLOYMENT}"
-          - name: MAVEN_REPO_URL
-            value: "${MAVEN_REPO_URL}"
-          - name: MAVEN_REPO_USERNAME
-            value: "${MAVEN_REPO_USERNAME}"
-          - name: MAVEN_REPO_PASSWORD
-            value: "${MAVEN_REPO_PASSWORD}"
-          - name: MAVEN_REPO_SERVICE
-            value: ""
-          - name: MAVEN_REPO_PATH
+          - name: MAVEN_REPOS
+            value: "RHPAMCENTR,EXTERNAL"
+          - name: RHPAMCENTR_MAVEN_REPO_SERVICE
+            value: "${BUSINESS_CENTRAL_MAVEN_SERVICE}"
+          - name: RHPAMCENTR_MAVEN_REPO_PATH
             value: "/maven2/"
+          - name: RHPAMCENTR_MAVEN_REPO_USERNAME
+            value: "${BUSINESS_CENTRAL_MAVEN_USERNAME}"
+          - name: RHPAMCENTR_MAVEN_REPO_PASSWORD
+            value: "${BUSINESS_CENTRAL_MAVEN_PASSWORD}"
+          - name: EXTERNAL_MAVEN_REPO_URL
+            value: "${MAVEN_REPO_URL}"
+          - name: EXTERNAL_MAVEN_REPO_USERNAME
+            value: "${MAVEN_REPO_USERNAME}"
+          - name: EXTERNAL_MAVEN_REPO_PASSWORD
+            value: "${MAVEN_REPO_PASSWORD}"
           - name: KIE_SERVER_ROUTER_SERVICE
             value: "${KIE_SERVER_ROUTER_SERVICE}"
           - name: KIE_SERVER_ROUTER_HOST
@@ -539,8 +576,6 @@ objects:
             value: "postgresql"
           - name: KIE_SERVER_PERSISTENCE_DIALECT
             value: "org.hibernate.dialect.PostgreSQLDialect"
-          - name: RHPAM_TX_ISOLATION
-            value: "TRANSACTION_READ_COMMITTED"
           - name: RHPAM_USERNAME
             value: "${KIE_SERVER_POSTGRESQL_USER}"
           - name: RHPAM_PASSWORD
@@ -614,11 +649,24 @@ objects:
         - name: "${APPLICATION_NAME}-postgresql"
           image: postgresql
           imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+              - "/usr/libexec/check-container"
+              - "--live"
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+              - "/usr/libexec/check-container"
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
           ports:
           - containerPort: 5432
             protocol: TCP
           volumeMounts:
-          - mountPath: "/var/lib/postgresql/data"
+          - mountPath: "/var/lib/pgsql/data"
             name: "${APPLICATION_NAME}-postgresql-pvol"
           env:
           - name: POSTGRESQL_USER
