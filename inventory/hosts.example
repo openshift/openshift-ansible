@@ -168,7 +168,7 @@ debug_level=2
 # openshift_master_upgrade_post_hook=/usr/share/custom/post_master.yml
 
 # Cluster Image Source (registry) configuration
-# openshift-enterprise default is 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
+# openshift-enterprise default is 'registry.redhat.io/openshift3/ose-${component}:${version}'
 # origin default is 'docker.io/openshift/origin-${component}:${version}'
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 # If oreg_url points to a registry other than registry.redhat.io we can

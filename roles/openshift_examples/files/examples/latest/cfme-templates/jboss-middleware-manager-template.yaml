@@ -29,11 +29,11 @@ parameters:
 - name: HAWKULAR_SERVICES_IMAGE
   description: What docker image should be used for hawkular-services.
   displayName: Hawkular Services Docker Image
-  value: registry.access.redhat.com/jboss-mm-7-tech-preview/middleware-manager:latest
+  value: registry.redhat.io/jboss-mm-7-tech-preview/middleware-manager:latest
 - name: CASSANDRA_IMAGE
   description: What docker image should be used for cassandra node.
   displayName: Cassandra Docker Image
-  value: registry.access.redhat.com/openshift3/metrics-cassandra:3.5.0
+  value: registry.redhat.io/openshift3/metrics-cassandra:3.5.0
 - name: CASSANDRA_MEMORY_LIMIT
   description: Maximum amount of memory for Cassandra container.
   displayName: Cassandra Memory Limit

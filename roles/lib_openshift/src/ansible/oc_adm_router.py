@@ -19,7 +19,7 @@ def main():
             default_cert=dict(default=None, type='str'),
             cert_file=dict(default=None, type='str'),
             key_file=dict(default=None, type='str'),
-            images=dict(default=None, type='str'), #'registry.access.redhat.com/openshift3/ose-${component}:${version}'
+            images=dict(default=None, type='str'), #'registry.redhat.io/openshift3/ose-${component}:${version}'
             latest_images=dict(default=False, type='bool'),
             labels=dict(default=None, type='dict'),
             ports=dict(default=['80:80', '443:443'], type='list'),
