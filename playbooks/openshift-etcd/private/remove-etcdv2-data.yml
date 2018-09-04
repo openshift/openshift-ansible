@@ -1,6 +1,6 @@
 ---
 - name: Remove etcd v2 data
-  hosts: oo_etcd_to_config
+  hosts: oo_etcd_to_config[0]
   any_errors_fatal: true
   tasks:
   - import_role:
