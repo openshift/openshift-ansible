@@ -1,3 +1,12 @@
+{% macro cipher_suites() -%}
+{% for cipher in openshift_master_cipher_suites | default([]) -%}
+{% if loop.last -%}
+{{ cipher }}
+{%- else -%}
+{{ cipher }},
+{%- endif -%}
+{% endfor -%}
+{% endmacro -%}
 kind: Pod
 apiVersion: v1
 metadata:
@@ -13,7 +22,7 @@ spec:
   hostNetwork: true
   containers:
   - name: etcd
-    image: quay.io/coreos/etcd:v3.3
+    image: {{ etcd_image }}
     workingDir: /var/lib/etcd
     command: ["/bin/sh", "-c"]
     args:
@@ -22,6 +31,10 @@ spec:
       set -o allexport
       source /etc/etcd/etcd.conf
       exec etcd
+{%- if cipher_suites() -%}
+  {{' --cipher-suites='}}{{ cipher_suites() }}
+{%- endif %}
+
     securityContext:
       privileged: true
     volumeMounts:
@@ -32,6 +45,17 @@ spec:
        name: master-data
     livenessProbe:
       exec:
+        command:
+        - etcdctl
+        - --cert-file
+        - {{ etcd_peer_cert_file }}
+        - --key-file
+        - {{ etcd_peer_key_file }}
+        - --ca-file
+        - {{ etcd_peer_ca_file }}
+        - -C
+        - {{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}
+        - cluster-health
       initialDelaySeconds: 45
   volumes:
   - name: master-config
