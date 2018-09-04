@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.41
+Version:        3.10.42
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,39 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Sep 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.42-1
+- Add support for ak/orgid for RHEL (e.minguez@gmail.com)
+- Update the value of 'openshift_grafana_prometheus_serviceaccount' Fix
+  openshift_grafana prometheus serviceaccount default value in README,The
+  default value is 'promethus','promethus' missed a letter, and there should be
+  an e after the h,so it should be 'prometheus' (3168582@qq.com)
+- openshift-prometheus: improve uninstall process (pgier@redhat.com)
+- Fix incorrect formatting for ca file (vrutkovs@redhat.com)
+- _idp['name'] not availabe (github@st0ne.at)
+- Move openshift_crio_pause_image to openshift_facts (rteague@redhat.com)
+- Renames CRI-O pause_image to openshift_crio_pause_image.
+  (jtudelag@redhat.com)
+- Remove docker excluder from image prep packages (rteague@redhat.com)
+- kube_proxy_and_dns: add role that runs standalone kube-proxy + DNS
+  (dcbw@redhat.com)
+- Ensure sebool container_manage_cgroup on upgrade (mgugino@redhat.com)
+- Fix cpu_limit check in eventrouter template (vrutkovs@redhat.com)
+- openshift-control-plane: check whether the sync pods are ready before
+  selecting nodes (pgier@redhat.com)
+- make azure load balancer creation parameters as options (weshi@redhat.com)
+- Update pause image value in crio.conf after upgrade (umohnani@redhat.com)
+- Prefix identity provider's CA files with identity provider names
+  (vrutkovs@redhat.com)
+- Dissalow custom CA file path for providers with CA path (vrutkovs@redhat.com)
+- GlusterFS: Replace heketi Route with Service URL (jarrpa@redhat.com)
+- Be more accuracy for getting def_route_int and def_route_ip
+  (bysnupy@hotmail.com)
+- Don't collect node facts on master - these are set during bootstrap
+  (vrutkovs@redhat.com)
+- rollback node ports (m.judeikis@gmail.com)
+- fix metrics become syntax (eduardas@redhat.com)
+- change become syntax (m.judeikis@gmail.com)
+
 * Wed Aug 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.41-1
 - Approve node CSRs during restart (rteague@redhat.com)
 
