@@ -5,13 +5,14 @@ metadata:
   annotations:
     description: Application template for a non-HA persistent authoring environment, for Red Hat Process Automation Manager 7.0
     iconClass: icon-jboss
-    tags: rhpam,jboss,xpaas
-    version: 1.4.0
+    tags: rhpam,jboss,authoring
+    version: "1.2"
     openshift.io/display-name: Red Hat Process Automation Manager 7.0 authoring environment (non-HA, persistent, with https)
+    template.openshift.io/bindable: "false"
   name: rhpam70-authoring
 labels:
   template: rhpam70-authoring
-  xpaas: 1.4.0
+  rhpam: "1.2"
 message: A new persistent Process Automation Manager application have been created in your project.
   The username/password for accessing the KIE Server / Business Central interface is ${KIE_ADMIN_USER}/${KIE_ADMIN_PWD}.
   Please be sure to create the secrets named "${BUSINESS_CENTRAL_HTTPS_SECRET}" and "${KIE_SERVER_HTTPS_SECRET}" containing the
@@ -22,17 +23,6 @@ parameters:
   name: APPLICATION_NAME
   value: myapp
   required: true
-- displayName: EAP Admin User
-  description: EAP administrator username
-  name: ADMIN_USERNAME
-  value: eapadmin
-  required: false
-- displayName: EAP Admin Password
-  description: EAP administrator password
-  name: ADMIN_PASSWORD
-  from: "[a-zA-Z]{6}[0-9]{1}!"
-  generate: expression
-  required: false
 - displayName: KIE Admin User
   description: KIE administrator username
   name: KIE_ADMIN_USER
@@ -104,7 +94,7 @@ parameters:
   value: 'true'
   required: false
 - displayName: Business Central Custom http Route Hostname
-  description: 'Custom hostname for http service route.  Leave blank for default hostname,
+  description: 'Custom hostname for http service route. Leave blank for default hostname,
     e.g.: <application-name>-rhpamcentr-<project>.<default-domain-suffix>'
   name: BUSINESS_CENTRAL_HOSTNAME_HTTP
   value: ''
@@ -116,7 +106,7 @@ parameters:
   value: ''
   required: false
 - displayName: Execution Server Custom http Route Hostname
-  description: 'Custom hostname for http service route.  Leave blank for default hostname,
+  description: 'Custom hostname for http service route, if set will also configure the KIE_SERVER_HOST. Leave blank for default hostname,
     e.g.: <application-name>-kieserver-<project>.<default-domain-suffix>'
   name: EXECUTION_SERVER_HOSTNAME_HTTP
   value: ''
@@ -126,6 +116,11 @@ parameters:
     hostname, e.g.: secure-<application-name>-kieserver-<project>.<default-domain-suffix>'
   name: EXECUTION_SERVER_HOSTNAME_HTTPS
   value: ''
+  required: false
+- displayName: Use the secure route name to set KIE_SERVER_HOST.
+  description: Use https for the KIE_SERVER_HOST when it is not explicit configured to a custom value.
+  name: EXECUTION_SERVER_USE_SECURE_ROUTE_NAME
+  value: 'false'
   required: false
 - displayName: Business Central Server Keystore Secret Name
   description: The name of the secret containing the keystore file
@@ -180,22 +175,27 @@ parameters:
   name: IMAGE_STREAM_NAMESPACE
   value: openshift
   required: true
+- displayName: KIE Server ImageStream Name
+  description: The name of the image stream to use for KIE Execution Server. Default is "rhpam70-kieserver-openshift".
+  name: KIE_SERVER_IMAGE_STREAM_NAME
+  value: "rhpam70-kieserver-openshift"
+  required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.2".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
-  required: false
+  value: "1.2"
+  required: true
 - displayName: Maven repository URL
   description: Fully qualified URL to a Maven repository or service.
   name: MAVEN_REPO_URL
   example: http://nexus.nexus-project.svc.cluster.local:8081/nexus/content/groups/public/
   required: false
 - displayName: Maven repository username
-  description: Username to access the Maven repository.
+  description: Username to access the Maven repository, if required.
   name: MAVEN_REPO_USERNAME
   required: false
 - displayName: Maven repository password
-  description: Password to access the Maven repository.
+  description: Password to access the Maven repository, if required.
   name: MAVEN_REPO_PASSWORD
   required: false
 - displayName: Username for the Maven service hosted by Business Central
@@ -264,7 +264,123 @@ parameters:
   name: SSO_DISABLE_SSL_CERTIFICATE_VALIDATION
   value: "false"
   required: false
+- displayName: LDAP Endpoint
+  description: LDAP Endpoint to connect for authentication
+  name: AUTH_LDAP_URL
+  example: "ldap://myldap.example.com"
+  required: false
+- displayName: LDAP Bind DN
+  description: Bind DN used for authentication
+  name: AUTH_LDAP_BIND_DN
+  example: "uid=admin,ou=users,ou=exmample,ou=com"
+  required: false
+- displayName: LDAP Bind Credentials
+  description: LDAP Credentials used for authentication
+  name: AUTH_LDAP_BIND_CREDENTIAL
+  example: "Password"
+  required: false
+- displayName: LDAP JAAS Security Domain
+  description: The JMX ObjectName of the JaasSecurityDomain used to decrypt the password.
+  name: AUTH_LDAP_JAAS_SECURITY_DOMAIN
+  required: false
+- displayName: LDAP Base DN
+  description: LDAP Base DN of the top-level context to begin the user search.
+  name: AUTH_LDAP_BASE_CTX_DN
+  example: "ou=users,ou=example,ou=com"
+  required: false
+- displayName: LDAP Base Search filter
+  description: LDAP search filter used to locate the context of the user to authenticate. The input username or userDN obtained from the login module callback is substituted into the filter anywhere a {0} expression is used. A common example for the search filter is (uid={0}).
+  name: AUTH_LDAP_BASE_FILTER
+  example: "(uid={0})"
+  required: false
+- displayName: LDAP Search scope
+  description: The search scope to use.
+  name: AUTH_LDAP_SEARCH_SCOPE
+  example: "SUBTREE_SCOPE"
+  required: false
+- displayName: LDAP Search time limit
+  description: The timeout in milliseconds for user or role searches.
+  name: AUTH_LDAP_SEARCH_TIME_LIMIT
+  example: "10000"
+  required: false
+- displayName: LDAP DN attribute
+  description: The name of the attribute in the user entry that contains the DN of the user. This may be necessary if the DN of the user itself contains special characters, backslash for example, that prevent correct user mapping. If the attribute does not exist, the entry’s DN is used.
+  name: AUTH_LDAP_DISTINGUISHED_NAME_ATTRIBUTE
+  example: "distinguishedName"
+  required: false
+- displayName: LDAP Parse username
+  description: A flag indicating if the DN is to be parsed for the username. If set to true, the DN is parsed for the username. If set to false the DN is not parsed for the username. This option is used together with usernameBeginString and usernameEndString.
+  name: AUTH_LDAP_PARSE_USERNAME
+  example: "true"
+  required: false
+- displayName: LDAP Username begin string
+  description: Defines the String which is to be removed from the start of the DN to reveal the username. This option is used together with usernameEndString and only taken into account if parseUsername is set to true.
+  name: AUTH_LDAP_USERNAME_BEGIN_STRING
+  required: false
+- displayName: LDAP Username end string
+  description: Defines the String which is to be removed from the end of the DN to reveal the username. This option is used together with usernameEndString and only taken into account if parseUsername is set to true.
+  name: AUTH_LDAP_USERNAME_END_STRING
+  required: false
+- displayName: LDAP Role attributeID
+  description: Name of the attribute containing the user roles.
+  name: AUTH_LDAP_ROLE_ATTRIBUTE_ID
+  example: memberOf
+  required: false
+- displayName: LDAP Roles Search DN
+  description: The fixed DN of the context to search for user roles. This is not the DN where the actual roles are, but the DN where the objects containing the user roles are. For example, in a Microsoft Active Directory server, this is the DN where the user account is.
+  name: AUTH_LDAP_ROLES_CTX_DN
+  example: "ou=groups,ou=example,ou=com"
+  required: false
+- displayName: LDAP Role search filter
+  description: A search filter used to locate the roles associated with the authenticated user. The input username or userDN obtained from the login module callback is substituted into the filter anywhere a {0} expression is used. The authenticated userDN is substituted into the filter anywhere a {1} is used. An example search filter that matches on the input username is (member={0}). An alternative that matches on the authenticated userDN is (member={1}).
+  name: AUTH_LDAP_ROLE_FILTER
+  example: "(memberOf={1})"
+  required: false
+- displayName: LDAP Role recursion
+  description: The number of levels of recursion the role search will go below a matching context. Disable recursion by setting this to 0.
+  name: AUTH_LDAP_ROLE_RECURSION
+  example: "1"
+  required: false
+- displayName: LDAP Default role
+  description: A role included for all authenticated users
+  name: AUTH_LDAP_DEFAULT_ROLE
+  example: "guest"
+  required: false
+- displayName: LDAP Role name attribute ID
+  description: Name of the attribute within the roleCtxDN context which contains the role name. If the roleAttributeIsDN property is set to true, this property is used to find the role object’s name attribute.
+  name: AUTH_LDAP_ROLE_NAME_ATTRIBUTE_ID
+  example: "name"
+  required: false
+- displayName: LDAP Role DN contains roleNameAttributeID
+  description: A flag indicating if the DN returned by a query contains the roleNameAttributeID. If set to true, the DN is checked for the roleNameAttributeID. If set to false, the DN is not checked for the roleNameAttributeID. This flag can improve the performance of LDAP queries.
+  name: AUTH_LDAP_PARSE_ROLE_NAME_FROM_DN
+  example: "false"
+  required: false
+- displayName: LDAP Role Attribute ID is DN
+  description: Whether or not the roleAttributeID contains the fully-qualified DN of a role object. If false, the role name is taken from the value of the roleNameAttributeId attribute of the context name. Certain directory schemas, such as Microsoft Active Directory, require this attribute to be set to true.
+  name: AUTH_LDAP_ROLE_ATTRIBUTE_IS_DN
+  example: "false"
+  required: false
+- displayName: LDAP Referral user attribute ID
+  description: If you are not using referrals, this option can be ignored. When using referrals, this option denotes the attribute name which contains users defined for a certain role, for example member, if the role object is inside the referral. Users are checked against the content of this attribute name. If this option is not set, the check will always fail, so role objects cannot be stored in a referral tree.
+  name: AUTH_LDAP_REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK
+  required: false
 objects:
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-kieserver"
+    labels:
+      application: "${APPLICATION_NAME}"
+- kind: RoleBinding
+  apiVersion: v1
+  metadata:
+     name: "${APPLICATION_NAME}-kieserver-view"
+  subjects:
+  - kind: ServiceAccount
+    name: "${APPLICATION_NAME}-kieserver"
+  roleRef:
+    name: view
 - kind: Service
   apiVersion: v1
   spec:
@@ -488,10 +604,6 @@ objects:
             value: "${BUSINESS_CENTRAL_HTTPS_NAME}"
           - name: HTTPS_PASSWORD
             value: "${BUSINESS_CENTRAL_HTTPS_PASSWORD}"
-          - name: ADMIN_USERNAME
-            value: "${ADMIN_USERNAME}"
-          - name: ADMIN_PASSWORD
-            value: "${ADMIN_PASSWORD}"
           - name: PROBE_IMPL
             value: probe.eap.jolokia.EapProbe
           - name: PROBE_DISABLE_BOOT_ERRORS_CHECK
@@ -516,6 +628,48 @@ objects:
             value: "${BUSINESS_CENTRAL_HOSTNAME_HTTP}"
           - name: HOSTNAME_HTTPS
             value: "${BUSINESS_CENTRAL_HOSTNAME_HTTPS}"
+          - name: AUTH_LDAP_URL
+            value: "${AUTH_LDAP_URL}"
+          - name: AUTH_LDAP_BIND_DN
+            value: "${AUTH_LDAP_BIND_DN}"
+          - name: AUTH_LDAP_BIND_CREDENTIAL
+            value: "${AUTH_LDAP_BIND_CREDENTIAL}"
+          - name: AUTH_LDAP_JAAS_SECURITY_DOMAIN
+            value: "${AUTH_LDAP_JAAS_SECURITY_DOMAIN}"
+          - name: AUTH_LDAP_BASE_CTX_DN
+            value: "${AUTH_LDAP_BASE_CTX_DN}"
+          - name: AUTH_LDAP_BASE_FILTER
+            value: "${AUTH_LDAP_BASE_FILTER}"
+          - name: AUTH_LDAP_SEARCH_SCOPE
+            value: "${AUTH_LDAP_SEARCH_SCOPE}"
+          - name: AUTH_LDAP_SEARCH_TIME_LIMIT
+            value: "${AUTH_LDAP_SEARCH_TIME_LIMIT}"
+          - name: AUTH_LDAP_DISTINGUISHED_NAME_ATTRIBUTE
+            value: "${AUTH_LDAP_DISTINGUISHED_NAME_ATTRIBUTE}"
+          - name: AUTH_LDAP_PARSE_USERNAME
+            value: "${AUTH_LDAP_PARSE_USERNAME}"
+          - name: AUTH_LDAP_USERNAME_BEGIN_STRING
+            value: "${AUTH_LDAP_USERNAME_BEGIN_STRING}"
+          - name: AUTH_LDAP_USERNAME_END_STRING
+            value: "${AUTH_LDAP_USERNAME_END_STRING}"
+          - name: AUTH_LDAP_ROLE_ATTRIBUTE_ID
+            value: "${AUTH_LDAP_ROLE_ATTRIBUTE_ID}"
+          - name: AUTH_LDAP_ROLES_CTX_DN
+            value: "${AUTH_LDAP_ROLES_CTX_DN}"
+          - name: AUTH_LDAP_ROLE_FILTER
+            value: "${AUTH_LDAP_ROLE_FILTER}"
+          - name: AUTH_LDAP_ROLE_RECURSION
+            value: "${AUTH_LDAP_ROLE_RECURSION}"
+          - name: AUTH_LDAP_DEFAULT_ROLE
+            value: "${AUTH_LDAP_DEFAULT_ROLE}"
+          - name: AUTH_LDAP_ROLE_NAME_ATTRIBUTE_ID
+            value: "${AUTH_LDAP_ROLE_NAME_ATTRIBUTE_ID}"
+          - name: AUTH_LDAP_PARSE_ROLE_NAME_FROM_DN
+            value: "${AUTH_LDAP_PARSE_ROLE_NAME_FROM_DN}"
+          - name: AUTH_LDAP_ROLE_ATTRIBUTE_IS_DN
+            value: "${AUTH_LDAP_ROLE_ATTRIBUTE_IS_DN}"
+          - name: AUTH_LDAP_REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK
+            value: "${AUTH_LDAP_REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK}"
         volumes:
         - name: businesscentral-keystore-volume
           secret:
@@ -542,7 +696,7 @@ objects:
         from:
           kind: ImageStreamTag
           namespace: "${IMAGE_STREAM_NAMESPACE}"
-          name: "rhpam70-kieserver-openshift:${IMAGE_STREAM_TAG}"
+          name: "${KIE_SERVER_IMAGE_STREAM_NAME}:${IMAGE_STREAM_TAG}"
     - type: ConfigChange
     replicas: 1
     selector:
@@ -555,10 +709,11 @@ objects:
           application: "${APPLICATION_NAME}"
           service: "${APPLICATION_NAME}-kieserver"
       spec:
+        serviceAccountName: "${APPLICATION_NAME}-kieserver"
         terminationGracePeriodSeconds: 60
         containers:
         - name: "${APPLICATION_NAME}-kieserver"
-          image: rhpam70-kieserver-openshift
+          image: "${KIE_SERVER_IMAGE_STREAM_NAME}"
           imagePullPolicy: Always
           resources:
             limits:
@@ -642,12 +797,16 @@ objects:
             value: "${KIE_SERVER_CONTROLLER_PWD}"
           - name: KIE_SERVER_CONTROLLER_SERVICE
             value: "${APPLICATION_NAME}-rhpamcentr"
+          - name: KIE_SERVER_CONTROLLER_PROTOCOL
+            value: "ws"
           - name: KIE_SERVER_ID
             value: "${KIE_SERVER_ID}"
           - name: KIE_SERVER_HOST
-            valueFrom:
-              fieldRef:
-                fieldPath: status.podIP
+            value: "${EXECUTION_SERVER_HOSTNAME_HTTP}"
+          - name: EXECUTION_SERVER_ROUTE_NAME
+            value: "${APPLICATION_NAME}-kieserver"
+          - name: EXECUTION_SERVER_USE_SECURE_ROUTE_NAME
+            value: "${EXECUTION_SERVER_USE_SECURE_ROUTE_NAME}"
           - name: KIE_SERVER_PERSISTENCE_DS
             value: "${KIE_SERVER_PERSISTENCE_DS}"
           - name: KIE_SERVER_USER
@@ -698,6 +857,48 @@ objects:
             value: "${EXECUTION_SERVER_HOSTNAME_HTTP}"
           - name: HOSTNAME_HTTPS
             value: "${EXECUTION_SERVER_HOSTNAME_HTTPS}"
+          - name: AUTH_LDAP_URL
+            value: "${AUTH_LDAP_URL}"
+          - name: AUTH_LDAP_BIND_DN
+            value: "${AUTH_LDAP_BIND_DN}"
+          - name: AUTH_LDAP_BIND_CREDENTIAL
+            value: "${AUTH_LDAP_BIND_CREDENTIAL}"
+          - name: AUTH_LDAP_JAAS_SECURITY_DOMAIN
+            value: "${AUTH_LDAP_JAAS_SECURITY_DOMAIN}"
+          - name: AUTH_LDAP_BASE_CTX_DN
+            value: "${AUTH_LDAP_BASE_CTX_DN}"
+          - name: AUTH_LDAP_BASE_FILTER
+            value: "${AUTH_LDAP_BASE_FILTER}"
+          - name: AUTH_LDAP_SEARCH_SCOPE
+            value: "${AUTH_LDAP_SEARCH_SCOPE}"
+          - name: AUTH_LDAP_SEARCH_TIME_LIMIT
+            value: "${AUTH_LDAP_SEARCH_TIME_LIMIT}"
+          - name: AUTH_LDAP_DISTINGUISHED_NAME_ATTRIBUTE
+            value: "${AUTH_LDAP_DISTINGUISHED_NAME_ATTRIBUTE}"
+          - name: AUTH_LDAP_PARSE_USERNAME
+            value: "${AUTH_LDAP_PARSE_USERNAME}"
+          - name: AUTH_LDAP_USERNAME_BEGIN_STRING
+            value: "${AUTH_LDAP_USERNAME_BEGIN_STRING}"
+          - name: AUTH_LDAP_USERNAME_END_STRING
+            value: "${AUTH_LDAP_USERNAME_END_STRING}"
+          - name: AUTH_LDAP_ROLE_ATTRIBUTE_ID
+            value: "${AUTH_LDAP_ROLE_ATTRIBUTE_ID}"
+          - name: AUTH_LDAP_ROLES_CTX_DN
+            value: "${AUTH_LDAP_ROLES_CTX_DN}"
+          - name: AUTH_LDAP_ROLE_FILTER
+            value: "${AUTH_LDAP_ROLE_FILTER}"
+          - name: AUTH_LDAP_ROLE_RECURSION
+            value: "${AUTH_LDAP_ROLE_RECURSION}"
+          - name: AUTH_LDAP_DEFAULT_ROLE
+            value: "${AUTH_LDAP_DEFAULT_ROLE}"
+          - name: AUTH_LDAP_ROLE_NAME_ATTRIBUTE_ID
+            value: "${AUTH_LDAP_ROLE_NAME_ATTRIBUTE_ID}"
+          - name: AUTH_LDAP_PARSE_ROLE_NAME_FROM_DN
+            value: "${AUTH_LDAP_PARSE_ROLE_NAME_FROM_DN}"
+          - name: AUTH_LDAP_ROLE_ATTRIBUTE_IS_DN
+            value: "${AUTH_LDAP_ROLE_ATTRIBUTE_IS_DN}"
+          - name: AUTH_LDAP_REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK
+            value: "${AUTH_LDAP_REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK}"
         volumes:
         - name: kieserver-keystore-volume
           secret:

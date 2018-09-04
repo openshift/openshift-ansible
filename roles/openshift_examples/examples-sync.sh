@@ -5,11 +5,11 @@
 #
 # This script should be run from openshift-ansible/roles/openshift_examples
 
-XPAAS_VERSION=ose-v1.4.14
+XPAAS_VERSION=ose-v1.4.15
 RHDM70_VERSION=7.0.1.GA
 RHPAM70_VERSION=7.0.2.GA
 DG_72_VERSION=datagrid72-dev
-ORIGIN_VERSION=${1:-v3.11}
+#ORIGIN_VERSION=${1:-v3.11}
 ORIGIN_BRANCH=${2:-master}
 RHAMP_TAG=2.0.0.GA
 EXAMPLES_BASE=$(pwd)/files/examples/latest

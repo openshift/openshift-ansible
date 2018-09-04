@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass" : "icon-sso",
             "tags" : "sso,keycloak,jboss",
-            "version": "1.4.14",
+            "version": "1.4.15",
             "openshift.io/display-name": "Red Hat Single Sign-On 7.2 (Ephemeral)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example RH-SSO 7 application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "sso72-x509-https",
-        "xpaas": "1.4.14"
+        "xpaas": "1.4.15"
     },
     "message": "A new RH-SSO service has been created in your project. The admin username/password for accessing the master realm via the RH-SSO console is ${SSO_ADMIN_USERNAME}/${SSO_ADMIN_PASSWORD}. The HTTPS keystore used for serving secure content, the JGroups keystore used for securing JGroups communications, and server truststore used for securing RH-SSO requests were automatically created via OpenShift's service serving x509 certificate secrets.",
     "parameters": [

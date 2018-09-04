@@ -5,13 +5,14 @@ metadata:
   annotations:
     description: Application template for a managed KIE server with a MySQL database, for Red Hat Process Automation Manager 7.0
     iconClass: icon-jboss
-    tags: rhpam,jboss,xpaas
-    version: 1.4.0
+    tags: rhpam,jboss,kieserver,mysql
+    version: "1.2"
     openshift.io/display-name: Red Hat Process Automation Manager 7.0 managed KIE server with a MySQL database
+    template.openshift.io/bindable: "false"
   name: rhpam70-kieserver-mysql
 labels:
   template: rhpam70-kieserver-mysql
-  xpaas: 1.4.0
+  rhpam: "1.2"
 message: A new environment has been set up for Red Hat Process Automation Manager 7. The username/password for accessing the KIE server is ${KIE_SERVER_USER}/${KIE_SERVER_PWD}.
 parameters:
 - displayName: Application Name
@@ -27,21 +28,25 @@ parameters:
 - displayName: Maven repository username
   description: Username to access the Maven repository, if required.
   name: MAVEN_REPO_USERNAME
-  required: true
+  required: false
 - displayName: Maven repository password
   description: Password to access the Maven repository, if required.
   name: MAVEN_REPO_PASSWORD
-  required: true
-- displayName: EAP Admin User
-  description: EAP administrator username
-  name: ADMIN_USERNAME
-  value: eapadmin
   required: false
-- displayName: EAP Admin Password
-  description: EAP administrator password
-  name: ADMIN_PASSWORD
-  from: "[a-zA-Z]{6}[0-9]{1}!"
-  generate: expression
+- displayName: Name of the Maven service hosted by Business Central
+  description: The service name for the optional business central, where it can be reached, to allow service lookups (for maven repo usage), if required
+  name: BUSINESS_CENTRAL_MAVEN_SERVICE
+  example: "myapp-rhpamcentr"
+  required: false
+- displayName: Username for the Maven service hosted by Business Central
+  description: Username to access the Maven service hosted by Business Central inside EAP.
+  name: BUSINESS_CENTRAL_MAVEN_USERNAME
+  example: "mavenUser"
+  required: false
+- displayName: Password for the Maven service hosted by Business Central
+  description: Password to access the Maven service hosted by Business Central inside EAP.
+  name: BUSINESS_CENTRAL_MAVEN_PASSWORD
+  example: "maven1!"
   required: false
 - displayName: KIE Admin User
   description: KIE administrator username
@@ -77,11 +82,16 @@ parameters:
   name: IMAGE_STREAM_NAMESPACE
   value: openshift
   required: true
+- displayName: KIE Server ImageStream Name
+  description: The name of the image stream to use for KIE Execution Server. Default is "rhpam70-kieserver-openshift".
+  name: KIE_SERVER_IMAGE_STREAM_NAME
+  value: "rhpam70-kieserver-openshift"
+  required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.2".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
-  required: false
+  value: "1.2"
+  required: true
 - displayName: Smart Router Service
   description: The service name for the optional smart router, where it can be reached, to allow smart routing
   name: KIE_SERVER_ROUTER_SERVICE
@@ -176,7 +186,7 @@ parameters:
   value: enabled
   required: false
 - displayName: Execution Server Custom http Route Hostname
-  description: 'Custom hostname for http service route.  Leave blank for default hostname,
+  description: 'Custom hostname for http service route, if set will also configure the KIE_SERVER_HOST. Leave blank for default hostname,
     e.g.: <application-name>-kieserver-<project>.<default-domain-suffix>'
   name: EXECUTION_SERVER_HOSTNAME_HTTP
   value: ''
@@ -186,6 +196,11 @@ parameters:
     hostname, e.g.: secure-<application-name>-kieserver-<project>.<default-domain-suffix>'
   name: EXECUTION_SERVER_HOSTNAME_HTTPS
   value: ''
+  required: false
+- displayName: Use the secure route name to set KIE_SERVER_HOST.
+  description: Use https for the KIE_SERVER_HOST when it is not explicit configured to a custom value.
+  name: EXECUTION_SERVER_USE_SECURE_ROUTE_NAME
+  value: 'false'
   required: false
 - displayName: KIE Server Keystore Secret Name
   description: The name of the secret containing the keystore file
@@ -212,7 +227,6 @@ parameters:
   name: KIE_SERVER_BYPASS_AUTH_USER
   value: 'false'
   required: false
-  required: true
 - displayName: "Timer service data store refresh interval (in milliseconds)"
   description: "Sets refresh-interval for the EJB timer database data-store service."
   name: TIMER_SERVICE_DATA_STORE_REFRESH_INTERVAL
@@ -239,6 +253,21 @@ parameters:
   example: "LocalContainersStartupStrategy"
   required: false
 objects:
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-kieserver"
+    labels:
+      application: "${APPLICATION_NAME}"
+- kind: RoleBinding
+  apiVersion: v1
+  metadata:
+     name: "${APPLICATION_NAME}-kieserver-view"
+  subjects:
+  - kind: ServiceAccount
+    name: "${APPLICATION_NAME}-kieserver"
+  roleRef:
+    name: view
 - kind: Service
   apiVersion: v1
   spec:
@@ -345,7 +374,7 @@ objects:
         from:
           kind: ImageStreamTag
           namespace: "${IMAGE_STREAM_NAMESPACE}"
-          name: "rhpam70-kieserver-openshift:${IMAGE_STREAM_TAG}"
+          name: "${KIE_SERVER_IMAGE_STREAM_NAME}:${IMAGE_STREAM_TAG}"
     - type: ConfigChange
     replicas: 1
     selector:
@@ -358,10 +387,11 @@ objects:
           application: "${APPLICATION_NAME}"
           service: "${APPLICATION_NAME}-kieserver"
       spec:
+        serviceAccountName: "${APPLICATION_NAME}-kieserver"
         terminationGracePeriodSeconds: 60
         containers:
         - name: "${APPLICATION_NAME}-kieserver"
-          image: rhpam70-kieserver-openshift
+          image: "${KIE_SERVER_IMAGE_STREAM_NAME}"
           imagePullPolicy: Always
           resources:
             limits:
@@ -428,26 +458,38 @@ objects:
             value: "${KIE_SERVER_CONTROLLER_PROTOCOL}"
           - name: KIE_SERVER_CONTROLLER_TOKEN
             value: "${KIE_SERVER_CONTROLLER_TOKEN}"
+          - name: KIE_SERVER_CONTROLLER_PROTOCOL
+            value: "ws"
           - name: KIE_SERVER_ID
             value: "${KIE_SERVER_ID}"
           - name: KIE_SERVER_HOST
-            valueFrom:
-              fieldRef:
-                fieldPath: status.podIP
+            value: "${EXECUTION_SERVER_HOSTNAME_HTTP}"
+          - name: EXECUTION_SERVER_ROUTE_NAME
+            value: "${APPLICATION_NAME}-kieserver"
+          - name: EXECUTION_SERVER_USE_SECURE_ROUTE_NAME
+            value: "${EXECUTION_SERVER_USE_SECURE_ROUTE_NAME}"
           - name: KIE_SERVER_USER
             value: "${KIE_SERVER_USER}"
           - name: KIE_SERVER_PWD
             value: "${KIE_SERVER_PWD}"
           - name: KIE_SERVER_CONTAINER_DEPLOYMENT
             value: "${KIE_SERVER_CONTAINER_DEPLOYMENT}"
-          - name: MAVEN_REPO_URL
-            value: "${MAVEN_REPO_URL}"
-          - name: MAVEN_REPO_USERNAME
-            value: "${MAVEN_REPO_USERNAME}"
-          - name: MAVEN_REPO_PASSWORD
-            value: "${MAVEN_REPO_PASSWORD}"
-          - name: MAVEN_REPO_PATH
+          - name: MAVEN_REPOS
+            value: "RHPAMCENTR,EXTERNAL"
+          - name: RHPAMCENTR_MAVEN_REPO_SERVICE
+            value: "${BUSINESS_CENTRAL_MAVEN_SERVICE}"
+          - name: RHPAMCENTR_MAVEN_REPO_PATH
             value: "/maven2/"
+          - name: RHPAMCENTR_MAVEN_REPO_USERNAME
+            value: "${BUSINESS_CENTRAL_MAVEN_USERNAME}"
+          - name: RHPAMCENTR_MAVEN_REPO_PASSWORD
+            value: "${BUSINESS_CENTRAL_MAVEN_PASSWORD}"
+          - name: EXTERNAL_MAVEN_REPO_URL
+            value: "${MAVEN_REPO_URL}"
+          - name: EXTERNAL_MAVEN_REPO_USERNAME
+            value: "${MAVEN_REPO_USERNAME}"
+          - name: EXTERNAL_MAVEN_REPO_PASSWORD
+            value: "${MAVEN_REPO_PASSWORD}"
           - name: KIE_SERVER_ROUTER_SERVICE
             value: "${KIE_SERVER_ROUTER_SERVICE}"
           - name: KIE_SERVER_ROUTER_HOST
@@ -466,8 +508,6 @@ objects:
             value: "RHPAM"
           - name: RHPAM_JNDI
             value: "${KIE_SERVER_PERSISTENCE_DS}"
-          - name: RHPAM_TX_ISOLATION
-            value: "TRANSACTION_READ_COMMITTED"
 ## MySQL driver settings BEGIN
           - name: RHPAM_DATABASE
             value: "${KIE_SERVER_MYSQL_DB}"
@@ -498,10 +538,6 @@ objects:
             value: "${KIE_SERVER_HTTPS_NAME}"
           - name: HTTPS_PASSWORD
             value: "${KIE_SERVER_HTTPS_PASSWORD}"
-          - name: ADMIN_USERNAME
-            value: "${ADMIN_USERNAME}"
-          - name: ADMIN_PASSWORD
-            value: "${ADMIN_PASSWORD}"
           - name: JGROUPS_PING_PROTOCOL
             value: "openshift.DNS_PING"
           - name: OPENSHIFT_DNS_PING_SERVICE_NAME
@@ -550,6 +586,21 @@ objects:
         - name: "${APPLICATION_NAME}-mysql"
           image: mysql
           imagePullPolicy: Always
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+                - "/bin/sh"
+                - "-i"
+                - "-c"
+                - "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"
+              port: 3306
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
           ports:
           - containerPort: 3306
             protocol: TCP
