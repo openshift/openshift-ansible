@@ -1,0 +1,5 @@
+---
+- import_tasks: requisites.yaml
+- import_tasks: openshift_config_files.yaml
+- import_tasks: other_files.yaml
+- import_tasks: package_list.yaml

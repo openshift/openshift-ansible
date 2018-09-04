@@ -1,0 +1,8 @@
+---
+- name: openshift_hosts_backup
+  hosts: masters,nodes
+  gather_facts: yes
+  tags: openshift_hosts_backup
+
+  roles:
+  - { role: openshift_hosts_backup }

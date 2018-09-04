@@ -1,0 +1,56 @@
+---
+- name: Create OCP files backup directory
+  file:
+    state: directory
+    path: "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/etc/sysconfig"
+
+- name: List files in /etc/origin/
+  find:
+    path: /etc/origin/
+    recurse: yes
+    file_type: any
+  register: origin_result
+  become: yes
+
+- name: Create the directories
+  file:
+    path: '{{ item.path | regex_replace("/etc/origin/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/origin/") }}'
+    state: directory
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ origin_result.files }}"
+  when:
+    - item.isdir
+
+- name: Copy the files
+  copy:
+    src: "{{ item.path }}"
+    dest: '{{ item.path | regex_replace("/etc/origin/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/origin/") }}'
+    remote_src: yes
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ origin_result.files }}"
+  when:
+    - item.isdir == False
+  become: yes
+
+- name: List files in /etc/sysconfig/
+  find:
+    path: /etc/sysconfig
+    recurse: yes
+    file_type: file
+    patterns: '*atomic-*'
+  register: atomic_result
+  become: yes
+
+- name: Copy the files
+  copy:
+    src: "{{ item.path }}"
+    dest: '{{ item.path | regex_replace("/etc/sysconfig/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/sysconfig/") }}'
+    remote_src: yes
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ atomic_result.files }}"
+  when:
+    - item.isdir == False
+  become: yes

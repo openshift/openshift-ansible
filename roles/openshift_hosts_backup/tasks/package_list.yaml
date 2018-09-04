@@ -1,0 +1,11 @@
+---
+- name: Get list of installed packages
+  yum: list=installed
+  register: yum_packages
+
+- name: Create packages.txt file
+  copy:
+    content: "{{ yum_packages|json_query(jsonquery) }}"
+    dest: "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/packages.txt"
+  vars:
+    jsonquery: "results[*].envra"
