@@ -1,0 +1,12 @@
+- name: Verify cluster is healthy pre-upgrade
+  command: "{{ etcdctlv2 }} cluster-health"
+
+- name: Remove etcdv2 kubernetes data
+  command: "{{ etcdctlv2 }} rm -r /kubernetes.io"
+  register: etcdv2_remove_k8s
+  failed_when: "'Key not found' not in etcdv2_remove_k8s.stderr"
+
+- name: Remove etcdv2 openshift data
+  command: "{{ etcdctlv2 }} rm -r /openshift.io"
+  register: etcdv2_remove_openshift
+  failed_when: "'Key not found' not in etcdv2_remove_openshift.stderr"
