@@ -1,0 +1,16 @@
+---
+- include: ../openshift-cluster/initialize_groups.yml
+  tags:
+  - always
+
+- include: ../../common/openshift-cluster/std_include.yml
+  tags:
+  - always
+
+- name: Remove etcd v2 data
+  hosts: oo_etcd_to_config[0]
+  any_errors_fatal: true
+  roles:
+    - role: etcd_remove_v2
+      etcd_peer: "{{ openshift.common.hostname }}"
+      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"

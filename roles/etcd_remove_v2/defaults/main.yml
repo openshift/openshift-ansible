@@ -1,0 +1,2 @@
+---
+etcdctl_cmd: "{{ r_etcd_common_etcdctl_command }} --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} --endpoint https://{{ etcd_peer }}:{{ etcd_client_port }}"

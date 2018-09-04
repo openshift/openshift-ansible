@@ -1,0 +1,23 @@
+- name: Verify cluster is healthy pre-upgrade
+  command: "{{ etcdctl_cmd }} cluster-health"
+
+- name: Check migrated status
+  command: "{{ etcdctl_cmd }} get /kubernetes.io"
+  register: etcdv2_migrated_status
+  failed_when: "'stdout' not in etcdv2_migrated_status"
+
+- block:
+  - name: Remove etcdv2 kubernetes data
+    command: "{{ etcdctl_cmd }} rm -r /kubernetes.io"
+    register: etcdv2_remove_k8s
+    failed_when: "'Key not found' not in etcdv2_remove_k8s.stderr"
+
+  - name: Remove etcdv2 openshift data
+    command: "{{ etcdctl_cmd }} rm -r /openshift.io"
+    register: etcdv2_remove_openshift
+    failed_when: "'Key not found' not in etcdv2_remove_openshift.stderr"
+
+  - name: Set migrated mark
+    command: "{{ etcdctl_cmd }} set /kubernetes.io migrated"
+
+  when: "etcdv2_migrated_status.stdout != 'migrated'"

@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  author: Vadim Rutkovsky
+  description: Remove etcd v2 data
+  company: Red Hat, Inc.
+  license: Apache License, Version 2.0
+  min_ansible_version: 2.1
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - cloud
+  - system
+dependencies:
+- { role: etcd_common }
+- { role: lib_utils }
