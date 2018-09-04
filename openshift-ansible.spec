@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.25.0%{?dist}
+Release:        0.26.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,64 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Sep 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.26.0
+- Fix etcdctl aliases on etcd hosts (vrutkovs@redhat.com)
+- Removing azure publishing tooling. (kwoodson@redhat.com)
+- repair container_runtime_extra_storage var values
+  (46245+jirib@users.noreply.github.com)
+- Convert all remaining registry.access.redhat.com to registry.redhat.io
+  (sdodson@redhat.com)
+- Update packages in gold image and unsubscribe (e.minguez@gmail.com)
+- Configure repositories if RHEL (e.minguez@gmail.com)
+- Update openshift_master.py (crmarquesjc@gmail.com)
+- Update the value of 'openshift_grafana_prometheus_serviceaccount' Fix
+  openshift_grafana prometheus serviceaccount default value  in README,The
+  default value is 'promethus','promethus' missed a letter, and there should be
+  an e after the h,so it should be 'prometheus' (3168582@qq.com)
+- kube_proxy_and_dns: add role that runs standalone kube-proxy + DNS
+  (dcbw@redhat.com)
+- Don't reset os_firewall_use_firewalld if iptables is inactive during upgrade
+  (vrutkovs@redhat.com)
+- crio: Don't use file locking (mrunalp@gmail.com)
+- Forcing full cluster restart to treat dcs as set (ewolinet@redhat.com)
+- Ensure gquota set on slash filesystem (mazzystr@gmail.com)
+- Use correct container CLI for docker or cri-o (rteague@redhat.com)
+- openshift-prometheus: improve uninstall process (pgier@redhat.com)
+- Install NetworkManager on OpenStack (tomas@sedovic.cz)
+- Fix incorrect formatting for ca file (vrutkovs@redhat.com)
+- Refactor with_items usage with Ansible package module (rteague@redhat.com)
+- Move openshift_crio_pause_image to openshift_facts (rteague@redhat.com)
+- Update deprecated crio.sock (rteague@redhat.com)
+- Remove docker excluder from image prep packages (rteague@redhat.com)
+- Support ak/orgid and user/password (e.minguez@gmail.com)
+- Fix ASG tagging (mazzystr@gmail.com)
+- Fix loop item (cwilkers@redhat.com)
+- Ensure sebool container_manage_cgroup on upgrade (mgugino@redhat.com)
+- issue #9820 (rcook@redhat.com)
+- Add support for ak/orgid for RHEL (e.minguez@gmail.com)
+- Enable context selector on console upgrade (spadgett@redhat.com)
+- Resolves openshift_release openshift_version conversion for AWS plays
+  (mazzystr@gmail.com)
+- Add extensions to tasks_from: directives (rteague@redhat.com)
+- Remove version_gte_3_10, version_gte_3_11, content_version
+  (sdodson@redhat.com)
+- Control plane static pods (apiserver, etcd, controller-manager) must get
+  highest priority class system-node-critical. Priority admission plugin was
+  incorrectly assigning system-cluster-critical to these pods.
+  (avesh.ncsu@gmail.com)
+- Add retry to openstack heat stack create (tzumainn@redhat.com)
+- fix error in cnx conditional regex (derekmcquay@gmail.com)
+- Get cluster resources for SDN check in health.yml (miciah.masters@gmail.com)
+- Update OLM roles to include resource names (cordell.evan@gmail.com)
+- Update example prometheus object to include securityContext field
+  (cordell.evan@gmail.com)
+- Update aggregated edit role to include verbs (cordell.evan@gmail.com)
+- Add mkfs_opts to extra_storage_setup.yml (mail@jkroepke.de)
+- Revert "Revert "logging configure fluent to merge_json_log""
+  (jcantril@redhat.com)
+- bug 1597282. Quote selector to make it valid json (jcantril@redhat.com)
+- Don't strip working set in Prometheus (sross@redhat.com)
+
 * Tue Aug 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.25.0
 - Fix etcd helper function template error (sdodson@redhat.com)
 - Remove openshift_is_bootstrapped variable (rteague@redhat.com)
