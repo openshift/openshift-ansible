@@ -10,6 +10,9 @@ rules:
   - "servicecatalog.k8s.io"
   attributeRestrictions: null
   resources:
+  - servicebrokers
+  - serviceclasses
+  - serviceplans
   - serviceinstances
   - servicebindings
   verbs:
@@ -44,6 +47,9 @@ rules:
   - "servicecatalog.k8s.io"
   attributeRestrictions: null
   resources:
+  - servicebrokers
+  - serviceclasses
+  - serviceplans
   - serviceinstances
   - servicebindings
   verbs:
@@ -78,6 +84,9 @@ rules:
   - "servicecatalog.k8s.io"
   attributeRestrictions: null
   resources:
+  - servicebrokers
+  - serviceclasses
+  - serviceplans
   - serviceinstances
   - servicebindings
   verbs:
