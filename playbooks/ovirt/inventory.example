@@ -27,10 +27,10 @@ container_runtime_docker_storage_type=overlay2
 openshift_node_local_quota_per_fsgroup=512Mi
 
 [masters:vars]
-container_runtime_extra_storage="[{'device': '/dev/vdc', 'path': '/var/lib/origin/openshift.local.volumes', 'options': 'gquota', 'filesystem': 'xfs', 'format': 'True'}, {'device': '/dev/vdd', 'path': '/var/lib/etcd', 'hosts': 'masters', 'filesystem': 'xfs', 'format': 'True'}]"
+container_runtime_extra_storage=[{'device': '/dev/vdc', 'path': '/var/lib/origin/openshift.local.volumes', 'options': 'gquota', 'filesystem': 'xfs', 'format': 'True'}, {'device': '/dev/vdd', 'path': '/var/lib/etcd', 'hosts': 'masters', 'filesystem': 'xfs', 'format': 'True'}]
 
 [nodes:vars]
-container_runtime_extra_storage="[{'device': '/dev/vdc', 'path': '/var/lib/origin/openshift.local.volumes', 'options': 'gquota', 'filesystem': 'xfs', 'format': 'True'}]"
+container_runtime_extra_storage=[{'device': '/dev/vdc', 'path': '/var/lib/origin/openshift.local.volumes', 'options': 'gquota', 'filesystem': 'xfs', 'format': 'True'}]
 
 [masters]
 master0.example.com
