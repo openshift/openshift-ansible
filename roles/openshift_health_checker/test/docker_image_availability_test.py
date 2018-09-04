@@ -196,7 +196,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'docker.io/openshift/origin-haproxy-router:vtest',
             'docker.io/cockpit/kubernetes:latest',
             # containerized component images
-            'registry.access.redhat.com/openshift3/ose-node:vtest',
+            'registry.redhat.io/openshift3/ose-node:vtest',
         ])
     ),
     (  # enterprise images
@@ -207,9 +207,9 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'foo.io/openshift3/ose-docker-registry:f13ac45',
             'foo.io/openshift3/ose-haproxy-router:f13ac45',
             # registry-console is not constructed/versioned the same as the others.
-            'registry.access.redhat.com/openshift3/registry-console:vtest',
+            'registry.redhat.io/openshift3/registry-console:vtest',
             # containerized images aren't built from oreg_url
-            'registry.access.redhat.com/openshift3/ose-node:vtest',
+            'registry.redhat.io/openshift3/ose-node:vtest',
         ])
     ),
 
@@ -221,7 +221,7 @@ def test_required_images(deployment_type, openshift_is_atomic, groups, oreg_url,
         group_names=groups,
         oreg_url=oreg_url,
         openshift_image_tag='vtest',
-        osn_image='registry.access.redhat.com/openshift3/ose-node:vtest',
+        osn_image='registry.redhat.io/openshift3/ose-node:vtest',
     )
 
     assert expected == DockerImageAvailability(task_vars=task_vars).required_images()
@@ -239,7 +239,7 @@ def test_required_images(deployment_type, openshift_is_atomic, groups, oreg_url,
             openshift_deployment_type="openshift-enterprise",
             openshift_image_tag="vtest",
         ),
-        "registry.access.redhat.com/openshift3/registry-console:vtest",
+        "registry.redhat.io/openshift3/registry-console:vtest",
     ), (
         dict(
             openshift_deployment_type="openshift-enterprise",
@@ -268,10 +268,10 @@ def test_registry_console_image(task_vars, expected):
         dict(
             group_names=['oo_nodes_to_config'],
             openshift_image_tag="veggs",
-            osn_image="registry.access.redhat.com/openshift3/ose-node:vtest",
+            osn_image="registry.redhat.io/openshift3/ose-node:vtest",
         ),
         set([
-            'registry.access.redhat.com/openshift3/ose-node:vtest', 'docker.io/cockpit/kubernetes:latest',
+            'registry.redhat.io/openshift3/ose-node:vtest', 'docker.io/cockpit/kubernetes:latest',
             'docker.io/openshift/origin-haproxy-router:veggs', 'docker.io/openshift/origin-deployer:veggs',
             'docker.io/openshift/origin-docker-registry:veggs', 'docker.io/openshift/origin-pod:veggs',
         ]),

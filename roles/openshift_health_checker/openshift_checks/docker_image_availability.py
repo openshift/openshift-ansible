@@ -19,7 +19,7 @@ DEPLOYMENT_IMAGE_INFO = {
     "openshift-enterprise": {
         "namespace": "openshift3",
         "name": "ose",
-        "registry_console_prefix": "registry.access.redhat.com/openshift3/",
+        "registry_console_prefix": "registry.redhat.io/openshift3/",
         "registry_console_basename": "registry-console",
         "registry_console_default_version": "${short_version}",
     },
@@ -150,7 +150,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         For now we operate as follows:
         * For containerized components (master, node, ...) we look at the deployment
           type and use docker.io/openshift/origin or
-          registry.access.redhat.com/openshift3/ose as the base for those component
+          registry.redhat.io/openshift3/ose as the base for those component
           images. The version is openshift_image_tag as determined by the
           openshift_version role.
         * For OpenShift-managed infrastructure (router, registry...) we use oreg_url if
