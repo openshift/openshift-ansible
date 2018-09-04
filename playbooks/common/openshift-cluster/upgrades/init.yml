@@ -42,4 +42,4 @@
     set_fact:
       os_firewall_use_firewalld: false
     when:
-    - iptables_service.status.ActiveState != 'active'
+    - iptables_service.status.ActiveState == 'active'
