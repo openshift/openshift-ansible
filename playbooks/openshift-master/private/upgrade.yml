@@ -239,3 +239,10 @@
       tasks_from: config.yml
     vars:
       openshift_master_host: "{{ groups.oo_first_master.0 }}"
+
+- name: Update sync DS
+  hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: openshift_node_group
+      tasks_from: sync.yml
