@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.42
+Version:        3.10.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,11 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Sep 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.43-1
+- Fix etcdctl aliases on etcd hosts (vrutkovs@redhat.com)
+- Don't reset os_firewall_use_firewalld if iptables is inactive during upgrade
+  (vrutkovs@redhat.com)
+
 * Tue Sep 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.42-1
 - Add support for ak/orgid for RHEL (e.minguez@gmail.com)
 - Update the value of 'openshift_grafana_prometheus_serviceaccount' Fix
