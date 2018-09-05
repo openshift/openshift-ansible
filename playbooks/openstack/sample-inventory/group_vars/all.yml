@@ -111,10 +111,9 @@ openshift_openstack_num_nodes: 2
 # # - by default, all roles are given Public IP addresses
 #openshift_openstack_master_floating_ip: true
 #openshift_openstack_infra_floating_ip: true
-#openshift_openstack_app_floating_ip: true
-#openshift_openstack_etcd_floating_ip: false
-#openshift_openstack_load_balancer_floating_ip: false
-#openshift_openstack_compute_floating_ip: false
+#openshift_openstack_etcd_floating_ip: true
+#openshift_openstack_load_balancer_floating_ip: true
+#openshift_openstack_compute_floating_ip: true
 
 # # Used Flavors
 # # - set specific flavors for roles by uncommenting corresponding lines

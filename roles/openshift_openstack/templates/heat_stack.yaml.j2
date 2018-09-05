@@ -43,7 +43,7 @@ outputs:
     description: IPs of the nodes
     value: { get_attr: [ compute_nodes, private_ip ] }
 
-{% if openshift_openstack_app_floating_ip | default(True) | bool %}
+{% if openshift_openstack_compute_floating_ip | default(True) | bool %}
   node_floating_ips:
     description: Floating IPs of the nodes
     value: { get_attr: [ compute_nodes, floating_ip ] }
