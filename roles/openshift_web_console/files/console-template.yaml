@@ -48,6 +48,7 @@ objects:
           app: openshift-web-console
           webconsole: "true"
       spec:
+        priorityClassName: system-cluster-critical
         serviceAccountName: webconsole
         containers:
         - name: webconsole

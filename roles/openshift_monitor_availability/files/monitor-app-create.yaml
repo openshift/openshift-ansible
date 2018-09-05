@@ -142,6 +142,7 @@ objects:
         labels:
           k8s-app: monitor-app-create
       spec:
+        priorityClassName: system-cluster-critical
         serviceAccountName: monitor-app-create
         volumes:
         - name: config

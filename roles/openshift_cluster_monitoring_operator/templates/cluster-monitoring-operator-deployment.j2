@@ -15,6 +15,7 @@ spec:
       labels:
         app: cluster-monitoring-operator
     spec:
+      priorityClassName: system-cluster-critical
       serviceAccountName: cluster-monitoring-operator
 {% if openshift_cluster_monitoring_operator_node_selector is iterable and openshift_cluster_monitoring_operator_node_selector | length > 0 %}
       nodeSelector:

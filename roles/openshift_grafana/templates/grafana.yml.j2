@@ -17,6 +17,7 @@ spec:
         app: grafana
       name: grafana
     spec:
+      priorityClassName: system-cluster-critical
       serviceAccountName: {{ grafana_serviceaccount_name }}
 {% if grafana_node_selector is iterable and grafana_node_selector | length > 0 %}
       nodeSelector:

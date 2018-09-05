@@ -16,6 +16,7 @@ spec:
       labels:
         app: metering-operator
     spec:
+      priorityClassName: system-cluster-critical
       securityContext:
         runAsNonRoot: true
       containers:

@@ -26,6 +26,7 @@ spec:
         {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
+      priorityClassName: system-cluster-critical
       containers:
       # Deploy Prometheus behind an oauth proxy
       - name: prom-proxy

@@ -59,6 +59,7 @@ objects:
           role: monitoring
         name: prometheus-exporter
       spec:
+        priorityClassName: system-cluster-critical
         serviceAccountName: prometheus-node-exporter
         hostNetwork: true
         hostPID: true

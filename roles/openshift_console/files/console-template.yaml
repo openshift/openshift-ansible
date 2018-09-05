@@ -61,6 +61,7 @@ objects:
           component: ui
         name: console
       spec:
+        priorityClassName: system-cluster-critical
         selector:
           matchLabels:
             app: openshift-console
