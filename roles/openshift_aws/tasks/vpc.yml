@@ -40,8 +40,6 @@
     vpc_id: "{{ vpc.vpc.id }}"
     cidr: "{{ item.cidr }}"
     az: "{{ item.az }}"
-    resource_tags:
-      Name: "{{ item.az }}"
   with_items: "{{ openshift_aws_vpc.subnets[openshift_aws_region] }}"
 
 - name: Grab the route tables from our VPC
