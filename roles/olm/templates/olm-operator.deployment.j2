@@ -1,33 +1,30 @@
 ##---
-# Source: olm/templates/13-catalog-operator.deployment.yaml
+# Source: olm/templates/12-alm-operator.deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalog-operator
+  name: alm-operator
   namespace: operator-lifecycle-manager
   labels:
-    app: catalog-operator
+    app: alm-operator
 spec:
   strategy:
     type: RollingUpdate
   replicas: 1
   selector:
     matchLabels:
-      app: catalog-operator
+      app: alm-operator
   template:
     metadata:
       labels:
-        app: catalog-operator
+        app: alm-operator
     spec:
       serviceAccountName: olm-operator-serviceaccount
       containers:
-        - name: catalog-operator
+        - name: alm-operator
           command:
-          - /bin/catalog
-          - '-namespace'
-          - operator-lifecycle-manager
-          - '-debug'
-          image: quay.io/coreos/catalog@sha256:20886d49205aa8d8fd53f1c85fad6a501775226da25ef14f51258b7066e91064
+          - /bin/olm
+          image: {{ olm_operator_image }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -39,5 +36,12 @@ spec:
             httpGet:
               path: /healthz
               port: 8080
+          env:
+          - name: OPERATOR_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: OPERATOR_NAME
+            value: alm-operator
       imagePullSecrets:
         - name: coreos-pull-secret
