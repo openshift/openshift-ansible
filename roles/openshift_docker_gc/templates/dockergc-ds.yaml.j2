@@ -23,9 +23,9 @@ items:
         name: dockergc
       spec:
 {# Only set nodeSelector if the dict is not empty #}
-{% if r_docker_gc_node_selectors %}
+{% if openshift_crio_docker_gc_node_selector %}
         nodeSelector:
-{% for k,v in r_docker_gc_node_selectors.items() %}
+{% for k,v in openshift_crio_docker_gc_node_selector.items() %}
           {{ k }}: "{{ v }}"{% endfor %}{% endif %}
 
         serviceAccountName: dockergc

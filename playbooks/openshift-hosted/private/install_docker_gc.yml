@@ -8,5 +8,4 @@
   - import_role:
       name: openshift_docker_gc
     when:
-    - openshift_use_crio | bool
     - openshift_crio_enable_docker_gc | bool

@@ -119,7 +119,7 @@ debug_level=2
 # these variables are set to the defaults shown. You may override them here.
 # NOTE: You will still need to tag crio nodes with your given label(s)!
 # Enable docker garbage collection when using cri-o
-#openshift_crio_enable_docker_gc=True
+#openshift_crio_enable_docker_gc=False
 # Node Selectors to run the garbage collection
 #openshift_crio_docker_gc_node_selector={'runtime': 'cri-o'}
 
