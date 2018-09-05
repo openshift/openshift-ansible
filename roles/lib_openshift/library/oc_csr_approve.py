@@ -166,7 +166,7 @@ def confirm_needed_requests_present(module, not_ready_nodes, csr_dict):
         missing_nodes = ', '.join(nodes_needed)
         result = {'failed': True,
                   'changed': False,
-                  'msg': "Cound not find csr for nodes: {}".format(missing_nodes),
+                  'msg': "Could not find csr for nodes: {}".format(missing_nodes),
                   'state': 'unknown'}
         module.fail_json(**result)
 
