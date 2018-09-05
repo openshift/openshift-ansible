@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.26.0%{?dist}
+Release:        0.27.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,18 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Sep 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.27.0
+- Fixing a typo s/Cound/Could/g noticed with an error getting CSR's approved
+  (roxenham@redhat.com)
+- Add namespaced servicebrokers, serviceclasses and serviceplans to
+  admin/edit/view ClusterRoles (marko.luksa@gmail.com)
+- Update sync DS after control plane upgrade (vrutkovs@redhat.com)
+- Fix incorrect reference to idp['name'] (vrutkovs@redhat.com)
+- Add support for ak/orgid at uninstall/scale (e.minguez@gmail.com)
+- Configure a list of etcd cipher suites via `etcd_cipher_suites`
+  (vrutkovs@redhat.com)
+- GlusterFS: Fix registry.yml playbook (jarrpa@redhat.com)
+
 * Tue Sep 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.26.0
 - Fix etcdctl aliases on etcd hosts (vrutkovs@redhat.com)
 - Removing azure publishing tooling. (kwoodson@redhat.com)
