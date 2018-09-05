@@ -89,7 +89,7 @@ def test_confirm_needed_requests_present():
     with pytest.raises(Exception) as err:
         oc_csr_approve.confirm_needed_requests_present(
             module, not_ready_nodes, csr_dict)
-    assert 'Exception: Cound not find csr for nodes: host1' in str(err)
+    assert 'Exception: Could not find csr for nodes: host1' in str(err)
 
     not_ready_nodes = ['fedora1.openshift.io']
     # this should complete silently
