@@ -25,11 +25,13 @@ data:
 {% endif %}
       externalLabels:
         cluster: {{ openshift_cluster_monitoring_operator_cluster_id }}
+{% if openshift_cluster_monitoring_operator_prometheus_storage_enabled %}
       volumeClaimTemplate:
         spec:
           resources:
             requests:
               storage: {{ openshift_cluster_monitoring_operator_prometheus_storage_capacity }}
+{% endif %}
     alertmanagerMain:
       baseImage: {{ openshift_cluster_monitoring_operator_alertmanager_repo }}
 {% if openshift_cluster_monitoring_operator_node_selector is iterable and openshift_cluster_monitoring_operator_node_selector | length > 0 %}
@@ -38,11 +40,13 @@ data:
         {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
+{% if openshift_cluster_monitoring_operator_alertmanager_storage_enabled %}
       volumeClaimTemplate:
         spec:
           resources:
             requests:
               storage: {{ openshift_cluster_monitoring_operator_alertmanager_storage_capacity }}
+{% endif %}
     nodeExporter:
       baseImage: {{ openshift_cluster_monitoring_operator_node_exporter_repo }}
     grafana:
