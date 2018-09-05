@@ -65,6 +65,8 @@ objects:
             mountPath: "/dev"
           - name: glusterfs-misc
             mountPath: "/var/lib/misc/glusterfsd"
+          - name: glusterfs-sys-dev-block
+            mountPath: "/sys/dev/block"
           - name: glusterfs-cgroup
             mountPath: "/sys/fs/cgroup"
             readOnly: true
@@ -126,6 +128,9 @@ objects:
         - name: glusterfs-misc
           hostPath:
             path: "/var/lib/misc/glusterfsd"
+        - name: glusterfs-sys-dev-block
+          hostPath:
+            path: "/sys/dev/block"
         - name: glusterfs-cgroup
           hostPath:
             path: "/sys/fs/cgroup"
