@@ -152,9 +152,12 @@ openshift_openstack_pool_start: "192.168.99.3"
 # The ending IP address for the OpenStack subnet allocation pool.
 openshift_openstack_pool_end: "192.168.99.254"
 
-## Red Hat subscription:
+## Red Hat subscription using user/password
 #rhsub_user: '<username>'
 #rhsub_pass: '<password>'
+# Or if using activation key:
+#rhsub_ak: '<ak>'
+#rhsub_orgid: '<orgid>'
 #rhsub_pool: '<pool name>'
 
 
