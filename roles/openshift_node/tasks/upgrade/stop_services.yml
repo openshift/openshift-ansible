@@ -7,13 +7,6 @@
   - "{{ openshift_service_type }}-node"
   failed_when: false
 
-- name: Stop openvswitch services
-  service:
-    name: openvswitch
-    state: stopped
-  when: not openshift_use_nsx
-  failed_when: false
-
 - service:
     name: docker
     state: stopped
