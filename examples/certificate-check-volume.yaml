@@ -10,7 +10,7 @@
 # The following objects are expected to be configured before the creation
 # of this Job:
 #   - A ConfigMap named 'inventory' with a key named 'hosts' that
-#     contains the the Ansible inventory file
+#     contains the Ansible inventory file
 #   - A Secret named 'sshkey' with a key named 'ssh-privatekey
 #     that contains the ssh key to connect to the hosts
 #   - A PersistentVolumeClaim named 'certcheck-reports' where the

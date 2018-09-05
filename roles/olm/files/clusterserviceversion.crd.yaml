@@ -240,7 +240,7 @@ spec:
                           properties:
                             path:
                               type: string
-                              description: A jsonpath indexing into the status object on the CR where the the status value can be found.
+                              description: A jsonpath indexing into the status object on the CR where the status value can be found.
                             displayName:
                               type: string
                               description: A human-readable name for the status entry.
@@ -267,7 +267,7 @@ spec:
                           properties:
                             path:
                               type: string
-                              description: A jsonpath indexing into the spec object on the CR where the the spec value can be found.
+                              description: A jsonpath indexing into the spec object on the CR where the spec value can be found.
                             displayName:
                               type: string
                               description: A human-readable name for the spec entry.
@@ -321,7 +321,7 @@ spec:
                           properties:
                             path:
                               type: string
-                              description: A jsonpath indexing into the status object on the CR where the the status value can be found.
+                              description: A jsonpath indexing into the status object on the CR where the status value can be found.
                             displayName:
                               type: string
                               description: A human-readable name for the status entry.

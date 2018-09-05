@@ -721,7 +721,7 @@ same arguments (private key, inventories, etc.) as your provision/install ones:
     playbooks/openstack/inventory.py openshift-ansible/playbooks/openstack/openshift-cluster/cluster-info.yml
 
 These addresses will depend on the load balancing solution. For LBaaS, they'll
-be the the floating IPs of the load balancers. In the VM-based solution,
+be the floating IPs of the load balancers. In the VM-based solution,
 the API address will be the public IP of the load balancer VM and the router IP
 will be the address of the first infra node that was created. If no load
 balancer is selected, the API will be the address of the first master node and
