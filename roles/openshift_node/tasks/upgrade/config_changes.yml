@@ -43,9 +43,7 @@
   package:
     name: openvswitch
     state: absent
-  when: 
-    - not openshift_is_atomic | bool
-    - not openshift_use_nsx | bool
+  when: not (openshift_is_atomic | bool or openshift_use_nsx | bool)
 
 - name: Remove old service information
   file:
