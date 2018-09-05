@@ -147,6 +147,8 @@ debug_level=2
 # etcd_debug=true
 # Set etcd log levels by package
 # etcd_log_package_levels="etcdserver=WARNING,security=DEBUG"
+# Comma-separated list of etcd cipher suites
+# etcd_cipher_suites="TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"
 
 # Upgrade Hooks
 #
