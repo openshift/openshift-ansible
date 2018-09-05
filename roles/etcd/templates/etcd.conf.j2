@@ -19,6 +19,9 @@ ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
 #ETCD_MAX_SNAPSHOTS=5
 #ETCD_MAX_WALS=5
 #ETCD_CORS=
+{% if etcd_cipher_suites is defined and etcd_cipher_suites %}
+ETCD_CIPHER_SUITES="{{ etcd_cipher_suites }}"
+{% endif %}
 
 
 #[cluster]
