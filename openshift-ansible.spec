@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.27.0%{?dist}
+Release:        0.28.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,11 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Sep 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.28.0
+- Switch openshift_crio_enable_docker_gc default to False (rteague@redhat.com)
+- Add default node groups to support running cri-o runtime (rteague@redhat.com)
+- Rework test CI (vrutkovs@redhat.com)
+
 * Wed Sep 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.27.0
 - Fixing a typo s/Cound/Could/g noticed with an error getting CSR's approved
   (roxenham@redhat.com)
