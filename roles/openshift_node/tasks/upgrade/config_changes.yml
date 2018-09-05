@@ -43,7 +43,9 @@
   package:
     name: openvswitch
     state: absent
-  when: not openshift_is_atomic | bool
+  when: 
+    - not openshift_is_atomic | bool
+    - not openshift_use_nsx | bool
 
 - name: Remove old service information
   file:
@@ -53,7 +55,13 @@
   - /etc/systemd/system/docker.service.d/docker-sdn-ovs.conf
   - /etc/systemd/system/atomic-openshift-node-dep.service
   - /etc/systemd/system/origin-node-dep.service
-  - /etc/systemd/system/openvswitch.service
+
+- name: Remove openvswitch service information
+  file:
+    path: /etc/systemd/system/openvswitch.service
+    state: absent
+  when: 
+    - not openshift_use_nsx | bool
 
 - name: Move existing credentials and configuration into bootstrap configuration
   import_tasks: bootstrap_changes.yml
