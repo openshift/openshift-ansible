@@ -58,8 +58,7 @@
   file:
     path: /etc/systemd/system/openvswitch.service
     state: absent
-  when: 
-  - not openshift_use_nsx | bool
+  when: not openshift_use_nsx | bool
 
 - name: Move existing credentials and configuration into bootstrap configuration
   import_tasks: bootstrap_changes.yml
