@@ -12,7 +12,7 @@
     - cockpit-system
     - cockpit-bridge
     - cockpit-docker
-    - "{{ cockpit_plugins }}"
+    - "{{ cockpit_plugins | join(',') }}"
   when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
