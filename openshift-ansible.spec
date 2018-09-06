@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.43
+Version:        3.10.44
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,16 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Sep 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.44-1
+- Use first_master_client_binary from hostvars[groups.oo_first_master.0]
+  (nakayamakenjiro@gmail.com)
+- Ensure master image is pre-pulled on upgrade (mgugino@redhat.com)
+- Fixing a typo s/Cound/Could/g noticed with an error getting CSR's approved
+  (roxenham@redhat.com)
+- Configure a list of etcd cipher suites via `etcd_cipher_suites`
+  (vrutkovs@redhat.com)
+- Add failed_when to 'Remove the image stream tag' tasks (mgugino@redhat.com)
+
 * Tue Sep 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.43-1
 - Fix etcdctl aliases on etcd hosts (vrutkovs@redhat.com)
 - Don't reset os_firewall_use_firewalld if iptables is inactive during upgrade
