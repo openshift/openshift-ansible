@@ -16,6 +16,7 @@ Environment variables may also be used.
 * [OpenStack With SSL Configuration](#openstack-with-ssl-configuration)
 * [Stack Name Configuration](#stack-name-configuration)
 * [DNS Configuration](#dns-configuration)
+* [Floating IP Address Configuration](#floating-ip-address-configuration)
 * [All-in-one Deployment Configuration](#all-in-one-deployment-configuration)
 * [Building Node Images](#building-node-images)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
@@ -39,6 +40,10 @@ In `inventory/group_vars/all.yml`:
   * `openshift_openstack_num_masters` Number of master nodes to create.
   * `openshift_openstack_num_infra` Number of infra nodes to create.
   * `openshift_openstack_num_nodes` Number of app nodes to create.
+* Role Node Floating IP Allocation
+  * `openshift_openstack_master_floating_ip` Assign floating IP to master nodes. Defaults to `True`.
+  * `openshift_openstack_infra_floating_ip` Assign floating IP to infra nodes. Defaults to `True`.
+  * `openshift_openstack_compute_floating_ip` Assign floating IP to app nodes. Defaults to `True`.
 * Role Images
   * `openshift_openstack_default_image_name` OpenStack image used by all VMs, unless a particular role image name is specified.
   * `openshift_openstack_master_image_name`
@@ -408,6 +413,86 @@ console.openshift.cool.    10.40.128.137
 
 These must point to the publicly-accessible IP addresses of your
 master and infra nodes or preferably to the load balancers.
+
+
+## Floating IP Address Configuration
+
+Every OpenShift node as well as the API and Router load balancer will receive a
+floating IP address by default. This is to make the deployment and debugging
+experience easier.
+
+You may want to change that behaviour, for example to prevent any possibility
+of external access to the nodes (defense in depth) or if your floating IP pool
+is not large enough.
+
+### Overview
+
+It possible to configure the playbooks to not asssign floating IP addresses.
+However, the Ansible playbooks will then not be able to SSH and install
+OpenShift.
+
+The nodes will only be accessible from the subnet they are assigned to.
+
+To solve this, we need to create the network the nodes will be placed in
+beforehnd, then boot up a bastion host in the same network and run the
+playbooks from there.
+
+### Node Network
+
+We will have to create a Neutron Network, Subnet and a Router for external
+connectivity. Take note of any DNS servers you would normally put under
+`openshift_openstack_dns_nameservers` -- they must be added to the subnet.
+
+In this example, we will call the network and its subnet `openshift` and configure
+a DNS server with IP address `10.20.30.40`. The external network will be called `public`.
+
+```
+$ openstack network create openshift
+$ openstack subnet create --subnet-range 192.168.0.0/24 --dns-nameserver 10.20.30.40 --network openshift openshift
+$ openstack router create openshift-router
+$ openstack router set --external-gateway public openshift-router
+$ openstack router add subnet openshift-router openshift
+```
+
+### Bastion host
+
+To provide SSH connectivity (that Ansible requires) to the OpenShift nodes
+without using floating IP addresses, the playbooks must be running on a server
+inside the same subnet.
+
+This will create such server and place it into the subnet created above.
+
+We will use an image called `CentOS-7-x86_64-GenericCloud`, and assume that the
+created floating IP address will be `172.24.4.10`.
+
+```
+$ openstack server create --wait --image CentOS-7-x86_64-GenericCloud --flavor m1.medium --key-name openshift --network openshift bastion
+$ openstack floating ip create public
+$ openstack server add floating ip bastion 172.24.4.10
+$ ping 172.24.4.10
+$ ssh centos@172.24.4.10
+```
+
+### openshift-ansible Configuration
+
+In addition to the rest of openshift-ansible configuration, we will need to
+specify the node netwok, subnet and that we do not want any floating IP
+addresses.
+
+You must do this from inside the "bastion" host created in the previous step.
+
+Put the following to `inventory/group_vars/all.yml`:
+
+```yaml
+openshift_openstack_node_network_name: openshift
+openshift_openstack_node_subnet_name: openshift
+openshift_openstack_master_floating_ip: false
+openshift_openstack_infra_floating_ip: false
+openshift_openstack_compute_floating_ip: false
+openshift_openstack_load_balancer_floating_ip: false
+```
+
+And then run the `playbooks/openstack/openshift-cluster/*.yml` as usual.
 
 
 ## All-in-one Deployment Configuration

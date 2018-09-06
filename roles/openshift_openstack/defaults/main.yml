@@ -38,6 +38,11 @@ openshift_openstack_nsupdate_zone: "{{ openshift_openstack_full_dns_domain }}"
 
 
 # heat vars
+openshift_openstack_master_floating_ip: true
+openshift_openstack_infra_floating_ip: true
+openshift_openstack_compute_floating_ip: true
+openshift_openstack_etcd_floating_ip: true
+openshift_openstack_load_balancer_floating_ip: true
 openshift_openstack_heat_template_version: pike
 openshift_openstack_clusterid: openshift
 openshift_openstack_stack_name: "openshift-cluster"
@@ -71,6 +76,8 @@ openshift_openstack_lb_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_etcd_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_provider_network_name: null
 openshift_openstack_external_network_name: null
+openshift_openstack_node_network_name: null
+openshift_openstack_node_subnet_name: null
 openshift_openstack_private_network: >-
   {% if openshift_openstack_provider_network_name | default(None) -%}
   {{ openshift_openstack_provider_network_name }}
