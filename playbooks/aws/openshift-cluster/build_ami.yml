@@ -39,7 +39,6 @@
 - import_playbook: ../../openshift-node/private/image_prep.yml
   vars:
     openshift_node_reboot_instance_before_cleanup: true
-    openshift_aws_ami_set_gquota_on_slash: true
 
 - import_playbook: seal_ami.yml
   vars:
