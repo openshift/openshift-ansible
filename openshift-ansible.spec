@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.28.0%{?dist}
+Release:        0.29.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,25 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Sep 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.29.0
+- cluster-monitoring: Fix repo/docs URL (fbranczyk@gmail.com)
+- cluster-monitoring: Make PVCs optional (fbranczyk@gmail.com)
+- Fix issue with cockpit package list (rteague@redhat.com)
+- GlusterFS: External uninstall (jarrpa@redhat.com)
+- GlusterFS: Ignore external nodes (jarrpa@redhat.com)
+- openshifT_aws: removed subnet naming (mwoodson@redhat.com)
+- openshift-aws: updating the subnet querying (mwoodson@redhat.com)
+- Use first_master_client_binary from hostvars[groups.oo_first_master.0]
+  (nakayamakenjiro@gmail.com)
+- Do not stop Opensvswitch #9895 (yasensim@gmail.com)
+- add OWNERS file for OLM (jpeeler@redhat.com)
+- Add OLM to component upgrades (jpeeler@redhat.com)
+- Refactor image health checks (mgugino@redhat.com)
+- OLM images: use quay for origin (cordell.evan@gmail.com)
+- NSX-T fixes #8134 and fixes NSX #8015, PR #8016 (yasensim@gmail.com)
+- update olm images to use openshift registry instead of quay
+  (cordell.evan@gmail.com)
+
 * Wed Sep 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.28.0
 - Switch openshift_crio_enable_docker_gc default to False (rteague@redhat.com)
 - Add default node groups to support running cri-o runtime (rteague@redhat.com)
