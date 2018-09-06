@@ -19430,7 +19430,7 @@
 			"multi": false,
 			"name": "node",
 			"options": [],
-			"query": "label_values(node_exporter_build_info{job=\"kubernetes-nodes-exporter\"}, instance)",
+			"query": "label_values(node_boot_time_seconds{job=\"kubernetes-nodes-exporter\"}, instance)",
 			"refresh": 1,
 			"regex": "",
 			"sort": 0,
