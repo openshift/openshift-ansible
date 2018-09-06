@@ -39,6 +39,10 @@ In `inventory/group_vars/all.yml`:
   * `openshift_openstack_num_masters` Number of master nodes to create.
   * `openshift_openstack_num_infra` Number of infra nodes to create.
   * `openshift_openstack_num_nodes` Number of app nodes to create.
+* Role Node Floating IP Allocation
+  * `openshift_openstack_master_floating_ip` Assign floating IP to master nodes. Defaults to `True`.
+  * `openshift_openstack_infra_floating_ip` Assign floating IP to infra nodes. Defaults to `True`.
+  * `openshift_openstack_app_floating_ip` Assign floating IP to app nodes. Defaults to `True`.
 * Role Images
   * `openshift_openstack_default_image_name` OpenStack image used by all VMs, unless a particular role image name is specified.
   * `openshift_openstack_master_image_name`
