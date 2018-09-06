@@ -1,4 +1,5 @@
 ---
+openshift_hosted_manage_registry_console: True
 l_os_cockpit_image_version_dict:
   origin: 'latest'
   openshift-enterprise: "{{ openshift_image_tag }}"
