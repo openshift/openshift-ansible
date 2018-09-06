@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.41
+Version:        3.9.42
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,31 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Sep 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.42-1
+- Update the value of 'openshift_grafana_prometheus_serviceaccount' Fix
+  openshift_grafana prometheus serviceaccount default value in README,The
+  default value is 'promethus','promethus' missed a letter, and there should be
+  an e after the h,so it should be 'prometheus' (3168582@qq.com)
+- Update doc link on the etcd embedded group validation message
+  (dani_comnea@yahoo.com)
+- Ensure sebool container_manage_cgroup on upgrade (mgugino@redhat.com)
+- python-scandir was renamed in EPEL (vrutkovs@redhat.com)
+- Move filters (mateus.caruccio@getupcloud.com)
+- Overwrite grafana datasource and dashboards (mateus.caruccio@getupcloud.com)
+- Dont fail when datasource or dashboard already exists
+  (mateus.caruccio@getupcloud.com)
+- GlusterFS: Remove domain from heketi URL (jarrpa@redhat.com)
+- Fix glusterfs storageclass heketi url (mgugino@redhat.com)
+- Remove Get heketi route tasks (nakayamakenjiro@gmail.com)
+- Use glusterfs_name and glusterfs_namespace for heketi url
+  (nakayamakenjiro@gmail.com)
+- Use service name for heketi url (nakayamakenjiro@gmail.com)
+- Use openshift_image_tag for registry-console upgrade (rteague@redhat.com)
+- Add a playbook to regenerate service-catalog certs (vrutkovs@redhat.com)
+- Fix prometheus annotations typo (vrutkovs@redhat.com)
+- Fix glusterfs cluster check when condition (mgugino@redhat.com)
+- Add containerized glusterfs cluster health check (mgugino@redhat.com)
+
 * Mon Aug 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.41-1
 - Fix conditional for cri-o system container removal (rteague@redhat.com)
 - Upgrade cri-o during 3.9 upgrade (rteague@redhat.com)
