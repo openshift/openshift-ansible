@@ -6,4 +6,3 @@
 
 - include_tasks: remove.yaml
   when: operator_lifecycle_manager_remove | bool
-  
