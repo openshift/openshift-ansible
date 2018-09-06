@@ -17,6 +17,11 @@
 - name: Configure nodes
   hosts: oo_nodes_to_config
   tasks:
+  - name: Set gquota for slash filesystem
+    import_role:
+      name: openshift_aws
+      tasks_from: set_gquota_for_slashfs.yml
+    when: openshift_aws_ami_build_set_gquota_on_slashfs | default(false)
   - name: Remove any ansible facts created during AMI creation
     file:
       path: "/etc/ansible/facts.d/{{ item }}"
