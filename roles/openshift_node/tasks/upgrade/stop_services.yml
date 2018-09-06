@@ -1,10 +1,9 @@
 ---
-- name: Stop node and openvswitch services
+- name: Stop node services
   service:
     name: "{{ item }}"
     state: stopped
   with_items:
-  - openvswitch
   - "{{ openshift_service_type }}-node"
   failed_when: false
 
