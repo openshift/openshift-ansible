@@ -193,3 +193,7 @@
     name: "{{ mktemp.stdout }}"
     state: absent
   changed_when: False
+
+- name: Install monitoring resources
+  import_tasks: monitoring-install.yml
+  when: openshift_metering_enable_monitoring | bool

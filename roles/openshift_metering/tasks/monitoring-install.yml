@@ -1,0 +1,28 @@
+---
+- name: Install Role and RoleBinding to allow cluster-monitoring to scrape Metering
+  oc_obj:
+    state: present
+    kind: "{{ obj.kind }}"
+    name: "{{ obj.metadata.name }}"
+    namespace: "{{ __openshift_metering_namespace }}"
+    content:
+      path: "/tmp/{{ obj.kind }}-{{ obj.metadata.name }}.yaml"
+      data: "{{ obj }}"
+  vars:
+    obj: "{{ lookup('file', item) | from_yaml }}"
+  with_fileglob:
+  - "files/monitoring/rbac/*.yaml"
+
+- name: Install Metering ServiceMonitors into openshift-monitoring namespace
+  oc_obj:
+    state: present
+    kind: "{{ obj.kind }}"
+    name: "{{ obj.metadata.name }}"
+    namespace: "openshift-monitoring"
+    content:
+      path: "/tmp/{{ obj.kind }}-{{ obj.metadata.name }}.yaml"
+      data: "{{ obj }}"
+  vars:
+    obj: "{{ lookup('file', item) | from_yaml }}"
+  with_fileglob:
+  - "files/monitoring/service-monitors/*.yaml"
