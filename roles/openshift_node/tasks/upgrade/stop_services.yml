@@ -4,7 +4,6 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-  - openvswitch
   - "{{ openshift_service_type }}-node"
   failed_when: false
 
