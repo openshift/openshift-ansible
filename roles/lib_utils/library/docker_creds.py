@@ -196,7 +196,7 @@ def run_module():
         registry=dict(type='str', required=True),
         username=dict(type='str', required=True),
         password=dict(type='str', required=True, no_log=True),
-        test_login=dict(type='str', required=False, default=True),
+        test_login=dict(type='bool', required=False, default=True),
         proxy_vars=dict(type='str', required=False, default=''),
         image_name=dict(type='str', required=True),
     )
