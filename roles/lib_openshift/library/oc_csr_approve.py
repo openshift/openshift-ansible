@@ -85,6 +85,7 @@ class CSRapprove(object):
         # Build a dictionary to hold all of our output information so nothing
         # is lost when we fail.
         self.result = {'changed': False, 'rc': 0,
+                       'oc_get_nodes': None,
                        'client_csrs': None,
                        'server_csrs': None,
                        'all_subjects_found': self.all_subjects_found,
@@ -117,7 +118,7 @@ class CSRapprove(object):
             self.result['msg'] = str(err)
             self.result['state'] = 'unknown'
             self.module.fail_json(**self.result)
-
+        self.result['oc_get_nodes'] = data
         ready_nodes = []
         for node in data['items']:
             if node.get('status') and node['status'].get('conditions'):
