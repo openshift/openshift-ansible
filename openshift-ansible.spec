@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.29.0%{?dist}
+Release:        0.30.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,17 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.30.0
+- Remove configmap check during upgrades (rteague@redhat.com)
+- Add extra debug info to csr module (mgugino@redhat.com)
+- Revert ensure gquota set on slash filesystem (mazzystr@gmail.com)
+- Don't fetch provider facts if openshift_cloud_provider_kind is not set
+  (vrutkovs@redhat.com)
+- Remove unused openshift_openstack_app_floating_ip (tomas@sedovic.cz)
+- Allow custom OpenStack network and subnet (tomas@sedovic.cz)
+- Fixup PR #8671 (tomas@sedovic.cz)
+- Squash PR 8671 (i.am.emilio@gmail.com)
+
 * Thu Sep 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.29.0
 - cluster-monitoring: Fix repo/docs URL (fbranczyk@gmail.com)
 - cluster-monitoring: Make PVCs optional (fbranczyk@gmail.com)
