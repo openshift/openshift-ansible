@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.63
+Version:        3.7.64
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.64-1
+- 
+
 * Thu Sep 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.63-1
 - [BZ 1550680] do not set up non-first master configs when uninstalling
   (john.sanda@gmail.com)
