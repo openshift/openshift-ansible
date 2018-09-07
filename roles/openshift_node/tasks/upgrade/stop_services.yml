@@ -12,7 +12,6 @@
     name: openvswitch
     state: stopped
   when: not openshift_use_nsx
-  failed_when: false
 
 - service:
     name: docker
