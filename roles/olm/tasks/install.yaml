@@ -86,23 +86,23 @@
     files:
       - "{{ mktemp.stdout }}/subscription.crd.yaml"
 
-- name: Apply ocs ConfigMap manifest
+- name: Apply rh-operators ConfigMap manifest
   oc_obj:
     state: present
     kind: ConfigMap
-    name: ocs
+    name: rh-operators
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/ocs.configmap.yaml"
+      - "{{ mktemp.stdout }}/rh-operators.configmap.yaml"
 
 - name: Apply ocs CatalogSource manifest
   oc_obj:
     state: present
     kind: CatalogSource
-    name: ocs
+    name: rh-operators
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/ocs.catalogsource.yaml"
+      - "{{ mktemp.stdout }}/rh-operators.catalogsource.yaml"
 
 - name: Apply olm-operator Deployment manifest
   oc_obj:
