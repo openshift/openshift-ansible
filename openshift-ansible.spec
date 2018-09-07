@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.44
+Version:        3.10.45
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,12 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.45-1
+- Don't fetch provider facts if openshift_cloud_provider_kind is not set
+  (vrutkovs@redhat.com)
+- GlusterFS: External uninstall (jarrpa@redhat.com)
+- GlusterFS: Ignore external nodes (jarrpa@redhat.com)
+
 * Thu Sep 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.44-1
 - Use first_master_client_binary from hostvars[groups.oo_first_master.0]
   (nakayamakenjiro@gmail.com)
