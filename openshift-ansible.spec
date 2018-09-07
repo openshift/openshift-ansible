@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.129
+Version:        3.6.173.0.130
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.130-1
+- Fixes 1507119: Add retries to fixup shared-resource-viewer role
+  (scuppett@redhat.com)
+- [BZ 1550680] do not set up non-first master configs when uninstalling
+  (john.sanda@gmail.com)
+- openshift_cert_check: check that dict elements are not None
+  (vrutkovs@redhat.com)
+
 * Tue Aug 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.129-1
 - 
 
