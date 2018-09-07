@@ -23,14 +23,14 @@
     src: olm-operator.deployment.j2
     dest: "{{ mktemp.stdout  }}/olm-operator.deployment.yaml"
   vars:
-    namespace: "{{ openshift_cluster_monitoring_operator_namespace }}"
+    namespace: operator-lifecycle-manager
 
 - name: Set catalog-operator template
   template:
     src: catalog-operator.deployment.j2
     dest: "{{ mktemp.stdout  }}/catalog-operator.deployment.yaml"
   vars:
-    namespace: "{{ openshift_cluster_monitoring_operator_namespace }}"
+    namespace: operator-lifecycle-manager
 
 - name: Apply olm-operator-serviceaccount ServiceAccount manifest
   oc_obj:
