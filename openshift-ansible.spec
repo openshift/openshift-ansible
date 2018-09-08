@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.32.0%{?dist}
+Release:        0.33.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,20 @@ BuildArch:     noarch
 
 
 %changelog
+* Sat Sep 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.33.0
+- Install rh-operators catalog (cordell.evan@gmail.com)
+- olm: add openshift_facts dependency (sdodson@redhat.com)
+- fix ca cert deploy for 3.10. addresses
+  https://bugzilla.redhat.com/show_bug.cgi?id=1585978 (judd@newgoliath.com)
+- Add oc_get_nodes to debug csr output (mgugino@redhat.com)
+- Check for migrated status (vrutkovs@redhat.com)
+- Run on first etcd only (vrutkovs@redhat.com)
+- Add playbooks to remove etcdv2 data (vrutkovs@redhat.com)
+- Update rh-operators catalog (cordell.evan@gmail.com)
+- don't bind to cluster-admin for OLM (cordell.evan@gmail.com)
+- put olm deployments in the right namespace (cordell.evan@gmail.com)
+- add main.yaml for olm task (cordell.evan@gmail.com)
+
 * Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.32.0
 - 
 
