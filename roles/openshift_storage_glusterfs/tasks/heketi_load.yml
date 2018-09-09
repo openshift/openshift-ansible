@@ -1,7 +1,7 @@
 ---
 - name: Set heketi-cli command
   set_fact:
-    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {%if heketi_pod is defined %}{{ heketi_pod.metadata.name }}{% elif deploy_heketi_pod is defined %}{{ deploy_heketi_pod.metadata.name }}{% endif %} {% endif %}{{ glusterfs_heketi_cli }} -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin {% if glusterfs_heketi_admin_key is defined %}--secret '{{ glusterfs_heketi_admin_key }}'{% endif %}"
+    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {% if deploy_heketi_pod is defined %}{{ deploy_heketi_pod.metadata.name }}{% elif heketi_pod is defined %}{{ heketi_pod.metadata.name }}{% endif %} {% endif %} {{ glusterfs_heketi_cli }} -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin {% if glusterfs_heketi_admin_key is defined %}--secret '{{ glusterfs_heketi_admin_key }}'{% endif %}"
 
 - name: Verify heketi service
   command: "{{ glusterfs_heketi_client }} cluster list"
