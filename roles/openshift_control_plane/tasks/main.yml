@@ -33,6 +33,11 @@
     path: "/etc/origin/master"
     state: directory
 
+- name: Copy recyler pod to config directory
+  template:
+    src: recycler_pod.yaml
+    dest: "/etc/origin/master/recycler_pod.yaml"
+
 - name: Create flexvolume directory when on atomic hosts
   file:
     state: directory
