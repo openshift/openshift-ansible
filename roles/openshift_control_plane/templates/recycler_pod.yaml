@@ -10,7 +10,7 @@ spec:
   containers:
     -
       name: "recyler-container"
-      image: "openshift/origin-recycler"
+      image: "docker.io/openshift/origin-recycler:v3.11"
       command:
       - "/usr/bin/openshift-recycle"
       args:
