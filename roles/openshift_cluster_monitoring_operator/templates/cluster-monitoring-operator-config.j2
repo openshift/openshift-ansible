@@ -25,7 +25,7 @@ data:
 {% endif %}
       externalLabels:
         cluster: {{ openshift_cluster_monitoring_operator_cluster_id }}
-{% if openshift_cluster_monitoring_operator_prometheus_storage_enabled %}
+{% if openshift_cluster_monitoring_operator_prometheus_storage_enabled | bool %}
       volumeClaimTemplate:
         spec:
           resources:
@@ -40,7 +40,7 @@ data:
         {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
-{% if openshift_cluster_monitoring_operator_alertmanager_storage_enabled %}
+{% if openshift_cluster_monitoring_operator_alertmanager_storage_enabled | bool %}
       volumeClaimTemplate:
         spec:
           resources:
