@@ -160,6 +160,13 @@ BuildArch:     noarch
 %files roles
 %{_datadir}/ansible/%{name}/roles
 
+%pretrans roles
+#RHBZ https://bugzilla.redhat.com/show_bug.cgi?id=1626048
+#roles/openshift_examples/latest used to be a symlink, now its a dir
+# workaround for RPM bug https://bugzilla.redhat.com/show_bug.cgi?id=975909
+if [ -d %{_datadir}/ansible/%{name}/roles/openshift_examples/files/examples ]; then
+  find %{_datadir}/ansible/%{name}/roles/openshift_examples/files/examples -name latest -type l -delete
+fi
 
 
 %changelog
