@@ -1,4 +1,9 @@
 ---
+- name: Calico | Run kube proxy
+  run_once: true
+  import_role:
+    name: kube_proxy_and_dns
+
 - include_tasks: certs.yml
 
 - name: Calico Master | Clean Calico etcd data
