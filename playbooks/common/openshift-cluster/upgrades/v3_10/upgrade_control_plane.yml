@@ -102,6 +102,8 @@
     import_role:
       name: openshift_node_group
       tasks_from: sync
+    vars:
+      skip_sync_annotations_check: true
   roles:
   - role: openshift_sdn
     when: openshift_use_openshift_sdn | default(True) | bool

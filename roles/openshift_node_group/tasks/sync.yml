@@ -54,21 +54,56 @@
     name: "{{ mktemp.stdout }}"
   changed_when: False
 
-- name: Wait for the sync daemonset to become ready and available
-  oc_obj:
-    state: list
-    kind: daemonset
-    name: sync
-    namespace: openshift-node
-  register: __status_of_sync_ds
-  until:
-    - __status_of_sync_ds.results is defined
-    - __status_of_sync_ds.results.results is defined
-    - __status_of_sync_ds.results.results | length > 0
-    - __status_of_sync_ds.results.results[0].status is defined
-    - __status_of_sync_ds.results.results[0].status.numberAvailable is defined
-    - __status_of_sync_ds.results.results[0].status.desiredNumberScheduled is defined
-    - __status_of_sync_ds.results.results[0].status.numberAvailable == __status_of_sync_ds.results.results[0].status.desiredNumberScheduled
-  retries: 60
-  delay: 30
-  failed_when: false
+- when:
+    - not skip_sync_annotations_check | bool
+  block:
+    - name: Wait for the sync daemonset to become ready and available
+      oc_obj:
+        state: list
+        kind: daemonset
+        name: sync
+        namespace: openshift-node
+      register: __status_of_sync_ds
+      until:
+        - __status_of_sync_ds.results is defined
+        - __status_of_sync_ds.results.results is defined
+        - __status_of_sync_ds.results.results | length > 0
+        - __status_of_sync_ds.results.results[0].status is defined
+        - __status_of_sync_ds.results.results[0].status.numberAvailable is defined
+        - __status_of_sync_ds.results.results[0].status.desiredNumberScheduled is defined
+        - __status_of_sync_ds.results.results[0].status.numberAvailable == __status_of_sync_ds.results.results[0].status.desiredNumberScheduled
+      retries: 60
+      delay: 10
+
+    - name: Wait for sync DS to set annotations on master nodes
+      oc_obj:
+        state: list
+        kind: node
+        selector: ""
+      register: node_status
+      until:
+        - node_status.results is defined
+        - node_status.results.results is defined
+        - node_status.results.results | length > 0
+        - node_status.results.results[0]['items']
+            | map(attribute='metadata.annotations') | list | oo_flatten
+            | select('match', 'node.openshift.io/md5sum') | list | length ==
+          node_status.results.results[0]['items'] | length
+      retries: 60
+      delay: 10
+
+    # Sync DS may have restarted masters
+    - name: Verify api server is available
+      command: >
+        curl --silent --tlsv1.2
+        --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+        {{ openshift.master.api_url }}/healthz/ready
+      args:
+        # Disables the following warning:
+        # Consider using get_url or uri module rather than running curl
+        warn: no
+      register: api_available_output
+      until: api_available_output.stdout == 'ok'
+      retries: 120
+      delay: 1
+      changed_when: false

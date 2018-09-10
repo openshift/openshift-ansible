@@ -11,3 +11,4 @@
         tasks_from: config.yml
       vars:
         openshift_master_host: '{{ groups.oo_first_master.0 }}'
+        skip_sync_annotations_check: true

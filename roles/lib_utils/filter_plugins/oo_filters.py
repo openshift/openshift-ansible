@@ -767,4 +767,5 @@ class FilterModule(object):
             "lib_utils_oo_etcd_host_urls": lib_utils_oo_etcd_host_urls,
             "lib_utils_mutate_htpass_provider": lib_utils_mutate_htpass_provider,
             "lib_utils_oo_oreg_image": lib_utils_oo_oreg_image,
+            "oo_flatten": oo_flatten,
         }
