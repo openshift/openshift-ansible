@@ -83,6 +83,10 @@ kubernetesMasterConfig:
     - VolumeScheduling=true
 {% endif %}
   controllerArguments: {{ openshift.master.controller_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
+    pv-recycler-pod-template-filepath-nfs:
+    - "/etc/origin/master/recycler_pod.yaml"
+    pv-recycler-pod-template-filepath-hostpath:
+    - "/etc/origin/master/recycler_pod.yaml"
 {% if openshift_is_atomic | bool %}
     flex-volume-plugin-dir:
     - "/etc/origin/kubelet-plugins/volume/exec"
