@@ -41,6 +41,15 @@
     files:
       - "{{ mktemp.stdout }}/olm-operator.serviceaccount.yaml"
 
+- name: Apply operator-lifecycle-manager ClusterRole manifest
+  oc_obj:
+    state: present
+    kind: ClusterRole
+    name: system:controller:operator-lifecycle-manager
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/olm-operator.clusterrole.yaml"
+
 - name: Apply olm-operator-binding-operator-lifecycle-manager ClusterRoleBinding manifest
   oc_obj:
     state: present
