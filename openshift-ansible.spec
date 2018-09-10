@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.45
+Version:        3.10.46
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,11 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon Sep 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.46-1
+- GlusterFS: Fix heketi_pod check (jarrpa@redhat.com)
+- Add oc_get_nodes to debug csr output (mgugino@redhat.com)
+- Add extra debug info to csr module (mgugino@redhat.com)
+
 * Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.45-1
 - Don't fetch provider facts if openshift_cloud_provider_kind is not set
   (vrutkovs@redhat.com)
