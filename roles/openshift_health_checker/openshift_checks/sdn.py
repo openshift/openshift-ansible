@@ -61,8 +61,11 @@ class SDNCheck(OpenShiftCheck):
                 oc_executable = self.get_var('openshift_client_binary',
                                              default='/bin/oc')
                 oc_executable = self.template_var(oc_executable)
-                self.save_command_output('oc-version', [oc_executable,
-                                                        'version'])
+                # The oc executable is not installed on containerized nodes, so
+                # use "2>&1" to capture any error output (such as "command not
+                # found"), and use "|| :" to ignore the exit code.
+                self.save_command_output('oc-version',
+                                         oc_executable + ' version 2>&1 || :')
                 self.register_file('os-version', None,
                                    '/etc/system-release-cpe')
             except OpenShiftCheckException as exc:
