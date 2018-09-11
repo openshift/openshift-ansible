@@ -127,6 +127,12 @@ networkConfig:
   clusterNetworks:
   - cidr: {{ openshift_cluster_network_cidr }}
     hostSubnetLength: {{ openshift_host_subnet_length }}
+{% for cluster_network in openshift_cluster_networks %}
+{%   if cluster_network.cidr != openshift_cluster_network_cidr %}
+  - cidr: {{ cluster_network.cidr }}
+    hostSubnetLength: {{ cluster_network.host_subnet_length }}
+{%   endif %}
+{% endfor %}
 {% if r_openshift_master_use_openshift_sdn or r_openshift_master_use_nuage or r_openshift_master_use_contiv or r_openshift_master_use_kuryr or r_openshift_master_sdn_network_plugin_name == 'cni' %}
   networkPluginName: {{ r_openshift_master_sdn_network_plugin_name_default }}
 {% endif %}

@@ -16,5 +16,5 @@
   - regex: '^HTTPS_PROXY='
     line: "HTTPS_PROXY={{ openshift.common.https_proxy | default('') }}"
   - regex: '^NO_PROXY='
-    line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ openshift_cluster_network_cidr }}"
+    line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ [openshift_cluster_network_cidr] | union(openshift_cluster_networks | map(attribute='cidr') | list) | join(',') }}"
   when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
