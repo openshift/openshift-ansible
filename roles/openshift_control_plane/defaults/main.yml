@@ -157,7 +157,4 @@ l_core_api_list:
 - "template.openshift.io"
 - "user.openshift.io"
 
-l_openshift_recycler_image_dict:
-  origin: docker.io/openshift/origin-recycler:v3.11
-  openshift-enterprise: registry.redhat.io:443/openshift3/ose-recycler:v3.11
-openshift_volume_recycler_image: "{{ l_openshift_recycler_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
+openshift_volume_recycler_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'recycler') }}"
