@@ -1,0 +1,41 @@
+# permissions for viewing metrics -- this isn't necessarily tied to metrics-server directly,
+# but we don't really have a better place for it right now
+
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+  name: system:openshift:aggregate-to-view:resource-metrics
+rules:
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-cluster-reader: "true"
+  name: system:openshift:aggregate-to-view-reader:resource-metrics
+rules:
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
