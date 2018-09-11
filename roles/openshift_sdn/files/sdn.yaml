@@ -38,7 +38,7 @@ spec:
       # It relies on an up to date node-config.yaml being present.
       - name: sdn
         image: " "
-        command: 
+        command:
         - /bin/bash
         - -c
         - |
@@ -102,7 +102,8 @@ spec:
           oc config --config=/tmp/kubeconfig set-credentials sa "--token=$( cat /var/run/secrets/kubernetes.io/serviceaccount/token )"
           oc config --config=/tmp/kubeconfig set-context "$( oc config --config=/tmp/kubeconfig current-context )" --user=sa
           # Launch the network process
-          exec openshift start network --config=/etc/origin/node/node-config.yaml --kubeconfig=/tmp/kubeconfig --loglevel=${DEBUG_LOGLEVEL:-2}
+          openshift start network --disable=plugins --enable=proxy,dns --config=/etc/origin/node/node-config.yaml --kubeconfig=/tmp/kubeconfig --loglevel=${DEBUG_LOGLEVEL:-2} || \
+            dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:
 
         securityContext:
           runAsUser: 0
