@@ -10,6 +10,11 @@
 
 - name: Verify cluster is healthy pre-upgrade
   command: "{{ etcdctlv2 }} cluster-health"
+  register: cluster_health
+  retries: 30
+  delay: 6
+  until: cluster_health.rc == 0
+
 
 - set_fact:
     l_etcd_target_package: "{{ 'etcd' if r_etcd_upgrade_version is not defined else 'etcd-'+r_etcd_upgrade_version+'*' }}"

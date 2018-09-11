@@ -2,6 +2,10 @@
 # INPUT r_etcd_upgrade_version
 - name: Verify cluster is healthy pre-upgrade
   command: "{{ etcdctlv2 }} cluster-health"
+  register: cluster_health
+  retries: 30
+  delay: 6
+  until: cluster_health.rc == 0
 
 - name: Get current image
   shell: "grep 'ExecStart=' {{ etcd_service_file }} | awk '{print $NF}'"
