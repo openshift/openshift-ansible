@@ -132,14 +132,14 @@ def load_config_file(module, dest):
 
 
 # pylint: disable=too-many-arguments
-def gen_skopeo_cmd(registry, username, password, proxy_vars, image_name, tls_verify):
+def gen_skopeo_cmd(registry, username, password, proxy_vars, test_image, tls_verify):
     '''Generate skopeo command to run'''
     skopeo_temp = ("{proxy_vars} timeout 10 skopeo inspect"
-                   " {creds} docker://{registry}/{image_name}")
+                   " {creds} docker://{registry}/{test_image}")
     # this will quote the entire creds argument to account for special chars.
     creds = pipes.quote('--creds={}:{}'.format(username, password))
     skopeo_args = {'proxy_vars': proxy_vars, 'creds': creds,
-                   'registry': registry, 'image_name': image_name,
+                   'registry': registry, 'test_image': test_image,
                    'tls_verify': tls_verify}
     return skopeo_temp.format(**skopeo_args).strip()
 
@@ -200,7 +200,7 @@ def run_module():
         password=dict(type='str', required=True, no_log=True),
         test_login=dict(type='bool', required=False, default=True),
         proxy_vars=dict(type='str', required=False, default=''),
-        image_name=dict(type='str', required=True),
+        test_image=dict(type='str', required=True),
         tls_verify=dict(type='bool', required=False, default=True)
     )
 
@@ -216,7 +216,7 @@ def run_module():
     password = module.params['password']
     test_login = module.params['test_login']
     proxy_vars = module.params['proxy_vars']
-    image_name = module.params['image_name']
+    test_image = module.params['test_image']
     tls_verify = module.params['tls_verify']
 
     if not check_dest_dir_exists(module, dest):
@@ -230,7 +230,7 @@ def run_module():
     # Test the credentials
     if test_login:
         skopeo_command = gen_skopeo_cmd(registry, username, password,
-                                        proxy_vars, image_name, tls_verify)
+                                        proxy_vars, test_image, tls_verify)
         validate_registry_login(module, skopeo_command)
 
     # base64 encode our username:password string
