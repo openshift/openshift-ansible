@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.34.0%{?dist}
+Release:        0.35.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -170,6 +170,20 @@ fi
 
 
 %changelog
+* Tue Sep 11 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.35.0
+- cluster-monitoring: Fix incorrect handling of conditional PVCs
+  (fbranczyk@gmail.com)
+- fix alertmanager example in OLM prometheus operator (cordell.evan@gmail.com)
+- GlusterFS: Tweak groups for external config (jarrpa@redhat.com)
+- Fix kuryr support for custom OpenStack network and subnet
+  (ltomasbo@redhat.com)
+- Add missing ClusterRole for OLM (cordell.evan@gmail.com)
+- GlusterFS: Fix heketi_pod check (jarrpa@redhat.com)
+- spec: remove roles/openshift_examples/lates symlink (vrutkovs@redhat.com)
+- Prepare to split openshift-sdn out of the openshift binary
+  (ccoleman@redhat.com)
+- SDN check: Ignore errors from `oc version` (miciah.masters@gmail.com)
+
 * Sun Sep 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.34.0
 - 
 
