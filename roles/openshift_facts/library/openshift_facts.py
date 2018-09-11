@@ -608,10 +608,7 @@ def build_controller_args(facts):
     cloud_cfg_path = os.path.join(facts['common']['config_base'],
                                   'cloudprovider')
     if 'master' in facts:
-        controller_args = {
-            'pv-recycler-pod-template-filepath-nfs': ['/etc/origin/master/recycler_pod.yaml'],
-            'pv-recycler-pod-template-filepath-hostpath': ['/etc/origin/master/recycler_pod.yaml']
-        }
+        controller_args = {}
 
         if 'cloudprovider' in facts:
             if 'kind' in facts['cloudprovider']:
