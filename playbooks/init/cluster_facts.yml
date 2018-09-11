@@ -37,6 +37,7 @@
         https_proxy: "{{ openshift_https_proxy | default(None) }}"
         no_proxy: "{{ openshift_no_proxy | default(None) }}"
         generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
+        cloudprovider: "{{ openshift_cloudprovider_kind | default(None) }}"
 
   - name: Set fact of no_proxy_internal_hostnames
     openshift_facts:
