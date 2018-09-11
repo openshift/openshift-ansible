@@ -282,6 +282,33 @@ spec:
                             value:
                               type: object
                               description: If present, the value of this spec is the same for all instances of the CRD and can be found here instead of on the CR.
+                      actionDescriptors:
+                        type: array
+                        items:
+                          type: object
+                          description: A spec for actions that can be performed on instances of the CRD
+                          required:
+                            - path
+                            - displayName
+                            - description
+                          properties:
+                            path:
+                              type: string
+                              description: A jsonpath indexing into the spec object on the CR where the the spec value can be found.
+                            displayName:
+                              type: string
+                              description: A human-readable name for the action.
+                            description:
+                              type: string
+                              description: A description of the action.
+                            x-descriptors:
+                              type: array
+                              description: A list of descriptors for the action that indicate the meaning of the action.
+                              items:
+                                type: string
+                            value:
+                              type: object
+                              description: If present, the value of this action is the same for all instances of the CRD and can be found here instead of on the CR.
                 required:
                   type: array
                   description: What resources this operator is responsible for managing. No two running operators should manage the same resource.
