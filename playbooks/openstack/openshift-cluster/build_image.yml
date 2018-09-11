@@ -53,6 +53,7 @@
       name: "{{ build_prefix }}-subnet"
       network_name: "{{ network.network.name }}"
       cidr: "{{ openshift_openstack_build_network_cidr | default('192.168.23.0/24') }}"
+      dns_nameservers: "{{ openshift_openstack_dns_nameservers }}"
     register: subnet
 
   - name: Create the router
@@ -171,7 +172,7 @@
     command: openstack server image create --wait --name "{{ openshift_openstack_default_image_name }}" "{{ image_vm.id }}"
 
   # Remove the temporary OpenStack resources
-  - name: Remove the imabe build instance
+  - name: Remove the image build instance
     os_server:
       name: "{{ image_vm.id }}"
       state: absent
