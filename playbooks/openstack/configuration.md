@@ -476,7 +476,7 @@ $ ssh centos@172.24.4.10
 ### openshift-ansible Configuration
 
 In addition to the rest of openshift-ansible configuration, we will need to
-specify the node netwok, subnet and that we do not want any floating IP
+specify the node subnet, the routerand that we do not want any floating IP
 addresses.
 
 You must do this from inside the "bastion" host created in the previous step.
@@ -484,7 +484,7 @@ You must do this from inside the "bastion" host created in the previous step.
 Put the following to `inventory/group_vars/all.yml`:
 
 ```yaml
-openshift_openstack_node_network_name: openshift
+openshift_openstack_router_name: openshift-router
 openshift_openstack_node_subnet_name: openshift
 openshift_openstack_master_floating_ip: false
 openshift_openstack_infra_floating_ip: false
