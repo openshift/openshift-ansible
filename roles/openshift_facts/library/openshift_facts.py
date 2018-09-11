@@ -1055,9 +1055,7 @@ class OpenShiftFacts(object):
         roles = local_facts.keys()
 
         defaults = self.get_defaults(roles)
-        provider_facts = {}
-        if 'cloudprovider' in local_facts and 'kind' in local_facts['cloudprovider']:
-            provider_facts = self.init_provider_facts()
+        provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
         facts = merge_facts(facts,
                             local_facts,
