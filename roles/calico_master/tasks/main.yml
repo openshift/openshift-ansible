@@ -94,6 +94,10 @@
   failed_when: "calico_pull_secret_create_output.rc != 0"
   changed_when: "('created' in calico_pull_secret_create_output.stdout) or ('configured' in calico_pull_secret_create_output.stdout)"
 
+- name: Calico Master | Set the correct liveness and readiness checks
+  set_fact:
+    calico_binary_checks: "{{ (node_version > '3.2.0' and cnx != 'cnx') or (node_version > '2.2.0' and cnx == 'cnx') | bool }}"
+
 - name: Calico Master | Write Calico v2
   template:
     dest: "{{ mktemp.stdout }}/calico.yml"
