@@ -21,16 +21,16 @@ l_openshift_cluster_monitoring_image_dicts:
     kube_rbac_proxy: quay.io/coreos/kube-rbac-proxy
     oauth_proxy: openshift/oauth-proxy
   openshift-enterprise:
-    prometheus_operator: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'prometheus-operator') }}"
-    prometheus: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'prometheus') }}"
-    alertmanager: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'prometheus-alertmanager') }}"
-    node_exporter: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'prometheus-node-exporter') }}"
-    prometheus_config_reloader: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'prometheus-config-reloader') }}"
-    configmap_reloader: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'configmap-reloader') }}"
-    grafana: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'grafana') }}"
-    kube_state_metrics: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'kube-state-metrics') }}"
-    kube_rbac_proxy: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}:${version}' | regex_escape, 'kube-rbac-proxy') }}"
-    oauth_proxy: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}:${version}' | regex_escape, 'oauth-proxy') }}"
+    prometheus_operator: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}' | regex_escape, 'prometheus-operator') | regex_replace(':[^:]*$' | regex_escape, '') }}"
+    prometheus: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}' | regex_escape, 'prometheus') | regex_replace(':[^:]*$' | regex_escape, '')  }}"
+    alertmanager: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}' | regex_escape, 'prometheus-alertmanager') | regex_replace(':[^:]*$' | regex_escape, '')  }}"
+    node_exporter: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}' | regex_escape, 'prometheus-node-exporter') | regex_replace(':[^:]*$' | regex_escape, '')  }}"
+    prometheus_config_reloader: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}' | regex_escape, 'prometheus-config-reloader') | regex_replace(':[^:]*$' | regex_escape, '')  }}"
+    configmap_reloader: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}' | regex_escape, 'configmap-reloader') | regex_replace(':[^:]*$' | regex_escape, '')  }}"
+    grafana: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}' | regex_escape, 'grafana') | regex_replace(':[^:]*$' | regex_escape, '')  }}"
+    kube_state_metrics: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}' | regex_escape, 'kube-state-metrics') | regex_replace(':[^:]*$' | regex_escape, '')  }}"
+    kube_rbac_proxy: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('${component}' | regex_escape, 'kube-rbac-proxy') | regex_replace(':[^:]*$' | regex_escape, '')  }}"
+    oauth_proxy: "{{ l_openshift_cluster_monitoring_non_standard_reg_url | regex_replace('ose-${component}' | regex_escape, 'oauth-proxy') | regex_replace(':[^:]*$' | regex_escape, '')  }}"
 
 openshift_cluster_monitoring_operator_prometheus_operator_repo: "{{l_openshift_cluster_monitoring_image_dicts[openshift_deployment_type]['prometheus_operator']}}"
 openshift_cluster_monitoring_operator_prometheus_repo: "{{l_openshift_cluster_monitoring_image_dicts[openshift_deployment_type]['prometheus']}}"
