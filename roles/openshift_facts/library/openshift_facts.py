@@ -609,8 +609,8 @@ def build_controller_args(facts):
                                   'cloudprovider')
     if 'master' in facts:
         controller_args = {
-            'pv-recycler-pod-template-filepath-nfs': '/etc/origin/master/recycler_pod.yaml',
-            'pv-recycler-pod-template-filepath-hostpath': '/etc/origin/master/recycler_pod.yaml'
+            'pv-recycler-pod-template-filepath-nfs': ['/etc/origin/master/recycler_pod.yaml'],
+            'pv-recycler-pod-template-filepath-hostpath': ['/etc/origin/master/recycler_pod.yaml']
         }
 
         if 'cloudprovider' in facts:
