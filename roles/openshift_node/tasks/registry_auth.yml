@@ -22,7 +22,7 @@
     # Test that we can actually connect with provided info
     test_login: "{{ oreg_test_login | default(True) }}"
     proxy_vars: "{{ l_docker_creds_proxy_vars }}"
-    image_name: "{{ l_docker_creds_image_name }}"
+    test_image: "{{ l_docker_creds_test_image }}"
   when:
     - oreg_auth_user is defined
   register: node_oreg_auth_credentials_create
@@ -39,7 +39,7 @@
     # Test that we can actually connect with provided info
     test_login: "{{ item.test_login | default(omit) }}"
     proxy_vars: "{{ l_docker_creds_proxy_vars }}"
-    image_name: "{{ item.image_name | default('openshift3/ose-pod') }}"
+    test_image: "{{ item.test_image | default('openshift3/ose-pod') }}"
     tls_verify: "{{ item.tls_verify | default(omit) }}"
   when:
     - openshift_additional_registry_credentials is defined
