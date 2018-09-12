@@ -568,7 +568,7 @@ the `build_image` playbook.
 If you don't want to be setting the build variables in your inventory, you can
 pass them to ansible-playbook directly:
 
-    ansible-playbook -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/build_image.yml -e openshift_openstack_build_base_image=CentOS-7-x86_64-GenericCloud-1805 -e openshift_openstack_build_network_cidr=192.168.42.0/24
+    ansible-playbook -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/build_image.yml -e openshift_openstack_build_base_image=CentOS-7-x86_64-GenericCloud-1805 -e openshift_openstack_build_network_cidr=192.168.42.0/24 -e 'openshift_version="3.10"'
 
 
 ## Kuryr Networking Configuration
@@ -898,7 +898,7 @@ If you want the volume *created automatically*, set the desired name instead:
 openshift_hosted_registry_storage_volume_name: registry
 ```
 
-The volume will be formatted automaticaly and it will be mounted to one of the
+The volume will be formatted automatically and it will be mounted to one of the
 infra nodes when the registry pod gets started.
 
 ## Swift or Ceph Rados GW Backed Registry Configuration
