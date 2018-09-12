@@ -79,7 +79,7 @@
     when: openshift_use_nuage | default(false) | bool
   - role: nuage_master
     when: openshift_use_nuage | default(false) | bool
-  - role: calico_master
+  - role: calico
     when: openshift_use_calico | default(false) | bool
   tasks:
   - import_role:
