@@ -609,6 +609,7 @@ def build_controller_args(facts):
                                   'cloudprovider')
     if 'master' in facts:
         controller_args = {}
+
         if 'cloudprovider' in facts:
             if 'kind' in facts['cloudprovider']:
                 if facts['cloudprovider']['kind'] == 'aws':
