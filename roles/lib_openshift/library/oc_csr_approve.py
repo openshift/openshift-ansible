@@ -53,60 +53,6 @@ EXAMPLES = '''
 CERT_MODE = {'client': 'client auth', 'server': 'server auth'}
 
 
-def run_command(module, command, rc_opts=None):
-    '''Run a command using AnsibleModule.run_command, or fail'''
-    if rc_opts is None:
-        rc_opts = {}
-    rtnc, stdout, err = module.run_command(command, **rc_opts)
-    if rtnc:
-        result = {'failed': True,
-                  'changed': False,
-                  'msg': str(err),
-                  'state': 'unknown'}
-        module.fail_json(**result)
-    return stdout
-
-
-def get_ready_nodes(module, oc_bin, oc_conf):
-    '''Get list of nodes currently ready vi oc'''
-    # json output is necessary for consistency here.
-    command = "{} {} get nodes -ojson".format(oc_bin, oc_conf)
-    stdout = run_command(module, command)
-
-    try:
-        data = json.loads(stdout)
-    except JSONDecodeError as err:
-        result = {'failed': True,
-                  'changed': False,
-                  'msg': str(err),
-                  'state': 'unknown'}
-        module.fail_json(**result)
-
-    ready_nodes = []
-    for node in data['items']:
-        if node.get('status') and node['status'].get('conditions'):
-            for condition in node['status']['conditions']:
-                # "True" is a string here, not a boolean.
-                if condition['type'] == "Ready" and condition['status'] == 'True':
-                    ready_nodes.append(node['metadata']['name'])
-    return ready_nodes
-
-
-def get_csrs(module, oc_bin, oc_conf):
-    '''Retrieve csrs from cluster using oc get csr -ojson'''
-    command = "{} {} get csr -ojson".format(oc_bin, oc_conf)
-    stdout = run_command(module, command)
-    try:
-        data = json.loads(stdout)
-    except JSONDecodeError as err:
-        result = {'failed': True,
-                  'changed': False,
-                  'msg': str(err),
-                  'state': 'unknown'}
-        module.fail_json(**result)
-    return data['items']
-
-
 def parse_subject_cn(subject_str):
     '''parse output of openssl req -noout -subject to retrieve CN.
        example input:
@@ -125,114 +71,232 @@ def parse_subject_cn(subject_str):
             return item_parts[1]
 
 
-def process_csrs(module, csrs, node_list, mode):
-    '''Return a dictionary of pending csrs where the format of the dict is
-       k=csr name, v=Subject Common Name'''
-    csr_dict = {}
-    for item in csrs:
-        status = item['status'].get('conditions')
-        if status:
-            # If status is not an empty dictionary, cert is not pending.
-            continue
-        if CERT_MODE[mode] not in item['spec']['usages']:
-            continue
-        name = item['metadata']['name']
-        request_data = base64.b64decode(item['spec']['request'])
-        command = "openssl req -noout -subject"
-        # ansible's module.run_command accepts data to pipe via stdin as
-        # as 'data' kwarg.
-        rc_opts = {'data': request_data, 'binary_data': True}
-        stdout = run_command(module, command, rc_opts=rc_opts)
-        # parse common_name from subject string.
-        common_name = parse_subject_cn(stdout)
-        if common_name and common_name.startswith('system:node:'):
-            # common name is typically prepended with system:node:.
-            common_name = common_name.split('system:node:')[1]
-        # we only want to approve csrs from nodes we know about.
-        if common_name in node_list:
-            csr_dict[name] = common_name
+class CSRapprove(object):
+    """Approves csr requests"""
 
-    return csr_dict
+    def __init__(self, module, oc_bin, oc_conf, node_list):
+        '''init method'''
+        self.module = module
+        self.oc_bin = oc_bin
+        self.oc_conf = oc_conf
+        self.node_list = node_list
+        self.all_subjects_found = []
+        self.unwanted_csrs = []
+        # Build a dictionary to hold all of our output information so nothing
+        # is lost when we fail.
+        self.result = {'changed': False, 'rc': 0,
+                       'oc_get_nodes': None,
+                       'client_csrs': None,
+                       'server_csrs': None,
+                       'all_subjects_found': self.all_subjects_found,
+                       'client_approve_results': [],
+                       'server_approve_results': [],
+                       'unwanted_csrs': self.unwanted_csrs}
 
-
-def confirm_needed_requests_present(module, not_ready_nodes, csr_dict):
-    '''Ensure all non-Ready nodes have a csr, or fail'''
-    nodes_needed = set(not_ready_nodes)
-    for _, val in csr_dict.items():
-        nodes_needed.discard(val)
-
-    # check that we found all of our needed nodes
-    if nodes_needed:
-        missing_nodes = ', '.join(nodes_needed)
-        result = {'failed': True,
-                  'changed': False,
-                  'msg': "Could not find csr for nodes: {}".format(missing_nodes),
-                  'state': 'unknown'}
-        module.fail_json(**result)
-
-
-def approve_csrs(module, oc_bin, oc_conf, csr_pending_list, mode):
-    '''Loop through csr_pending_list and call:
-       oc adm certificate approve <item>'''
-    res_mode = "{}_approve_results".format(mode)
-    base_command = "{} {} adm certificate approve {}"
-    approve_results = []
-    for csr in csr_pending_list:
-        command = base_command.format(oc_bin, oc_conf, csr)
-        rtnc, stdout, err = module.run_command(command)
-        approve_results.append(stdout)
+    def run_command(self, command, rc_opts=None):
+        '''Run a command using AnsibleModule.run_command, or fail'''
+        if rc_opts is None:
+            rc_opts = {}
+        rtnc, stdout, err = self.module.run_command(command, **rc_opts)
         if rtnc:
-            result = {'failed': True,
-                      'changed': False,
-                      'msg': str(err),
-                      res_mode: approve_results,
-                      'state': 'unknown'}
-            module.fail_json(**result)
-    return approve_results
+            self.result['failed'] = True
+            self.result['msg'] = str(err)
+            self.result['state'] = 'unknown'
+            self.module.fail_json(**self.result)
+        return stdout
 
+    def get_ready_nodes(self):
+        '''Get list of nodes currently ready vi oc'''
+        # json output is necessary for consistency here.
+        command = "{} {} get nodes -ojson".format(self.oc_bin, self.oc_conf)
+        stdout = self.run_command(command)
 
-def get_ready_nodes_server(module, oc_bin, oc_conf, nodes_list):
-    '''Determine which nodes have working server certificates'''
-    ready_nodes_server = []
-    base_command = "{} {} get --raw /api/v1/nodes/{}/proxy/healthz"
-    for node in nodes_list:
-        # need this to look like /api/v1/nodes/<node>/proxy/healthz
-        command = base_command.format(oc_bin, oc_conf, node)
-        rtnc, _, _ = module.run_command(command)
-        if not rtnc:
-            # if we can hit that api endpoint, the node has a valid server
-            # cert.
-            ready_nodes_server.append(node)
-    return ready_nodes_server
+        try:
+            data = json.loads(stdout)
+        except JSONDecodeError as err:
+            self.result['failed'] = True
+            self.result['msg'] = str(err)
+            self.result['state'] = 'unknown'
+            self.module.fail_json(**self.result)
+        self.result['oc_get_nodes'] = data
+        ready_nodes = []
+        for node in data['items']:
+            if node.get('status') and node['status'].get('conditions'):
+                for condition in node['status']['conditions']:
+                    # "True" is a string here, not a boolean.
+                    if condition['type'] == "Ready" and condition['status'] == 'True':
+                        ready_nodes.append(node['metadata']['name'])
+        return ready_nodes
 
+    def get_csrs(self):
+        '''Retrieve csrs from cluster using oc get csr -ojson'''
+        command = "{} {} get csr -ojson".format(self.oc_bin, self.oc_conf)
+        stdout = self.run_command(command)
+        try:
+            data = json.loads(stdout)
+        except JSONDecodeError as err:
+            self.result['failed'] = True
+            self.result['msg'] = str(err)
+            self.result['state'] = 'unknown'
+            self.module.fail_json(**self.result)
+        return data['items']
 
-def verify_server_csrs(module, result, oc_bin, oc_conf, node_list):
-    '''We approved some server csrs, now we need to validate they are working.
-       This function will attempt to retry 10 times in case of failure.'''
-    # Attempt to try node endpoints a few times.
-    attempts = 0
-    # Find not_ready_nodes for server-side again
-    nodes_server_ready = get_ready_nodes_server(module, oc_bin, oc_conf,
-                                                node_list)
-    # Create list of nodes that still aren't ready.
-    not_ready_nodes_server = set([item for item in node_list if item not in nodes_server_ready])
-    while not_ready_nodes_server:
-        nodes_server_ready = get_ready_nodes_server(module, oc_bin, oc_conf,
-                                                    not_ready_nodes_server)
+    def process_csrs(self, csrs, mode):
+        '''Return a dictionary of pending csrs where the format of the dict is
+           k=csr name, v=Subject Common Name'''
+        csr_dict = {}
+        for item in csrs:
+            name = item['metadata']['name']
+            request_data = base64.b64decode(item['spec']['request'])
+            command = "openssl req -noout -subject"
+            # ansible's module.run_command accepts data to pipe via stdin as
+            # as 'data' kwarg.
+            rc_opts = {'data': request_data, 'binary_data': True}
+            stdout = self.run_command(command, rc_opts=rc_opts)
+            self.all_subjects_found.append(stdout)
 
-        # if we have same number of nodes_server_ready now, all of the previous
-        # not_ready_nodes are now ready.
-        if not len(not_ready_nodes_server - set(nodes_server_ready)):
-            break
-        attempts += 1
-        if attempts > 9:
-            result['failed'] = True
-            result['rc'] = 1
-            missing_nodes = not_ready_nodes_server - set(nodes_server_ready)
-            msg = "Some nodes still not ready after approving server certs: {}"
-            msg = msg.format(", ".join(missing_nodes))
-            result['msg'] = msg
-            module.fail_json(**result)
+            status = item['status'].get('conditions')
+            if status:
+                # If status is not an empty dictionary, cert is not pending.
+                self.unwanted_csrs.append(item)
+                continue
+            if CERT_MODE[mode] not in item['spec']['usages']:
+                self.unwanted_csrs.append(item)
+                continue
+            # parse common_name from subject string.
+            common_name = parse_subject_cn(stdout)
+            if common_name and common_name.startswith('system:node:'):
+                # common name is typically prepended with system:node:.
+                common_name = common_name.split('system:node:')[1]
+            # we only want to approve csrs from nodes we know about.
+            if common_name in self.node_list:
+                csr_dict[name] = common_name
+            else:
+                self.unwanted_csrs.append(item)
+
+        return csr_dict
+
+    def confirm_needed_requests_present(self, not_ready_nodes, csr_dict):
+        '''Ensure all non-Ready nodes have a csr, or fail'''
+        nodes_needed = set(not_ready_nodes)
+        for _, val in csr_dict.items():
+            nodes_needed.discard(val)
+
+        # check that we found all of our needed nodes
+        if nodes_needed:
+            missing_nodes = ', '.join(nodes_needed)
+            self.result['failed'] = True
+            self.result['msg'] = "Could not find csr for nodes: {}".format(missing_nodes)
+            self.result['state'] = 'unknown'
+            self.module.fail_json(**self.result)
+
+    def approve_csrs(self, csr_pending_list, mode):
+        '''Loop through csr_pending_list and call:
+           oc adm certificate approve <item>'''
+        res_mode = "{}_approve_results".format(mode)
+        base_command = "{} {} adm certificate approve {}"
+        approve_results = []
+        for csr in csr_pending_list:
+            command = base_command.format(self.oc_bin, self.oc_conf, csr)
+            rtnc, stdout, err = self.module.run_command(command)
+            approve_results.append(stdout)
+            if rtnc:
+                self.result['failed'] = True
+                self.result['msg'] = str(err)
+                self.result[res_mode] = approve_results
+                self.result['state'] = 'unknown'
+                self.module.fail_json(**self.result)
+        self.result[res_mode] = approve_results
+        # We set changed for approved client or server csrs.
+        self.result['changed'] = bool(approve_results) or bool(self.result['changed'])
+
+    def get_ready_nodes_server(self, nodes_list):
+        '''Determine which nodes have working server certificates'''
+        ready_nodes_server = []
+        base_command = "{} {} get --raw /api/v1/nodes/{}/proxy/healthz"
+        for node in nodes_list:
+            # need this to look like /api/v1/nodes/<node>/proxy/healthz
+            command = base_command.format(self.oc_bin, self.oc_conf, node)
+            rtnc, _, _ = self.module.run_command(command)
+            if not rtnc:
+                # if we can hit that api endpoint, the node has a valid server
+                # cert.
+                ready_nodes_server.append(node)
+        return ready_nodes_server
+
+    def verify_server_csrs(self):
+        '''We approved some server csrs, now we need to validate they are working.
+           This function will attempt to retry 10 times in case of failure.'''
+        # Attempt to try node endpoints a few times.
+        attempts = 0
+        # Find not_ready_nodes for server-side again
+        nodes_server_ready = self.get_ready_nodes_server(self.node_list)
+        # Create list of nodes that still aren't ready.
+        not_ready_nodes_server = set([item for item in self.node_list if item not in nodes_server_ready])
+        while not_ready_nodes_server:
+            nodes_server_ready = self.get_ready_nodes_server(not_ready_nodes_server)
+
+            # if we have same number of nodes_server_ready now, all of the previous
+            # not_ready_nodes are now ready.
+            if not len(not_ready_nodes_server - set(nodes_server_ready)):
+                break
+            attempts += 1
+            if attempts > 9:
+                self.result['failed'] = True
+                self.result['rc'] = 1
+                missing_nodes = not_ready_nodes_server - set(nodes_server_ready)
+                msg = "Some nodes still not ready after approving server certs: {}"
+                msg = msg.format(", ".join(missing_nodes))
+                self.result['msg'] = msg
+                self.module.fail_json(**self.result)
+
+    def run(self):
+        '''execute the csr approval process'''
+        nodes_ready = self.get_ready_nodes()
+        # don't need to check nodes that are already ready.
+        client_not_ready_nodes = [item for item in self.node_list
+                                  if item not in nodes_ready]
+
+        # Get all csrs, no good way to filter on pending.
+        client_csrs = self.get_csrs()
+        # process data in csrs and build a dictionary of client requests
+        client_csr_dict = self.process_csrs(client_csrs, "client")
+        self.result['client_csrs'] = client_csr_dict
+
+        # This method is fail-happy and expects all non-Ready nodes have available
+        # csrs.  Handle failure for this method via ansible retry/until.
+        self.confirm_needed_requests_present(client_not_ready_nodes,
+                                             client_csr_dict)
+
+        self.approve_csrs(client_csr_dict, 'client')
+
+        # # Server Cert Section # #
+        # Find not_ready_nodes for server-side
+        nodes_server_ready = self.get_ready_nodes_server(self.node_list)
+        # Create list of nodes that definitely need a server cert approved.
+        not_ready_nodes_server = [item for item in self.node_list
+                                  if item not in nodes_server_ready]
+
+        # Get all csrs again, no good way to filter on pending.
+        server_csrs = self.get_csrs()
+        # process data in csrs and build a dictionary of server requests
+        server_csr_dict = self.process_csrs(server_csrs, "server")
+        self.result['server_csrs'] = server_csr_dict
+
+        # This will fail if all server csrs are not present, but probably shouldn't
+        # at this point since we spent some time hitting the api to see if the
+        # nodes are already responding.
+        self.confirm_needed_requests_present(not_ready_nodes_server,
+                                             server_csr_dict)
+        self.approve_csrs(server_csr_dict, 'server')
+
+        self.verify_server_csrs()
+
+        # We made it here, everything was successful, cleanup some debug info
+        # so we don't spam logs.
+        for key in ('client_csrs', 'server_csrs', 'unwanted_csrs'):
+            self.result.pop(key)
+        self.module.exit_json(**self.result)
 
 
 def run_module():
@@ -250,53 +314,8 @@ def run_module():
     oc_conf = '--config={}'.format(module.params['oc_conf'])
     node_list = module.params['node_list']
 
-    result = {'changed': False, 'rc': 0}
-
-    nodes_ready = get_ready_nodes(module, oc_bin, oc_conf)
-    # don't need to check nodes that are already ready.
-    not_ready_nodes = [item for item in node_list if item not in nodes_ready]
-
-    # Get all csrs, no good way to filter on pending.
-    csrs = get_csrs(module, oc_bin, oc_conf)
-
-    # process data in csrs and build a dictionary of client requests
-    csr_dict = process_csrs(module, csrs, node_list, "client")
-
-    # This method is fail-happy and expects all non-Ready nodes have available
-    # csrs.  Handle failure for this method via ansible retry/until.
-    confirm_needed_requests_present(module, not_ready_nodes, csr_dict)
-
-    # save client_approve_results so we can report later.
-    client_approve_results = approve_csrs(module, oc_bin, oc_conf, csr_dict,
-                                          'client')
-    result['client_approve_results'] = client_approve_results
-
-    # # Server Cert Section # #
-    # Find not_ready_nodes for server-side
-    nodes_server_ready = get_ready_nodes_server(module, oc_bin, oc_conf,
-                                                node_list)
-    # Create list of nodes that definitely need a server cert approved.
-    not_ready_nodes_server = [item for item in node_list if item not in nodes_server_ready]
-
-    # Get all csrs again, no good way to filter on pending.
-    csrs = get_csrs(module, oc_bin, oc_conf)
-
-    # process data in csrs and build a dictionary of server requests
-    csr_dict = process_csrs(module, csrs, node_list, "server")
-
-    # This will fail if all server csrs are not present, but probably shouldn't
-    # at this point since we spent some time hitting the api to see if the
-    # nodes are already responding.
-    confirm_needed_requests_present(module, not_ready_nodes_server, csr_dict)
-    server_approve_results = approve_csrs(module, oc_bin, oc_conf, csr_dict,
-                                          'server')
-    result['server_approve_results'] = server_approve_results
-
-    result['changed'] = bool(client_approve_results) or bool(server_approve_results)
-
-    verify_server_csrs(module, result, oc_bin, oc_conf, node_list)
-
-    module.exit_json(**result)
+    approver = CSRapprove(module, oc_bin, oc_conf, node_list)
+    approver.run()
 
 
 def main():
