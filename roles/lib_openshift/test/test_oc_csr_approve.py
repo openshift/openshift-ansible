@@ -43,7 +43,7 @@ def test_parse_subject_cn():
     assert oc_csr_approve.parse_subject_cn(subject) == 'test.io'
 
 
-def test_get_ready_nodes():
+def test_get_nodes():
     output_file = os.path.join(ASSET_PATH, 'oc_get_nodes.json')
     with open(output_file) as stdoutfile:
         oc_get_nodes_stdout = stdoutfile.read()
@@ -53,8 +53,8 @@ def test_get_ready_nodes():
 
     with patch(RUN_CMD_MOCK) as call_mock:
         call_mock.return_value = (0, oc_get_nodes_stdout, '')
-        ready_nodes = approver.get_ready_nodes()
-    assert ready_nodes == ['fedora1.openshift.io', 'fedora3.openshift.io']
+        all_nodes = approver.get_nodes()
+    assert all_nodes == ['fedora1.openshift.io', 'fedora2.openshift.io', 'fedora3.openshift.io']
 
 
 def test_get_csrs():
@@ -89,15 +89,15 @@ def test_get_csrs():
 def test_confirm_needed_requests_present():
     module = DummyModule({})
     csr_dict = {'some-csr': 'fedora1.openshift.io'}
-    not_ready_nodes = ['host1']
+    not_found_nodes = ['host1']
     approver = CSRapprove(module, 'oc', '/dev/null', [])
     with pytest.raises(Exception) as err:
-        approver.confirm_needed_requests_present(not_ready_nodes, csr_dict)
+        approver.confirm_needed_requests_present(not_found_nodes, csr_dict)
         assert 'Exception: Could not find csr for nodes: host1' in str(err)
 
-    not_ready_nodes = ['fedora1.openshift.io']
+    not_found_nodes = ['fedora1.openshift.io']
     # this should complete silently
-    approver.confirm_needed_requests_present(not_ready_nodes, csr_dict)
+    approver.confirm_needed_requests_present(not_found_nodes, csr_dict)
 
 
 def test_approve_csrs():
@@ -173,7 +173,7 @@ def test_verify_server_csrs():
 
 if __name__ == '__main__':
     test_parse_subject_cn()
-    test_get_ready_nodes()
+    test_get_nodes()
     test_get_csrs()
     test_confirm_needed_requests_present()
     test_approve_csrs()
