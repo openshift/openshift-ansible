@@ -234,7 +234,7 @@
   tasks:
   - copy:
       src: "{{ hostvars['localhost'].g_master_mktemp.stdout }}/ca-bundle.crt"
-      dest: "{{ openshift.common.config_base }}/node/ca.crt"
+      dest: "{{ openshift.common.config_base }}/node/client-ca.crt"
   - name: Copy OpenShift CA to system CA trust
     copy:
       src: "{{ item.cert }}"
@@ -242,13 +242,13 @@
       remote_src: yes
     with_items:
     - id: openshift
-      cert: "{{ openshift.common.config_base }}/node/ca.crt"
+      cert: "{{ openshift.common.config_base }}/node/client-ca.crt"
     notify:
     - update ca trust
   - name: Update node client kubeconfig CA data
     kubeclient_ca:
       client_path: "{{ openshift.common.config_base }}/node/system:node:{{ openshift.common.hostname }}.kubeconfig"
-      ca_path: "{{ openshift.common.config_base }}/node/ca.crt"
+      ca_path: "{{ openshift.common.config_base }}/node/client-ca.crt"
   handlers:
   # Normally this handler would restart docker after updating ca
   # trust. We'll do that when we restart nodes to avoid restarting
@@ -284,7 +284,7 @@
   - ('expired' not in hostvars
       | lib_utils_oo_select_keys(groups['oo_nodes_to_config'])
       | lib_utils_oo_collect('check_results.check_results.ocp_certs')
-      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift.common.config_base ~ "/node/ca.crt"}))
+      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift.common.config_base ~ "/node/client-ca.crt"}))
   # masters
   - ('expired' not in hostvars
       | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
