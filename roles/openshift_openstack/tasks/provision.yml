@@ -59,7 +59,7 @@
   ignore_errors: True
   register: stack_create
   until: stack_create is not failed
-  retries: 20
+  retries: 5
   delay: 5
   os_stack:
     name: "{{ openshift_openstack_stack_name }}"
