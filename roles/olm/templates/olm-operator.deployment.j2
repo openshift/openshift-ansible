@@ -1,27 +1,25 @@
-##---
-# Source: olm/templates/12-alm-operator.deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: alm-operator
+  name: olm-operator
   namespace: operator-lifecycle-manager
   labels:
-    app: alm-operator
+    app: olm-operator
 spec:
   strategy:
     type: RollingUpdate
   replicas: 1
   selector:
     matchLabels:
-      app: alm-operator
+      app: olm-operator
   template:
     metadata:
       labels:
-        app: alm-operator
+        app: olm-operator
     spec:
       serviceAccountName: olm-operator-serviceaccount
       containers:
-        - name: alm-operator
+        - name: olm-operator
           command:
           - /bin/olm
           image: {{ olm_operator_image }}
@@ -42,6 +40,4 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
           - name: OPERATOR_NAME
-            value: alm-operator
-      imagePullSecrets:
-        - name: coreos-pull-secret
+            value: olm-operator

@@ -37,14 +37,17 @@ spec:
   - name: Age
     type: date
     JSONPath: .metadata.creationTimestamp
+  subresources:
+  # status enables the status subresource.
+    status: {}
   validation:
     openAPIV3Schema:
-      type: object
-      description: Represents a subscription to a source and channel
-      required:
-      - spec
       properties:
         spec:
+          type: object
+          description: Represents a subscription to a source and channel
+          required:
+          - spec
           type: object
           description: Spec for a catalog source.
           required:
