@@ -104,7 +104,7 @@
     files:
       - "{{ mktemp.stdout }}/rh-operators.configmap.yaml"
 
-- name: Apply ocs CatalogSource manifest
+- name: Apply rh-operators CatalogSource manifest
   oc_obj:
     state: present
     kind: CatalogSource
@@ -112,6 +112,24 @@
     namespace: operator-lifecycle-manager
     files:
       - "{{ mktemp.stdout }}/rh-operators.catalogsource.yaml"
+
+- name: Apply certified-operators ConfigMap manifest
+  oc_obj:
+    state: present
+    kind: ConfigMap
+    name: certified-operators
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/certified-operators.configmap.yaml"
+
+- name: Apply certified-operators CatalogSource manifest
+  oc_obj:
+    state: present
+    kind: CatalogSource
+    name: certified-operators
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/certified-operators.catalogsource.yaml"
 
 - name: Apply olm-operator Deployment manifest
   oc_obj:
