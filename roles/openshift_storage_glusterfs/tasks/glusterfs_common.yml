@@ -110,11 +110,9 @@
 - import_tasks: glusterblock_storageclass.yml
   when: glusterfs_block_storageclass
 
-- name: Check if gluster-s3 can't be deployed
-  set_fact:
-    glusterfs_s3_deploy: False
-  when:
-  - "glusterfs_s3_account is not defined or glusterfs_s3_user is not defined or glusterfs_s3_password is not defined"
-
 - import_tasks: gluster_s3_deploy.yml
-  when: glusterfs_s3_deploy
+  when:
+  - glusterfs_s3_deploy
+  - glusterfs_s3_account is defined
+  - glusterfs_s3_user is defined
+  - glusterfs_s3_password is defined
