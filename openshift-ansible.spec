@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.3
+Version:        3.11.4
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,14 @@ fi
 
 
 %changelog
+* Thu Sep 13 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.4-1
+- Fix volume recycler configuration on upgrade (sdodson@redhat.com)
+- Wait for sync DS to set annotations on all available nodes
+  (vrutkovs@redhat.com)
+- sync annotations: expected number of annotations should be a number of items
+  (vrutkovs@redhat.com)
+- Refactor csr approval for client certs ignore ready (mgugino@redhat.com)
+
 * Wed Sep 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.3-1
 - 
 
