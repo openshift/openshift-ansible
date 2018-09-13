@@ -49,12 +49,14 @@ if [[ $2 =~ ^(up|dhcp4-change|dhcp6-change)$ ]]; then
       cat << EOF > /etc/dnsmasq.d/origin-dns.conf
 no-resolv
 domain-needed
-server=/cluster.local/172.30.0.1
-server=/30.172.in-addr.arpa/172.30.0.1
+server=/cluster.local/127.0.0.1
+server=/in-addr.arpa/127.0.0.1
 enable-dbus
 dns-forward-max=5000
 cache-size=5000
 min-port=1024
+bind-dynamic
+except-interface=lo
 EOF
       # New config file, must restart
       NEEDS_RESTART=1
