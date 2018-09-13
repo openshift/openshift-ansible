@@ -2407,6 +2407,2022 @@ data:
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
+        name: kafkas.kafka.strimzi.io
+        labels:
+          app: strimzi
+      spec:
+        group: kafka.strimzi.io
+        version: v1alpha1
+        scope: Namespaced
+        names:
+          kind: Kafka
+          listKind: KafkaList
+          singular: kafka
+          plural: kafkas
+        validation:
+          openAPIV3Schema:
+            properties:
+              spec:
+                type: object
+                properties:
+                  kafka:
+                    type: object
+                    properties:
+                      replicas:
+                        type: integer
+                        minimum: 1
+                      image:
+                        type: string
+                      storage:
+                        type: object
+                        properties:
+                          class:
+                            type: string
+                          deleteClaim:
+                            type: boolean
+                          selector:
+                            type: object
+                          size:
+                            type: string
+                          type:
+                            type: string
+                      listeners:
+                        type: object
+                        properties:
+                          plain:
+                            type: object
+                            properties: {}
+                          tls:
+                            type: object
+                            properties:
+                              authentication:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                      authorization:
+                        type: object
+                        properties:
+                          superUsers:
+                            type: array
+                            items:
+                              type: string
+                          type:
+                            type: string
+                      config:
+                        type: object
+                      rack:
+                        type: object
+                        properties:
+                          topologyKey:
+                            type: string
+                            example: failure-domain.beta.kubernetes.io/zone
+                        required:
+                        - topologyKey
+                      brokerRackInitImage:
+                        type: string
+                      affinity:
+                        type: object
+                        properties:
+                          nodeAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    preference:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: object
+                                properties:
+                                  nodeSelectorTerms:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                          podAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    podAffinityTerm:
+                                      type: object
+                                      properties:
+                                        labelSelector:
+                                          type: object
+                                          properties:
+                                            matchExpressions:
+                                              type: array
+                                              items:
+                                                type: object
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    type: array
+                                                    items:
+                                                      type: string
+                                            matchLabels:
+                                              type: object
+                                        namespaces:
+                                          type: array
+                                          items:
+                                            type: string
+                                        topologyKey:
+                                          type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                          podAntiAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    podAffinityTerm:
+                                      type: object
+                                      properties:
+                                        labelSelector:
+                                          type: object
+                                          properties:
+                                            matchExpressions:
+                                              type: array
+                                              items:
+                                                type: object
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    type: array
+                                                    items:
+                                                      type: string
+                                            matchLabels:
+                                              type: object
+                                        namespaces:
+                                          type: array
+                                          items:
+                                            type: string
+                                        topologyKey:
+                                          type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                      tolerations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            effect:
+                              type: string
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            tolerationSeconds:
+                              type: integer
+                            value:
+                              type: string
+                      livenessProbe:
+                        type: object
+                        properties:
+                          initialDelaySeconds:
+                            type: integer
+                            minimum: 0
+                          timeoutSeconds:
+                            type: integer
+                            minimum: 0
+                      readinessProbe:
+                        type: object
+                        properties:
+                          initialDelaySeconds:
+                            type: integer
+                            minimum: 0
+                          timeoutSeconds:
+                            type: integer
+                            minimum: 0
+                      jvmOptions:
+                        type: object
+                        properties:
+                          -XX:
+                            type: object
+                          -Xms:
+                            type: string
+                            pattern: '[0-9]+[mMgG]?'
+                          -Xmx:
+                            type: string
+                            pattern: '[0-9]+[mMgG]?'
+                      resources:
+                        type: object
+                        properties:
+                          limits:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                                pattern: '[0-9]+m?$'
+                              memory:
+                                type: string
+                                pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                          requests:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                                pattern: '[0-9]+m?$'
+                              memory:
+                                type: string
+                                pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                      metrics:
+                        type: object
+                      logging:
+                        type: object
+                        properties:
+                          loggers:
+                            type: object
+                          name:
+                            type: string
+                          type:
+                            type: string
+                      tlsSidecar:
+                        type: object
+                        properties:
+                          image:
+                            type: string
+                          resources:
+                            type: object
+                            properties:
+                              limits:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                              requests:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                    required:
+                    - replicas
+                    - storage
+                    - listeners
+                  zookeeper:
+                    type: object
+                    properties:
+                      replicas:
+                        type: integer
+                        minimum: 1
+                      image:
+                        type: string
+                      storage:
+                        type: object
+                        properties:
+                          class:
+                            type: string
+                          deleteClaim:
+                            type: boolean
+                          selector:
+                            type: object
+                          size:
+                            type: string
+                          type:
+                            type: string
+                      config:
+                        type: object
+                      affinity:
+                        type: object
+                        properties:
+                          nodeAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    preference:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: object
+                                properties:
+                                  nodeSelectorTerms:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                          podAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    podAffinityTerm:
+                                      type: object
+                                      properties:
+                                        labelSelector:
+                                          type: object
+                                          properties:
+                                            matchExpressions:
+                                              type: array
+                                              items:
+                                                type: object
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    type: array
+                                                    items:
+                                                      type: string
+                                            matchLabels:
+                                              type: object
+                                        namespaces:
+                                          type: array
+                                          items:
+                                            type: string
+                                        topologyKey:
+                                          type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                          podAntiAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    podAffinityTerm:
+                                      type: object
+                                      properties:
+                                        labelSelector:
+                                          type: object
+                                          properties:
+                                            matchExpressions:
+                                              type: array
+                                              items:
+                                                type: object
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    type: array
+                                                    items:
+                                                      type: string
+                                            matchLabels:
+                                              type: object
+                                        namespaces:
+                                          type: array
+                                          items:
+                                            type: string
+                                        topologyKey:
+                                          type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                      tolerations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            effect:
+                              type: string
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            tolerationSeconds:
+                              type: integer
+                            value:
+                              type: string
+                      livenessProbe:
+                        type: object
+                        properties:
+                          initialDelaySeconds:
+                            type: integer
+                            minimum: 0
+                          timeoutSeconds:
+                            type: integer
+                            minimum: 0
+                      readinessProbe:
+                        type: object
+                        properties:
+                          initialDelaySeconds:
+                            type: integer
+                            minimum: 0
+                          timeoutSeconds:
+                            type: integer
+                            minimum: 0
+                      jvmOptions:
+                        type: object
+                        properties:
+                          -XX:
+                            type: object
+                          -Xms:
+                            type: string
+                            pattern: '[0-9]+[mMgG]?'
+                          -Xmx:
+                            type: string
+                            pattern: '[0-9]+[mMgG]?'
+                      resources:
+                        type: object
+                        properties:
+                          limits:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                                pattern: '[0-9]+m?$'
+                              memory:
+                                type: string
+                                pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                          requests:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                                pattern: '[0-9]+m?$'
+                              memory:
+                                type: string
+                                pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                      metrics:
+                        type: object
+                      logging:
+                        type: object
+                        properties:
+                          loggers:
+                            type: object
+                          name:
+                            type: string
+                          type:
+                            type: string
+                      tlsSidecar:
+                        type: object
+                        properties:
+                          image:
+                            type: string
+                          resources:
+                            type: object
+                            properties:
+                              limits:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                              requests:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                    required:
+                    - replicas
+                    - storage
+                  topicOperator:
+                    type: object
+                    properties:
+                      watchedNamespace:
+                        type: string
+                      image:
+                        type: string
+                      reconciliationIntervalSeconds:
+                        type: integer
+                        minimum: 0
+                      zookeeperSessionTimeoutSeconds:
+                        type: integer
+                        minimum: 0
+                      affinity:
+                        type: object
+                        properties:
+                          nodeAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    preference:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: object
+                                properties:
+                                  nodeSelectorTerms:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                          podAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    podAffinityTerm:
+                                      type: object
+                                      properties:
+                                        labelSelector:
+                                          type: object
+                                          properties:
+                                            matchExpressions:
+                                              type: array
+                                              items:
+                                                type: object
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    type: array
+                                                    items:
+                                                      type: string
+                                            matchLabels:
+                                              type: object
+                                        namespaces:
+                                          type: array
+                                          items:
+                                            type: string
+                                        topologyKey:
+                                          type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                          podAntiAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    podAffinityTerm:
+                                      type: object
+                                      properties:
+                                        labelSelector:
+                                          type: object
+                                          properties:
+                                            matchExpressions:
+                                              type: array
+                                              items:
+                                                type: object
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    type: array
+                                                    items:
+                                                      type: string
+                                            matchLabels:
+                                              type: object
+                                        namespaces:
+                                          type: array
+                                          items:
+                                            type: string
+                                        topologyKey:
+                                          type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                      resources:
+                        type: object
+                        properties:
+                          limits:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                                pattern: '[0-9]+m?$'
+                              memory:
+                                type: string
+                                pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                          requests:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                                pattern: '[0-9]+m?$'
+                              memory:
+                                type: string
+                                pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                      topicMetadataMaxAttempts:
+                        type: integer
+                        minimum: 0
+                      tlsSidecar:
+                        type: object
+                        properties:
+                          image:
+                            type: string
+                          resources:
+                            type: object
+                            properties:
+                              limits:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                              requests:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                      logging:
+                        type: object
+                        properties:
+                          loggers:
+                            type: object
+                          name:
+                            type: string
+                          type:
+                            type: string
+                  entityOperator:
+                    type: object
+                    properties:
+                      topicOperator:
+                        type: object
+                        properties:
+                          watchedNamespace:
+                            type: string
+                          image:
+                            type: string
+                          reconciliationIntervalSeconds:
+                            type: integer
+                            minimum: 0
+                          zookeeperSessionTimeoutSeconds:
+                            type: integer
+                            minimum: 0
+                          resources:
+                            type: object
+                            properties:
+                              limits:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                              requests:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                          topicMetadataMaxAttempts:
+                            type: integer
+                            minimum: 0
+                          logging:
+                            type: object
+                            properties:
+                              loggers:
+                                type: object
+                              name:
+                                type: string
+                              type:
+                                type: string
+                      userOperator:
+                        type: object
+                        properties:
+                          watchedNamespace:
+                            type: string
+                          image:
+                            type: string
+                          reconciliationIntervalSeconds:
+                            type: integer
+                            minimum: 0
+                          zookeeperSessionTimeoutSeconds:
+                            type: integer
+                            minimum: 0
+                          resources:
+                            type: object
+                            properties:
+                              limits:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                              requests:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                          logging:
+                            type: object
+                            properties:
+                              loggers:
+                                type: object
+                              name:
+                                type: string
+                              type:
+                                type: string
+                      affinity:
+                        type: object
+                        properties:
+                          nodeAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    preference:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: object
+                                properties:
+                                  nodeSelectorTerms:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                          podAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    podAffinityTerm:
+                                      type: object
+                                      properties:
+                                        labelSelector:
+                                          type: object
+                                          properties:
+                                            matchExpressions:
+                                              type: array
+                                              items:
+                                                type: object
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    type: array
+                                                    items:
+                                                      type: string
+                                            matchLabels:
+                                              type: object
+                                        namespaces:
+                                          type: array
+                                          items:
+                                            type: string
+                                        topologyKey:
+                                          type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                          podAntiAffinity:
+                            type: object
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    podAffinityTerm:
+                                      type: object
+                                      properties:
+                                        labelSelector:
+                                          type: object
+                                          properties:
+                                            matchExpressions:
+                                              type: array
+                                              items:
+                                                type: object
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    type: array
+                                                    items:
+                                                      type: string
+                                            matchLabels:
+                                              type: object
+                                        namespaces:
+                                          type: array
+                                          items:
+                                            type: string
+                                        topologyKey:
+                                          type: string
+                                    weight:
+                                      type: integer
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                      tolerations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            effect:
+                              type: string
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            tolerationSeconds:
+                              type: integer
+                            value:
+                              type: string
+                      tlsSidecar:
+                        type: object
+                        properties:
+                          image:
+                            type: string
+                          resources:
+                            type: object
+                            properties:
+                              limits:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                              requests:
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                    pattern: '[0-9]+m?$'
+                                  memory:
+                                    type: string
+                                    pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                required:
+                - kafka
+                - zookeeper
+      
+    - apiVersion: apiextensions.k8s.io/v1beta1
+      kind: CustomResourceDefinition
+      metadata:
+        name: kafkaconnects.kafka.strimzi.io
+        labels:
+          app: strimzi
+      spec:
+        group: kafka.strimzi.io
+        version: v1alpha1
+        scope: Namespaced
+        names:
+          kind: KafkaConnect
+          listKind: KafkaConnectList
+          singular: kafkaconnect
+          plural: kafkaconnects
+        validation:
+          openAPIV3Schema:
+            properties:
+              spec:
+                type: object
+                properties:
+                  replicas:
+                    type: integer
+                  image:
+                    type: string
+                  livenessProbe:
+                    type: object
+                    properties:
+                      initialDelaySeconds:
+                        type: integer
+                        minimum: 0
+                      timeoutSeconds:
+                        type: integer
+                        minimum: 0
+                  readinessProbe:
+                    type: object
+                    properties:
+                      initialDelaySeconds:
+                        type: integer
+                        minimum: 0
+                      timeoutSeconds:
+                        type: integer
+                        minimum: 0
+                  jvmOptions:
+                    type: object
+                    properties:
+                      -XX:
+                        type: object
+                      -Xms:
+                        type: string
+                        pattern: '[0-9]+[mMgG]?'
+                      -Xmx:
+                        type: string
+                        pattern: '[0-9]+[mMgG]?'
+                  affinity:
+                    type: object
+                    properties:
+                      nodeAffinity:
+                        type: object
+                        properties:
+                          preferredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                preference:
+                                  type: object
+                                  properties:
+                                    matchExpressions:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          key:
+                                            type: string
+                                          operator:
+                                            type: string
+                                          values:
+                                            type: array
+                                            items:
+                                              type: string
+                                weight:
+                                  type: integer
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            type: object
+                            properties:
+                              nodeSelectorTerms:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    matchExpressions:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          key:
+                                            type: string
+                                          operator:
+                                            type: string
+                                          values:
+                                            type: array
+                                            items:
+                                              type: string
+                      podAffinity:
+                        type: object
+                        properties:
+                          preferredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                podAffinityTerm:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                                weight:
+                                  type: integer
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                labelSelector:
+                                  type: object
+                                  properties:
+                                    matchExpressions:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          key:
+                                            type: string
+                                          operator:
+                                            type: string
+                                          values:
+                                            type: array
+                                            items:
+                                              type: string
+                                    matchLabels:
+                                      type: object
+                                namespaces:
+                                  type: array
+                                  items:
+                                    type: string
+                                topologyKey:
+                                  type: string
+                      podAntiAffinity:
+                        type: object
+                        properties:
+                          preferredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                podAffinityTerm:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                                weight:
+                                  type: integer
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                labelSelector:
+                                  type: object
+                                  properties:
+                                    matchExpressions:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          key:
+                                            type: string
+                                          operator:
+                                            type: string
+                                          values:
+                                            type: array
+                                            items:
+                                              type: string
+                                    matchLabels:
+                                      type: object
+                                namespaces:
+                                  type: array
+                                  items:
+                                    type: string
+                                topologyKey:
+                                  type: string
+                  tolerations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        effect:
+                          type: string
+                        key:
+                          type: string
+                        operator:
+                          type: string
+                        tolerationSeconds:
+                          type: integer
+                        value:
+                          type: string
+                  logging:
+                    type: object
+                    properties:
+                      loggers:
+                        type: object
+                      name:
+                        type: string
+                      type:
+                        type: string
+                  metrics:
+                    type: object
+                  authentication:
+                    type: object
+                    properties:
+                      certificateAndKey:
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          key:
+                            type: string
+                          secretName:
+                            type: string
+                        required:
+                        - certificate
+                        - key
+                        - secretName
+                      type:
+                        type: string
+                    required:
+                    - certificateAndKey
+                  bootstrapServers:
+                    type: string
+                  config:
+                    type: object
+                  resources:
+                    type: object
+                    properties:
+                      limits:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                            pattern: '[0-9]+m?$'
+                          memory:
+                            type: string
+                            pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                      requests:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                            pattern: '[0-9]+m?$'
+                          memory:
+                            type: string
+                            pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                  tls:
+                    type: object
+                    properties:
+                      trustedCertificates:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            certificate:
+                              type: string
+                            secretName:
+                              type: string
+                          required:
+                          - certificate
+                          - secretName
+                    required:
+                    - trustedCertificates
+                required:
+                - bootstrapServers
+      
+    - apiVersion: apiextensions.k8s.io/v1beta1
+      kind: CustomResourceDefinition
+      metadata:
+        name: kafkaconnects2is.kafka.strimzi.io
+        labels:
+          app: strimzi
+      spec:
+        group: kafka.strimzi.io
+        version: v1alpha1
+        scope: Namespaced
+        names:
+          kind: KafkaConnectS2I
+          listKind: KafkaConnectS2IList
+          singular: kafkaconnects2i
+          plural: kafkaconnects2is
+        validation:
+          openAPIV3Schema:
+            properties:
+              spec:
+                type: object
+                properties:
+                  replicas:
+                    type: integer
+                  image:
+                    type: string
+                  livenessProbe:
+                    type: object
+                    properties:
+                      initialDelaySeconds:
+                        type: integer
+                        minimum: 0
+                      timeoutSeconds:
+                        type: integer
+                        minimum: 0
+                  readinessProbe:
+                    type: object
+                    properties:
+                      initialDelaySeconds:
+                        type: integer
+                        minimum: 0
+                      timeoutSeconds:
+                        type: integer
+                        minimum: 0
+                  jvmOptions:
+                    type: object
+                    properties:
+                      -XX:
+                        type: object
+                      -Xms:
+                        type: string
+                        pattern: '[0-9]+[mMgG]?'
+                      -Xmx:
+                        type: string
+                        pattern: '[0-9]+[mMgG]?'
+                  affinity:
+                    type: object
+                    properties:
+                      nodeAffinity:
+                        type: object
+                        properties:
+                          preferredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                preference:
+                                  type: object
+                                  properties:
+                                    matchExpressions:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          key:
+                                            type: string
+                                          operator:
+                                            type: string
+                                          values:
+                                            type: array
+                                            items:
+                                              type: string
+                                weight:
+                                  type: integer
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            type: object
+                            properties:
+                              nodeSelectorTerms:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    matchExpressions:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          key:
+                                            type: string
+                                          operator:
+                                            type: string
+                                          values:
+                                            type: array
+                                            items:
+                                              type: string
+                      podAffinity:
+                        type: object
+                        properties:
+                          preferredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                podAffinityTerm:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                                weight:
+                                  type: integer
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                labelSelector:
+                                  type: object
+                                  properties:
+                                    matchExpressions:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          key:
+                                            type: string
+                                          operator:
+                                            type: string
+                                          values:
+                                            type: array
+                                            items:
+                                              type: string
+                                    matchLabels:
+                                      type: object
+                                namespaces:
+                                  type: array
+                                  items:
+                                    type: string
+                                topologyKey:
+                                  type: string
+                      podAntiAffinity:
+                        type: object
+                        properties:
+                          preferredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                podAffinityTerm:
+                                  type: object
+                                  properties:
+                                    labelSelector:
+                                      type: object
+                                      properties:
+                                        matchExpressions:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                type: array
+                                                items:
+                                                  type: string
+                                        matchLabels:
+                                          type: object
+                                    namespaces:
+                                      type: array
+                                      items:
+                                        type: string
+                                    topologyKey:
+                                      type: string
+                                weight:
+                                  type: integer
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                labelSelector:
+                                  type: object
+                                  properties:
+                                    matchExpressions:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          key:
+                                            type: string
+                                          operator:
+                                            type: string
+                                          values:
+                                            type: array
+                                            items:
+                                              type: string
+                                    matchLabels:
+                                      type: object
+                                namespaces:
+                                  type: array
+                                  items:
+                                    type: string
+                                topologyKey:
+                                  type: string
+                  metrics:
+                    type: object
+                  authentication:
+                    type: object
+                    properties:
+                      certificateAndKey:
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          key:
+                            type: string
+                          secretName:
+                            type: string
+                        required:
+                        - certificate
+                        - key
+                        - secretName
+                      type:
+                        type: string
+                    required:
+                    - certificateAndKey
+                  bootstrapServers:
+                    type: string
+                  config:
+                    type: object
+                  insecureSourceRepository:
+                    type: boolean
+                  logging:
+                    type: object
+                    properties:
+                      loggers:
+                        type: object
+                      name:
+                        type: string
+                      type:
+                        type: string
+                  resources:
+                    type: object
+                    properties:
+                      limits:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                            pattern: '[0-9]+m?$'
+                          memory:
+                            type: string
+                            pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                      requests:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                            pattern: '[0-9]+m?$'
+                          memory:
+                            type: string
+                            pattern: '[0-9]+([kKmMgGtTpPeE]i?)?$'
+                  tls:
+                    type: object
+                    properties:
+                      trustedCertificates:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            certificate:
+                              type: string
+                            secretName:
+                              type: string
+                          required:
+                          - certificate
+                          - secretName
+                    required:
+                    - trustedCertificates
+                  tolerations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        effect:
+                          type: string
+                        key:
+                          type: string
+                        operator:
+                          type: string
+                        tolerationSeconds:
+                          type: integer
+                        value:
+                          type: string
+                required:
+                - bootstrapServers
+      
+    - apiVersion: apiextensions.k8s.io/v1beta1
+      kind: CustomResourceDefinition
+      metadata:
+        name: kafkatopics.kafka.strimzi.io
+        labels:
+          app: strimzi
+      spec:
+        group: kafka.strimzi.io
+        version: v1alpha1
+        scope: Namespaced
+        names:
+          kind: KafkaTopic
+          listKind: KafkaTopicList
+          singular: kafkatopic
+          plural: kafkatopics
+          shortNames:
+          - kt
+        validation:
+          openAPIV3Schema:
+            properties:
+              spec:
+                type: object
+                properties:
+                  partitions:
+                    type: integer
+                    minimum: 1
+                  replicas:
+                    type: integer
+                    minimum: 1
+                    maximum: 32767
+                  config:
+                    type: object
+                  topicName:
+                    type: string
+    - apiVersion: apiextensions.k8s.io/v1beta1
+      kind: CustomResourceDefinition
+      metadata:
+        name: kafkausers.kafka.strimzi.io
+        labels:
+          app: strimzi
+      spec:
+        group: kafka.strimzi.io
+        version: v1alpha1
+        scope: Namespaced
+        names:
+          kind: KafkaUser
+          listKind: KafkaUserList
+          singular: kafkauser
+          plural: kafkausers
+          shortNames:
+          - ku
+        validation:
+          openAPIV3Schema:
+            properties:
+              spec:
+                type: object
+                properties:
+                  authentication:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                  authorization:
+                    type: object
+                    properties:
+                      acls:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            host:
+                              type: string
+                            operation:
+                              type: string
+                              enum:
+                              - Read
+                              - Write
+                              - Create
+                              - Delete
+                              - Alter
+                              - Describe
+                              - ClusterAction
+                              - AlterConfigs
+                              - DescribeConfigs
+                              - IdempotentWrite
+                              - All
+                            resource:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                patternType:
+                                  type: string
+                                  enum:
+                                  - literal
+                                  - prefix
+                                type:
+                                  type: string
+                            type:
+                              type: string
+                              enum:
+                              - allow
+                              - deny
+                          required:
+                          - operation
+                          - resource
+                      type:
+                        type: string
+                    required:
+                    - acls
+                required:
+                - authentication
+    - apiVersion: apiextensions.k8s.io/v1beta1
+      kind: CustomResourceDefinition
+      metadata:
         name: etcdbackups.etcd.database.coreos.com
       spec:
         group: etcd.database.coreos.com
@@ -5699,6 +7715,441 @@ data:
         version: v1
       
   clusterServiceVersions: |-
+    - apiVersion: operators.coreos.com/v1alpha1
+      kind: ClusterServiceVersion
+      metadata:
+        name: amqstreams.v1.0.0.beta
+        namespace: placeholder
+        annotations:
+          alm-examples: '[{"apiVersion":"kafka.strimzi.io/v1alpha1","kind":"Kafka","metadata":{"name":"my-cluster"},"spec":{"kafka":{"replicas":3,"listeners":{"plain":{},"tls":{}},"config":{"offsets.topic.replication.factor":3,"transaction.state.log.replication.factor":3,"transaction.state.log.min.isr":2},"storage":{"type":"ephemeral"}},"zookeeper":{"replicas":3,"storage":{"type":"ephemeral"}},"entityOperator":{"topicOperator":{},"userOperator":{}}}}, {"apiVersion":"kafka.strimzi.io/v1alpha1","kind":"KafkaConnect","metadata":{"name":"my-connect-cluster"},"spec":{"replicas":1,"bootstrapServers":"my-cluster-kafka-bootstrap:9093","tls":{"trustedCertificates":[{"secretName":"my-cluster-cluster-ca-cert","certificate":"ca.crt"}]}}}, {"apiVersion":"kafka.strimzi.io/v1alpha1","kind":"KafkaConnectS2I","metadata":{"name":"my-connect-cluster"},"spec":{"replicas":1,"bootstrapServers":"my-cluster-kafka-bootstrap:9093","tls":{"trustedCertificates":[{"secretName":"my-cluster-cluster-ca-cert","certificate":"ca.crt"}]}}}, {"apiVersion":"kafka.strimzi.io/v1alpha1","kind":"KafkaTopic","metadata":{"name":"my-topic","labels":{"strimzi.io/cluster":"my-cluster"}},"spec":{"partitions":10,"replicas":3,"config":{"retention.ms":604800000,"segment.bytes":1073741824}}}, {"apiVersion":"kafka.strimzi.io/v1alpha1","kind":"KafkaUser","metadata":{"name":"my-user","labels":{"strimzi.io/cluster":"my-cluster"}},"spec":{"authentication":{"type":"tls"},"authorization":{"type":"simple","acls":[{"resource":{"type":"topic","name":"my-topic","patternType":"literal"},"operation":"Read","host":"*"},{"resource":{"type":"topic","name":"my-topic","patternType":"literal"},"operation":"Describe","host":"*"},{"resource":{"type":"group","name":"my-group","patternType":"literal"},"operation":"Read","host":"*"},{"resource":{"type":"topic","name":"my-topic","patternType":"literal"},"operation":"Write","host":"*"},{"resource":{"type":"topic","name":"my-topic","patternType":"literal"},"operation":"Create","host":"*"},{"resource":{"type":"topic","name":"my-topic","patternType":"literal"},"operation":"Describe","host":"*"}]}}}]'
+      spec:
+        displayName: AMQ Streams
+        description: |
+              **Red Hat AMQ Streams** is a massively scalable, distributed, and high performance data streaming platform based on the Apache Kafka project. 
+              AMQ Streams provides an event streaming backbone that allows microservices and other application components to exchange data with extremely high throughput and low latency. 
+              
+              **The core capabilities include**
+              * A pub/sub messaging model, similar to a traditional enterprise messaging system, in which application components publish and consume events to/from an ordered stream
+              * The long term, fault-tolerant storage of events
+              * The ability for a consumer to replay streams of events
+              * The ability to partition topics for horizontal scalability
+      
+              # Before you start
+      
+              1\. Create AMQ Streams Cluster Roles
+              ```
+              $ oc apply -f http://amq.io/amqstreams/rbac.yaml
+              ```
+              2\. Create following bindings
+              ```
+              $ oc adm policy add-cluster-role-to-user strimzi-cluster-operator -z strimzi-cluster-operator --namespace <namespace>
+              $ oc adm policy add-cluster-role-to-user strimzi-kafka-broker -z strimzi-cluster-operator --namespace <namespace>
+              ```
+        keywords: ['amq', 'streams', 'messaging', 'kafka', 'streaming']
+        version: 1.0.0-Beta
+        maturity: beta
+        maintainers:
+        - name: Red Hat, Inc.
+          email: customerservice@redhat.com
+        provider:
+          name: Red Hat, Inc.
+        links:
+        - name: Product Page
+          url: https://access.redhat.com/products/red-hat-amq-streams
+        - name: Documentation
+          url: https://access.redhat.com/documentation/en-us/red_hat_amq_streams/1.0-beta/html-single/using_amq_streams/
+        icon:
+        - base64data: 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
+          mediatype: image/png
+        install:
+          strategy: deployment
+          spec:
+            permissions:
+            - serviceAccountName: strimzi-cluster-operator
+              rules:
+              - apiGroups:
+                - ""
+                resources:
+                - serviceaccounts
+                verbs:
+                - get
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - rbac.authorization.k8s.io
+                resources:
+                - clusterrolebindings
+                - rolebindings
+                verbs:
+                - get
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - ""
+                resources:
+                - configmaps
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - kafka.strimzi.io
+                resources:
+                - kafkas
+                - kafkaconnects
+                - kafkaconnects2is
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - ""
+                resources:
+                - pods
+                verbs:
+                - get
+                - list
+                - watch
+                - delete
+              - apiGroups:
+                - ""
+                resources:
+                - services
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - ""
+                resources:
+                - endpoints
+                verbs:
+                - get
+                - list
+                - watch
+              - apiGroups:
+                - extensions
+                resources:
+                - deployments
+                - deployments/scale
+                - replicasets
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - apps
+                resources:
+                - deployments
+                - deployments/scale
+                - deployments/status
+                - statefulsets
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - ""
+                resources:
+                - events
+                verbs:
+                - create
+              - apiGroups:
+                - extensions
+                resources:
+                - replicationcontrollers
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - apps.openshift.io
+                resources:
+                - deploymentconfigs
+                - deploymentconfigs/scale
+                - deploymentconfigs/status
+                - deploymentconfigs/finalizers
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - build.openshift.io
+                resources:
+                - buildconfigs
+                - builds
+                verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - watch
+                - update
+              - apiGroups:
+                - image.openshift.io
+                resources:
+                - imagestreams
+                - imagestreams/status
+                verbs:
+                - create
+                - delete
+                - get
+                - list
+                - watch
+                - patch
+                - update
+              - apiGroups:
+                - ""
+                resources:
+                - replicationcontrollers
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - ""
+                resources:
+                - secrets
+                verbs:
+                - get
+                - list
+                - create
+                - delete
+                - patch
+                - update
+              - apiGroups:
+                - ""
+                resources:
+                - nodes
+                verbs:
+                - get
+              - apiGroups:
+                - kafka.strimzi.io
+                resources:
+                - kafkatopics
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - patch
+                - update
+                - delete
+              - apiGroups:
+                - ""
+                resources:
+                - events
+                verbs:
+                - create
+              - apiGroups:
+                - kafka.strimzi.io
+                resources:
+                - kafkausers
+                verbs:
+                - get
+                - list
+                - watch
+                - create
+                - patch
+                - update
+                - delete
+            deployments:
+            - name: strimzi-cluster-operator
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    name: strimzi-cluster-operator-alm-owned
+                template:
+                  metadata:
+                    name: strimzi-cluster-operator-alm-owned
+                    labels:
+                      name: strimzi-cluster-operator-alm-owned
+                  spec:
+                    serviceAccountName: strimzi-cluster-operator
+                    containers:
+                    - name: cluster-operator
+                      image: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-clusteroperator-openshift:1.0.0-beta
+                      env:
+                        - name: STRIMZI_NAMESPACE
+                          valueFrom:
+                            fieldRef:
+                              fieldPath: metadata.namespace
+                        - name: STRIMZI_FULL_RECONCILIATION_INTERVAL_MS
+                          value: "120000"
+                        - name: STRIMZI_OPERATION_TIMEOUT_MS
+                          value: "300000"
+                        - name: STRIMZI_DEFAULT_ZOOKEEPER_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-zookeeper-openshift:1.0.0-beta
+                        - name: STRIMZI_DEFAULT_KAFKA_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-kafka-openshift:1.0.0-beta
+                        - name: STRIMZI_DEFAULT_KAFKA_CONNECT_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-kafkaconnect-openshift:1.0.0-beta
+                        - name: STRIMZI_DEFAULT_KAFKA_CONNECT_S2I_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-kafkaconnects2i-openshift:1.0.0-beta
+                        - name: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-topicoperator-openshift:1.0.0-beta
+                        - name: STRIMZI_DEFAULT_USER_OPERATOR_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-useroperator-openshift:1.0.0-beta
+                        - name: STRIMZI_DEFAULT_KAFKA_INIT_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-kafkainit-openshift:1.0.0-beta
+                        - name: STRIMZI_DEFAULT_TLS_SIDECAR_ZOOKEEPER_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-zookeeperstunnel-openshift:1.0.0-beta
+                        - name: STRIMZI_DEFAULT_TLS_SIDECAR_KAFKA_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-kafkastunnel-openshift:1.0.0-beta
+                        - name: STRIMZI_DEFAULT_TLS_SIDECAR_ENTITY_OPERATOR_IMAGE
+                          value: registry.access.redhat.com/amqstreams-1-tech-preview/amqstreams10-entityoperatorstunnel-openshift:1.0.0-beta
+                        - name: STRIMZI_LOG_LEVEL
+                          value: INFO
+        customresourcedefinitions:
+          owned:
+          - name: kafkas.kafka.strimzi.io
+            version: v1alpha1
+            kind: Kafka
+            displayName: Kafka
+            description: Represents a Kafka cluster
+            specDescriptors:
+              - description: The desired number of Kafka brokers.
+                displayName: Kafka Brokers
+                path: kafka.replicas
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
+              - description: The type of storage used by Kafka brokers
+                displayName: Kafka storage
+                path: kafka.storage.type
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
+              - description: Limits describes the minimum/maximum amount of compute resources required/allowed
+                displayName: Kafka Resource Requirements
+                path: kafka.resources
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
+              - description: The desired number of Zookeeper nodes.
+                displayName: Zookeeper Nodes
+                path: zookeeper.replicas
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
+              - description: The type of storage used by Zookeeper nodes
+                displayName: Zookeeper storage
+                path: zookeeper.storage.type
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
+              - description: Limits describes the minimum/maximum amount of compute resources required/allowed
+                displayName: Zookeeper Resource Requirements
+                path: zookeeper.resources
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
+          - name: kafkaconnects.kafka.strimzi.io
+            version: v1alpha1
+            kind: KafkaConnect
+            displayName: Kafka Connect
+            description: Represents a Kafka Connect cluster
+            specDescriptors:
+              - description: The desired number of Kafka Connect nodes.
+                displayName: Connect nodes
+                path: replicas
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:podCount'
+              - description: The address of the bootstrap server
+                displayName: Bootstrap server
+                path: bootstrapServers
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
+              - description: Limits describes the minimum/maximum amount of compute resources required/allowed
+                displayName: Resource Requirements
+                path: resources
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
+          - name: kafkaconnects2is.kafka.strimzi.io
+            version: v1alpha1
+            kind: KafkaConnectS2I
+            displayName: Kafka Connect S2I
+            description: Represents a Kafka Connect cluster with Source 2 Image support
+            specDescriptors:
+              - description: The desired number of Kafka Connect nodes.
+                displayName: Connect nodes
+                path: replicas
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:podCount'
+              - description: The address of the bootstrap server
+                displayName: Bootstrap server
+                path: bootstrapServers
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
+              - description: Limits describes the minimum/maximum amount of compute resources required/allowed
+                displayName: Resource Requirements
+                path: resources
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
+          - name: kafkatopics.kafka.strimzi.io
+            version: v1alpha1
+            kind: KafkaTopic
+            displayName: Kafka Topic
+            description: Represents a topic inside a Kafka cluster
+            specDescriptors:
+              - description: The number of partitions
+                displayName: Partitions
+                path: partitions
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
+              - description: The number of replicas
+                displayName: Replication factor
+                path: replicas
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
+          - name: kafkausers.kafka.strimzi.io
+            version: v1alpha1
+            kind: KafkaUser
+            displayName: Kafka User
+            description: Represents a user inside a Kafka cluster
+            specDescriptors:
+              - description: Authentication type
+                displayName: Authentication type
+                path: authentication.type
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
+              - description: Authorization type
+                displayName: Authorization type
+                path: authorization.type
+                x-descriptors:
+                  - 'urn:alm:descriptor:com.tectonic.ui:label'
     - #! validate-crd: ./deploy/chart/templates/03-clusterserviceversion.crd.yaml
       #! parse-kind: ClusterServiceVersion
       apiVersion: operators.coreos.com/v1alpha1
@@ -7223,6 +9674,12 @@ data:
               - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
       
   packages: |-
+    - #! package-manifest: ./deploy/chart/catalog_resources/rh-operators/amq-streams.v1.0.0-clusterserviceversion
+      packageName: amq-streams
+      channels:
+      - name: preview
+        currentCSV: amqstreams.v1.0.0.beta
+      
     - #! package-manifest: ./deploy/chart/catalog_resources/rh-operators/etcdoperator.v0.9.2.clusterserviceversion.yaml
       packageName: etcd
       channels:
@@ -7232,7 +9689,7 @@ data:
     - #! package-manifest: ./deploy/chart/catalog_resources/rh-operators/prometheusoperator.0.22.2.clusterserviceversion.yaml
       packageName: prometheus
       channels:
-      - name: alpha
+      - name: preview
         currentCSV: prometheusoperator.0.22.2
       
 
