@@ -53,9 +53,9 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 - `openshift_logging_fluentd_use_journal`: *DEPRECATED - DO NOT USE* Fluentd will automatically detect whether or not Docker is using the journald log driver.
 - `openshift_logging_fluentd_journal_read_from_head`: If empty, Fluentd will use its internal default, which is false.
 - `openshift_logging_fluentd_hosts`: List of nodes that should be labeled for Fluentd to be deployed to. Defaults to ['--all'].
-- `openshift_logging_fluentd_buffer_queue_limit`: Buffer queue limit for Fluentd. Defaults to 1024.
-- `openshift_logging_fluentd_buffer_size_limit`: Buffer chunk limit for Fluentd. Defaults to 1m.
-- `openshift_logging_fluentd_file_buffer_limit`: Fluentd will set the value to the file buffer limit.  Defaults to '1Gi' per destination.
+- `openshift_logging_fluentd_buffer_queue_limit`: Buffer queue limit for Fluentd. Defaults to 32.
+- `openshift_logging_fluentd_buffer_size_limit`: Buffer chunk limit for Fluentd. Defaults to 8m.
+- `openshift_logging_fluentd_file_buffer_limit`: Fluentd will set the value to the file buffer limit.  Defaults to '256Mi' per destination.
 
 - `openshift_logging_fluentd_audit_container_engine`: When `openshift_logging_fluentd_audit_container_engine` is set to `True`, the audit log of the container engine will be collected and stored in ES.
 - `openshift_logging_fluentd_audit_file`: Location of audit log file. The default is `/var/log/audit/audit.log`
