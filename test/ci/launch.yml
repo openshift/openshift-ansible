@@ -76,5 +76,7 @@
     - wait_for_connection: {}
     - setup: {}
 
+
+- import_playbook: ../../playbooks/openshift-node/network_manager.yml
 - import_playbook: ../../playbooks/prerequisites.yml
 - import_playbook: ../../playbooks/deploy_cluster.yml
