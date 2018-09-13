@@ -38,8 +38,10 @@
   until: result is succeeded
   vars:
     crio_pkgs:
-      - "cri-o"
-      - "cri-tools"
+      - cri-o
+      - cri-tools
+      - atomic
+      - skopeo
 
 - name: Remove CRI-O default configuration files
   file:
