@@ -17,11 +17,11 @@
                 "annotations": {
                     "openshift.io/display-name": "Red Hat OpenJDK 8",
                     "openshift.io/provider-display-name": "Red Hat, Inc.",
-                    "version": "1.4.14"
+                    "version": "1.4.16"
                 }
             },
             "labels": {
-                "xpaas": "1.4.14"
+                "xpaas": "1.4.16"
             },
             "spec": {
                 "tags": [
@@ -124,6 +124,26 @@
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/redhat-openjdk-18/openjdk18-openshift:1.4"
                         }
+                    },
+                    {
+                        "name": "1.5",
+                        "annotations": {
+                            "openshift.io/display-name": "Red Hat OpenJDK 8",
+                            "description": "Build and run Java applications using Maven and OpenJDK 8.",
+                            "iconClass": "icon-rh-openjdk",
+                            "tags": "builder,java,openjdk,hidden",
+                            "supports": "java:8",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts",
+                            "sampleContextDir": "undertow-servlet",
+                            "version": "1.5"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/redhat-openjdk-18/openjdk18-openshift:1.5"
+                        }
                     }
                 ]
             }
@@ -136,11 +156,11 @@
                 "annotations": {
                     "openshift.io/display-name": "Red Hat OpenJDK 8",
                     "openshift.io/provider-display-name": "Red Hat, Inc.",
-                    "version": "1.4.14"
+                    "version": "1.4.16"
                 }
             },
             "labels": {
-                "xpaas": "1.4.14"
+                "xpaas": "1.4.16"
             },
             "spec": {
                 "tags": [
