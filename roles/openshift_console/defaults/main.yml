@@ -23,6 +23,6 @@ l_openshift_console_branding_dict:
 openshift_console_branding: "{{ l_openshift_console_branding_dict[openshift_deployment_type] }}"
 
 l_openshift_console_documentation_url_dict:
-  origin: 'https://docs.okd.io/3.11/'
-  openshift-enterprise: 'https://docs.openshift.com/container-platform/3.11/'
+  origin: 'https://docs.okd.io/4.0/'
+  openshift-enterprise: 'https://docs.openshift.com/container-platform/4.0/'
 openshift_console_documentation_base_url: "{{ l_openshift_console_documentation_url_dict[openshift_deployment_type] }}"
