@@ -35,13 +35,16 @@
         name: "{{ pkg_list | join(',') }}"
         state: present
       vars:
-        pkg_list:
+        pkg_list_temp:
         - iproute
         - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
         - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
-        - "{{ 'python-ipaddress' if ansible_distribution != 'Fedora' else '' }}"
         - libsemanage-python
         - yum-utils
         - "{{ 'python3-docker' if ansible_distribution == 'Fedora' else 'python-docker' }}"
+        pkg_list_non_fedora:
+        - 'python-ipaddress'
+        pkg_list_use_non_fedora: "{{ ansible_distribution != 'Fedora' | bool }}"
+        pkg_list: "{{ pkg_list_non_fedora | ternary(pkg_list_non_fedora, []) + pkg_list_temp }}"
       register: result
       until: result is succeeded
