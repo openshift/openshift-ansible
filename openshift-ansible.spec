@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.1
+Version:        3.11.2
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,64 @@ fi
 
 
 %changelog
+* Wed Sep 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.2-1
+- Update openshift ca redeploy to use correct node client-ca
+  (rteague@redhat.com)
+- Annotate nodes with md5sum of the applied config (vrutkovs@redhat.com)
+- reducing /sys/fs/selinux/avc/cache_threshold to 8192 instead of 65535
+  (elvirkuric@gmail.com)
+- Add a wait for aggregated APIs when restarting control plane
+  (sdodson@redhat.com)
+- Move controller args back to template (hekumar@redhat.com)
+- fix arguments to controller (hekumar@redhat.com)
+- Update recyler to lsm_registry_url (hekumar@redhat.com)
+- Use oreg_url rather than hardcoding path (hekumar@redhat.com)
+- Provide version information (hekumar@redhat.com)
+- Add a pod template for recycler pod (hekumar@redhat.com)
+- Add playbook to migrate node imageConfig.format (mgugino@redhat.com)
+- docker_creds: rename image_name to test_image (sdodson@redhat.com)
+- Retry our etcd health check (sdodson@redhat.com)
+- Set gquota on slash filesystem (mazzystr@gmail.com)
+- Revert "Don't fetch provider openshift_facts if openshift_cloud_provider_kind
+  is not set" (roignac@gmail.com)
+- Fixes: BZ1618547 disable keep ns on error in ASB to prevent resource
+  starvation (jmontleo@redhat.com)
+- Fix kuryr support for custom OpenStack network and subnet
+  (ltomasbo@redhat.com)
+- Prepare to split openshift-sdn out of the openshift binary
+  (ccoleman@redhat.com)
+- SDN check: Ignore errors from `oc version` (miciah.masters@gmail.com)
+- GlusterFS: Tweak groups for external config (jarrpa@redhat.com)
+- GlusterFS: Fix heketi_pod check (jarrpa@redhat.com)
+- spec: remove roles/openshift_examples/lates symlink (vrutkovs@redhat.com)
+- olm: add openshift_facts dependency (sdodson@redhat.com)
+- Add oc_get_nodes to debug csr output (mgugino@redhat.com)
+- Check for migrated status (vrutkovs@redhat.com)
+- Run on first etcd only (vrutkovs@redhat.com)
+- Add playbooks to remove etcdv2 data (vrutkovs@redhat.com)
+- fix ca cert deploy for 3.10. addresses
+  https://bugzilla.redhat.com/show_bug.cgi?id=1585978 (judd@newgoliath.com)
+- Revert ensure gquota set on slash filesystem (mazzystr@gmail.com)
+- Don't fetch provider facts if openshift_cloud_provider_kind is not set
+  (vrutkovs@redhat.com)
+- Remove configmap check during upgrades (rteague@redhat.com)
+- Remove unused openshift_openstack_app_floating_ip (tomas@sedovic.cz)
+- Allow custom OpenStack network and subnet (tomas@sedovic.cz)
+- Fixup PR #8671 (tomas@sedovic.cz)
+- Squash PR 8671 (i.am.emilio@gmail.com)
+- Add extra debug info to csr module (mgugino@redhat.com)
+- Set etcd facts necessary for etcd scaleup (rteague@redhat.com)
+- cluster-monitoring: Fix regex_replace to remove image tag
+  (fbranczyk@gmail.com)
+- Formatting fixes on olm and catalog operators (cordell.evan@gmail.com)
+- Update rh-operators catalog to latest (cordell.evan@gmail.com)
+- Update OLM CRDs to latest (cordell.evan@gmail.com)
+- Filter openshift_cloudprovider_openstack_blockstorage_ignore_volume_az to
+  bool (alberto.rodriguez.peon@cern.ch)
+- Use true/false instead of yes/no (alberto.rodriguez.peon@cern.ch)
+- Allow to configure BlockStorage.ignore-volume-az for Openstack Cloud Provider
+  (alberto.rodriguez.peon@cern.ch)
+
 * Tue Sep 11 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.1-1
 - fix alertmanager example in OLM prometheus operator (cordell.evan@gmail.com)
 - cluster-monitoring: Remove version tag for passing image repos
