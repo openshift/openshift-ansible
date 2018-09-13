@@ -72,7 +72,7 @@
   retries: 60
   delay: 10
 
-- name: Wait for sync DS to set annotations on all nodes
+- name: Wait for sync DS to set annotations on master nodes
   oc_obj:
     state: list
     kind: node
@@ -83,8 +83,9 @@
     - node_status.results.results is defined
     - node_status.results.results | length > 0
     - node_status.results.results[0]['items']
-     | map(attribute='metadata.annotations') | map('list') | flatten
-     | select('match', '[\"node.openshift.io/md5sum\"]') | list | length == node_status.results.results | length
+        | map(attribute='metadata.annotations') | map('list') | flatten
+        | select('match', '[\"node.openshift.io/md5sum\"]') | list | length ==
+      node_status.results.results[0]['items'] | length
   retries: 60
   delay: 10
 
