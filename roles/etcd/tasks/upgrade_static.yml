@@ -7,6 +7,10 @@
 
 - name: Verify cluster is healthy pre-upgrade
   command: "{{ etcdctlv2 }} cluster-health"
+  register: cluster_health
+  retries: 30
+  delay: 6
+  until: cluster_health.rc == 0
 
 - name: Check for old etcd service files
   stat:
