@@ -1,5 +1,8 @@
 ---
 vm_prefix: "ci_test"
+#aws_use_auto_terminator is set to True by default, as rh-dev account doesn't have permission
+# to terminate instances. These should be stopped and renamed to include 'terminate' instead
+#aws_use_auto_terminator: false
 
 type: aws
 aws_user: "ec2-user"
