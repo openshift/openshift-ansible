@@ -105,12 +105,11 @@ class CSRapprove(object):
             self.module.fail_json(**self.result)
         return stdout
 
-    def get_ready_nodes(self):
-        '''Get list of nodes currently ready vi oc'''
+    def get_nodes(self):
+        '''Get all nodes via oc get nodes -ojson'''
         # json output is necessary for consistency here.
         command = "{} {} get nodes -ojson".format(self.oc_bin, self.oc_conf)
         stdout = self.run_command(command)
-
         try:
             data = json.loads(stdout)
         except JSONDecodeError as err:
@@ -119,14 +118,7 @@ class CSRapprove(object):
             self.result['state'] = 'unknown'
             self.module.fail_json(**self.result)
         self.result['oc_get_nodes'] = data
-        ready_nodes = []
-        for node in data['items']:
-            if node.get('status') and node['status'].get('conditions'):
-                for condition in node['status']['conditions']:
-                    # "True" is a string here, not a boolean.
-                    if condition['type'] == "Ready" and condition['status'] == 'True':
-                        ready_nodes.append(node['metadata']['name'])
-        return ready_nodes
+        return [node['metadata']['name'] for node in data['items']]
 
     def get_csrs(self):
         '''Retrieve csrs from cluster using oc get csr -ojson'''
@@ -252,10 +244,12 @@ class CSRapprove(object):
 
     def run(self):
         '''execute the csr approval process'''
-        nodes_ready = self.get_ready_nodes()
-        # don't need to check nodes that are already ready.
-        client_not_ready_nodes = [item for item in self.node_list
-                                  if item not in nodes_ready]
+        all_nodes = self.get_nodes()
+        # don't need to check nodes that have already joined the cluster because
+        # client csr needs to be approved for now to show in output of
+        # oc get nodes.
+        not_found_nodes = [item for item in self.node_list
+                           if item not in all_nodes]
 
         # Get all csrs, no good way to filter on pending.
         client_csrs = self.get_csrs()
@@ -263,11 +257,13 @@ class CSRapprove(object):
         client_csr_dict = self.process_csrs(client_csrs, "client")
         self.result['client_csrs'] = client_csr_dict
 
-        # This method is fail-happy and expects all non-Ready nodes have available
+        # This method is fail-happy and expects all not found nodes have available
         # csrs.  Handle failure for this method via ansible retry/until.
-        self.confirm_needed_requests_present(client_not_ready_nodes,
+        self.confirm_needed_requests_present(not_found_nodes,
                                              client_csr_dict)
-
+        # If for some reason a node is found in oc get nodes but it still needs
+        # a client csr approved, this method will approve all outstanding
+        # client csrs for any node in our self.node_list.
         self.approve_csrs(client_csr_dict, 'client')
 
         # # Server Cert Section # #
