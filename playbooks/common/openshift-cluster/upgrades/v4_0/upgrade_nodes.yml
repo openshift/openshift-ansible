@@ -12,9 +12,9 @@
   hosts: oo_all_hosts
   tasks:
   - set_fact:
-      openshift_upgrade_target: '3.11'
-      openshift_upgrade_min: '3.10'
-      openshift_release: '3.11'
+      openshift_upgrade_target: '4.0'
+      openshift_upgrade_min: '3.11'
+      openshift_release: '4.0'
 
 - import_playbook: ../pre/config.yml
   vars:

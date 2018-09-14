@@ -18,13 +18,13 @@
     l_base_packages_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_upgrade_cert_check_hosts: "oo_masters_to_config:oo_etcd_to_config"
 
-- name: Configure the upgrade target for the common upgrade tasks 3.11
+- name: Configure the upgrade target for the common upgrade tasks 4.0
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
   tasks:
   - set_fact:
-      openshift_upgrade_target: '3.11'
-      openshift_upgrade_min: '3.10'
-      openshift_release: '3.11'
+      openshift_upgrade_target: '4.0'
+      openshift_upgrade_min: '3.11'
+      openshift_release: '4.0'
 
 - import_playbook: ../pre/config.yml
   # These vars a meant to exclude oo_nodes from plays that would otherwise include
@@ -87,7 +87,7 @@
 
 - import_playbook: ../upgrade_control_plane.yml
   vars:
-    openshift_release: '3.11'
+    openshift_release: '4.0'
 
 - name: Update master nodes
   hosts: oo_masters
@@ -116,16 +116,3 @@
   - import_role:
       name: openshift_web_console
       tasks_from: remove_old_asset_config.yml
-
-# This is a one time migration. No need to save it in the 3.11.
-# https://bugzilla.redhat.com/show_bug.cgi?id=1565736
-- hosts: oo_first_master
-  tasks:
-  - import_role:
-      name: openshift_hosted
-      tasks_from: registry_service_account.yml
-    when: openshift_hosted_manage_registry | default(True) | bool
-  - import_role:
-      name: openshift_hosted
-      tasks_from: remove_legacy_env_variables.yml
-    when: openshift_hosted_manage_registry | default(True) | bool
