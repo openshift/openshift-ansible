@@ -46,8 +46,8 @@ class OCGroupTest(unittest.TestCase):
         }'''
 
         mock_run.side_effect = [
-            (1, '', 'Error from server: groups "acme" not found'),
-            (1, '', 'Error from server: groups "acme" not found'),
+            (1, '', 'Error from server: groups.user.openshift.io "acme" not found'),
+            (1, '', 'Error from server: groups.user.openshift.io "acme" not found'),
             (0, '', ''),
             (0, group, ''),
         ]
@@ -70,7 +70,7 @@ class OCGroupTest(unittest.TestCase):
         params['name'] = 'noexist'
 
         mock_run.side_effect = [
-            (1, '', 'Error from server: groups "acme" not found'),
+            (1, '', 'Error from server: groups.user.openshift.io "acme" not found'),
         ]
 
         mock_tmpfile_copy.side_effect = [
