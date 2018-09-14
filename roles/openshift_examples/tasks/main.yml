@@ -90,6 +90,8 @@
   register: oex_import_rhel_streams
   failed_when: "'already exists' not in oex_import_rhel_streams.stderr and oex_import_rhel_streams.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_rhel_streams is succeeded
 
 - name: Import Centos Image streams
   command: >
@@ -100,6 +102,8 @@
   register: oex_import_centos_streams
   failed_when: "'already exists' not in oex_import_centos_streams.stderr and oex_import_centos_streams.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_centos_streams is succeeded
 
 - name: Import db templates
   command: >
@@ -108,6 +112,8 @@
   register: oex_import_db_templates
   failed_when: "'already exists' not in oex_import_db_templates.stderr and oex_import_db_templates.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_db_templates is succeeded
 
 - name: Remove defunct quickstart template files
   file:
@@ -137,6 +143,8 @@
   register: oex_import_quickstarts
   failed_when: "'already exists' not in oex_import_quickstarts.stderr and oex_import_quickstarts.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_quickstarts is succeeded
 
 - name: Remove old xPaas template files
   file:
@@ -160,6 +168,8 @@
   register: oex_import_xpaas_streams
   failed_when: "'already exists' not in oex_import_xpaas_streams.stderr and oex_import_xpaas_streams.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_xpaas_streams is succeeded
 
 - name: Import xPaas templates
   command: >
@@ -168,3 +178,5 @@
   register: oex_import_xpaas_templates
   failed_when: "'already exists' not in oex_import_xpaas_templates.stderr and oex_import_xpaas_templates.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_xpaas_templates is succeeded
