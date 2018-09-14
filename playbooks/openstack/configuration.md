@@ -1017,3 +1017,81 @@ $ ansible-playbook --user openshift \
   -i inventory \
   openshift-ansible/playbooks/openstack/openshift-cluster/install.yml
 ```
+
+
+## Opening Optional Ports
+
+Certain features of Openshift that are not part of the default configuration may require ports to be opened. The following changes to openshift-ansible/roles/openshift_openstack/defaults/main.yml are needed to enable these features. This section assumes that these services were already properly enabled and configured in OSEv3.yml or all.yml, and will not include details pertaining to them.
+
+### Metrics
+If you want to enable metrics in your openshift cluster, then port 10255 must be open on all nodes in the cluster. The following code should be added to openshift_openstack_node_secgroup_rules in main.yml.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 10255
+    port_range_max: 10255
+  - direction: ingress
+    protocol: udp
+    port_range_min: 10255
+    port_range_max: 10255
+```
+
+### Prometheus
+The following code to open ports for prometheus should also be added to the openshift_openstack_node_secgroup_rules section of main.yml.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 9100
+    port_range_max: 9100
+```
+    
+### Elastic Search
+Add this to the openshift_openstack_node_secgroup_rules section of main.yml to enable elastic search.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 9200
+    port_range_max: 9200
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 9300
+    port_range_max: 9300
+```
+
+### Using Pacemaker HA
+If you choose to use Pacemaker to manage the HA system on the master nodes, the following changes should be made to the openshift_openstack_master_secgroup_rules section.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 2224
+    port_range_max: 2224
+  - direction: ingress
+    protocol: udp
+    port_range_min: 5404
+    port_range_max: 5405
+```
+
+The following Documentation may prove helpful as well:
+- https://docs.openshift.com/enterprise/3.1/architecture/infrastructure_components/kubernetes_infrastructure.html#high-availability-masters
+- https://docs.openshift.com/enterprise/3.1/install_config/upgrading/pacemaker_to_native_ha.html
+
+### Template Router
+If you are running a template router to expose your statistics, there are a few changes you need to make. First, add this to main.yml.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 1936
+    port_range_max: 1936
+```
+
+You may have to update your iptable rules to make this work with the following command:
+
+```
+iptables -A OS_FIREWALL_ALLOW -p tcp -m state --state NEW -m tcp \
+    --dport 1936 -j ACCEPT
+```
