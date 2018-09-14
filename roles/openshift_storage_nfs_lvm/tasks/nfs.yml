@@ -21,8 +21,5 @@
   lineinfile: dest=/etc/exports
               regexp="^{{ osnl_mount_dir }}/{{ item }} "
               line="{{ osnl_mount_dir }}/{{ item }} {{osnl_nfs_export_options}}"
-  with_sequence:
-    start: "{{osnl_volume_num_start}}"
-    count: "{{osnl_number_of_volumes}}"
-    format: "{{osnl_volume_prefix}}{{osnl_volume_size}}g%04d"
+  with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d
   notify: restart nfs
