@@ -84,11 +84,11 @@
   yedit:
     src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: "kubernetesMasterConfig.controllerArguments.pv-recycler-pod-template-filepath-nfs"
-    value: "/etc/origin/master/recycler_pod.yaml"
-    value_type: list
+    value:
+    - /etc/origin/master/recycler_pod.yaml
 - name: Update controller-manager to have hostpath recycler pod
   yedit:
     src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: "kubernetesMasterConfig.controllerArguments.pv-recycler-pod-template-filepath-hostpath"
-    value: "/etc/origin/master/recycler_pod.yaml"
-    value_type: list
+    value:
+    - /etc/origin/master/recycler_pod.yaml
