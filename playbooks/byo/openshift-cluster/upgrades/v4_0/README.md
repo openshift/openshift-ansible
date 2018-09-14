@@ -16,5 +16,5 @@ This playbook currently performs the following steps.
 ## Usage
 
 ```
-ansible-playbook -i ~/ansible-inventory openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v3_11/upgrade.yml
+ansible-playbook -i ~/ansible-inventory openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v4_0/upgrade.yml
 ```
