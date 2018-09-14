@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.5
+Version:        3.11.6
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,9 @@ fi
 
 
 %changelog
+* Fri Sep 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.6-1
+- 
+
 * Thu Sep 13 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.5-1
 - certificate_expiry: gather facts so ansible_date_time is defined
   (sdodson@redhat.com)
