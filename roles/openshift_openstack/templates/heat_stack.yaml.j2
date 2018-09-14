@@ -1098,7 +1098,7 @@ resources:
             - { get_resource: cns-secgrp }
 {% endif %}
 {% if openshift_use_kuryr|default(false)|bool %}
-         pod_secgrp:
+          pod_secgrp:
             - { get_resource: pod_access_sg }
 {% endif %}
 {% endif %}
