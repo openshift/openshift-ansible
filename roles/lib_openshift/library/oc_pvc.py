@@ -1525,7 +1525,7 @@ class PersistentVolumeClaimConfig(object):
         self.data['spec']['resources']['requests'] = {}
         self.data['spec']['resources']['requests']['storage'] = self.vol_capacity
 
-        if self.storage_class_name:
+        if self.storage_class_name or self.storage_class_name == '':
             self.data['spec']['storageClassName'] = self.storage_class_name
 
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
