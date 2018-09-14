@@ -64,7 +64,7 @@
 
 - name: Create imagestream import secrets for any additional registries
   command: >
-      {{ openshift_client_binary }} create secret docker-registry imagestreamsecret
+      {{ openshift_client_binary }} create secret docker-registry o-a-{{ item.host | hash('md5') }}
       --docker-server={{ item.host }} --docker-username={{ item.user }}
       --docker-email=openshift@openshift.com --docker-password={{ item.password }}
       --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift
