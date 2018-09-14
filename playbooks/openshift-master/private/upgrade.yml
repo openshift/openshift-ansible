@@ -213,6 +213,13 @@
       msg: "Upgrade cannot continue. The following masters did not finish reconciling: {{ reconcile_failed | join(',') }}"
     when: reconcile_failed | length > 0
 
+- name: Update sync DS
+  hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: openshift_node_group
+      tasks_from: sync.yml
+
 - name: Drain and upgrade master nodes
   hosts: oo_masters_to_config:&oo_nodes_to_upgrade
   # This var must be set with -e on invocation, as it is not a per-host inventory var
@@ -228,10 +235,3 @@
       tasks_from: config.yml
     vars:
       openshift_master_host: "{{ groups.oo_first_master.0 }}"
-
-- name: Update sync DS
-  hosts: oo_first_master
-  tasks:
-  - import_role:
-      name: openshift_node_group
-      tasks_from: sync.yml
