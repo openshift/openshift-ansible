@@ -79,7 +79,8 @@
       regexp: "{{ item.regexp }}"
       line: "{{ item.line }}"
     with_items:
-    - { regexp: '^ResourceDisk\.Format=', line: 'ResourceDisk.Format=n' }
+    - { regexp: 'ResourceDisk\.Format=', line: 'ResourceDisk.Format=n' }
+    - { regexp: 'AutoUpdate\.Enabled=', line: 'AutoUpdate.Enabled=n' }
 
   - name: persist oreg_url
     copy:
