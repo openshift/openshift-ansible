@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.6
+Version:        3.11.7
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,16 @@ fi
 
 
 %changelog
+* Sun Sep 16 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.7-1
+- Add retries around api service discovery (sdodson@redhat.com)
+- Hash the registry hostname to generate unique secret names
+  (sdodson@redhat.com)
+- Ensure that recycler pod definition is deployed during upgrade
+  (sdodson@redhat.com)
+- sync: remove existing pods if any present (vrutkovs@redhat.com)
+- Sync DS should be updated before draining masters (vrutkovs@redhat.com)
+- Collect provider facts only if cloudprovider is set (vrutkovs@redhat.com)
+
 * Fri Sep 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.6-1
 - 
 
