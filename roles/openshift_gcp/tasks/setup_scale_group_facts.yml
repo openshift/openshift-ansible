@@ -6,27 +6,12 @@
     openshift_node_group_name: "{{ openshift_gcp_node_group_mapping['compute'] }}"
   with_items: "{{ groups['tag_ocp-node'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
 
-- name: Add bootstrap node instances
-  add_host:
-    name: "{{ hostvars[item].gce_name }}"
-    groups: bootstrap_nodes
-    openshift_is_bootstrapped: True
-    openshift_node_group_name: "{{ openshift_gcp_node_group_mapping['compute'] }}"
-  with_items: "{{ groups['tag_ocp-node'] | default([]) | intersect(groups['tag_ocp-bootstrap'] | default([])) }}"
-
 - name: Add bootstrap node instances as nodes
   add_host:
     name: "{{ item }}"
     groups: nodes, new_nodes
-    openshift_is_bootstrapped: True
   with_items: "{{ groups['tag_ocp-bootstrap'] | default([]) }}"
   when: all_nodes | default(False)
-
-- name: Add a master to the primary masters group
-  add_host:
-    name: "{{ hostvars[item].gce_name }}"
-    groups: primary_master
-  with_items: "{{ groups['tag_ocp-master'].0 }}"
 
 - name: Add non-bootstrapping master node instances to node group
   add_host:

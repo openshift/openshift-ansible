@@ -27,11 +27,11 @@ class LookupModule(LookupBase):
                 # pylint: disable=line-too-long
                 raise AnsibleError("Either OpenShift needs to be installed or openshift_release needs to be specified")
 
-        if short_version not in ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11', 'latest']:
+        if short_version not in ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11', '4.0', '4.1', '4.2', 'latest']:
             raise AnsibleError("Unknown short_version %s" % short_version)
 
         if short_version == 'latest':
-            short_version = '3.11'
+            short_version = '4.0'
 
         # Predicates ordered according to OpenShift Origin source:
         # origin/vendor/k8s.io/kubernetes/plugin/pkg/scheduler/algorithmprovider/defaults/defaults.go
@@ -64,7 +64,7 @@ class LookupModule(LookupBase):
                 {'name': 'NoVolumeNodeConflict'},
             ])
 
-        if short_version in ['3.9', '3.10', '3.11']:
+        if short_version in ['3.9', '3.10', '3.11', '4.0', '4.1', '4.2']:
             predicates.extend([
                 {'name': 'NoVolumeZoneConflict'},
                 {'name': 'MaxEBSVolumeCount'},

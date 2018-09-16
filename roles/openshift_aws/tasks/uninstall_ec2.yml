@@ -1,0 +1,10 @@
+---
+- name: delete instance(s)
+  ec2:
+    instance_ids: "{{ item }}"
+    region: "{{ openshift_aws_region }}"
+    state: absent
+    wait: yes
+  delay: 3
+  retries: 3
+  with_items: "{{ instancesout.instances | list | map(attribute='instance_id') | list }}"

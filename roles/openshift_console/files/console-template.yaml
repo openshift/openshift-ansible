@@ -20,6 +20,9 @@ parameters:
 - name: CONSOLE_HOSTNAME
   value: console.router.default.svc.cluster.local
   required: true
+- name: TLS_CERT
+- name: TLS_KEY
+- name: TLS_CA_CERT
 - name: NODE_SELECTOR
   value: "{}"
   required: true
@@ -50,6 +53,7 @@ objects:
     strategy:
       type: RollingUpdate
     progressDeadlineSeconds: 600
+    replicas: "${{REPLICA_COUNT}}"
     template:
       metadata:
         labels:
@@ -110,7 +114,6 @@ objects:
           - mountPath: /var/console-config
             name: console-config
         dnsPolicy: ClusterFirst
-        replicas: "${{REPLICA_COUNT}}"
         restartPolicy: Always
         terminationGracePeriodSeconds: 30
         volumes:
@@ -148,7 +151,6 @@ objects:
     labels:
       app: openshift-console
   stringData:
-    clientID: ${OAUTH_CLIENT_ID}
     clientSecret: ${OAUTH_SECRET}
 
 # to be able to assign powers to the process
@@ -197,6 +199,9 @@ objects:
     tls:
       insecureEdgeTerminationPolicy: Redirect
       termination: reencrypt
+      certificate: ${TLS_CERT}
+      key: ${TLS_KEY}
+      caCertificate: ${TLS_CA_CERT}
 
 # to let users log in
 - apiVersion: oauth.openshift.io/v1

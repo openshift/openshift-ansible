@@ -6,26 +6,22 @@
   - (openshift_aws_ami == '' and openshift_aws_node_group.group not in openshift_aws_ami_map) or (openshift_aws_node_group.group in openshift_aws_ami_map and openshift_aws_ami_map[openshift_aws_node_group.group] == '')
   block:
   - name: fetch recently created AMI
-    ec2_ami_find:
+    ec2_ami_facts:
       region: "{{ openshift_aws_region }}"
-      sort: creationDate
-      sort_order: descending
-      name: "{{ openshift_aws_ami_name }}*"
-      ami_tags: "{{ openshift_aws_ami_tags }}"
-      no_result_action: fail
+      filters: "{ 'name': '{{ openshift_aws_ami_name }}*',
+             {%- for key in openshift_aws_ami_tags -%}
+                 'tag:{{ key }}': '{{ openshift_aws_ami_tags[key] }}',
+             {%- endfor -%} }"
     register: amiout
+    failed_when: "amiout.images|length == 0"
 
   - name: Set the openshift_aws_ami
     set_fact:
-      openshift_aws_ami: "{{ amiout.results[0].ami_id }}"
+      openshift_aws_ami: "{{ ( amiout.images | sort(attribute='creation_date') | map(attribute='image_id') | reverse | list )[0] }}"
     when:
-    - "'results' in amiout"
-    - amiout.results|length > 0
+    - "'images' in amiout"
+    - amiout.images|length > 0
 
-# Need to set epoch time in one place to use for launch_config and scale_group
-- set_fact:
-    l_epoch_time: "{{ ansible_date_time.epoch }}"
-#
 # query asg's and determine if we need to create the others.
 # if we find more than 1 for each type, and this isn't an upgrade, then exit
 - name: query all asg's for this cluster
@@ -70,6 +66,18 @@
   when:
   - openshift_aws_node_group_upgrade | default(False)
   - asgs.results|length == 2
+
+- set_fact:
+    l_instance_tags: "{{ openshift_aws_node_group_config_tags
+    | combine(openshift_aws_node_group.tags)
+    | combine({'deployment_serial': l_deployment_serial, 'ami': openshift_aws_ami_map[openshift_aws_node_group.group] | default(openshift_aws_ami)})
+    | combine({'openshift-node-group-config': openshift_aws_node_group.node_group_config | default('unset') }) }}"
+    l_node_group_name: "{{ openshift_aws_node_group.name }} {{ l_deployment_serial }}"
+
+- name: Set scale group instances autonaming
+  set_fact:
+    l_instance_tags: "{{ l_instance_tags | combine({'Name': l_node_group_name }) }}"
+  when: openshift_aws_autoname_scale_group_instances | default(false)
 
 - when:
   - openshift_aws_create_iam_role

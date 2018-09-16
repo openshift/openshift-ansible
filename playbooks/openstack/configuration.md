@@ -12,15 +12,17 @@ Environment variables may also be used.
 
 * [OpenStack Configuration](#openstack-configuration)
 * [OpenShift Configuration](#openshift-configuration)
+* [OpenStack Cloud Provider Configuration](#openstack-cloud-provider-configuration)
+* [OpenStack With SSL Configuration](#openstack-with-ssl-configuration)
 * [Stack Name Configuration](#stack-name-configuration)
 * [DNS Configuration](#dns-configuration)
+* [Floating IP Address Configuration](#floating-ip-address-configuration)
 * [All-in-one Deployment Configuration](#all-in-one-deployment-configuration)
 * [Building Node Images](#building-node-images)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
 * [Multi-Master Configuration](#multi-master-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
-* [OpenStack Credential Configuration](#openstack-credential-configuration)
 * [Cinder-Backed Persistent Volumes Configuration](#cinder-backed-persistent-volumes-configuration)
 * [Cinder-Backed Registry Configuration](#cinder-backed-registry-configuration)
 * [Swift or Ceph Rados GW Backed Registry Configuration](#swift-or-ceph-rados-gw-backed-registry-configuration)
@@ -38,6 +40,10 @@ In `inventory/group_vars/all.yml`:
   * `openshift_openstack_num_masters` Number of master nodes to create.
   * `openshift_openstack_num_infra` Number of infra nodes to create.
   * `openshift_openstack_num_nodes` Number of app nodes to create.
+* Role Node Floating IP Allocation
+  * `openshift_openstack_master_floating_ip` Assign floating IP to master nodes. Defaults to `True`.
+  * `openshift_openstack_infra_floating_ip` Assign floating IP to infra nodes. Defaults to `True`.
+  * `openshift_openstack_compute_floating_ip` Assign floating IP to app nodes. Defaults to `True`.
 * Role Images
   * `openshift_openstack_default_image_name` OpenStack image used by all VMs, unless a particular role image name is specified.
   * `openshift_openstack_master_image_name`
@@ -100,6 +106,47 @@ Additional options can be found in this sample inventory:
 
 https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example
 
+
+## OpenStack Cloud Provider Configuration
+
+Some features require you to configure the OpenStack cloud provider. For example, in
+`inventory/group_vars/OSEv3.yml`:
+
+* `openshift_cloudprovider_kind`: openstack
+* `openshift_cloudprovider_openstack_auth_url`: "{{ lookup('env','OS_AUTH_URL') }}"
+* `openshift_cloudprovider_openstack_username`: "{{ lookup('env','OS_USERNAME') }}"
+* `openshift_cloudprovider_openstack_password`: "{{ lookup('env','OS_PASSWORD') }}"
+* `openshift_cloudprovider_openstack_tenant_name`: "{{ lookup('env','OS_PROJECT_NAME') }}"
+* `openshift_cloudprovider_openstack_domain_name`: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}"
+
+The full range of openshift-ansible OpenStack cloud provider options can be found at:
+
+https://github.com/openshift/openshift-ansible/blob/master/roles/openshift_cloud_provider/templates/openstack.conf.j2
+
+For more information, consult the [Configuring for OpenStack page in the OpenShift documentation][openstack-credentials].
+
+[openstack-credentials]: https://docs.okd.io/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
+
+If you would like to use additional parameters, create a custom cloud provider
+configuration file locally and specify it in `inventory/group_vars/OSEv3.yml`:
+
+* `openshift_cloudprovider_openstack_conf_file` Path to local openstack.conf
+
+
+## OpenStack With SSL Configuration
+
+In order to configure your OpenShift cluster to work properly with OpenStack with
+SSL-endpoints, add the following to `inventory/group_vars/OSEv3.yml`:
+
+```
+openshift_certificates_redeploy: true
+openshift_additional_ca: /path/to/ca.crt.pem
+kuryr_openstack_ca: /path/to/ca.crt.pem (optional)
+openshift_cloudprovider_openstack_ca_file: |
+  -----BEGIN CERTIFICATE-----
+  CONTENTS OF OPENSTACK SSL CERTIFICATE
+  -----END CERTIFICATE-----
+```
 
 ## Stack Name Configuration
 
@@ -368,6 +415,86 @@ These must point to the publicly-accessible IP addresses of your
 master and infra nodes or preferably to the load balancers.
 
 
+## Floating IP Address Configuration
+
+Every OpenShift node as well as the API and Router load balancer will receive a
+floating IP address by default. This is to make the deployment and debugging
+experience easier.
+
+You may want to change that behaviour, for example to prevent any possibility
+of external access to the nodes (defense in depth) or if your floating IP pool
+is not large enough.
+
+### Overview
+
+It possible to configure the playbooks to not asssign floating IP addresses.
+However, the Ansible playbooks will then not be able to SSH and install
+OpenShift.
+
+The nodes will only be accessible from the subnet they are assigned to.
+
+To solve this, we need to create the network the nodes will be placed in
+beforehnd, then boot up a bastion host in the same network and run the
+playbooks from there.
+
+### Node Network
+
+We will have to create a Neutron Network, Subnet and a Router for external
+connectivity. Take note of any DNS servers you would normally put under
+`openshift_openstack_dns_nameservers` -- they must be added to the subnet.
+
+In this example, we will call the network and its subnet `openshift` and configure
+a DNS server with IP address `10.20.30.40`. The external network will be called `public`.
+
+```
+$ openstack network create openshift
+$ openstack subnet create --subnet-range 192.168.0.0/24 --dns-nameserver 10.20.30.40 --network openshift openshift
+$ openstack router create openshift-router
+$ openstack router set --external-gateway public openshift-router
+$ openstack router add subnet openshift-router openshift
+```
+
+### Bastion host
+
+To provide SSH connectivity (that Ansible requires) to the OpenShift nodes
+without using floating IP addresses, the playbooks must be running on a server
+inside the same subnet.
+
+This will create such server and place it into the subnet created above.
+
+We will use an image called `CentOS-7-x86_64-GenericCloud`, and assume that the
+created floating IP address will be `172.24.4.10`.
+
+```
+$ openstack server create --wait --image CentOS-7-x86_64-GenericCloud --flavor m1.medium --key-name openshift --network openshift bastion
+$ openstack floating ip create public
+$ openstack server add floating ip bastion 172.24.4.10
+$ ping 172.24.4.10
+$ ssh centos@172.24.4.10
+```
+
+### openshift-ansible Configuration
+
+In addition to the rest of openshift-ansible configuration, we will need to
+specify the node subnet, the routerand that we do not want any floating IP
+addresses.
+
+You must do this from inside the "bastion" host created in the previous step.
+
+Put the following to `inventory/group_vars/all.yml`:
+
+```yaml
+openshift_openstack_router_name: openshift-router
+openshift_openstack_node_subnet_name: openshift
+openshift_openstack_master_floating_ip: false
+openshift_openstack_infra_floating_ip: false
+openshift_openstack_compute_floating_ip: false
+openshift_openstack_load_balancer_floating_ip: false
+```
+
+And then run the `playbooks/openstack/openshift-cluster/*.yml` as usual.
+
+
 ## All-in-one Deployment Configuration
 
 If you want to deploy OpenShift on a single node (e.g. for quick evaluation),
@@ -506,6 +633,9 @@ to the UUID of the public subnet in your OpenStack.
 **NOTE**: A lot of OpenStack deployments do not make the public subnet
 accessible to regular users.
 
+Finally, you *must* set up an OpenStack cloud provider as specified in
+ [OpenStack Cloud Provider Configuration](#openstack-cloud-provider-configuration).
+
 ### Port pooling
 
 It is possible to pre-create Neutron ports for later use. This means that
@@ -575,16 +705,20 @@ openshift_node_groups:
 ```
 
 
-### Namespace Subnet driver
+### Namespace Isolation drivers
 
 By default, kuryr is configured with the default subnet driver where all the
 pods are deployed on the same Neutron subnet. However, there is an option of
 enabling a different subnet driver, named namespace, which makes pods to be
-allocated on different subnets depending on the namespace they belong to. To
-enable this new kuryr subnet driver you need to uncomment:
+allocated on different subnets depending on the namespace they belong to.
+In addition to the subnet driver, to properly enable isolation between
+different namespaces (through OpenStack security groups) there is a need of
+also enabling the related security group driver for namespaces.
+To enable this new kuryr namespace isolation capability you need to uncomment:
 
 ```yaml
 openshift_kuryr_subnet_driver: namespace
+openshift_kuryr_sg_driver: namespace
 ```
 
 
@@ -682,7 +816,6 @@ This means that regardless of the load balancing solution, you can use these
 two entries to provide access to your cluster.
 
 
-
 ## Provider Network Configuration
 
 Normally, the playbooks create a new Neutron network and subnet and attach
@@ -700,32 +833,9 @@ In `inventory/group_vars/all.yml`:
 * `openshift_openstack_provider_network_name` Provider network name. Setting this will cause the `openshift_openstack_external_network_name` and `openshift_openstack_private_network_name` parameters to be ignored.
 
 
-## OpenStack Credential Configuration
-
-Some features require you to configure OpenStack credentials. In `inventory/group_vars/OSEv3.yml`:
-
-* `openshift_cloudprovider_kind: openstack
-* `openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
-* `openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
-* `openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
-* `openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
-* `openshift_cloudprovider_openstack_domain_name: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}"
-
-For more information, consult the [Configuring for OpenStack page in the OpenShift documentation][openstack-credentials].
-
-[openstack-credentials]: https://docs.openshift.org/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
-
-**NOTE** the OpenStack integration currently requires DNS to be configured and
-running and the `openshift_hostname` variable must match the Nova server name
-for each node. The cluster deployment will fail without it. If you use the
-provided OpenStack dynamic inventory and configure the
-`openshift_openstack_dns_nameservers` Ansible variable, this will be handled
-for you.
-
-
 ## Cinder-Backed Persistent Volumes Configuration
 
-In addition to [setting up OpenStack credentials](#openstack-credential-configuration),
+In addition to [setting up an OpenStack cloud provider](#openstack-cloud-provider-configuration),
 you must set the following in `inventory/group_vars/OSEv3.yml`:
 
 * `openshift_cloudprovider_openstack_blockstorage_version`: v2
@@ -767,9 +877,8 @@ openstack volume create --size <volume size in gb> <volume name>
 Alternatively, the playbooks can create the volume created automatically if you
 specify its name and size.
 
-In either case, you have to [set up OpenStack
-credentials](#openstack-credential-configuration), and then set the following
-in `inventory/group_vars/OSEv3.yml`:
+In either case, you have to [set up an OpenStack cloud provider](#openstack-cloud-provider-configuration),
+and then set the following in `inventory/group_vars/OSEv3.yml`:
 
 * `openshift_hosted_registry_storage_kind`: openstack
 * `openshift_hosted_registry_storage_access_modes`: ['ReadWriteOnce']
@@ -815,19 +924,17 @@ parameters.
 
 ## Scaling The OpenShift Cluster
 
-Adding more nodes to the cluster is a three-step process: we need to create the
-new nodes, mark them for scale up and then run the appropriate playbook.
+Adding more nodes to the cluster is a simple process: we need to update the
+node cloud in `inventory/group_vars/all/yml`, then run the appropriate
+scaleup playbook.
 
-Note that the scaling playbooks are different from the installation ones. If
-you just change the number of nodes in your inventory and re-run
-`provision_install.yml`, the playbooks will fail.
+**NOTE**: the dynamic inventory used for scaling is different. Make sure you
+use `scaleup_inventory.py` for all the operations below.
 
-### Scaling the Compute and Infra Nodes
 
-#### 1. Adding Extra Nodes
+### 1. Update The Inventory
 
-Edit your `inventory/group_vars/all.yml` and set the new node total in
-`openshift_openstack_num_nodes`.
+Edit your `inventory/group_vars/all.yml` and set the new node total.
 
 For example, if your cluster has currently 3 masters, 2 infra and 5 app nodes
 and you want to add another 3 compute nodes, `all.yml` should contain this:
@@ -838,88 +945,32 @@ openshift_openstack_num_infra: 2
 openshift_openstack_num_nodes: 8  # 5 existing and 3 new
 ```
 
-**NOTE**: scaling the infra nodes is exactly the same. Just update the
-`openshift_openstack_num_infra` var instead.
 
-Then run the `provision.yml` playbook only (*do not run*
-`provision_install.yml` -- it can mess up your cluster!).
+### 2. Scale the Cluster
 
-```
-$ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py \
-  -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/provision.yml
-```
-
-This will create the new nodes while leaving everything else as is.
-
-
-#### 2. Marking The Nodes For Scaleup
-
-You can see all nodes (old as well as new) by running:
-
-```
-openstack server list
-```
-
-Note the names of the newly created nodes.
-
-Then create a new text file called `new-nodes` with the following contents:
-
-```
-[new_nodes]
-app-node-5.openshift.example.com
-app-node-6.openshift.example.com
-app-node-7.openshift.example.com
-
-[OSEv3:children]
-new_nodes
-```
-
-That is, an ini group section called `new_nodes` and the name of every new node
-on its own line. If you're scaling the infra nodes, they should go into the
-`new_nodes` section as well.
-
-You must also run the `configure-new-nodes.yml` playbook to run a few
-OpenStack-specific configurations. Don't forget to pass the `new-nodes` file
-in.
+Next, run the appropriate playbook - either
+`openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml`
+for master nodes or
+`openshift-ansible/playbooks/openstack/openshift-cluster/node-scaleup.yml`
+for other nodes. For example:
 
 ```
 $ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py \
-  -i new-nodes \
+  -i openshift-ansible/playbooks/openstack/scaleup_inventory.py \
   -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/configure-new-nodes.yml
+  openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml
 ```
 
-#### 3. Adding The Nodes To OpenShift
+This will create the new OpenStack nodes, optionally create the DNS records
+and subscribe them to RHN, configure the `new_masters`, `new_nodes` and
+`new_etcd` groups and run the OpenShift scaleup tasks.
 
-The final step is running the `scaleup.yml` playbook and passing in the
-`new-nodes` file:
+When the playbook finishes, you should have new nodes up and running.
 
-```
-$ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py \
-  -i new-nodes \
-  -i inventory \
-  openshift-ansible/playbooks/openshift-node/scaleup.yml
-```
-
-After that, your OpenShift cluster will be configured with the extra nodes. Be
-sure to **remove the `-i new-nodes` parameter from any subsequent Ansible
-runs** as these "new nodes" are now "regular nodes".
-
-For any subsequent scaling operations, you will have to update the `new-nodes`
-file. The `new_nodes` group should only contain nodes that were not deployed.
-So you would remove the previously added nodes and put in the new ones.
-
-For more information on scaling, please visit the [OpenShift Admin
-Guide][admin-guide].
-
-[admin-guide]: https://docs.openshift.org/latest/admin_guide/manage_nodes.html#adding-cluster-hosts_manage-nodes
+Run `oc get nodes` to verify.
 
 
-#### 4. Updating The Registry and Router Replicas
+### 3. Update The Registry and Router Replicas (Infra only)
 
 If you have added new infra nodes, the extra `docker-registry` and `router`
 pods may not have been created automatically. E.g. if you started with a single
@@ -936,43 +987,6 @@ oc scale --replicas=<count> dc/router
 
 Where `<count>` is the number of the pods you want (i.e. the number of your
 infra nodes).
-
-
-### Scaling the Master Nodes
-
-Adding master nodes is similar to adding compute/infra nodes, but we need to
-run a different playbook at the end.
-
-You must have a fully working OpenShift cluster before you start scaling.
-
-#### 1. Adding Extra Master Nodes
-
-Edit your `inventory/group_vars/all.yml` and set the new master node total in
-`openshift_openstack_num_masters`.
-
-For example if you started with a single master node and you want to add two
-more (for a grand total of three), you should set:
-
-    openshift_openstack_num_masters: 3
-
-#### 2. Scaling the Cluster
-
-Then run the `master-scaleup.yml` playbook:
-
-```
-$ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py \
-  -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml
-```
-
-This will create the new OpenStack nodes, optionally create the DNS records
-and subscribe them to RHN, configure the `new_masters`, `new_nodes` and
-`new_etcd` groups and run the OpenShift master scaleup tasks.
-
-When the playbook finishes, you should have new master nodes up and running.
-
-Run `oc get nodes` to verify.
 
 
 ## Deploying At Scale

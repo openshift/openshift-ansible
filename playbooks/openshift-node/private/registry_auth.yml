@@ -15,8 +15,11 @@
       tasks_from: node_system_container_install.yml
     when: openshift_is_atomic
 
+# l_reg_auth_restart_hosts is passed in via imageconfig.yml to prevent
+# the nodes from restarting because the sync pod will be restarting them
+# anyway.
 - name: Restart nodes
-  hosts: oo_nodes_to_config
+  hosts: "{{ l_reg_auth_restart_hosts | default('oo_nodes_to_config') }}"
   serial: "{{ openshift_restart_nodes_serial | default(1) }}"
   roles:
   - lib_openshift

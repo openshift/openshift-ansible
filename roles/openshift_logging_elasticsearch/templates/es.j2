@@ -142,6 +142,9 @@ spec:
               readOnly: true
             - name: elasticsearch-storage
               mountPath: /elasticsearch/persistent
+            - name: podinfo
+              mountPath: /etc/podinfo
+              readOnly: true
           readinessProbe:
             exec:
               command:
@@ -195,6 +198,13 @@ spec:
         - name: elasticsearch-config
           configMap:
             name: logging-elasticsearch
+        - name: podinfo
+          downwardAPI:
+            items:
+              - path: "mem_limit"
+                resourceFieldRef:
+                  containerName: elasticsearch
+                  resource: limits.memory
         - name: elasticsearch-storage
 {% if openshift_logging_elasticsearch_storage_type == 'pvc' %}
           persistentVolumeClaim:

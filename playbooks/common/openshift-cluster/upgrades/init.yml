@@ -16,13 +16,6 @@
       name: openshift_certificate_expiry
       tasks_from: main.yml
 
-- name: Ensure essential node configmaps are present
-  hosts: oo_first_master
-  tasks:
-  - import_role:
-      name: openshift_node_group
-      tasks_from: check_for_configs.yml
-
 - name: Ensure firewall is not switched during upgrade
   hosts: "{{ l_upgrade_no_switch_firewall_hosts | default('oo_all_hosts') }}"
   vars:
@@ -42,4 +35,4 @@
     set_fact:
       os_firewall_use_firewalld: false
     when:
-    - iptables_service.status.ActiveState != 'active'
+    - iptables_service.status.ActiveState == 'active'

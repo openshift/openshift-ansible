@@ -22,6 +22,8 @@ objects:
     selector:
       matchLabels:
         glusterfs: ${CLUSTER_NAME}-pod
+    updateStrategy:
+      type: OnDelete
     template:
       metadata:
         name: glusterfs-${CLUSTER_NAME}

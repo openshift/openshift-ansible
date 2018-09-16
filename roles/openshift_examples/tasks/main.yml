@@ -21,7 +21,7 @@
   run_once: True
 
 - name: Create tar of OpenShift examples
-  local_action: command tar -C "{{ role_path }}/files/examples/{{ content_version }}/" -cvf "{{ copy_examples_mktemp.stdout }}/openshift-examples.tar" .
+  local_action: command tar -C "{{ role_path }}/files/examples/latest/" -cvf "{{ copy_examples_mktemp.stdout }}/openshift-examples.tar" .
   args:
     # Disables the following warning:
     # Consider using unarchive module rather than running tar
@@ -49,17 +49,31 @@
 ######################################################################
 # Begin image streams
 
-- name: Create imagestream import secret
+- name: Create imagestream import secret for oreg_url
   command: >
-    {{ openshift_client_binary }} create secret docker-registry imagestreamsecret --docker-server={{ registry_host }} --docker-username={{ oreg_auth_user }} --docker-email=openshift@openshift.com --docker-password={{ oreg_auth_password }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift
+    {{ openshift_client_binary }} create secret docker-registry imagestreamsecret
+    --docker-server={{ registry_host }} --docker-username={{ oreg_auth_user }}
+    --docker-email=openshift@openshift.com --docker-password={{ oreg_auth_password }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift
   when:
     - openshift_examples_load_rhel | bool
     - oreg_auth_password is defined
-  with_items:
-    - "{{ rhel_image_streams }}"
   register: oex_imagestream_import_secret
   failed_when: "'already exists' not in oex_imagestream_import_secret.stderr and oex_imagestream_import_secret.rc != 0"
   changed_when: false
+
+- name: Create imagestream import secrets for any additional registries
+  command: >
+      {{ openshift_client_binary }} create secret docker-registry o-a-{{ item.host | hash('md5') }}
+      --docker-server={{ item.host }} --docker-username={{ item.user }}
+      --docker-email=openshift@openshift.com --docker-password={{ item.password }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift
+  when:
+    - openshift_additional_registry_credentials is defined
+  with_items:
+    - "{{ openshift_additional_registry_credentials }}"
+  register: oex_additional_creds
+  failed_when: "'already exists' not in oex_additional_creds.stderr and oex_additional_creds.rc != 0"
 
 - name: Modify registry paths if registry_url is not registry.redhat.io
   shell: >
@@ -76,6 +90,8 @@
   register: oex_import_rhel_streams
   failed_when: "'already exists' not in oex_import_rhel_streams.stderr and oex_import_rhel_streams.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_rhel_streams is succeeded
 
 - name: Import Centos Image streams
   command: >
@@ -86,6 +102,8 @@
   register: oex_import_centos_streams
   failed_when: "'already exists' not in oex_import_centos_streams.stderr and oex_import_centos_streams.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_centos_streams is succeeded
 
 - name: Import db templates
   command: >
@@ -94,6 +112,8 @@
   register: oex_import_db_templates
   failed_when: "'already exists' not in oex_import_db_templates.stderr and oex_import_db_templates.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_db_templates is succeeded
 
 - name: Remove defunct quickstart template files
   file:
@@ -123,6 +143,8 @@
   register: oex_import_quickstarts
   failed_when: "'already exists' not in oex_import_quickstarts.stderr and oex_import_quickstarts.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_quickstarts is succeeded
 
 - name: Remove old xPaas template files
   file:
@@ -146,6 +168,8 @@
   register: oex_import_xpaas_streams
   failed_when: "'already exists' not in oex_import_xpaas_streams.stderr and oex_import_xpaas_streams.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_xpaas_streams is succeeded
 
 - name: Import xPaas templates
   command: >
@@ -154,3 +178,5 @@
   register: oex_import_xpaas_templates
   failed_when: "'already exists' not in oex_import_xpaas_templates.stderr and oex_import_xpaas_templates.rc != 0"
   changed_when: false
+  retries: 3
+  until: oex_import_xpaas_templates is succeeded

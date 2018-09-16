@@ -95,8 +95,8 @@
     labels:
       name: prometheus
     annotations:
-      oprometheus.io/scrape: 'true'
-      oprometheus.io/scheme: https
+      prometheus.io/scrape: 'true'
+      prometheus.io/scheme: https
       service.alpha.openshift.io/serving-cert-secret-name: prometheus-tls
     ports:
     - name: prometheus
@@ -200,6 +200,9 @@
 
 - stat:
     path: "{{ tempdir }}/prometheus.additional.rules"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: additional_rules_stat
 
 - template:

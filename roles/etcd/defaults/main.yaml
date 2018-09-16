@@ -2,8 +2,6 @@
 r_etcd_common_backup_tag: ''
 r_etcd_common_backup_sufix_name: ''
 
-l_etcd_bootstrapped: '{{ openshift.node.bootstrapped }}'
-
 l_etcd_static_pod: "{{ (inventory_hostname in groups['oo_masters']) | bool }}"
 
 # runc, docker, static pod, host
@@ -114,3 +112,5 @@ etcd_ca_host: "{{ groups['oo_etcd_to_config'].0 }}"
 l_etcd_restart_command: "{{ l_etcd_static_pod | ternary('/usr/local/bin/master-restart etcd', 'systemctl restart etcd') }}"
 
 etcd_static_pod_location: "{{ openshift_control_plane_static_pod_location | default('/etc/origin/node/pods/') }}"
+
+etcd_cipher_suites: ""

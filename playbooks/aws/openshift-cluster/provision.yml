@@ -14,10 +14,12 @@
 
 - import_playbook: provision_elb.yml
 
-- name: Create the master node group
+- name: Create the master instances
   hosts: localhost
   tasks:
-  - name: provision cluster
+  - name: provision instances
     import_role:
       name: openshift_aws
-      tasks_from: provision.yml
+      tasks_from: provision_masters.yml
+
+- import_playbook: provision_dns.yml

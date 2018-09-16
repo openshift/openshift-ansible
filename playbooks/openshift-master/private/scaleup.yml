@@ -17,3 +17,5 @@
 - import_playbook: ../../openshift-node/private/join.yml
 
 - import_playbook: ../../openshift-loadbalancer/private/config.yml
+
+- import_playbook: ../../openshift-glusterfs/private/add_hosts.yml

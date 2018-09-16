@@ -9,13 +9,9 @@
 
 - name: run node config setup
   import_playbook: disable_excluders.yml
-  vars:
-    l_node_group: oo_nodes_to_config
 
 - name: run node config
   import_playbook: configure_nodes.yml
-  vars:
-    l_node_group: oo_nodes_to_config
 
 - name: node bootstrap config
   hosts: oo_nodes_to_config
@@ -46,10 +42,6 @@
 
 - name: Re-enable excluders
   import_playbook: enable_excluders.yml
-  vars:
-    l_node_group: oo_nodes_to_config
 
 - name: Remove any undesired artifacts from build
   import_playbook: clean_image.yml
-  vars:
-    l_node_group: oo_nodes_to_config

@@ -22,14 +22,17 @@
 # Note: The curr_docker_version.stdout check can be removed when https://github.com/ansible/ansible/issues/33187 gets fixed.
 - name: Install Docker
   package:
-    name: "docker{{ '-' + docker_version if docker_version is defined else '' }}"
+    name: "{{ pkg_list | join(',') }}"
     state: present
   when:
   - not (openshift_is_atomic | bool)
-  - not (curr_docker_version is skipped)
-  - not (curr_docker_version.stdout != '')
   register: result
   until: result is succeeded
+  vars:
+    pkg_list:
+    - "docker{{ '-' + docker_version if docker_version is defined else '' }}"
+    - atomic
+    - skopeo
 
 - block:
   # Extend the default Docker service unit file when using iptables-services
@@ -46,7 +49,10 @@
     - restart container runtime
   when: not (os_firewall_use_firewalld | default(False)) | bool
 
-- stat: path=/etc/sysconfig/docker
+- stat:
+    path: /etc/sysconfig/docker
+    get_checksum: false
+    get_mime: false
   register: docker_check
 
 - name: Set registry params
@@ -115,7 +121,10 @@
   notify:
   - restart container runtime
 
-- stat: path=/etc/sysconfig/docker-network
+- stat:
+    path: /etc/sysconfig/docker-network
+    get_checksum: false
+    get_mime: false
   register: sysconfig_docker_network_check
 
 - name: Configure Docker Network OPTIONS

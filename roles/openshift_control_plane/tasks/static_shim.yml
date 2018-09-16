@@ -10,10 +10,10 @@
   - "scripts/{{ l_runtime }}/master-logs"
   - "scripts/{{ l_runtime }}/master-restart"
   vars:
-    l_runtime: "{{ 'crio' if openshift_use_crio | default(False) else 'docker' }}"
+    l_runtime: "{{ 'crio' if (openshift_use_crio | bool) else 'docker' }}"
 
 - name: Ensure cri-tools installed
   package:
     name: cri-tools
     state: present
-  when: openshift_use_crio | default(False)
+  when: openshift_use_crio | bool

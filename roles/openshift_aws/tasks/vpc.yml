@@ -1,4 +1,17 @@
 ---
+- name: query azs
+  aws_az_facts:
+    region: "{{ openshift_aws_region }}"
+  register: azs
+
+- fail:
+    msg: >
+      AWS VPC does NOT contain
+      {{ openshift_aws_vpc.subnets[openshift_aws_region] | map(attribute='az') | list | length }} availability zone(s).
+      Please pick another region!
+  when:
+  - ( azs.availability_zones | length ) < ( openshift_aws_vpc.subnets[openshift_aws_region] | map(attribute='az') | list | length )
+
 - name: Create AWS VPC
   ec2_vpc_net:
     state: present
@@ -27,8 +40,6 @@
     vpc_id: "{{ vpc.vpc.id }}"
     cidr: "{{ item.cidr }}"
     az: "{{ item.az }}"
-    resource_tags:
-      Name: "{{ item.az }}"
   with_items: "{{ openshift_aws_vpc.subnets[openshift_aws_region] }}"
 
 - name: Grab the route tables from our VPC

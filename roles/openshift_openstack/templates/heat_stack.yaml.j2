@@ -15,9 +15,11 @@ outputs:
     description: IPs of the etcds
     value: { get_attr: [ etcd, private_ip ] }
 
+{% if openshift_openstack_etcd_floating_ip | default(True) | bool %}
   etcd_floating_ips:
     description: Floating IPs of the etcds
     value: { get_attr: [ etcd, floating_ip ] }
+{% endif %}
 
   master_names:
     description: Name of the masters
@@ -27,9 +29,11 @@ outputs:
     description: IPs of the masters
     value: { get_attr: [ masters, private_ip ] }
 
+{% if openshift_openstack_master_floating_ip | default(True) | bool %}
   master_floating_ips:
     description: Floating IPs of the masters
     value: { get_attr: [ masters, floating_ip ] }
+{% endif %}
 
   node_names:
     description: Name of the nodes
@@ -39,9 +43,11 @@ outputs:
     description: IPs of the nodes
     value: { get_attr: [ compute_nodes, private_ip ] }
 
+{% if openshift_openstack_compute_floating_ip | default(True) | bool %}
   node_floating_ips:
     description: Floating IPs of the nodes
     value: { get_attr: [ compute_nodes, floating_ip ] }
+{% endif %}
 
   infra_names:
     description: Name of the nodes
@@ -51,16 +57,19 @@ outputs:
     description: IPs of the nodes
     value: { get_attr: [ infra_nodes, private_ip ] }
 
+{% if openshift_openstack_infra_floating_ip | default(True) | bool %}
   infra_floating_ips:
     description: Floating IPs of the nodes
     value: { get_attr: [ infra_nodes, floating_ip ] }
 {% endif %}
+{% endif %}
 
   public_api_ip:
     description: IP address for the API/UI endpoint
-{% if openshift_openstack_use_lbaas_load_balancer %}
-    # TODO(shadower): Handle setups without floating IPs
+{% if openshift_openstack_use_lbaas_load_balancer and openshift_openstack_load_balancer_floating_ip %}
     value: { get_attr: [api_lb_floating_ip, floating_ip_address] }
+{% elif openshift_openstack_use_lbaas_load_balancer and not openshift_openstack_load_balancer_floating_ip %}
+    value: { get_attr: [api_lb, vip_address] }
 {% elif openshift_openstack_use_vm_load_balancer %}
     value: { get_attr: [loadbalancer, resource.0, floating_ip] }
 {% else %}
@@ -69,8 +78,10 @@ outputs:
 
   public_router_ip:
     description: IP address of the apps/router endpoint
-{% if openshift_openstack_use_lbaas_load_balancer %}
+{% if openshift_openstack_use_lbaas_load_balancer and openshift_openstack_load_balancer_floating_ip %}
     value: { get_attr: [router_lb_floating_ip, floating_ip_address] }
+{% elif openshift_openstack_use_lbaas_load_balancer and not openshift_openstack_load_balancer_floating_ip %}
+    value: { get_attr: [router_lb, vip_address] }
 {% else %}
     # NOTE(shadower): The VM-based loadbalancer only supports master nodes
     value: { get_attr: [infra_nodes, resource.0, floating_ip] }
@@ -91,7 +102,11 @@ outputs:
 {% if openshift_use_kuryr|default(false)|bool %}
   vm_subnet:
     description: ID of the subnet the Pods will be on
+{% if not openshift_openstack_node_subnet_name %}
     value: { get_resource: subnet }
+{% else %}
+    value: {{ openshift_openstack_node_subnet_id }}
+{% endif %}
 
   pod_subnet:
     description: ID of the subnet the Pods will be on
@@ -103,12 +118,27 @@ outputs:
 
   pod_router:
     description: ID of the router where the pod subnet will be connected
+{% if not openshift_openstack_router_name %}
     value: { get_resource: router }
+{% else %}
+    value: {{ openshift_openstack_router_id }}
+{% endif %}
+
 
 {% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
   pod_subnet_pool:
     description: ID of the subnet pool to use for the pod_subnets CIDRs
     value: { get_resource: pod_subnet_pool }
+{% endif %}
+
+{% if openshift_kuryr_sg_driver|default('default') == 'namespace' %}
+  sg_allow_from_default:
+    description: ID of the security group to enable access from default namespace
+    value: { get_resource: sg_allow_from_default}
+
+  sg_allow_from_namespace:
+    description: ID of the security group to enable access from namespaces to default namespace
+    value: { get_resource: sg_allow_from_namespace}
 {% endif %}
 
   pod_access_sg_id:
@@ -146,6 +176,8 @@ resources:
 {% if openshift_use_kuryr|default(false)|bool %}
       vip_address: {{ openshift_openstack_kuryr_service_subnet_cidr | ipaddr('1') | ipaddr('address') }}
       vip_subnet: { get_resource: service_subnet }
+{% elif openshift_openstack_node_subnet_name %}
+      vip_subnet: {{ openshift_openstack_node_subnet_name }}
 {% else %}
       vip_subnet: { get_resource: subnet }
 {% endif %}
@@ -217,6 +249,54 @@ resources:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
 {% endif %}
 
+{% if openshift_kuryr_sg_driver|default('default') == 'namespace' %}
+  sg_allow_from_default:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-allow_from_default
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      description: Give access to the services and pods from the default namespace
+
+  sg_allow_from_namespace:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-allow_from_namespace
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      description: Give access to the services and pods on the default namespace from the other namespaces
+      rules:
+      - ethertype: IPv4
+        remote_group_id: { get_resource: sg_allow_from_default }
+        remote_mode: remote_group_id
+
+  sg_allow_from_default_rule:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: sg_allow_from_default }
+      ethertype: IPv4
+      remote_group: { get_resource: sg_allow_from_namespace }
+
+  common-secgrp_namespace_rule:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: common-secgrp }
+      ethertype: IPv4
+      remote_group: { get_resource: sg_allow_from_namespace }
+
+  common-secgrp_default_rule:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: common-secgrp }
+      ethertype: IPv4
+      remote_group: { get_resource: sg_allow_from_default }
+{% endif %}
+
+
   pod_subnet:
     type: OS::Neutron::Subnet
     properties:
@@ -264,6 +344,7 @@ resources:
 
 {% endif %}
 
+{% if not openshift_openstack_node_subnet_name %}
   net:
     type: OS::Neutron::Net
     properties:
@@ -272,7 +353,9 @@ resources:
           template: openshift-ansible-cluster_id-net
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
+{% endif %}
 
+{% if not openshift_openstack_node_subnet_name %}
   subnet:
     type: OS::Neutron::Subnet
     properties:
@@ -290,6 +373,7 @@ resources:
 {% for nameserver in openshift_openstack_dns_nameservers %}
         - {{ nameserver }}
 {% endfor %}
+{% endif %}
 
 {% if openshift_use_flannel|default(False)|bool %}
   data_net:
@@ -307,6 +391,7 @@ resources:
       gateway_ip: null
 {% endif %}
 
+{% if not openshift_openstack_router_name %}
   router:
     type: OS::Neutron::Router
     properties:
@@ -323,12 +408,17 @@ resources:
     properties:
       router_id: { get_resource: router }
       subnet_id: { get_resource: subnet }
+{% endif %}
 
 {% if openshift_use_kuryr|default(false)|bool %}
   pod_subnet_interface:
     type: OS::Neutron::RouterInterface
     properties:
+{% if not openshift_openstack_router_name %}
       router_id: { get_resource: router }
+{% else %}
+      router_id: {{ openshift_openstack_router_id }}
+{% endif %}
       subnet_id: { get_resource: pod_subnet }
 
   service_router_port:
@@ -347,7 +437,11 @@ resources:
   service_subnet_interface:
     type: OS::Neutron::RouterInterface
     properties:
+{% if not openshift_openstack_router_name %}
       router_id: { get_resource: router }
+{% else %}
+      router_id: {{ openshift_openstack_router_id }}
+{% endif %}
       port: { get_resource: service_router_port }
 {% endif %}
 
@@ -393,8 +487,10 @@ resources:
         remote_ip_prefix: {{ openshift_openstack_kuryr_service_subnet_cidr }}
       - ethertype: IPv4
         remote_ip_prefix: {{ openshift_openstack_subnet_cidr }}
+{% if openshift_kuryr_sg_driver|default('default') != 'namespace' %}
       - ethertype: IPv4
         remote_mode: remote_group_id
+{% endif %}
 {% endif %}
 
 {% if openshift_openstack_flat_secgrp|default(False)|bool %}
@@ -547,8 +643,16 @@ resources:
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:         {{ openshift_openstack_provider_network_name }}
 {% else %}
+{% if openshift_openstack_node_network_id|default(false) %}
+          net:         {{ openshift_openstack_node_network_id }}
+{% else %}
           net:         { get_resource: net }
+{% endif %}
+{% if openshift_openstack_node_subnet_name %}
+          subnet:      {{ openshift_openstack_node_subnet_name }}
+{% else %}
           subnet:      { get_resource: subnet }
+{% endif %}
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_net:     { get_resource: pod_net }
           pod_subnet:  { get_resource: pod_subnet }
@@ -571,11 +675,11 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name or not openshift_openstack_etcd_floating_ip | default(False) | bool %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_etcd_volume_size }}
-{% if not openshift_openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
 {% endif %}
@@ -623,9 +727,15 @@ resources:
 {% if openshift_openstack_provider_network_name %}
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:         {{ openshift_openstack_provider_network_name }}
+{% elif openshift_openstack_node_network_id|default(false) %}
+          net:         {{ openshift_openstack_node_network_id }}
 {% else %}
           net:         { get_resource: net }
+{% if openshift_openstack_node_subnet_name %}
+          subnet:      {{ openshift_openstack_node_subnet_name }}
+{% else %}
           subnet:      { get_resource: subnet }
+{% endif %}
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_net:     { get_resource: pod_net }
           pod_subnet:  { get_resource: pod_subnet }
@@ -648,11 +758,11 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name or not openshift_openstack_load_balancer_floating_ip | default(True) | bool %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_lb_volume_size }}
-{% if not openshift_openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
 {% endif %}
@@ -691,8 +801,16 @@ resources:
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:         {{ openshift_openstack_provider_network_name }}
 {% else %}
+{% if openshift_openstack_node_network_id|default(false) %}
+          net:         {{ openshift_openstack_node_network_id }}
+{% else %}
           net:         { get_resource: net }
+{% endif %}
+{% if openshift_openstack_node_subnet_name %}
+          subnet:      {{ openshift_openstack_node_subnet_name }}
+{% else %}
           subnet:      { get_resource: subnet }
+{% endif %}
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_net:     { get_resource: pod_net }
           pod_subnet:  { get_resource: pod_subnet }
@@ -731,7 +849,7 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name or not openshift_openstack_master_floating_ip | default(False) | bool %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_master_volume_size }}
@@ -739,7 +857,7 @@ resources:
           scheduler_hints:
             group: { get_resource: master_server_group }
 {% endif %}
-{% if not openshift_openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
 {% endif %}
@@ -777,8 +895,16 @@ resources:
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:         {{ openshift_openstack_provider_network_name }}
 {% else %}
+{% if openshift_openstack_node_network_id|default(false) %}
+          net:         {{ openshift_openstack_node_network_id }}
+{% else %}
           net:         { get_resource: net }
+{% endif %}
+{% if openshift_openstack_node_subnet_name %}
+          subnet:      {{ openshift_openstack_node_subnet_name }}
+{% else %}
           subnet:      { get_resource: subnet }
+{% endif %}
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_net:     { get_resource: pod_net }
           pod_subnet:  { get_resource: pod_subnet }
@@ -806,11 +932,11 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name or not openshift_openstack_compute_floating_ip | default(False) | bool %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_node_volume_size }}
-{% if not openshift_openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
 {% endif %}
@@ -850,8 +976,16 @@ resources:
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:         {{ openshift_openstack_provider_network_name }}
 {% else %}
+{% if openshift_openstack_node_network_id|default(false) %}
+          net:         {{ openshift_openstack_node_network_id }}
+{% else %}
           net:         { get_resource: net }
+{% endif %}
+{% if openshift_openstack_node_subnet_name %}
+          subnet:      {{ openshift_openstack_node_subnet_name }}
+{% else %}
           subnet:      { get_resource: subnet }
+{% endif %}
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_net:     { get_resource: pod_net }
           pod_subnet:  { get_resource: pod_subnet }
@@ -885,7 +1019,7 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name or not openshift_openstack_infra_floating_ip | default(True) | bool %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_infra_volume_size }}
@@ -893,7 +1027,7 @@ resources:
           scheduler_hints:
             group: { get_resource: infra_server_group }
 {% endif %}
-{% if not openshift_openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
 {% endif %}
@@ -928,8 +1062,16 @@ resources:
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:    {{ openshift_openstack_provider_network_name }}
 {% else %}
+{% if openshift_openstack_node_network_id|default(false) %}
+          net:         {{ openshift_openstack_node_network_id }}
+{% else %}
           net:         { get_resource: net }
+{% endif %}
+{% if openshift_openstack_node_subnet_name %}
+          subnet:      {{ openshift_openstack_node_subnet_name }}
+{% else %}
           subnet:      { get_resource: subnet }
+{% endif %}
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_net:     { get_resource: pod_net }
           pod_subnet:  { get_resource: pod_subnet }
@@ -961,13 +1103,14 @@ resources:
           floating_network: {{ openshift_openstack_external_network_name }}
 {% endif %}
           volume_size: {{ openshift_openstack_cns_volume_size }}
-{% if not openshift_openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
 {% endif %}
 
 
 {% if openshift_openstack_use_lbaas_load_balancer %}
+{% if openshift_openstack_load_balancer_floating_ip | default(True) | bool %}
   api_lb_floating_ip:
     condition: { not: no_floating }
     depends_on:
@@ -978,13 +1121,18 @@ resources:
     properties:
       floating_network: {{ openshift_openstack_external_network_name }}
       port_id: { get_attr: [api_lb, vip_port_id] }
-
+{% endif %}
 
   router_lb:
     type: OS::{{ openshift_openstack_lbaasv2_provider }}::LoadBalancer
     properties:
+{% if openshift_openstack_node_subnet_name %}
+      vip_subnet: {{ openshift_openstack_node_subnet_name }}
+{% else %}
       vip_subnet: { get_resource: subnet }
+{% endif %}
 
+{% if openshift_openstack_load_balancer_floating_ip | default(True) | bool %}
   router_lb_floating_ip:
     condition: { not: no_floating }
     depends_on:
@@ -997,6 +1145,7 @@ resources:
     properties:
       floating_network: {{ openshift_openstack_external_network_name }}
       port_id: { get_attr: [router_lb, vip_port_id] }
+{% endif %}
 
   router_lb_listener_http:
     type: OS::{{ openshift_openstack_lbaasv2_provider }}::Listener

@@ -64,7 +64,7 @@
     - name: "Performing full cluster restart for {{ _cluster_component }} cluster"
       include_tasks: full_cluster_restart.yml
       vars:
-        logging_restart_cluster_dcs: "{{ _cluster_dcs.stdout_lines }}"
+        logging_restart_cluster_dcs: "{{ _cluster_dcs.stdout }}"
       when:
         - full_restart_cluster | bool
 

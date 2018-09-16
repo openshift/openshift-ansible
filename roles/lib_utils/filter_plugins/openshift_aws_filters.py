@@ -11,6 +11,37 @@ class FilterModule(object):
     ''' Custom ansible filters for use by openshift_aws role'''
 
     @staticmethod
+    def subnet_count_list(size, subnets):
+        """This function will modify create a list of subnets."""
+        items = {}
+        count = 0
+        for _ in range(0, int(size)):
+            if subnets[count]['subnets'][0]['subnet_id'] in items:
+                items[subnets[count]['subnets'][0]['subnet_id']] = \
+                    items[subnets[count]['subnets'][0]['subnet_id']] + 1
+            else:
+                items[subnets[count]['subnets'][0]['subnet_id']] = 1
+            if count < (len(subnets) - 1):
+                count = count + 1
+            else:
+                count = 0
+        return items
+
+    @staticmethod
+    def ec2_to_asg_tag(ec2_tag_info):
+        ''' This function will modify ec2 tag list to an asg dictionary.'''
+        tags = []
+        for tag in ec2_tag_info:
+            for key in tag:
+                if 'deployment_serial' in key:
+                    l_dict = {'tags': []}
+                    l_dict['tags'].append({'key': 'deployment_serial',
+                                           'value': tag[key]})
+                    tags.append(l_dict.copy())
+
+        return tags
+
+    @staticmethod
     def scale_groups_serial(scale_group_info, upgrade=False):
         ''' This function will determine what the deployment serial should be and return it
 
@@ -67,24 +98,10 @@ class FilterModule(object):
 
         return tags
 
-    @staticmethod
-    def get_default_az(subnets):
-        ''' From a list of subnets/AZs in a specific region (from the VPC
-            structure), return the AZ that has the key/value
-            'default_az=True.' '''
-
-        for subnet in subnets:
-            if subnet.get('default_az'):
-                return subnet['az']
-
-        # if there was none marked with default_az=True, just return the first
-        # one. (this does mean we could possible return an item that has
-        # default_az=False set
-        return subnets[0]['az']
-
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {'build_instance_tags': self.build_instance_tags,
-                'get_default_az': self.get_default_az,
                 'scale_groups_match_capacity': self.scale_groups_match_capacity,
-                'scale_groups_serial': self.scale_groups_serial}
+                'scale_groups_serial': self.scale_groups_serial,
+                'ec2_to_asg_tag': self.ec2_to_asg_tag,
+                'subnet_count_list': self.subnet_count_list}

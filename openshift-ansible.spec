@@ -9,15 +9,15 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.0
-Release:        0.10.0
+Version:        4.0.0
+Release:        0.0.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:      ansible >= 2.6
+Requires:      ansible >= 2.6.2
 Requires:      python2
 Requires:      python-six
 Requires:      tar
@@ -160,9 +160,491 @@ BuildArch:     noarch
 %files roles
 %{_datadir}/ansible/%{name}/roles
 
+%pretrans roles
+#RHBZ https://bugzilla.redhat.com/show_bug.cgi?id=1626048
+#roles/openshift_examples/latest used to be a symlink, now its a dir
+# workaround for RPM bug https://bugzilla.redhat.com/show_bug.cgi?id=975909
+if [ -d %{_datadir}/ansible/%{name}/roles/openshift_examples/files/examples ]; then
+  find %{_datadir}/ansible/%{name}/roles/openshift_examples/files/examples -name latest -type l -delete
+fi
 
 
 %changelog
+* Tue Sep 11 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.35.0
+- cluster-monitoring: Fix incorrect handling of conditional PVCs
+  (fbranczyk@gmail.com)
+- fix alertmanager example in OLM prometheus operator (cordell.evan@gmail.com)
+- GlusterFS: Tweak groups for external config (jarrpa@redhat.com)
+- Fix kuryr support for custom OpenStack network and subnet
+  (ltomasbo@redhat.com)
+- Add missing ClusterRole for OLM (cordell.evan@gmail.com)
+- GlusterFS: Fix heketi_pod check (jarrpa@redhat.com)
+- spec: remove roles/openshift_examples/lates symlink (vrutkovs@redhat.com)
+- Prepare to split openshift-sdn out of the openshift binary
+  (ccoleman@redhat.com)
+- SDN check: Ignore errors from `oc version` (miciah.masters@gmail.com)
+
+* Sun Sep 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.34.0
+- 
+
+* Sat Sep 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.33.0
+- Install rh-operators catalog (cordell.evan@gmail.com)
+- olm: add openshift_facts dependency (sdodson@redhat.com)
+- fix ca cert deploy for 3.10. addresses
+  https://bugzilla.redhat.com/show_bug.cgi?id=1585978 (judd@newgoliath.com)
+- Add oc_get_nodes to debug csr output (mgugino@redhat.com)
+- Check for migrated status (vrutkovs@redhat.com)
+- Run on first etcd only (vrutkovs@redhat.com)
+- Add playbooks to remove etcdv2 data (vrutkovs@redhat.com)
+- Update rh-operators catalog (cordell.evan@gmail.com)
+- don't bind to cluster-admin for OLM (cordell.evan@gmail.com)
+- put olm deployments in the right namespace (cordell.evan@gmail.com)
+- add main.yaml for olm task (cordell.evan@gmail.com)
+
+* Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.32.0
+- 
+
+* Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.31.0
+- 
+
+* Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.30.0
+- Remove configmap check during upgrades (rteague@redhat.com)
+- Add extra debug info to csr module (mgugino@redhat.com)
+- Revert ensure gquota set on slash filesystem (mazzystr@gmail.com)
+- Don't fetch provider facts if openshift_cloud_provider_kind is not set
+  (vrutkovs@redhat.com)
+- Remove unused openshift_openstack_app_floating_ip (tomas@sedovic.cz)
+- Allow custom OpenStack network and subnet (tomas@sedovic.cz)
+- Fixup PR #8671 (tomas@sedovic.cz)
+- Squash PR 8671 (i.am.emilio@gmail.com)
+
+* Thu Sep 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.29.0
+- cluster-monitoring: Fix repo/docs URL (fbranczyk@gmail.com)
+- cluster-monitoring: Make PVCs optional (fbranczyk@gmail.com)
+- Fix issue with cockpit package list (rteague@redhat.com)
+- GlusterFS: External uninstall (jarrpa@redhat.com)
+- GlusterFS: Ignore external nodes (jarrpa@redhat.com)
+- openshifT_aws: removed subnet naming (mwoodson@redhat.com)
+- openshift-aws: updating the subnet querying (mwoodson@redhat.com)
+- Use first_master_client_binary from hostvars[groups.oo_first_master.0]
+  (nakayamakenjiro@gmail.com)
+- Do not stop Opensvswitch #9895 (yasensim@gmail.com)
+- add OWNERS file for OLM (jpeeler@redhat.com)
+- Add OLM to component upgrades (jpeeler@redhat.com)
+- Refactor image health checks (mgugino@redhat.com)
+- OLM images: use quay for origin (cordell.evan@gmail.com)
+- NSX-T fixes #8134 and fixes NSX #8015, PR #8016 (yasensim@gmail.com)
+- update olm images to use openshift registry instead of quay
+  (cordell.evan@gmail.com)
+
+* Wed Sep 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.28.0
+- Switch openshift_crio_enable_docker_gc default to False (rteague@redhat.com)
+- Add default node groups to support running cri-o runtime (rteague@redhat.com)
+- Rework test CI (vrutkovs@redhat.com)
+
+* Wed Sep 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.27.0
+- Fixing a typo s/Cound/Could/g noticed with an error getting CSR's approved
+  (roxenham@redhat.com)
+- Add namespaced servicebrokers, serviceclasses and serviceplans to
+  admin/edit/view ClusterRoles (marko.luksa@gmail.com)
+- Update sync DS after control plane upgrade (vrutkovs@redhat.com)
+- Fix incorrect reference to idp['name'] (vrutkovs@redhat.com)
+- Add support for ak/orgid at uninstall/scale (e.minguez@gmail.com)
+- Configure a list of etcd cipher suites via `etcd_cipher_suites`
+  (vrutkovs@redhat.com)
+- GlusterFS: Fix registry.yml playbook (jarrpa@redhat.com)
+
+* Tue Sep 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.26.0
+- Fix etcdctl aliases on etcd hosts (vrutkovs@redhat.com)
+- Removing azure publishing tooling. (kwoodson@redhat.com)
+- repair container_runtime_extra_storage var values
+  (46245+jirib@users.noreply.github.com)
+- Convert all remaining registry.access.redhat.com to registry.redhat.io
+  (sdodson@redhat.com)
+- Update packages in gold image and unsubscribe (e.minguez@gmail.com)
+- Configure repositories if RHEL (e.minguez@gmail.com)
+- Update openshift_master.py (crmarquesjc@gmail.com)
+- Update the value of 'openshift_grafana_prometheus_serviceaccount' Fix
+  openshift_grafana prometheus serviceaccount default value  in README,The
+  default value is 'promethus','promethus' missed a letter, and there should be
+  an e after the h,so it should be 'prometheus' (3168582@qq.com)
+- kube_proxy_and_dns: add role that runs standalone kube-proxy + DNS
+  (dcbw@redhat.com)
+- Don't reset os_firewall_use_firewalld if iptables is inactive during upgrade
+  (vrutkovs@redhat.com)
+- crio: Don't use file locking (mrunalp@gmail.com)
+- Forcing full cluster restart to treat dcs as set (ewolinet@redhat.com)
+- Ensure gquota set on slash filesystem (mazzystr@gmail.com)
+- Use correct container CLI for docker or cri-o (rteague@redhat.com)
+- openshift-prometheus: improve uninstall process (pgier@redhat.com)
+- Install NetworkManager on OpenStack (tomas@sedovic.cz)
+- Fix incorrect formatting for ca file (vrutkovs@redhat.com)
+- Refactor with_items usage with Ansible package module (rteague@redhat.com)
+- Move openshift_crio_pause_image to openshift_facts (rteague@redhat.com)
+- Update deprecated crio.sock (rteague@redhat.com)
+- Remove docker excluder from image prep packages (rteague@redhat.com)
+- Support ak/orgid and user/password (e.minguez@gmail.com)
+- Fix ASG tagging (mazzystr@gmail.com)
+- Fix loop item (cwilkers@redhat.com)
+- Ensure sebool container_manage_cgroup on upgrade (mgugino@redhat.com)
+- issue #9820 (rcook@redhat.com)
+- Add support for ak/orgid for RHEL (e.minguez@gmail.com)
+- Enable context selector on console upgrade (spadgett@redhat.com)
+- Resolves openshift_release openshift_version conversion for AWS plays
+  (mazzystr@gmail.com)
+- Add extensions to tasks_from: directives (rteague@redhat.com)
+- Remove version_gte_3_10, version_gte_3_11, content_version
+  (sdodson@redhat.com)
+- Control plane static pods (apiserver, etcd, controller-manager) must get
+  highest priority class system-node-critical. Priority admission plugin was
+  incorrectly assigning system-cluster-critical to these pods.
+  (avesh.ncsu@gmail.com)
+- Add retry to openstack heat stack create (tzumainn@redhat.com)
+- fix error in cnx conditional regex (derekmcquay@gmail.com)
+- Get cluster resources for SDN check in health.yml (miciah.masters@gmail.com)
+- Update OLM roles to include resource names (cordell.evan@gmail.com)
+- Update example prometheus object to include securityContext field
+  (cordell.evan@gmail.com)
+- Update aggregated edit role to include verbs (cordell.evan@gmail.com)
+- Add mkfs_opts to extra_storage_setup.yml (mail@jkroepke.de)
+- Revert "Revert "logging configure fluent to merge_json_log""
+  (jcantril@redhat.com)
+- bug 1597282. Quote selector to make it valid json (jcantril@redhat.com)
+- Don't strip working set in Prometheus (sross@redhat.com)
+
+* Tue Aug 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.25.0
+- Fix etcd helper function template error (sdodson@redhat.com)
+- Remove openshift_is_bootstrapped variable (rteague@redhat.com)
+- Fix server csr while loop oc_csr_approve (mgugino@redhat.com)
+- Add %%{?dist} back into specfile release (sdodson@redhat.com)
+- Prefix identity provider's CA files with identity provider names
+  (vrutkovs@redhat.com)
+- Dissalow custom CA file path for providers with CA path (vrutkovs@redhat.com)
+- Add support for ak/orgid (e.minguez@gmail.com)
+- make azure load balancer creation parameters as options (weshi@redhat.com)
+- small typo in comment for vpc (emailscottcollier@gmail.com)
+- Add networkmanager check to sanity checks (mgugino@redhat.com)
+- Ensure default StorageClass reclaimPolicy is set to nil instead of
+  emptystring when reclaim_policy undefined (mawong@redhat.com)
+- Add failed_when to 'Remove the image stream tag' tasks (mgugino@redhat.com)
+- Ensure master image is pre-pulled on upgrade (mgugino@redhat.com)
+- Updating logging eventrouter image name to match ose naming pattern
+  (ewolinet@redhat.com)
+- Rename task name in role rhel_repos (mazzystr@gmail.com)
+- Update the naming of openshift on rhv to ovirt (sradco@redhat.com)
+- Unify cluster-monitoring install variables (fbranczyk@gmail.com)
+- Fix aws elb dictionary fact for dns (mgugino@redhat.com)
+- Cleanup upgrades - control plane + registry_auth (mgugino@redhat.com)
+- Update pause image value in crio.conf after upgrade (umohnani@redhat.com)
+- node kubelet args fail instead of warn (mgugino@redhat.com)
+
+* Mon Aug 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.24.0
+- openshift-prometheus: change node_exporter service port to 9102
+  (pgier@redhat.com)
+- Revert "openshift-prometheus: change node_exporter service port to 9101"
+  (pgier@redhat.com)
+
+* Sun Aug 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.23.0
+- Commit to enable standalone master instances in aws (mazzystr@gmail.com)
+- SDN check: Expand openshift_client_binary variable (miciah.masters@gmail.com)
+- Don't set reclaim policy to empty string (mawong@redhat.com)
+- Add support to static pods for etcd helpers (sdodson@redhat.com)
+- Creating a priority class for cluster-logging fluentd and configuring fluentd
+  to use it (ewolinet@redhat.com)
+- Refactor csr approvals: oc_csr_approve (mgugino@redhat.com)
+- Change aws launch_config & autoscale group name to contain deployment serial
+  (mazzystr@gmail.com)
+- Move filters (mateus.caruccio@getupcloud.com)
+- Overwrite grafana datasource and dashboards (mateus.caruccio@getupcloud.com)
+- Dont fail when datasource or dashboard already exists
+  (mateus.caruccio@getupcloud.com)
+
+* Thu Aug 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.22.0
+- Log driver for JSON should be json-file (umohnani@redhat.com)
+- cluster-monitoring: Add port definition to cluster-monitoring-operator
+  (fbranczyk@gmail.com)
+- cluster-monitoring: conditionally render proxy settings
+  (sergiusz.urbaniak@gmail.com)
+- Reorder master install tasks (rteague@redhat.com)
+- openshift-control-plane: check whether the sync pods are ready before
+  selecting nodes (pgier@redhat.com)
+
+* Thu Aug 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.21.0
+- if the cluster's arch is power (ppc64le) don't install default catalog.
+  create v3.11 imagestreams, quickstart, and db-templates that support ppc64le
+  (jeyoung@redhat.com)
+- GlusterFS: Run kernel_modules.yml once on all nodes (jarrpa@redhat.com)
+- Replace deprecated ec2_ami_find module with ec2_ami_facts
+  (mazzystr@gmail.com)
+- Allow override set scheme (mazzystr@gmail.com)
+- Remove old code related to Atomic Enterprise changes (rteague@redhat.com)
+- python-scandir was renamed in EPEL (vrutkovs@redhat.com)
+- openshift-prometheus: change node_exporter service port to 9101
+  (pgier@redhat.com)
+- Commit to remove openshift_master_cluster_hostname override
+  (mazzystr@gmail.com)
+- Change aws launch_config & autoscale group name to contain deployment serial
+  (mazzystr@gmail.com)
+- Master services are gone in 3.10 (vrutkovs@redhat.com)
+
+* Tue Aug 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.20.0
+- Pass region to AWS az lookup (cewong@redhat.com)
+- SDN check: Use openshift_client_binary (miciah.masters@gmail.com)
+- RHV Provider Role and Playbooks (cwilkers@redhat.com)
+- Fix backcompat with OpenStack inventory (tomas@sedovic.cz)
+- update v3.9 to v3.11 used in the example hosts (gpei@redhat.com)
+- GlusterFS: Remove domain from heketi URL (jarrpa@redhat.com)
+- Bug 1615787 - Blacklist broker-apb (david.j.zager@gmail.com)
+- openshift-metering: Update playbook instructions (chance.zibolski@coreos.com)
+- openshift-metering: Update role to use new metering CRD group and schemas and
+  images helm operator image (chance.zibolski@coreos.com)
+- openshift-metering: Update role to allow creating routes
+  (chance.zibolski@coreos.com)
+- Removing unnecessary fail task (ewolinet@redhat.com)
+- Remove correct duplicated SCC check (vrutkovs@redhat.com)
+- Revert "Remove duplicated bootstrapped SCC check" (vrutkovs@redhat.com)
+- Revert "Skip base package check for openshift_ca role" (roignac@gmail.com)
+- Adding file rollover size and max count policies (ewolinet@redhat.com)
+- Rework node initialization procedure to prepull images earlier
+  (vrutkovs@redhat.com)
+- [RHPAM-1241] - Include RHPAM templates in OpenShift release
+  (fspolti@redhat.com)
+- Cleanup old sanitize inventory warnings (mgugino@redhat.com)
+- Override configmap directly on the install role
+  (alberto.rodriguez.peon@cern.ch)
+- Correct typo in config variable (AlbertoPeon@users.noreply.github.com)
+- Allow to override full Ansible Service Broker config map
+  (alberto.rodriguez.peon@cern.ch)
+- Changed sample inventory to reflect vars used in heat_stack.yaml.j2
+  (dluong@redhat.com)
+- Add kuryr namespace isolation support (ltomasbo@redhat.com)
+
+* Mon Aug 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.19.0
+- 
+
+* Sun Aug 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.18.0
+- Require Ansible 2.6.2 (rteague@redhat.com)
+- Remove 3.10 upgrade playbooks (rteague@redhat.com)
+- Use openshift_image_tag for registry-console upgrade (rteague@redhat.com)
+- Clean up GCP disks during deprovision (ironcladlou@gmail.com)
+- Skip base package check for openshift_ca role (vrutkovs@redhat.com)
+- Update search string for registry console (mgugino@redhat.com)
+- Revert "Set correct vars for registry console" (gugino.michael@yahoo.com)
+- service-catalog: use K8s NamespaceLifecycle admission controller
+  (jaboyd@redhat.com)
+- remove name from tag (m.judeikis@gmail.com)
+- Update sanity_checks.py (cwilkers@redhat.com)
+- Provide better error message for json sanity check (cwilkers@redhat.com)
+- Remove asb-user-access cluster-role when uninstalling ASB
+  (jmontleo@redhat.com)
+- Increase maximum number of open file descriptors for dnsmasq
+  (ichavero@redhat.com)
+
+* Thu Aug 16 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.17.0
+- Update for Bugzilla 1580256 (mazzystr@gmail.com)
+- Remove duplicated bootstrapped SCC check (vrutkovs@redhat.com)
+- cluster_monitoring_operator: update ClusterRole (lserven@gmail.com)
+- Default CFME nodeselector should be a list of str, not a dict
+  (vrutkovs@redhat.com)
+- Added support for ak when registering hosts (e.minguez@gmail.com)
+- Fix audit config interpolation (denis@gladkikh.email)
+- SDN check: Ignore node's canonical name (miciah.masters@gmail.com)
+- fix 1616278. Modify the default logging namespace (jcantril@redhat.com)
+- The file name has changed to heketi_get_key.yml (mbruzek@gmail.com)
+- Bug 1615275. Regenerate session_secret if it can't be used with oauth-proxy
+  (asherkho@redhat.com)
+- Set correct vars for registry console (vrutkovs@redhat.com)
+- Updating to only iterate over oo_nodes_to_config list for
+  oo_elasticsearch_nodes (ewolinet@redhat.com)
+- The l_glusterfs_count is a string need to cast to int for comparison.
+  (mbruzek@gmail.com)
+- Specify external URL for Prometheus (pat2man@gmail.com)
+- Remove unused/broken node cert plays (mgugino@redhat.com)
+
+* Wed Aug 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.16.0
+- remove the olm project (jiazha@redhat.com)
+- fix ASB ClusterServiceBroker removal (jmontleo@redhat.com)
+- Cleanup logging and metrics deprecations (mgugino@redhat.com)
+- Adding default value for openshift_logging_storage_kind (ewolinet@redhat.com)
+- change default sc nam (davis.phillips@gmail.com)
+- update the commands to restart master api and controller
+  (siva_teja.areti@nokia.com)
+- fixing image defaults for logging (ewolinet@redhat.com)
+- node restart: check that all vars are defined (vrutkovs@redhat.com)
+- Revert "loopback_cluster_name: use api_hostname" (roignac@gmail.com)
+- CFME: set default value for openshift_hosted_infra_selector
+  (vrutkovs@redhat.com)
+- vgchange before vgremove update. (sarumuga@redhat.com)
+- To avoid I/O errors, carry out vg deactivate (using vgchange -an) and dmsetup
+  remove device. (sarumuga@redhat.com)
+
+* Tue Aug 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.15.0
+- Update old documentation links (mchappel@redhat.com)
+- Replace OpenShift Enterprise references with OpenShift Container Platform
+  (mchappel@redhat.com)
+- cluster-monitoring: pass through no_proxy setting
+  (sergiusz.urbaniak@gmail.com)
+- Add CentoOS Origin repo for 310 release (dani_comnea@yahoo.com)
+- cluster-monitoring: Fix OCP image names (fbranczyk@gmail.com)
+- Update documentation links, docs.openshift.org -> docs.okd.io
+  (vrutkovs@redhat.com)
+- Require -hyperkube RPMs instead of -master (vrutkovs@redhat.com)
+- [uninstall] Remove hyperkube package (norito.agetsuma@gmail.com)
+- Don't require etcd RPM to be installable on masters (vrutkovs@redhat.com)
+- Don't require fast-datapath channel on RHEL (vrutkovs@redhat.com)
+- No longer require SDN to be installed on nodes (vrutkovs@redhat.com)
+- Update release artifacts for OLM (cordell.evan@gmail.com)
+- GlusterFS: Upgrade playbook (jarrpa@redhat.com)
+- Ensure docker package always installed (mgugino@redhat.com)
+- re-order and required values (rcook@redhat.com)
+- Update route53 dns tasks (mgugino@redhat.com)
+- Refactor registry-console template and vars (mgugino@redhat.com)
+- Fix the ansible-service-broker URL (jmontleo@redhat.com)
+- [bz1552516] set the external url of prometheus (pgier@redhat.com)
+- Update console branding and doc URL for OKD (spadgett@redhat.com)
+- SCC recouncilation has to run with older oc, before node upgrade
+  (vrutkovs@redhat.com)
+- Switch to oc set env, since oc env is now removed (maszulik@redhat.com)
+- Add functionality for AWS DNS framework and route53 provider
+  (mazzystr@gmail.com)
+- matching the name values (rcook@redhat.com)
+- openshift_cluster_monitoring_operator: Fix enterprise images
+  (fbranczyk@gmail.com)
+- adding parameters to allow for load balancer creation (rcook@redhat.com)
+- Limiting additional fact collection to non-masters since we already collect
+  that information for masters (ewolinet@redhat.com)
+- Remove unnecessary passlib check (jkr@adorsys.de)
+
+* Sun Aug 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.14.0
+- Revert "Remove several unused vars" (sdodson@redhat.com)
+- Making the app nodes an optional return. (mbruzek@gmail.com)
+- 'Wait for node to be ready' task should check that all vars are defined
+  (vrutkovs@redhat.com)
+- Ensure kernel-modules not installed on atomic (mgugino@redhat.com)
+- Remove extra namespaces field on configmap (dymurray@redhat.com)
+- Adding min-port to dnsmasq configuration. (rhowe@redhat.com)
+- pull in origin imagestream+template updates (bparees@redhat.com)
+- Revert "openshift_loadbalancer: remove unused vars" (vrutkovs@redhat.com)
+- Remove node CSR approval from upgrade in 3.11 (rteague@redhat.com)
+- loopback_cluster_name: use api_hostname (vrutkovs@redhat.com)
+- Add quotes to node selector (rteague@redhat.com)
+- Bug 1543129 - Add configuration option for ASB local registry namespaces
+  (dymurray@redhat.com)
+- Omit resetting openshift_logging_elasticsearch_pvc_dynamic if volume is NFS
+  (vrutkovs@redhat.com)
+- Set claimRef for logging PVC when NFS volume is created previously
+  (vrutkovs@redhat.com)
+- Fix prometheus annotations typo (vrutkovs@redhat.com)
+
+* Thu Aug 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.13.0
+- SDN check: Fix parsing time stamp's time zone (miciah.masters@gmail.com)
+
+* Thu Aug 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.12.0
+- add equals to quoted skopeo argument (sjenning@redhat.com)
+- Fix missing input_image name error. (kwoodson@redhat.com)
+- excluders cannot be run on Atomic (vrutkovs@redhat.com)
+- Add new line in openshift_node defaults (vrutkovs@redhat.com)
+- Remove openshift_node_use_persistentlocalvolumes (vrutkovs@redhat.com)
+- Remove openshift_node_image_config_latest (vrutkovs@redhat.com)
+- Remove openshift_node_use_<sdn> vars (vrutkovs@redhat.com)
+- Remove openshift_set_node_ip (vrutkovs@redhat.com)
+- Remove openshift_node_proxy_mode (vrutkovs@redhat.com)
+- Remove openshift_master_node_labels (vrutkovs@redhat.com)
+- Remove openshift_manage_node_is_master (vrutkovs@redhat.com)
+- openshift_loadbalancer: remove unused vars (vrutkovs@redhat.com)
+- openshift_hosted: remove openshift_push_via_dns flag (vrutkovs@redhat.com)
+- openshift_hosted: remove ununsed vars (vrutkovs@redhat.com)
+- openshift_facts: remove unused vars (vrutkovs@redhat.com)
+- openshift_expand_partition: remove unused vars (vrutkovs@redhat.com)
+- openshift_examples: remove unused vars (vrutkovs@redhat.com)
+- docker-gc: remove unused var (vrutkovs@redhat.com)
+- Remove unused vars from control_plane role (vrutkovs@redhat.com)
+- Remove unused vars in etcd role (vrutkovs@redhat.com)
+- Be more accuracy for getting def_route_int and def_route_ip
+  (bysnupy@hotmail.com)
+- Remove master env migration module (mgugino@redhat.com)
+- Bump OLM version to 0.6.0 (cordell.evan@gmail.com)
+- nuage specific changes for eVDF and some fixes (siva_teja.areti@nokia.com)
+- Moving file to the image to fix error. (kwoodson@redhat.com)
+- cluster-monitoring: pass through http(s) proxy settings
+  (sergiusz.urbaniak@gmail.com)
+- Fix openshift_openstack: Add public API Record (akrzos@redhat.com)
+- add OSA 3.11 repos for pre-release (m.judeikis@gmail.com)
+- Renames CRI-O pause_image to openshift_crio_pause_image.
+  (jtudelag@redhat.com)
+- pylint: disable travis error (vrutkovs@redhat.com)
+- Adding image info to /etc/origin/image.yml on Azure (kwoodson@redhat.com)
+- Refactor glusterfs for scaleup (mgugino@redhat.com)
+- Quote registry credentials for skopeo (mgugino@redhat.com)
+- Commit to enable AWS multi avail zone (mazzystr@gmail.com)
+- rollback node ports (m.judeikis@gmail.com)
+- Output cert check file to more sensible location (mgugino@redhat.com)
+- Bug 1611841 - Allow customizing admin console certificates
+  (spadgett@redhat.com)
+- Additional cleanup of v1beta1 rbac.authorization (sdodson@redhat.com)
+- Fix glusterfs cluster check when condition (mgugino@redhat.com)
+- Ensure skopeo and atomic are installed in crt role (mgugino@redhat.com)
+- Ensure that monitoring operator has nodes to run (vrutkovs@redhat.com)
+- Don't get file checksum, attributes and mime type in stat module calls
+  (vrutkovs@redhat.com)
+- Bug 1611840 - Correctly set console replicas (spadgett@redhat.com)
+- BZ-1608216 Set timeoutSeconds for readinessProbe on Cassandra RCs
+  (ruben.vp8510@gmail.com)
+- openshift_metering: Add options to use RDS & S3 integrations
+  (chance.zibolski@coreos.com)
+- add conditional clauses for handling cnx versions (derekmcquay@gmail.com)
+- roles/openshift_metering: Fix typo in readme (chance.zibolski@coreos.com)
+- Remove exclude-bootstrapped logic (mgugino@redhat.com)
+- updating doc for SSL cert (dcritch@redhat.com)
+- apply the container_runtime for calico (derekmcquay@gmail.com)
+- Enable console picker (spadgett@redhat.com)
+- Version_compare filter was renamed to version (vrutkovs@redhat.com)
+- Avoid using deprecated syntax for filters in OLM (vrutkovs@redhat.com)
+- fix bug 1608269 (jiazha@redhat.com)
+- oc_obj should correctly identify  'results': [{}] as 'Object not found'
+  (mchappel@redhat.com)
+- router-redeploy: don't check that annotations are missing
+  (vrutkovs@redhat.com)
+- Update Calico versions to the latest (v3.1.3) (mleung975@gmail.com)
+- Always ensure master config has proper url upgrade (mgugino@redhat.com)
+- Move metrics-server out of openshift-monitoring NS (sross@redhat.com)
+- Don't collect node facts on master - these are set during bootstrap
+  (vrutkovs@redhat.com)
+- Don't set OAUTH_CLIENT_ID in console OAuth secret (spadgett@redhat.com)
+- Drop --confirm from migrate storage invocation (maszulik@redhat.com)
+- Adding support for an SSL certificate signed by the OpenStack cluster
+  (dcritch@redhat.com)
+
+* Thu Aug 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.11.0
+- Reorganized OpenStack cloud provider documentation (tzumainn@redhat.com)
+- Add doc note that kuryr requires openstack cloud provider
+  (tzumainn@redhat.com)
+- Beginning deprecation of INSTANCE_RAM var in favor of downwardAPI provided
+  mem limit vol mount (ewolinet@redhat.com)
+- Adding documentation in hosts.example (jcallen@redhat.com)
+- Fix ASB user and password defaults (jmontleo@redhat.com)
+- Add a license parameter to gcloud command (jcallen@redhat.com)
+- adding unmount task below the backup task (bysnupy@hotmail.com)
+- Bug 1610224 - Unable to find container log in Elasticsearch when using cri-o
+  (rmeggins@redhat.com)
+- Added OpenStack security group requirements section (tzumainn@redhat.com)
+- Add containerized glusterfs cluster health check (mgugino@redhat.com)
+- Allow user to specify local openstack.conf (tzumainn@redhat.com)
+- Avoid to call install_node_exporter task during uninstallation.
+  (gbsalinetti@extraordy.com)
+- Add bool filter to all instances of openshift_use_crio (rteague@redhat.com)
+- Cleanup node bootstrap / scaleup code (mgugino@redhat.com)
+- Allow shared_non_ops as kibana index mode (farandac@redhat.com)
+- AWS: reboot instance before sealing (jchaloup@redhat.com)
+- Fix docker reg auth bugs (mgugino@redhat.com)
+- Clarified scaling docs, combining master/infra/app sections
+  (tzumainn@redhat.com)
+- ignore failing dns clean errors when running openstack uninstall playbook
+  (tzumainn@redhat.com)
+- Updating how we get node names for logging hosts to build sysctl for
+  (ewolinet@redhat.com)
+- Allow disabling Network Manager managed dns (arun.neelicattu@gmail.com)
+
 * Fri Jul 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.10.0
 - Disable yum-cron by default on GCP (ccoleman@redhat.com)
 - Revert "logging configure fluent to merge_json_log" (jcantril@redhat.com)

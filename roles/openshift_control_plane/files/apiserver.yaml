@@ -11,6 +11,7 @@ metadata:
 spec:
   restartPolicy: Always
   hostNetwork: true
+  priorityClassName: system-node-critical
   containers:
   - name: api
     image: docker.io/openshift/origin:v3.11.0

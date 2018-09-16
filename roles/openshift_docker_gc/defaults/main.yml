@@ -1,7 +1,4 @@
 ---
-r_enable_docker_gc: "{{ openshift_crio_enable_docker_gc | default(True) }}"
-r_docker_gc_node_selectors: "{{ openshift_crio_docker_gc_node_selector | default({'runtime': 'cri-o'}) }}"
-
 openshift_docker_gc_image_dict:
   origin: "origin"
   openshift-enterprise: "ose-control-plane"

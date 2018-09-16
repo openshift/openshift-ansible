@@ -13,8 +13,6 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- import_playbook: certificates.yml
-
 - name: Disable excluders and gather facts
   hosts: oo_masters_to_config
   roles:
@@ -25,23 +23,6 @@
       name: openshift_excluder
     vars:
       r_openshift_excluder_action: disable
-
-  - name: Check for RPM generated config marker file .config_managed
-    stat:
-      path: /etc/origin/.config_managed
-    register: rpmgenerated_config
-
-  - name: Remove RPM generated config files if present
-    file:
-      path: "/etc/origin/{{ item }}"
-      state: absent
-    when:
-    - rpmgenerated_config.stat.exists == true
-    - openshift_deployment_type == 'openshift-enterprise'
-    with_items:
-    - master
-    - node
-    - .config_managed
 
   - openshift_facts:
       role: master
@@ -58,10 +39,8 @@
         console_url: "{{ openshift_master_console_url | default(None) }}"
         console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
         public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
-  - openshift_facts:
-      role: node
-      local_facts:
-        bootstrapped: true
+
+- import_playbook: certificates.yml
 
 - name: Generate or retrieve existing session secrets
   hosts: oo_first_master
@@ -94,9 +73,9 @@
 
   - role: openshift_control_plane
   - role: tuned
-  - role: nuage_ca
-    when: openshift_use_nuage | default(false) | bool
   - role: nuage_common
+    when: openshift_use_nuage | default(false) | bool
+  - role: nuage_ca
     when: openshift_use_nuage | default(false) | bool
   - role: nuage_master
     when: openshift_use_nuage | default(false) | bool

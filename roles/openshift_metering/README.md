@@ -6,17 +6,9 @@ This role installs the OpenShift [Metering](https://github.com/operator-framewor
 
 ## Installation
 
-To install Openshift Metering, set this variable:
+To install Openshift Metering, include the `install.yml` taskfile from your
+playbook, to uninstall use the `uninstall.yml` taskfile from your playbook.
 
-```yaml
-openshift_metering_install: true
-```
-
-To uninstall, set:
-
-```yaml
-openshift_metering_install: false
-```
 
 ## Configuration
 
@@ -27,9 +19,10 @@ For example:
 
 ```
 openshift_metering_config:
-  metering-operator:
-    config:
-      awsAccessKeyID: "REPLACEME"
+  reporting-operator:
+    spec:
+      config:
+        awsAccessKeyID: "REPLACEME"
 ```
 
 Updating the operator itself to a custom image can be done by setting `openshift_metering_operator_image` to a docker image and tag that should be used.
@@ -37,10 +30,12 @@ Updating the operator itself to a custom image can be done by setting `openshift
 For example:
 
 ```
-openshift_metering_config: quay.io/coreos/chargeback-helm-operator:latest
+openshift_metering_operator_image: quay.io/coreos/metering-helm-operator:latest
 ```
 
 Using a custom project/namespace can be done by specifying `__openshift_metering_namespace`.
+
+For a full list of variables, and descriptions of what they do see the [defaults/main.yml](defaults/main.yml) variables file.
 
 ## License
 

@@ -14,13 +14,13 @@
 #    include the masters and usually includes infra nodes.
 # 5. The init/main.yml playbook has been invoked
 
-- import_playbook: ../../openshift-glusterfs/private/config.yml
+- import_playbook: ../../openshift-glusterfs/private/new_install.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0
 
 - import_playbook: ../../openshift-hosted/private/config.yml
 
 - import_playbook: ../../openshift-monitoring/private/config.yml
-  when: openshift_monitoring_deploy | default(false) | bool
+  when: openshift_cluster_monitoring_operator_install | default(true) | bool
 
 - import_playbook: ../../openshift-metering/private/config.yml
   when: openshift_metering_install | default(false) | bool

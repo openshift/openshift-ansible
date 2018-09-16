@@ -1,4 +1,4 @@
-# This deletes *ALL* Origin and OpenShift Enterprise content installed by
+# This deletes *ALL* Origin and OpenShift Container Platform content installed by
 # ansible.  This includes:
 #
 #    configuration
@@ -49,23 +49,6 @@
     failed_when: false
     when: openshift_use_openshift_sdn | default(True) | bool
 
-- hosts: masters
-  become: yes
-  tasks:
-  - name: Stop services
-    service: name={{ item }} state=stopped
-    with_items:
-    - atomic-openshift-master
-    - atomic-openshift-master-api
-    - atomic-openshift-master-controllers
-    - openshift-master
-    - openshift-master-api
-    - openshift-master-controllers
-    - origin-master
-    - origin-master-api
-    - origin-master-controllers
-    failed_when: false
-
 - hosts: etcd
   become: yes
   tasks:
@@ -98,49 +81,61 @@
     with_items:
     - firewalld
 
-  - block:
-    - block:
+  - when: openshift_remove_all | default(true) | bool
+    block:
+
+    - when: not openshift_is_atomic | bool
+      block:
+
       - name: Remove packages
-        package: name={{ item }} state=absent
-        with_items:
-        - atomic-openshift
-        - atomic-openshift-clients
-        - atomic-openshift-excluder
-        - atomic-openshift-docker-excluder
-        - atomic-openshift-node
-        - atomic-openshift-sdn-ovs
-        - cockpit-bridge
-        - cockpit-docker
-        - cockpit-system
-        - cockpit-ws
-        - kubernetes-client
-        - openshift
-        - openshift-node
-        - openshift-sdn
-        - openshift-sdn-ovs
-        - origin
-        - origin-excluder
-        - origin-docker-excluder
-        - origin-clients
-        - origin-node
-        - origin-sdn-ovs
-        - tuned-profiles-atomic-openshift-node
-        - tuned-profiles-origin-node
+        package:
+          name: "{{ pkg_list | join(',') }} "
+          state: absent
+        vars:
+          pkg_list:
+          - atomic-openshift
+          - atomic-openshift-clients
+          - atomic-openshift-excluder
+          - atomic-openshift-docker-excluder
+          - atomic-openshift-node
+          - atomic-openshift-sdn-ovs
+          - atomic-openshift-hyperkube
+          - cockpit-bridge
+          - cockpit-docker
+          - cockpit-system
+          - cockpit-ws
+          - kubernetes-client
+          - openshift
+          - openshift-node
+          - openshift-sdn
+          - openshift-sdn-ovs
+          - origin
+          - origin-excluder
+          - origin-docker-excluder
+          - origin-clients
+          - origin-node
+          - origin-sdn-ovs
+          - origin-hyperkube
+          - tuned-profiles-atomic-openshift-node
+          - tuned-profiles-origin-node
         register: result
         until: result is succeeded
 
       - name: Remove OVS package
-        package: name=openvswitch state=absent
+        package:
+          name: openvswitch
+          state: absent
         register: result
         until: result is succeeded
         when: openshift_use_openshift_sdn | default(True) | bool
 
       - name: Remove flannel package
-        package: name=flannel state=absent
+        package:
+          name: flannel
+          state: absent
         when: openshift_use_flannel | default(false) | bool
         register: result
         until: result is succeeded
-      when: not openshift_is_atomic | bool
 
     - shell: systemctl reset-failed
       changed_when: False
@@ -170,29 +165,6 @@
       with_items:
       - tun0
       when: openshift_use_openshift_sdn | default(True) | bool
-
-    when: openshift_remove_all | default(true) | bool
-
-  - shell: atomic uninstall "{{ item }}"-master-api
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openshift-enterprise
-    - origin
-
-  - shell: atomic uninstall "{{ item }}"-master-controllers
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openshift-enterprise
-    - origin
-
-  - shell: atomic uninstall "{{ item }}"-master
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openshift-enterprise
-    - origin
 
   - shell: atomic uninstall "{{ item }}"-node
     changed_when: False
@@ -346,27 +318,32 @@
     - atomic-openshift-master
 
   - name: Remove packages
-    package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
-    with_items:
-    - atomic-openshift
-    - atomic-openshift-clients
-    - atomic-openshift-excluder
-    - atomic-openshift-docker-excluder
-    - atomic-openshift-master
-    - cockpit-bridge
-    - cockpit-docker
-    - cockpit-system
-    - cockpit-ws
-    - corosync
-    - kubernetes-client
-    - openshift
-    - openshift-master
-    - origin
-    - origin-clients
-    - origin-excluder
-    - origin-docker-excluder
-    - origin-master
+    package:
+      name: "{{ pkg_list | join(',') }}"
+      state: absent
+    when:
+    - not openshift_is_atomic | bool
+    - openshift_remove_all | default(True) | bool
+    vars:
+      pkg_list:
+      - atomic-openshift
+      - atomic-openshift-clients
+      - atomic-openshift-excluder
+      - atomic-openshift-docker-excluder
+      - atomic-openshift-master
+      - cockpit-bridge
+      - cockpit-docker
+      - cockpit-system
+      - cockpit-ws
+      - corosync
+      - kubernetes-client
+      - openshift
+      - openshift-master
+      - origin
+      - origin-clients
+      - origin-excluder
+      - origin-docker-excluder
+      - origin-master
     register: result
     until: result is succeeded
 
@@ -425,28 +402,7 @@
     with_items:
     - /etc/ansible/facts.d/openshift.fact
     - /etc/corosync
-    - /etc/openshift
-    - /etc/openshift-sdn
-    - /etc/systemd/system/atomic-openshift-master.service
-    - /etc/systemd/system/atomic-openshift-master-api.service
-    - /etc/systemd/system/atomic-openshift-master-controllers.service
-    - /etc/systemd/system/origin-master.service
-    - /etc/systemd/system/origin-master-api.service
-    - /etc/systemd/system/origin-master-controllers.service
-    - /etc/sysconfig/atomic-openshift-master-api
-    - /etc/sysconfig/atomic-openshift-master-controllers
-    - /etc/sysconfig/origin-master
-    - /etc/sysconfig/origin-master-api
-    - /etc/sysconfig/origin-master-controllers
-    - /etc/sysconfig/openshift-master
-    - /etc/sysconfig/origin-master
-    - /etc/sysconfig/origin-master-api
-    - /etc/sysconfig/origin-master-controllers
     - /usr/share/openshift/examples
-    - /usr/lib/systemd/system/atomic-openshift-master-api.service
-    - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
-    - /usr/lib/systemd/system/origin-master-api.service
-    - /usr/lib/systemd/system/origin-master-controllers.service
     - /usr/local/bin/openshift
     - /usr/local/bin/oadm
     - /usr/local/bin/oc
@@ -458,12 +414,6 @@
     with_items:
     - /etc/systemd/system/openvswitch.service
     when: openshift_use_openshift_sdn | default(True) | bool
-
-  # Since we are potentially removing the systemd unit files for separated
-  # master-api and master-controllers services, so we need to reload the
-  # systemd configuration manager
-  - name: Reload systemd manager configuration
-    command: systemctl daemon-reload
 
 - hosts: etcd
   become: yes
@@ -489,11 +439,16 @@
     failed_when: false
 
   - name: Remove packages
-    package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
-    with_items:
-    - etcd
-    - etcd3
+    package:
+      name: "{{ pkg_list | join(',') }}"
+      state: absent
+    when:
+    - not openshift_is_atomic | bool
+    - openshift_remove_all | default(True) | bool
+    vars:
+      pkg_list:
+      - etcd
+      - etcd3
     register: result
     until: result is succeeded
 
@@ -549,10 +504,12 @@
     - firewalld
 
   - name: Remove packages
-    package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
-    with_items:
-    - haproxy
+    package:
+      name: haproxy
+      state: absent
+    when:
+    - not openshift_is_atomic | bool
+    - openshift_remove_all | default(True) | bool
     register: result
     until: result is succeeded
 

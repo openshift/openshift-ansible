@@ -1,7 +1,7 @@
 ---
-- include_tasks: glusterfs_registry_facts.yml
+- import_tasks: glusterfs_registry_facts.yml
 
-- include_tasks: glusterfs_common.yml
+- import_tasks: glusterfs_common.yml
   when:
   - glusterfs_nodes | default([]) | count > 0
   - "'glusterfs' not in groups or glusterfs_nodes != groups.glusterfs"

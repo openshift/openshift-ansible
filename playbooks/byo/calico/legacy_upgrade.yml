@@ -5,6 +5,9 @@
   - name: Check legacy upgrade exists
     stat:
       path: /lib/systemd/system/calico.service
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: sym
   - fail:
       msg: No service to upgrade
@@ -37,7 +40,7 @@
   gather_facts: no
   tasks:
   - name: Prepull Images
-    command: "docker pull {{ calico_node_image }}"
+    command: "{{ openshift_container_cli }} pull {{ calico_node_image }}"
 
 - name: Calico Upgrade | Initiate
   hosts: oo_first_master

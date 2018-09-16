@@ -1,17 +1,6 @@
 ---
 # We need docker service up to remove all the images, but these services will keep
 # trying to re-start and thus re-pull the images we're trying to delete.
-- name: Stop containerized services
-  service: name={{ item }} state=stopped
-  with_items:
-  - "{{ openshift_service_type }}-master-api"
-  - "{{ openshift_service_type }}-master-controllers"
-  - "{{ openshift_service_type }}-node"
-  - etcd_container
-  - openvswitch
-  failed_when: false
-  when: openshift_is_containerized | bool
-
 - name: Restart static master services
   command: /usr/local/bin/master-restart "{{ item }}"
   with_items:
@@ -48,7 +37,9 @@
   delay: 30
 
 - name: Upgrade Docker
-  package: name=docker{{ '-' + docker_version }} state=present
+  package:
+    name: docker{{ '-' + docker_version }}
+    state: present
   register: result
   until: result is succeeded
 

@@ -74,7 +74,7 @@
     state: present
     name: asb-access
     rules:
-      - nonResourceURLs: ["/ansible-service-broker", "/ansible-service-broker/*"]
+      - nonResourceURLs: ["/osb", "/osb/*"]
         verbs: ["get", "post", "put", "patch", "delete"]
 
 - name: Bind admin cluster-role to asb serviceaccount
@@ -210,7 +210,7 @@
     kind: ConfigMap
     content:
       path: /tmp/cmout
-      data: "{{ lookup('template', 'configmap.yaml.j2') | from_yaml }}"
+      data: "{{ ansible_service_broker_full_broker_config_map | default(lookup('template', 'configmap.yaml.j2') | from_yaml) }}"
 
 - oc_secret:
     name: asb-registry-auth
@@ -236,7 +236,7 @@
         metadata:
           name: ansible-service-broker
         spec:
-          url: https://asb.openshift-ansible-service-broker.svc:1338/ansible-service-broker
+          url: https://asb.openshift-ansible-service-broker.svc:1338/osb
           authInfo:
             bearer:
               secretRef:

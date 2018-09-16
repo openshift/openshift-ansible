@@ -2,45 +2,13 @@
 # this is used to set the logging variables from deprecated values to the current variables names
 # this file should be deleted once variables are no longer honored
 
-- conditional_set_fact:
-    facts: "{{ hostvars[inventory_hostname] }}"
-    vars:
-      logging_hostname: openshift_hosted_logging_hostname
-      logging_ops_hostname: openshift_hosted_logging_ops_hostname
-      logging_elasticsearch_cluster_size: openshift_hosted_logging_elasticsearch_cluster_size
-      logging_elasticsearch_ops_cluster_size: openshift_hosted_logging_elasticsearch_ops_cluster_size
-      openshift_logging_storage_kind: openshift_hosted_logging_storage_kind
-      openshift_logging_storage_host: openshift_hosted_logging_storage_host
-      openshift_logging_storage_labels: openshift_hosted_logging_storage_labels
-      openshift_logging_storage_volume_size: openshift_hosted_logging_storage_volume_size
-      openshift_loggingops_storage_kind: openshift_hosted_loggingops_storage_kind
-      openshift_loggingops_storage_host: openshift_hosted_loggingops_storage_host
-      openshift_loggingops_storage_labels: openshift_hosted_loggingops_storage_labels
-      openshift_loggingops_storage_volume_size: openshift_hosted_loggingops_storage_volume_size
-      openshift_logging_use_ops: openshift_hosted_logging_enable_ops_cluster
-      openshift_logging_image_pull_secret: openshift_hosted_logging_image_pull_secret
-      openshift_logging_kibana_hostname: openshift_hosted_logging_hostname
-      openshift_logging_kibana_ops_hostname: openshift_hosted_logging_ops_hostname
-      openshift_logging_kibana_nodeselector: openshift_hosted_logging_kibana_nodeselector
-      openshift_logging_kibana_ops_nodeselector: openshift_hosted_logging_kibana_ops_nodeselector
-      openshift_logging_fluentd_journal_source: openshift_hosted_logging_journal_source
-      openshift_logging_fluentd_journal_read_from_head: openshift_hosted_logging_journal_read_from_head
-      openshift_logging_fluentd_nodeselector: openshift_hosted_logging_fluentd_nodeselector_label
-      openshift_logging_es_memory_limit: openshift_hosted_logging_elasticsearch_instance_ram
-      openshift_logging_es_nodeselector: openshift_hosted_logging_elasticsearch_nodeselector
-      openshift_logging_es_ops_nodeselector: openshift_hosted_logging_elasticsearch_ops_nodeselector
-      openshift_logging_es_ops_memory_limit: openshift_hosted_logging_elasticsearch_ops_instance_ram
-      openshift_logging_storage_access_modes: openshift_hosted_logging_storage_access_modes
-      openshift_logging_master_public_url: openshift_hosted_logging_master_public_url
-      openshift_logging_image_prefix: openshift_hosted_logging_deployer_prefix
-      openshift_logging_image_version: openshift_hosted_logging_deployer_version
-      openshift_logging_install_logging: openshift_hosted_logging_deploy
-      openshift_logging_curator_nodeselector: openshift_hosted_logging_curator_nodeselector
-      openshift_logging_curator_ops_nodeselector: openshift_hosted_logging_curator_ops_nodeselector
-
+# - conditional_set_fact:
+#     facts: "{{ hostvars[inventory_hostname] }}"
+#     vars:
+#       new: old
 
 - set_fact:
-    openshift_logging_elasticsearch_pvc_dynamic: "{{ 'true' if openshift_logging_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_logging_elasticsearch_pvc_dynamic: "{{ 'true' if openshift_logging_storage_kind | default(none) == 'dynamic' else omit if openshift_logging_storage_kind | default(none) == 'nfs' else '' }}"
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_storage_volume_size | default('10Gi') if openshift_logging_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
     openshift_logging_elasticsearch_pvc_prefix: "{{ 'logging-es' if openshift_logging_storage_kind | default(none) == 'dynamic' else '' }}"
     openshift_logging_elasticsearch_ops_pvc_dynamic: "{{ 'true' if openshift_loggingops_storage_kind | default(none) == 'dynamic' else '' }}"

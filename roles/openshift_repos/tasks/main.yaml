@@ -4,7 +4,9 @@
   block:
   # TODO: This needs to be removed and placed into a role
   - name: Ensure libselinux-python is installed
-    package: name=libselinux-python state=present
+    package:
+      name: libselinux-python
+      state: present
     register: result
     until: result is succeeded
 
@@ -38,8 +40,7 @@
       when:
       - ansible_distribution == 'RedHat'
       - openshift_deployment_type == 'openshift-enterprise'
-      - rhsub_user is defined
-      - rhsub_pass is defined
+      - (rhsub_user is defined and rhsub_pass is defined) or (rhsub_ak is defined and rhsub_orgid is defined)
 
     - include_tasks: centos_repos.yml
       when:

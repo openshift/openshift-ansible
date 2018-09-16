@@ -490,6 +490,8 @@ The Ansible `package` module calls the associated package manager for the underl
 ---
 # tasks.yml
 - name: Install etcd (for etcdctl)
-  package: name=etcd state=latest
+  package:
+    name: etcd
+    state: latest
   register: install_result
 ----

@@ -10,7 +10,7 @@ This role requires that the control host it is run on has Java installed as part
 generation for Elasticsearch (it uses JKS) as well as openssl to sign certificates.
 
 As part of the installation, it is recommended that you add the Fluentd node selector label
-to the list of persisted [node labels](https://docs.openshift.org/latest/install_config/install/advanced_install.html#configuring-node-host-labels).
+to the list of persisted [node labels](https://docs.okd.io/latest/install_config/install/advanced_install.html#configuring-node-host-labels).
 
 ### Required vars:
 
@@ -232,7 +232,7 @@ whether to setup `in_tail` plugin to parse cri-o formatted logs in
 
 Image update procedure
 ----------------------
-An upgrade of the logging stack from older version to newer is an automated process and should be performed by calling appropriate ansible playbook and setting required ansible variables in your inventory as documented in https://docs.openshift.org/.
+An upgrade of the logging stack from older version to newer is an automated process and should be performed by calling appropriate ansible playbook and setting required ansible variables in your inventory as documented in https://docs.okd.io/.
 
 Following text describes manual update of the logging images without version upgrade. To determine the current version of images being used you can.
 ```

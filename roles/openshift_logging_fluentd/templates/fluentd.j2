@@ -29,7 +29,7 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
-      priorityClassName: system-cluster-critical
+      priorityClassName: cluster-logging
       serviceAccountName: "{{ daemonset_serviceAccount }}"
       nodeSelector:
         {{ fluentd_nodeselector_key }}: "{{ fluentd_nodeselector_value }}"
@@ -83,6 +83,9 @@ spec:
         - name: dockercfg
           mountPath: /etc/sysconfig/docker
           readOnly: true
+        - name: originnodecfg
+          mountPath: /etc/origin/node
+          readOnly: true
         - name: dockerdaemoncfg
           mountPath: /etc/docker
           readOnly: true
@@ -96,6 +99,8 @@ spec:
           readOnly: true
 {% endif %}
         env:
+        - name: "MERGE_JSON_LOG"
+          value: "{{ openshift_logging_fluentd_merge_json_log }}"
         - name: "K8S_HOST_URL"
           value: "{{ openshift_logging_fluentd_master_url }}"
         - name: "ES_HOST"
@@ -241,6 +246,9 @@ spec:
       - name: dockercfg
         hostPath:
           path: /etc/sysconfig/docker
+      - name: originnodecfg
+        hostPath:
+          path: /etc/origin/node
       - name: dockerdaemoncfg
         hostPath:
           path: /etc/docker

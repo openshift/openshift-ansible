@@ -1,8 +1,0 @@
----
-- import_playbook: ../init/main.yml
-
-- import_playbook: private/redeploy-certificates.yml
-
-- import_playbook: private/restart.yml
-  vars:
-    openshift_node_restart_docker_required: False

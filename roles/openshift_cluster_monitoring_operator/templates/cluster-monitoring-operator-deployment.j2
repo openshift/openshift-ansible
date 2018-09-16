@@ -42,6 +42,9 @@ spec:
         - "-tags=kube-state-metrics={{ openshift_image_tag }}"
         - "-tags=kube-rbac-proxy={{ openshift_image_tag }}"
 {% endif %}
+        ports:
+        - containerPort: 8080
+          name: http
         resources:
           limits:
             cpu: 20m

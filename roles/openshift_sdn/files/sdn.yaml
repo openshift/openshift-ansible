@@ -102,6 +102,9 @@ spec:
           oc config --config=/tmp/kubeconfig set-credentials sa "--token=$( cat /var/run/secrets/kubernetes.io/serviceaccount/token )"
           oc config --config=/tmp/kubeconfig set-context "$( oc config --config=/tmp/kubeconfig current-context )" --user=sa
           # Launch the network process
+          if which openshift-sdn; then
+            exec openshift-sdn --config=/etc/origin/node/node-config.yaml --kubeconfig=/tmp/kubeconfig --loglevel=${DEBUG_LOGLEVEL:-2}
+          fi
           exec openshift start network --config=/etc/origin/node/node-config.yaml --kubeconfig=/tmp/kubeconfig --loglevel=${DEBUG_LOGLEVEL:-2}
 
         securityContext:

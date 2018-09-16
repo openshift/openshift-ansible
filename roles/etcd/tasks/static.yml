@@ -3,7 +3,7 @@
 - import_tasks: set_facts.yml
 
 - name: Check that etcd image is present
-  command: 'docker images -q "{{ etcd_image }}"'
+  command: "{{ openshift_container_cli }} images -q {{ etcd_image }}"
   register: etcd_image_exists
 
 - name: Pre-pull etcd image
@@ -16,6 +16,8 @@
   async: 600
   poll: 0
   register: etcd_prepull
+
+- import_tasks: drop_etcdctl.yml
 
 - name: setup firewall
   import_tasks: firewall.yml

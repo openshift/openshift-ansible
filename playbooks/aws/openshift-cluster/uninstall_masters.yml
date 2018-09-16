@@ -8,9 +8,9 @@
 
   - name: Alert user to variables needed - region
     debug:
-      msg: "openshift_aws_region={{ openshift_aws_region }}"
+      msg: "openshift_aws_region={{ openshift_aws_region | default('us-east-1') }}"
 
-- name: Delete the master node group
+- name: Delete the master instances
   hosts: localhost
   tasks:
   - name: delete masters

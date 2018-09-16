@@ -111,7 +111,7 @@ scrape_configs:
   metric_relabel_configs:
   - source_labels: [__name__]
     action: drop
-    regex: 'container_(cpu_user_seconds_total|cpu_cfs_periods_total|memory_usage_bytes|memory_swap|memory_working_set_bytes|memory_cache|last_seen|fs_(read_seconds_total|write_seconds_total|sector_(.*)|io_(.*)|reads_merged_total|writes_merged_total)|tasks_state|memory_failcnt|memory_failures_total|spec_memory_swap_limit_bytes|fs_(.*)_bytes_total|spec_(.*))'
+    regex: 'container_(cpu_user_seconds_total|cpu_cfs_periods_total|memory_usage_bytes|memory_swap|memory_cache|last_seen|fs_(read_seconds_total|write_seconds_total|sector_(.*)|io_(.*)|reads_merged_total|writes_merged_total)|tasks_state|memory_failcnt|memory_failures_total|spec_memory_swap_limit_bytes|fs_(.*)_bytes_total|spec_(.*))'
 
   relabel_configs:
   - action: labelmap
@@ -146,7 +146,7 @@ scrape_configs:
     # drop logging components managed by other scrape targets
     - source_labels: [__meta_kubernetes_namespace]
       action: drop
-      regex: '{{ openshift_logging_namespace | default('logging') }}'
+      regex: '{{ openshift_logging_namespace | default('openshift-logging') }}'
     # drop infrastructure components managed by other scrape targets
     - source_labels: [__meta_kubernetes_service_name]
       action: drop
@@ -199,7 +199,7 @@ scrape_configs:
   - role: endpoints
     namespaces:
       names:
-      - '{{ openshift_logging_namespace | default('logging') }}'
+      - '{{ openshift_logging_namespace | default('openshift-logging') }}'
 
   relabel_configs:
     # drop infrastructure components managed by other scrape targets
@@ -232,7 +232,7 @@ scrape_configs:
       action: replace
       target_label: kubernetes_name
 
-# Scrape config for node-exporter, which is expected to be running on port 9100.
+# Scrape config for node-exporter, which is expected to be running on port 9102.
 - job_name: 'kubernetes-nodes-exporter'
 
   tls_config:
@@ -270,7 +270,7 @@ scrape_configs:
   relabel_configs:
   - source_labels: [__address__]
     regex: '(.*):10250'
-    replacement: '${1}:9100'
+    replacement: '${1}:9102'
     target_label: __address__
   - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]
     target_label: __instance__

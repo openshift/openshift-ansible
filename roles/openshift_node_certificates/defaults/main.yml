@@ -1,4 +1,0 @@
----
-openshift_node_cert_expire_days: 730
-
-openshift_docker_service_name: "docker"

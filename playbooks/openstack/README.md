@@ -70,6 +70,9 @@ The OpenStack environment must satisfy these requirements:
     for production
 * The keypair for SSH must be available in OpenStack
 * You must have a`keystonerc` file that lets you talk to the OpenStack services
+* In order to install an OpenShift cluster and deploy services, we recommend
+that you have a minimum of 30 security groups, 200 security group rules, and 200
+ports available in your quota.
 
 It is also strongly recommended that you configure an external Neutron network
 with a floating IP address pool.
@@ -227,8 +230,8 @@ $ ansible-playbook --user openshift \
 [devstack]: https://docs.openstack.org/devstack/
 [tripleo]: http://tripleo.org/
 [packstack]: https://www.rdoproject.org/install/packstack/
-[configure-authentication]: https://docs.openshift.org/latest/install_config/configuring_authentication.html
-[hardware-requirements]: https://docs.openshift.org/latest/install_config/install/prerequisites.html#hardware
+[configure-authentication]: https://docs.okd.io/latest/install_config/configuring_authentication.html
+[hardware-requirements]: https://docs.okd.io/latest/install_config/install/prerequisites.html#hardware
 [origin]: https://www.openshift.org/
 [centos7]: https://www.centos.org/
 [sample-openshift-inventory]: https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example

@@ -54,6 +54,7 @@ openshift_openstack_external_network_name: "public"
 
 # # Kuryr can use a different subnet per namespace
 # openshift_kuryr_subnet_driver: namespace
+# openshift_kuryr_sg_driver: namespace
 
 # If you VM images will name the ethernet device different than 'eth0',
 # override this
@@ -105,6 +106,15 @@ openshift_openstack_num_infra: 1
 openshift_openstack_num_cns: 0
 openshift_openstack_num_nodes: 2
 
+# # Public IP Allocation
+# # - manage which node roles are allocated public IP addresses
+# # - by default, all roles are given Public IP addresses
+#openshift_openstack_master_floating_ip: true
+#openshift_openstack_infra_floating_ip: true
+#openshift_openstack_etcd_floating_ip: true
+#openshift_openstack_load_balancer_floating_ip: true
+#openshift_openstack_compute_floating_ip: true
+
 # # Used Flavors
 # # - set specific flavors for roles by uncommenting corresponding lines
 # # - note: do note remove openshift_openstack_default_flavor definition
@@ -129,12 +139,12 @@ openshift_openstack_default_flavor: "m1.medium"
 # # Docker volume size
 # # - set specific volume size for roles by uncommenting corresponding lines
 # # - note: do not remove docker_default_volume_size definition
-#openshift_openstack_docker_master_volume_size: "15"
-#openshift_openstack_docker_infra_volume_size: "15"
-#openshift_openstack_docker_cns_volume_size: "15"
-#openshift_openstack_docker_node_volume_size: "15"
-#openshift_openstack_docker_etcd_volume_size: "2"
-#openshift_openstack_docker_lb_volume_size: "5"
+#openshift_openstack_master_volume_size: "15"
+#openshift_openstack_infra_volume_size: "15"
+#openshift_openstack_cns_volume_size: "15"
+#openshift_openstack_node_volume_size: "15"
+#openshift_openstack_etcd_volume_size: "2"
+#openshift_openstack_lb_volume_size: "5"
 openshift_openstack_docker_volume_size: "15"
 
 ## Specify server group policies for master and infra nodes. Nova must be configured to
@@ -151,9 +161,12 @@ openshift_openstack_pool_start: "192.168.99.3"
 # The ending IP address for the OpenStack subnet allocation pool.
 openshift_openstack_pool_end: "192.168.99.254"
 
-## Red Hat subscription:
+## Red Hat subscription using user/password
 #rhsub_user: '<username>'
 #rhsub_pass: '<password>'
+# Or if using activation key:
+#rhsub_ak: '<ak>'
+#rhsub_orgid: '<orgid>'
 #rhsub_pool: '<pool name>'
 
 

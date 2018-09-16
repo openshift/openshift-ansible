@@ -16,5 +16,6 @@
     ansible_service_broker_registry_organization: "{{ ansible_service_broker_registry_organization | default(__ansible_service_broker_registry_organization) }}"
     ansible_service_broker_registry_tag: "{{ ansible_service_broker_registry_tag | default(__ansible_service_broker_registry_tag) }}"
     ansible_service_broker_registry_whitelist: "{{ ansible_service_broker_registry_whitelist | default(__ansible_service_broker_registry_whitelist) }}"
+    ansible_service_broker_registry_blacklist: "{{ ansible_service_broker_registry_blacklist | default(__ansible_service_broker_registry_blacklist) }}"
 
 - include_tasks: validate_facts.yml

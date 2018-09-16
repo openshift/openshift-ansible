@@ -7,12 +7,12 @@
 
 XPAAS_VERSION=ose-v1.4.14
 RHDM70_VERSION=7.0.1.GA
-RHPAM70_VERSION=7.0.0.GA
+RHPAM70_VERSION=7.0.2.GA
 DG_72_VERSION=datagrid72-dev
 ORIGIN_VERSION=${1:-v3.11}
 ORIGIN_BRANCH=${2:-master}
 RHAMP_TAG=2.0.0.GA
-EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
+EXAMPLES_BASE=$(pwd)/files/examples/latest
 find ${EXAMPLES_BASE} -name '*.json' -delete
 TEMP=`mktemp -d`
 pushd $TEMP

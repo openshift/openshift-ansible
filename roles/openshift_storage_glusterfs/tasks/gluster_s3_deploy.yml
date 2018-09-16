@@ -1,29 +1,4 @@
 ---
-- name: Delete pre-existing gluster-s3 resources
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: "{{ item.kind }}"
-    name: "{{ item.name | default(omit) }}"
-    selector: "{{ item.selector | default(omit) }}"
-    state: absent
-  with_items:
-  - kind: "all,svc,deploy,secret,sc,pvc"
-    selector: "gluster-s3"
-  failed_when: False
-  when: glusterfs_wipe
-
-- name: Wait for gluster-s3 pods to terminate
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: pod
-    state: list
-    selector: "glusterfs=s3-{{ glusterfs_name }}-provisioner-pod"
-  register: gluster_s3_pod
-  until: "gluster_s3_pod.results.results[0]['items'] | count == 0"
-  delay: 10
-  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
-  when: glusterfs_wipe
-
 - name: Create heketi secret
   oc_secret:
     namespace: "{{ glusterfs_namespace }}"

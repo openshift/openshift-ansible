@@ -39,11 +39,6 @@
   with_items:
   - "{{ openshift_service_type }}-node.service"
 
-- name: Check for RPM generated config marker file .config_managed
-  stat:
-    path: /etc/origin/.config_managed
-  register: rpmgenerated_config
-
 - name: create directories for bootstrapping
   file:
     state: directory
@@ -66,29 +61,3 @@
     state: link
     force: yes
     follow: no
-
-- when: rpmgenerated_config.stat.exists
-  block:
-  - name: Remove RPM generated config files if present
-    file:
-      path: "/etc/origin/{{ item }}"
-      state: absent
-    with_items:
-    - master
-    - .config_managed
-
-  # with_fileglob doesn't work correctly due to a few issues.
-  # Could change this to fileglob when it gets fixed.
-  - name: find all files in /etc/origin/node so we can remove them
-    find:
-      path: /etc/origin/node/
-    register: find_results
-
-  - name: Remove everything except the resolv.conf required for node
-    file:
-      path: "{{ item.path }}"
-      state: absent
-    when:
-    - "'resolv.conf' not in item.path"
-    - "'node-dnsmasq.conf' not in item.path"
-    with_items: "{{ find_results.files }}"

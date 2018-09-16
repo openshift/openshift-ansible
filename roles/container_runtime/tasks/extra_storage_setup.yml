@@ -4,6 +4,7 @@
     fstype: "{{ item.filesystem }}"
     dev: "{{ item.device }}"
     force: "{{ item.force|default(omit) }}"
+    opts: "{{ item.mkfs_opts|default(omit) }}"
   with_items: "{{ container_runtime_extra_storage }}"
 
 

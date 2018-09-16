@@ -52,7 +52,7 @@
 
   - name: Update router environment variables
     shell: >
-      {{ openshift_client_binary }} env dc/router
+      {{ openshift_client_binary }} set env dc/router
       OPENSHIFT_CA_DATA="$(cat /etc/origin/master/ca.crt)"
       OPENSHIFT_CERT_DATA="$(cat /etc/origin/master/openshift-router.crt)"
       OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-router.key)"
@@ -98,10 +98,6 @@
     - ('service.alpha.openshift.io/serving-cert-secret-name') in router_service_annotations
     - ('service.alpha.openshift.io/serving-cert-signed-by') in router_service_annotations
 
-  # When there are no annotations on the router service we will allow
-  # the openshift_hosted role to either create a new wildcard
-  # certificate (since we deleted the original) or reapply a custom
-  # openshift_hosted_router_certificate.
   - file:
       path: "{{ item }}"
       state: absent
@@ -112,8 +108,6 @@
     - l_router_dc.rc == 0
     - l_router_svc.rc == 0
     - ('router-certs' in router_secrets)
-    - ('service.alpha.openshift.io/serving-cert-secret-name') not in router_service_annotations
-    - ('service.alpha.openshift.io/serving-cert-signed-by') not in router_service_annotations
 
   - import_role:
       name: openshift_hosted
@@ -122,8 +116,6 @@
     - l_router_dc.rc == 0
     - l_router_svc.rc == 0
     - ('router-certs' in router_secrets)
-    - ('service.alpha.openshift.io/serving-cert-secret-name') not in router_service_annotations
-    - ('service.alpha.openshift.io/serving-cert-signed-by') not in router_service_annotations
 
   - name: Delete temp directory
     file:

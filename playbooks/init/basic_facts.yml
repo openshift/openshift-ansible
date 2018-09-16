@@ -19,6 +19,9 @@
   - name: Detecting Operating System from ostree_booted
     stat:
       path: /run/ostree-booted
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: ostree_booted
 
   # TODO(michaelgugino) remove this line once CI is updated.
@@ -28,14 +31,6 @@
     when:
     - openshift_deployment_type is undefined
     - deployment_type is defined
-
-  - name: check for node already bootstrapped
-    stat:
-      path: "/etc/origin/node/bootstrap-node-config.yaml"
-    register: bootstrap_node_config_path_check
-  - name: initialize_facts set fact openshift_is_bootstrapped
-    set_fact:
-      openshift_is_bootstrapped: "{{ openshift_is_bootstrapped|default(False) or bootstrap_node_config_path_check.stat.exists }}"
 
   - name: initialize_facts set fact openshift_is_atomic and openshift_is_containerized
     set_fact:
@@ -61,7 +56,7 @@
     - name: assert atomic host docker version is 1.12 or later
       assert:
         that:
-        - l_atomic_docker_version.stdout | replace('"', '') is version_compare('1.12','>=')
+        - l_atomic_docker_version.stdout | replace('"', '') is version('1.12','>=')
         msg: Installation on Atomic Host requires Docker 1.12 or later. Please upgrade and restart the Atomic Host.
 
 - name: Retrieve existing master configs and validate

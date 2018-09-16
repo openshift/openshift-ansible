@@ -32,14 +32,16 @@
 
 - name: Install cri-o
   package:
-    name: "{{ crio_pkgs | join(',') }}"
+    name: "{{ pkg_list | join(',') }}"
     state: latest
   register: result
   until: result is succeeded
   vars:
-    crio_pkgs:
-      - "cri-o"
-      - "cri-tools"
+    pkg_list:
+      - cri-o
+      - cri-tools
+      - atomic
+      - skopeo
 
 - name: Remove CRI-O default configuration files
   file:
@@ -54,6 +56,12 @@
     dest: /etc/crio/crio.conf
     src: crio.conf.j2
     backup: yes
+
+- name: Update crictl.yaml runtime-endpoint
+  yedit:
+    src: /etc/crictl.yaml
+    key: runtime-endpoint
+    value: "{{ openshift_crio_var_sock }}"
 
 - name: Ensure CNI configuration directory exists
   file:

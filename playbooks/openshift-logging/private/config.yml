@@ -13,6 +13,18 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
+# Normally we only collect this information for our master group entries
+# we want to also collect this for nodes so we can match group entries to nodes
+- name: Get common IP facts when necessary
+  hosts: oo_nodes_to_config:!oo_masters
+  gather_facts: false
+  tasks:
+  - name: Gather Cluster facts
+    openshift_facts:
+      role: common
+      local_facts:
+        ip: "{{ openshift_ip | default(None) }}"
+
 - name: Verify and collect ES hosts
   hosts: oo_first_master
   gather_facts: false
@@ -36,7 +48,7 @@
         --config={{ openshift.common.config_base }}/master/admin.kubeconfig
         get nodes
         -l {{ openshift_logging_es_nodeselector | map_to_pairs }}
-        -o jsonpath={.items[*].metadata.name}
+        -o jsonpath={.items[*].status.addresses[?(@.type==\"InternalIP\")].address}
       register: openshift_logging_es_hosts
 
     - when: openshift_logging_use_ops | default(false) | bool
@@ -58,23 +70,27 @@
           --config={{ openshift.common.config_base }}/master/admin.kubeconfig
           get nodes
           -l {{ openshift_logging_es_ops_nodeselector | map_to_pairs }}
-          -o jsonpath={.items[*].metadata.name}
+          -o jsonpath={.items[*].status.addresses[?(@.type==\"InternalIP\")].address}
         register: openshift_logging_es_ops_hosts
 
     - set_fact:
         openshift_logging_elasticsearch_hosts: "{{ ( openshift_logging_es_hosts.stdout.split(' ') | default([]) + (openshift_logging_es_ops_hosts.stdout.split(' ') if openshift_logging_es_ops_hosts.stdout is defined else []) ) | unique }}"
 
+    # Check to see if the collected ip from the openshift facts above matches our node back to a
+    # group entry in our inventory so we can maintain our group variables when updating the sysctl
+    # files for specific nodes based on <node>.status.addresses[@.type==InternalIP].address
     - name: Evaluate oo_elasticsearch_nodes
       add_host:
         name: "{{ item }}"
         groups: oo_elasticsearch_nodes
         ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
         ansible_become: "{{ g_sudo | default(omit) }}"
-      with_items: "{{ openshift_logging_elasticsearch_hosts }}"
+      with_items: "{{ groups['oo_nodes_to_config'] }}"
       changed_when: no
       run_once: true
       delegate_to: localhost
       connection: local
+      when: hostvars[item]['openshift']['common']['ip'] in openshift_logging_elasticsearch_hosts
 
 - name: Update vm.max_map_count for ES 5.x
   hosts: oo_elasticsearch_nodes

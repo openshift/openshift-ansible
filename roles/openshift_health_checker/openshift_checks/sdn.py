@@ -58,7 +58,14 @@ class SDNCheck(OpenShiftCheck):
                 if not self.get_var('openshift_use_crio_only', default=False):
                     self.save_command_output('docker-version',
                                              ['/bin/docker', 'version'])
-                self.save_command_output('oc-version', ['/bin/oc', 'version'])
+                oc_executable = self.get_var('openshift_client_binary',
+                                             default='/bin/oc')
+                oc_executable = self.template_var(oc_executable)
+                # The oc executable is not installed on containerized nodes, so
+                # use "2>&1" to capture any error output (such as "command not
+                # found"), and use "|| :" to ignore the exit code.
+                self.save_command_output('oc-version',
+                                         oc_executable + ' version 2>&1 || :')
                 self.register_file('os-version', None,
                                    '/etc/system-release-cpe')
             except OpenShiftCheckException as exc:
@@ -119,7 +126,7 @@ class SDNCheck(OpenShiftCheck):
         """
         self.register_file(path, self.read_command_output(command))
 
-    def read_command_output(self, command):
+    def read_command_output(self, command, utf8=True):
         """Execute the provided command using the command module
         and return its output.
 
@@ -141,7 +148,9 @@ class SDNCheck(OpenShiftCheck):
                 'RemoteCommandFailure',
                 'Failed to execute command on remote host: %s' % command)
 
-        return result['stdout'].encode('utf-8')
+        if utf8:
+            return result['stdout'].encode('utf-8')
+        return result['stdout']
 
     def check_master(self):
         """Gather diagnostic information on a master and ensure it can connect
@@ -337,8 +346,14 @@ class SDNCheck(OpenShiftCheck):
             self.register_failure('%s is not started.' % service_name)
             return
 
+        # The timestamp should be in the format "%a %Y-%m-%d %H:%M:%S %Z".
+        # However, Python cannot reliably parse timezone names
+        # (see <https://bugs.python.org/issue22377>), so we must drop the
+        # timezone name before parsing the timestamp.
+        start_timestamp = ' '.join(start_timestamp.split()[0:3])
+
         since_date = datetime.datetime.strptime(start_timestamp,
-                                                '%a %Y-%m-%d %H:%M:%S %Z')
+                                                '%a %Y-%m-%d %H:%M:%S')
         until_date = since_date + datetime.timedelta(minutes=5)
         since = since_date.strftime(time_fmt)
         until = until_date.strftime(time_fmt)
@@ -419,7 +434,7 @@ class SDNCheck(OpenShiftCheck):
         """Look up the given IPv4 address using getent."""
         command = ' '.join(['/bin/getent', 'ahostsv4', addr])
         try:
-            out = self.read_command_output(command)
+            out = self.read_command_output(command, False)
         except OpenShiftCheckException as exc:
             raise OpenShiftCheckException(
                 'NameResolutionError',
@@ -427,7 +442,7 @@ class SDNCheck(OpenShiftCheck):
 
         for line in out.splitlines():
             record = line.split()
-            if record[1:3] == ['STREAM', addr]:
+            if record[1] == 'STREAM':
                 return record[0]
 
         return None

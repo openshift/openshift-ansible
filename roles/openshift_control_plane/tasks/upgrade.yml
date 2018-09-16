@@ -1,12 +1,5 @@
 ---
-- name: Stop control plane services
-  service:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
-  - "{{ openshift_service_type }}-master-api"
-  - "{{ openshift_service_type }}-master-controllers"
-  failed_when: false
+- import_tasks: registry_auth.yml
 
 - import_tasks: static_shim.yml
 
@@ -21,12 +14,17 @@
 - name: Check for ca-bundle.crt
   stat:
     path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: ca_bundle_stat
   failed_when: false
 
 - name: Check for ca.crt
   stat:
     path: "{{ openshift.common.config_base }}/master/ca.crt"
+    get_checksum: false
+    get_mime: false
   register: ca_crt_stat
   failed_when: false
 
@@ -56,15 +54,14 @@
   yedit:
     src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: 'imageConfig.format'
-    value: "{{ oreg_url }}"
-  when: oreg_url is defined
+    value: "{{ openshift_imageconfig_format }}"
 
 - name: Change default node selector to compute=true
   yedit:
     src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: 'projectConfig.defaultNodeSelector'
     value: '{{ hostvars[groups.oo_first_master.0].l_osm_default_node_selector }}'
-  when: openshift_upgrade_target is version_compare('3.9', '>=')
+  when: openshift_upgrade_target is version('3.9', '>=')
 
 - name: Remove use of pod presets from master config
   yedit:
@@ -83,6 +80,19 @@
     key: "kubernetesMasterConfig.apiServerArguments.runtime-config"
     value: "{{ runtime_config.result | join(',') | regex_replace('(?:,)*apis/settings\\.k8s\\.io/v1alpha1=true','') }}"
   when: runtime_config.result
-
-- name: reload systemd units
-  command: systemctl daemon-reload
+- name: Copy recyler pod to config directory
+  template:
+    src: "recycler_pod.yaml.j2"
+    dest: "/etc/origin/master/recycler_pod.yaml"
+- name: Update controller-manager to have nfs recycler pod
+  yedit:
+    src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    key: "kubernetesMasterConfig.controllerArguments.pv-recycler-pod-template-filepath-nfs"
+    value:
+    - /etc/origin/master/recycler_pod.yaml
+- name: Update controller-manager to have hostpath recycler pod
+  yedit:
+    src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    key: "kubernetesMasterConfig.controllerArguments.pv-recycler-pod-template-filepath-hostpath"
+    value:
+    - /etc/origin/master/recycler_pod.yaml

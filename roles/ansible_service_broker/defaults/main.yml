@@ -14,13 +14,14 @@ ansible_service_broker_dev_broker: false
 ansible_service_broker_refresh_interval: 600s
 # Recommended you do not enable this for now
 ansible_service_broker_launch_apb_on_bind: false
-ansible_service_broker_keep_namespace_on_error: true
+ansible_service_broker_keep_namespace_on_error: false
 ansible_service_broker_keep_namespace: false
 
 ansible_service_broker_image_pull_policy: Always
 ansible_service_broker_sandbox_role: edit
 ansible_service_broker_auto_escalate: false
 ansible_service_broker_local_registry_whitelist: []
+ansible_service_broker_local_registry_namespaces: ["openshift"]
 
 l_asb_default_images_dict:
   origin: 'docker.io/ansibleplaybookbundle/origin-ansible-service-broker:latest'

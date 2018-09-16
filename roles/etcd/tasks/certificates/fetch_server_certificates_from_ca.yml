@@ -5,13 +5,15 @@
     state: present
   when:
   - not etcd_is_atomic | bool
-  - not openshift_is_bootstrapped | bool
   register: result
   until: result is succeeded
 
 - name: Check status of etcd certificates
   stat:
     path: "{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   with_items:
   - "{{ etcd_cert_config_dir }}/{{ etcd_cert_prefix }}server.crt"
   - "{{ etcd_cert_config_dir }}/{{ etcd_cert_prefix }}peer.crt"

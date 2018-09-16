@@ -46,6 +46,11 @@
     state: absent
     name: asb-access
 
+- name: remove asb-user-access cluster role
+  oc_clusterrole:
+    state: absent
+    name: asb-user-access
+
 - name: remove asb-registry auth secret
   oc_secret:
     state: absent
@@ -118,7 +123,7 @@
     name: ansible-service-broker
     state: absent
     kind: ClusterServiceBroker
-  when: not "'not found' in get_apiservices.stdout"
+  when: not('not found' in get_apiservices.stdout)
 
 - name: remove openshift-ansible-service-broker project
   oc_project:

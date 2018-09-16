@@ -34,13 +34,10 @@
   # create and update in one step.
   - role: openshift_examples
     when: openshift_install_examples | default(true) | bool
-  - openshift_hosted_templates
   # Update the existing templates
   - role: openshift_examples
     when: openshift_install_examples | default(true) | bool
     openshift_examples_import_command: replace
-  - role: openshift_hosted_templates
-    openshift_hosted_templates_import_command: replace
 
 # Poll for registry and router pods, redeploy registry certs if needed.
 - import_playbook: ../../../openshift-hosted/private/upgrade_poll_and_check_certs.yml
@@ -65,7 +62,7 @@
 
   - name: Warn if pluginOrderOverride is in use in master-config.yaml
     debug:
-      msg: "WARNING pluginOrderOverride is being deprecated in master-config.yaml, please see https://docs.openshift.com/enterprise/latest/architecture/additional_concepts/admission_controllers.html for more information."
+      msg: "WARNING pluginOrderOverride is being deprecated in master-config.yaml, please see https://docs.openshift.com/container-platform/latest/architecture/additional_concepts/admission_controllers.html for more information."
     when:
     - not (grep_plugin_order_override is skipped)
     - grep_plugin_order_override.rc == 0

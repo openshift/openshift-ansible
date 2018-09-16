@@ -42,6 +42,23 @@
     dest: "{{ mktemp.stdout }}/{{ __console_config_file }}"
   when: existing_config_map_data['console-config.yaml'] is defined
 
+- set_fact:
+    # Must have a trailing slash
+    console_picker_developer_console_public_url: "{{ openshift.master.public_console_url }}/"
+  when: (openshift_web_console_enable_context_selector | default(true) | bool) and (openshift_web_console_install | default(true) | bool)
+
+- set_fact: console_cert={{ lookup('file', openshift_console_cert) }}
+  when: openshift_console_cert is exists
+  changed_when: false
+
+- set_fact: console_key={{ lookup('file', openshift_console_key) }}
+  when: openshift_console_key is exists
+  changed_when: false
+
+- set_fact: console_ca_cert={{ lookup('file', openshift_console_ca) }}
+  when: openshift_console_ca is exists
+  changed_when: false
+
 # Generate a new config when a config map is not defined.
 - name: Set web console config properties from inventory variables
   yedit:
@@ -65,6 +82,16 @@
     state: present
   when: existing_config_map_data['console-config.yaml'] is not defined
 
+# Add the developer console URL to the console picker on upgrade, even if there is an existing config.
+- name: Add context selector URL
+  yedit:
+    src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
+    edits:
+    - key: clusterInfo#developerConsolePublicURL
+      value: "{{ console_picker_developer_console_public_url | default('') }}"
+    separator: '#'
+    state: present
+
 - slurp:
     src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
   register: updated_console_config
@@ -77,6 +104,9 @@
     --param SERVER_CONFIG="{{ updated_console_config['content'] | b64decode }}"
     --param REPLICA_COUNT="{{ openshift_console_replica_count }}"
     --param CONSOLE_HOSTNAME="{{ openshift_console_hostname }}"
+    --param TLS_CERT="{{ console_cert | default('') }}"
+    --param TLS_KEY="{{ console_key | default('') }}"
+    --param TLS_CA_CERT="{{ console_ca_cert | default('') }}"
     --config={{ mktemp.stdout }}/admin.kubeconfig
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
 

@@ -105,7 +105,7 @@ Jose David Martín (j.david.nieto@gmail.com)
 
 Image update procedure
 ----------------------
-An upgrade of the metrics stack from older version to newer is an automated process and should be performed by calling appropriate ansible playbook and setting required ansible variables in your inventory as documented in https://docs.openshift.org/.
+An upgrade of the metrics stack from older version to newer is an automated process and should be performed by calling appropriate ansible playbook and setting required ansible variables in your inventory as documented in https://docs.okd.io/.
 
 Following text describes manual update of the metrics images without version upgrade. To determine the current version of images being used you can:
 ```

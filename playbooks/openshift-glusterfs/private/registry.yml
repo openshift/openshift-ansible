@@ -1,13 +1,19 @@
 ---
-- import_playbook: config.yml
+- import_playbook: setup_nodes.yml
+
+- import_playbook: gluster_hosts.yml
+
+- import_playbook: gluster_main.yml
 
 - name: Create persistent volumes
   hosts: oo_first_master
   roles:
   - role: openshift_persistent_volumes
-    when: openshift_hosted_registry_storage_glusterfs_swap | default(False)
+    when:
+    - openshift_hosted_registry_storage_kind | default(none) == 'glusterfs' or openshift_hosted_registry_storage_glusterfs_swap
 
-- name: Create Hosted Resources
-  hosts: oo_first_master
-  roles:
-  - role: openshift_hosted
+- import_playbook: ../../openshift-hosted/private/openshift_hosted_registry.yml
+
+- import_playbook: ../../openshift-hosted/private/openshift_hosted_wait_for_pods.yml
+
+- import_playbook: ../../openshift-hosted/private/openshift_hosted_registry_storage.yml

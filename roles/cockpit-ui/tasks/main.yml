@@ -1,4 +1,5 @@
 ---
+
 - block:
 
   # When openshift_hosted_manage_registry=true the openshift_hosted
@@ -62,3 +63,5 @@
     changed_when: False
     # XXX: End required for items still using command
   run_once: true
+
+# This role is meant to be used with import_role and tasks_from.

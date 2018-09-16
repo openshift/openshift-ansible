@@ -1,5 +1,5 @@
 ---
-- name: Ensure RHEL rhui repositories are disabled
+- name: Discover enabled RHEL rhui repositories
   command: bash -c "yum -q --noplugins repolist | grep -v 'repo id' | grep 'rhui'"
   register: repo_rhui
   changed_when: "repo_rhui.rc != 1"
@@ -26,8 +26,7 @@
   command: subscription-manager repos \
                --enable="rhel-7-server-rpms" \
                --enable="rhel-7-server-extras-rpms" \
-               --enable="rhel-7-server-ose-{{ ( openshift_version ).split('.')[0:2] | join('.') }}-rpms" \
-               --enable="rhel-7-fast-datapath-rpms"
+               --enable="rhel-7-server-ose-{{ ( openshift_version ).split('.')[0:2] | join('.') }}-rpms"
   register: subscribe_repos
   until: subscribe_repos is succeeded
   when: repo_rhel.changed

@@ -2,6 +2,9 @@
 # We need to scrape existing config and check some items.
 - stat:
     path: "/etc/origin/master/master-config.yaml"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: master_config_path_check
 
 - slurp:

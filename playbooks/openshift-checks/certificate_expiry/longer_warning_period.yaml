@@ -4,7 +4,6 @@
 
 - name: Check cert expirys
   hosts: nodes:masters:etcd
-  gather_facts: no
   vars:
     openshift_certificate_expiry_warning_days: 1500
   roles:

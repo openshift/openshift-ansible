@@ -2,7 +2,7 @@
 
 - import_tasks: remove_components.yaml
 
-- name: remove openshift-ansible-service-broker project
+- name: remove operator-lifecycle-manager project
   oc_project:
-    name: openshift-ansible-service-broker
+    name: operator-lifecycle-manager
     state: absent

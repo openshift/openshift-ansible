@@ -1,5 +1,5 @@
 ---
-- name: Openshift Metering Checkpoint Start
+- name: Openshift Metering Install Checkpoint Start
   hosts: all
   gather_facts: false
   tasks:
@@ -7,19 +7,21 @@
     run_once: true
     set_stats:
       data:
-        installer_phase_openshift_metering:
+        install_phase_openshift_metering:
           title: "Openshift Metering"
           playbook: "playbooks/openshift-metering/config.yml"
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 
-- name: Configure Openshift Metering
+- name: Install Openshift Metering
   hosts: oo_first_master
-  roles:
-  - role: openshift_metering
+  tasks:
+  - include_role:
+      name: openshift_metering
+      tasks_from: install.yml
 
-- name: Openshift Metering Checkpoint End
+- name: Openshift Metering Install Checkpoint End
   hosts: all
   gather_facts: false
   tasks:
@@ -27,6 +29,6 @@
     run_once: true
     set_stats:
       data:
-        installer_phase_openshift_metering:
+        install_phase_openshift_metering:
           status: "Complete"
           end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

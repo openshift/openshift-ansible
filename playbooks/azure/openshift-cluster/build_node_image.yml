@@ -18,7 +18,6 @@
       openshift_enable_origin_repo: False
       skip_node_svc_handlers: True
       openshift_additional_repos: "{{ azure_node_repos[ansible_distribution] }}"
-      openshift_node_open_ports: [{"service":"Node exporter metrics", "port":"9100/tcp"}]
       openshift_node_include_control_plane: True
       openshift_control_plane_static_pod_location: /etc/origin/node/disabled/
       openshift_node_group_cloud_provider: azure
@@ -88,6 +87,19 @@
       content: "{{ oreg_url }}"
     when: oreg_url is defined
 
+  - name: create a file with image name
+    copy:
+      content: |
+        ---
+        image_name: {{ openshift_azure_output_image_name }}
+        base_image: {{ (hostvars['localhost'].input_image.stdout | from_json).name }}
+        subscription: {{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}
+        resource_group: {{ openshift_azure_output_image_ns }}
+      dest: /etc/origin/image.yml
+      owner: root
+      group: root
+      mode: '0440'
+
   - name: run waagent deprovision
     shell: sleep 2 && waagent -deprovision+user -force
     async: 1
@@ -97,8 +109,7 @@
   gather_facts: no
   tasks:
   - set_fact:
-      openshift_rpm: "{{ hostvars[groups['nodes'][0]]['yum'].results | selectattr('name', 'match', '^(origin|atomic-openshift)$') | first }}"
-
+      openshift_rpm: "{{ hostvars[groups['nodes'][0]]['yum'].results | selectattr('name', 'match', '^(origin-hyperkube|atomic-openshift-hyperkube)$') | first }}"
   - name: create image
     import_tasks: tasks/create_image_from_vm.yml
     vars:
@@ -107,7 +118,7 @@
       image_tags:
         base_image: "{{ (input_image.stdout | from_json).name }}"
         kernel: "{{ hostvars[groups['nodes'][0]]['ansible_kernel'] }}"
-        openshift: "{{ openshift_rpm.name }}-{{ openshift_rpm.version }}-{{ openshift_rpm.release }}.{{ openshift_rpm.arch }}"
+        openshift: "{{ openshift_rpm.version }}-{{ openshift_rpm.release }}.{{ openshift_rpm.arch }}"
 
   - name: create blob
     import_tasks: tasks/create_blob_from_vm.yml

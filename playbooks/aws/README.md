@@ -61,8 +61,7 @@ under the appropriate groups.  Most variables can exist in the 'all' group.
 # Minimum mandatory provisioning variables.  See provisioning_vars.yml.example.
 # for more information.
 openshift_deployment_type: # 'origin' or 'openshift-enterprise'
-openshift_release: # example: v3.7
-openshift_pkg_version: # example: -3.7.0
+openshift_aws_clusterid: # example: example
 openshift_aws_ssh_key_name: # example: myuser_key
 openshift_aws_base_ami: # example: ami-12345678
 # These are required when doing SSL on the ELBs

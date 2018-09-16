@@ -1,5 +1,16 @@
 ---
+- name: Calico | Run kube proxy
+  run_once: true
+  import_role:
+    name: kube_proxy_and_dns
+
 - include_tasks: certs.yml
+
+- name: Calico Master | Clean Calico etcd data
+  when: calico_cleanup_path is defined and calico_cleanup_path != ""
+  file:
+    state: absent
+    path: "{{ calico_cleanup_path }}"
 
 - name: Calico Master | oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:calico-node
   oc_adm_policy_user:
@@ -33,21 +44,44 @@
   register: mktemp
   changed_when: False
 
+- name: Calico Master | Write separate Calico etcd manifest
+  when: use_calico_etcd
+  template:
+    dest: "{{ mktemp.stdout }}/calico-etcd.yml"
+    src: calico-etcd.yml.j2
+
+- name: Calico Master | Launch separate Calico etcd
+  when: use_calico_etcd
+  command: >
+    {{ openshift_client_binary }} apply
+    -f {{ mktemp.stdout }}/calico-etcd.yml
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+  register: calico_etcd_create_output
+  failed_when: "calico_etcd_create_output.rc != 0"
+  changed_when: "('created' in calico_etcd_create_output.stdout) or ('configured' in calico_etcd_create_output.stdout)"
+
 - name: Calico Master | Parse node version
   set_fact:
     node_version: "{{ calico_node_image | regex_replace('^.*node:v?(.*)$', '\\1') }}"
+    cnx: "{{ calico_node_image | regex_replace('^.*/(.*)-node:.*$', '\\1') }}"
+
+- name: Calico Master | Set the correct liveness and readiness checks
+  set_fact:
+    calico_binary_checks: "{{ (node_version > '3.2.0' and cnx != 'cnx') or (node_version > '2.2.0' and cnx == 'cnx') | bool }}"
 
 - name: Calico Master | Write Calico v2
   template:
     dest: "{{ mktemp.stdout }}/calico.yml"
     src: calico.yml.j2
-  when: node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version < '3.0.0'
+  when:
+    - node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version < '3.0.0'
+    - cnx != "cnx"
 
 - name: Calico Master | Write Calico v3
   template:
     dest: "{{ mktemp.stdout }}/calico.yml"
     src: calicov3.yml.j2
-  when: (node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version >= '3.0.0') or node_version == 'master'
+  when: (node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version >= '3.0.0') or (node_version == 'master') or (cnx == "cnx" and node_version >= '2.0.0')
 
 - name: Calico Master | Launch Calico
   command: >

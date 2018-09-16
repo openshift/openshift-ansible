@@ -37,6 +37,11 @@
     nuage_cni_bin_dsets_mount_dir: /var/opt/cni/bin
   when: openshift_is_atomic | bool
 
+- name: Set the Nuage VRS mount dir for daemon sets install
+  set_fact:
+    nuage_vrs_mount_dir: /etc/default
+  when: nuage_personality == "evdf"
+
 - name: Create directory /usr/share/nuage-openshift-monitor
   become: yes
   file: path=/usr/share/nuage-openshift-monitor state=directory
@@ -104,6 +109,11 @@
   become: yes
   template: src=nuage-infra-pod-config-daemonset.j2 dest=/etc/nuage-infra-pod-config-daemonset.yaml owner=root mode=0644
 
+- name: Create Nuage strongswan Pod daemon set yaml file for EVDF platform
+  become: yes
+  template: src=nuage-strongswan-pod-config-daemonset.j2 dest=/etc/nuage-strongswan-pod-config-daemonset.yaml owner=root mode=0644
+  when: nuage_personality == "evdf"
+
 - name: Add the service account to the privileged scc to have root permissions for kube-system
   shell: oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:daemon-set-controller
   ignore_errors: true
@@ -129,9 +139,13 @@
   ignore_errors: true
   when: inventory_hostname == groups.oo_first_master.0
 
+- name: Spawn strongswan daemon sets pod for EVDF platform
+  shell: oc create -f /etc/nuage-strongswan-pod-config-daemonset.yaml
+  ignore_errors: true
+  when: inventory_hostname == groups.oo_first_master.0 and nuage_personality == "evdf"
+
 - name: Restart daemons
   command: /bin/true
   notify:
-    - restart master api
-    - restart master controllers
+    - restart master
   ignore_errors: true

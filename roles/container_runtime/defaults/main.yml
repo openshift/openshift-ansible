@@ -18,7 +18,7 @@ openshift_docker_ent_reg: 'registry.redhat.io'
 openshift_docker_options: False  # str
 openshift_docker_log_driver: False  # str
 openshift_docker_log_options_defaults:
-  json:
+  json-file:
   - "max-size=50m"
 openshift_docker_log_options: "{{ openshift_docker_log_options_defaults[openshift_docker_log_driver] | default([]) }}"
 
@@ -75,22 +75,7 @@ docker_http_proxy: "{{ openshift_http_proxy | default('') }}"
 docker_https_proxy: "{{ openshift.common.https_proxy | default('') }}"
 docker_no_proxy: "{{ openshift.common.no_proxy | default('') }}"
 
-openshift_use_crio: False
-
-# Set pause_image variable for crio.conf.j2 required to start the crio service in package_crio.yml
-l_openshift_image_tag_default: "{{ 'v' ~ openshift_release if openshift_release is defined else 'latest' }}"
-l_openshift_image_tag: "{{ openshift_image_tag | default(l_openshift_image_tag_default) | string}}"
-
-l_crio_pause_images_dict:
-  origin: 'docker.io/openshift/origin-${component}:${version}'
-  openshift-enterprise: 'registry.redhat.io/openshift3/ose-${component}:${version}'
-l_pause_registry_url_default: "{{ l_crio_pause_images_dict[openshift_deployment_type] }}"
-
-pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
-
 l_required_docker_version: '1.13'
-
-l_crio_var_sock: "/var/run/crio/crio.sock"
 
 l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l2_docker_insecure_registries)) }}"
 l_crio_registries: "{{ l2_docker_additional_registries + ['docker.io'] }}"
