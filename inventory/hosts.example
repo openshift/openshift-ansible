@@ -450,6 +450,8 @@ debug_level=2
 #openshift_hosted_manage_registry=true
 # Manage the OpenShift Registry Console (optional)
 #openshift_hosted_manage_registry_console=true
+# Manage the Openshift Registry Console Hostname
+#openshift_hosted_registry_console_hostname
 #
 # Registry Storage Options
 #
