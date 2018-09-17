@@ -72,7 +72,6 @@
   - role: openshift_buildoverrides
 
   - role: openshift_control_plane
-  - role: tuned
   - role: nuage_common
     when: openshift_use_nuage | default(false) | bool
   - role: nuage_ca

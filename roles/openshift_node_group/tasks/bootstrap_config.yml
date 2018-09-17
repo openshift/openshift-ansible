@@ -16,5 +16,8 @@
     regexp: "^BOOTSTRAP_CONFIG_NAME=.*"
 
 - import_role:
+    name: tuned
+
+- import_role:
     name: openshift_node
     tasks_from: configure-proxy-settings.yml
