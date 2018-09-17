@@ -4,7 +4,7 @@
     name: "{{ hostvars[item].gce_name }}"
     groups: nodes, new_nodes
     openshift_node_group_name: "{{ openshift_gcp_node_group_mapping['compute'] }}"
-  with_items: "{{ groups['tag_ocp-node'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
+  with_items: "{{ groups['tag_ocp-node'] | default([]) }}"
 
 - name: Add bootstrap node instances as nodes
   add_host:
@@ -24,7 +24,7 @@
     name: "{{ hostvars[item].gce_name }}"
     groups: nodes, new_nodes
     openshift_node_group_name: "{{ openshift_gcp_node_group_mapping['infra'] }}"
-  with_items: "{{ groups['tag_ocp-infra-node'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
+  with_items: "{{ groups['tag_ocp-infra-node'] | default([]) }}"
 
 - name: Add masters to requisite groups
   add_host:

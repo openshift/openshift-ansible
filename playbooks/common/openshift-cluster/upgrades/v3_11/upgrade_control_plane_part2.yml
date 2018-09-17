@@ -116,16 +116,3 @@
   - import_role:
       name: openshift_web_console
       tasks_from: remove_old_asset_config.yml
-
-# This is a one time migration. No need to save it in the 3.11.
-# https://bugzilla.redhat.com/show_bug.cgi?id=1565736
-- hosts: oo_first_master
-  tasks:
-  - import_role:
-      name: openshift_hosted
-      tasks_from: registry_service_account.yml
-    when: openshift_hosted_manage_registry | default(True) | bool
-  - import_role:
-      name: openshift_hosted
-      tasks_from: remove_legacy_env_variables.yml
-    when: openshift_hosted_manage_registry | default(True) | bool
