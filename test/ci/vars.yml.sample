@@ -4,6 +4,7 @@ vm_prefix: "ci_test"
 type: aws
 aws_user: "ec2-user"
 python: "/usr/bin/python"
+
 aws_key: "libra"
 aws_region: "us-east-1"
 aws_cluster_id: "ci"
