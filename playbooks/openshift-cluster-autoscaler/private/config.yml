@@ -1,4 +1,17 @@
 ---
+- name: Setup master instances
+  hosts: localhost
+  tasks:
+  - block:
+    - import_role:
+        name: openshift_aws
+        tasks_from: setup_master_group.yml
+    - name: add a master to oo_first_master group
+      add_host:
+        groups: oo_first_master
+        hostname: "{{ groups['masters'][0] }}"
+    when: openshift_aws_clusterid is defined
+
 - name: Cluster Auto Scaler Install Checkpoint Start
   hosts: all
   gather_facts: false
