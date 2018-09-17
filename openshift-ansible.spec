@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.130
+Version:        3.6.173.0.131
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Sep 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.131-1
+- 
+
 * Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.130-1
 - Fixes 1507119: Add retries to fixup shared-resource-viewer role
   (scuppett@redhat.com)
