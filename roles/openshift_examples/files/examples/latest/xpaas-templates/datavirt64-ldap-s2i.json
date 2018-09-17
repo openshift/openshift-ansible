@@ -4,17 +4,20 @@
     "metadata": {
         "annotations": {
             "iconClass": "icon-datavirt",
-            "description": "Application template for JBoss Data Virtualization 6.3 services built using S2I.",
-            "tags": "jdv,datavirt,database,jboss",
-            "version": "1.4.14",
-            "openshift.io/display-name": "JBoss Data Virtualization 6.3 (no SSL)",
-            "openshift.io/provider-display-name": "Red Hat, Inc."
+            "tags": "jdv,datavirt,database,jboss,ldap",
+            "version": "1.2.0",
+            "openshift.io/display-name": "JBoss Data Virtualization 6.4 defining Security Domain (no SSL)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "Application template for JBoss Data Virtualization 6.4 services that configures security domain using S2I.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Data Virtualization based application, configuring security domain(s), including a build configuration and application deployment configuration.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-data-virtualization/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
-        "name": "datavirt63-basic-s2i"
+        "name": "datavirt64-ldap-s2i"
     },
     "labels": {
-        "template": "datavirt63-basic-s2i",
-        "xpaas": "1.4.14"
+        "template": "datavirt64-ldap-s2i",
+        "jdv64": "1.2.0"
     },
     "message": "A new data service has been created in your project.  The username/password for accessing the service is ${TEIID_USERNAME}/${TEIID_PASSWORD}.  Please be sure to create the secret named ${CONFIGURATION_NAME} containing the datasource configuration details required by the deployed VDB(s).",
     "parameters": [
@@ -32,6 +35,13 @@
             "value": "datavirt-app-config",
             "required": true
         },
+        {
+            "description": "The name of the secret containing security domain configuration properties.",
+            "displayName": "Security Domain Configuration Secret Name",
+            "name": "CONFIG_SECURITY_DOMAIN_NAME",
+            "value": "datavirt-security-config",
+            "required": false
+        },         
         {
             "description": "Specify a custom hostname for the http route.  Leave blank to use default hostname, e.g.: <service-name>-<project>.<default-domain-suffix>",
             "displayName": "Custom http Route Hostname",
@@ -57,7 +67,7 @@
             "description": "Set this to the relative path to your project if it is not in the root of your repository.",
             "displayName": "Context Directory",
             "name": "CONTEXT_DIR",
-            "value": "datavirt/dynamicvdb-datafederation/app",
+            "value": "datavirt64/dynamicvdb-datafederation/app",
             "required": false
         },
         {
@@ -269,22 +279,7 @@
                         "uri": "${SOURCE_REPOSITORY_URL}",
                         "ref": "${SOURCE_REPOSITORY_REF}"
                     },
-                    "contextDir": "${CONTEXT_DIR}",
-                    "images": [
-                        {
-                            "from": {
-                                "kind": "ImageStreamTag",
-                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid65-client-openshift:1.1"
-                            },
-                            "paths": [
-                                {
-                                    "destinationDir": "./${CONTEXT_DIR}/extensions/datagrid65",
-                                    "sourcePath": "/extensions/."
-                                }
-                            ]
-                        }
-                    ]
+                    "contextDir": "${CONTEXT_DIR}"
                 },
                 "strategy": {
                     "type": "Source",
@@ -293,7 +288,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-datavirt63-openshift:1.4"
+                            "name": "jboss-datavirt64-openshift:1.2"
                         },
                         "env": [
                             {
@@ -338,16 +333,7 @@
                         "type": "ImageChange",
                         "imageChange": {}
                     },
-                    {
-                        "type": "ImageChange",
-                        "imageChange": {
-                            "from": {
-                                "kind": "ImageStreamTag",
-                                "name": "jboss-datagrid65-client-openshift:1.1"
-                            }
-                        }
-                    },
-                    {
+                     {
                         "type": "ConfigChange"
                     }
                 ]
@@ -412,6 +398,11 @@
                                     {
                                         "name": "configuration",
                                         "mountPath": "/etc/datavirt-environment",
+                                        "readOnly": true
+                                    },
+                                    {
+                                        "name": "configuration-security-domain",
+                                        "mountPath": "/etc/datavirt-security-environment",
                                         "readOnly": true
                                     }
                                 ],
@@ -500,7 +491,7 @@
                                     },
                                     {
                                         "name": "ENV_FILES",
-                                        "value": "/etc/datavirt-environment/*"
+                                        "value": "/etc/datavirt-environment/*,/etc/datavirt-security-environment/*"
                                     }
                                 ]
                             }
@@ -511,7 +502,13 @@
                                 "secret": {
                                     "secretName": "${CONFIGURATION_NAME}"
                                 }
-                            }
+                            },
+                            {
+                                "name": "configuration-security-domain",
+                                "secret": {
+                                    "secretName": "${CONFIG_SECURITY_DOMAIN_NAME}"
+                                }
+                            }                            
                         ]
                     }
                 }

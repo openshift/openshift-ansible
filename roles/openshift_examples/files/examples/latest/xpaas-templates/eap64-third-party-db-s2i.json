@@ -72,9 +72,9 @@
         },
         {
             "displayName": "Drivers ImageStreamTag",
-            "description": "ImageStreamTag definition for the image containing the drivers and configuration, e.g. jboss-datavirt63-driver-openshift:1.1",
+            "description": "ImageStreamTag definition for the image containing the drivers and configuration, e.g. jboss-datavirt64-driver-openshift:1.2",
             "name": "EXTENSIONS_IMAGE",
-            "value": "jboss-datavirt63-driver-openshift:1.1",
+            "value": "jboss-datavirt64-driver-openshift:1.2",
             "required": true
         },
         {
