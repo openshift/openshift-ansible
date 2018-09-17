@@ -83,6 +83,16 @@
 - import_tasks: dnsmasq_install.yml
 - import_tasks: dnsmasq.yml
 
+- name: ensure dnsmasq is always restarted
+  debug:
+    msg: "Restarting dnsmasq"
+  # changed_when: True required for debug tasks to trigger handlers.
+  changed_when: True
+  notify: restart dnsmasq
+
+# Need to flush handlers here so dnsmasq is restarted.
+- meta: flush_handlers
+
 # Restart all services
 - import_tasks: upgrade/restart.yml
 
@@ -118,5 +128,3 @@
   until: node_upgrade_oc_csr_approve is succeeded
 
 - import_tasks: journald.yml
-
-- meta: flush_handlers
