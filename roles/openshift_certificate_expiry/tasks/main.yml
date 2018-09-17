@@ -1,4 +1,9 @@
 ---
+- name: Ensure python dateutil library is present
+  package:
+    name: "{{ 'python3-dateutil' if ansible_distribution == 'Fedora' else 'python-dateutil' }}"
+    state: present
+
 - name: Check cert expirys on host
   openshift_cert_expiry:
     warning_days: "{{ openshift_certificate_expiry_warning_days|int }}"
