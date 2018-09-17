@@ -48,3 +48,13 @@
     msg: |-
       Configuring a value for openshift_hosted_registry_storage_kind=glusterfs without a any glusterfs option is not allowed.
       Specify either openshift_hosted_registry_storage_glusterfs_ips variable or glusterfs, glusterfs_registry host groups.
+
+#if the user is trying to install the deprecated prometheus stack
+- name: Check for deprecated prometheus/grafana install
+  when:
+  - (openshift_hosted_prometheus_deploy | default(false) | bool) or
+    (openshift_hosted_grafana_deploy | default(false) | bool)
+  fail:
+    msg: |-
+      The inventory variables 'openshift_hosted_prometheus_deploy' and 'openshift_hosted_grafana_deploy' are no longer used.
+      See roles/openshift_cluster_monitoring_operator/README.md for information about installing Prometheus and related monitoring components.
