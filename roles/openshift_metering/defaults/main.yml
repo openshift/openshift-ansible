@@ -2,6 +2,8 @@
 openshift_metering_install: true
 openshift_metering_operator_image: ''
 
+openshift_metering_enable_monitoring: true
+
 openshift_metering_config: null
 
 # Configures AWS Access credentials on all pods which use it for communicating

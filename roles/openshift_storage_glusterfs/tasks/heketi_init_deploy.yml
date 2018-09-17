@@ -43,9 +43,9 @@
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 
-- name: Update deploy-heketi pod result
-  set_fact:
-    deploy_heketi_pod: "{{ deploy_heketi_pod_wait.results.results[0]['items'][0] }}"
+- import_tasks: heketi_set_cli.yml
+  vars:
+    heketi_pod: "{{ deploy_heketi_pod_wait.results.results[0]['items'][0] }}"
 
 - name: Set deploy-heketi deployed fact
   set_fact:

@@ -609,6 +609,7 @@ def build_controller_args(facts):
                                   'cloudprovider')
     if 'master' in facts:
         controller_args = {}
+
         if 'cloudprovider' in facts:
             if 'kind' in facts['cloudprovider']:
                 if facts['cloudprovider']['kind'] == 'aws':
@@ -1055,7 +1056,9 @@ class OpenShiftFacts(object):
         roles = local_facts.keys()
 
         defaults = self.get_defaults(roles)
-        provider_facts = self.init_provider_facts()
+        provider_facts = {}
+        if 'common' in local_facts and 'cloudprovider' in local_facts['common']:
+            provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
         facts = merge_facts(facts,
                             local_facts,

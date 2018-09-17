@@ -17,6 +17,21 @@
     src: "{{ item }}"
     dest: "{{ mktemp.stdout }}"
   with_fileglob: files/*.yaml
+
+- name: Set olm-operator template
+  template:
+    src: olm-operator.deployment.j2
+    dest: "{{ mktemp.stdout  }}/olm-operator.deployment.yaml"
+  vars:
+    namespace: operator-lifecycle-manager
+
+- name: Set catalog-operator template
+  template:
+    src: catalog-operator.deployment.j2
+    dest: "{{ mktemp.stdout  }}/catalog-operator.deployment.yaml"
+  vars:
+    namespace: operator-lifecycle-manager
+
 - name: Apply olm-operator-serviceaccount ServiceAccount manifest
   oc_obj:
     state: present
@@ -24,7 +39,16 @@
     name: olm-operator-serviceaccount
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/01-alm-operator.serviceaccount.yaml"
+      - "{{ mktemp.stdout }}/olm-operator.serviceaccount.yaml"
+
+- name: Apply operator-lifecycle-manager ClusterRole manifest
+  oc_obj:
+    state: present
+    kind: ClusterRole
+    name: system:controller:operator-lifecycle-manager
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/olm-operator.clusterrole.yaml"
 
 - name: Apply olm-operator-binding-operator-lifecycle-manager ClusterRoleBinding manifest
   oc_obj:
@@ -33,7 +57,7 @@
     name: olm-operator-binding-operator-lifecycle-manager
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/02-alm-operator.rolebinding.yaml"
+      - "{{ mktemp.stdout }}/olm-operator.rolebinding.yaml"
 
 - name: Apply clusterserviceversions.operators.coreos.com CustomResourceDefinition manifest
   oc_obj:
@@ -42,7 +66,7 @@
     name: clusterserviceversions.operators.coreos.com
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/03-clusterserviceversion.crd.yaml"
+      - "{{ mktemp.stdout }}/clusterserviceversion.crd.yaml"
 
 - name: Apply catalogsources.operators.coreos.com CustomResourceDefinition manifest
   oc_obj:
@@ -51,7 +75,7 @@
     name: catalogsources.operators.coreos.com
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/05-catalogsource.crd.yaml"
+      - "{{ mktemp.stdout }}/catalogsource.crd.yaml"
 
 - name: Apply installplans.operators.coreos.com CustomResourceDefinition manifest
   oc_obj:
@@ -60,7 +84,7 @@
     name: installplans.operators.coreos.com
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/06-installplan.crd.yaml"
+      - "{{ mktemp.stdout }}/installplan.crd.yaml"
 
 - name: Apply subscriptions.operators.coreos.com CustomResourceDefinition manifest
   oc_obj:
@@ -69,34 +93,52 @@
     name: subscriptions.operators.coreos.com
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/07-subscription.crd.yaml"
+      - "{{ mktemp.stdout }}/subscription.crd.yaml"
 
-- name: Apply ocs ConfigMap manifest
+- name: Apply rh-operators ConfigMap manifest
   oc_obj:
     state: present
     kind: ConfigMap
-    name: ocs
+    name: rh-operators
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/08-ocs.configmap.yaml"
+      - "{{ mktemp.stdout }}/rh-operators.configmap.yaml"
 
-- name: Apply ocs CatalogSource manifest
+- name: Apply rh-operators CatalogSource manifest
   oc_obj:
     state: present
     kind: CatalogSource
-    name: ocs
+    name: rh-operators
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/10-ocs.catalogsource.yaml"
+      - "{{ mktemp.stdout }}/rh-operators.catalogsource.yaml"
 
-- name: Apply alm-operator Deployment manifest
+- name: Apply certified-operators ConfigMap manifest
+  oc_obj:
+    state: present
+    kind: ConfigMap
+    name: certified-operators
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/certified-operators.configmap.yaml"
+
+- name: Apply certified-operators CatalogSource manifest
+  oc_obj:
+    state: present
+    kind: CatalogSource
+    name: certified-operators
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/certified-operators.catalogsource.yaml"
+
+- name: Apply olm-operator Deployment manifest
   oc_obj:
     state: present
     kind: Deployment
-    name: alm-operator
+    name: olm-operator
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/12-alm-operator.deployment.yaml"
+      - "{{ mktemp.stdout }}/olm-operator.deployment.yaml"
 
 - name: Apply catalog-operator Deployment manifest
   oc_obj:
@@ -105,7 +147,7 @@
     name: catalog-operator
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/13-catalog-operator.deployment.yaml"
+      - "{{ mktemp.stdout }}/catalog-operator.deployment.yaml"
 
 - name: Apply aggregate-olm-edit ClusterRole manifest
   oc_obj:
@@ -114,7 +156,7 @@
     name: aggregate-olm-edit
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/20-aggregated-edit.clusterrole.yaml"
+      - "{{ mktemp.stdout }}/aggregated-edit.clusterrole.yaml"
 
 - name: Apply aggregate-olm-view ClusterRole manifest
   oc_obj:
@@ -123,4 +165,4 @@
     name: aggregate-olm-view
     namespace: operator-lifecycle-manager
     files:
-      - "{{ mktemp.stdout }}/21-aggregated-view.clusterrole.yaml"
+      - "{{ mktemp.stdout }}/aggregated-view.clusterrole.yaml"

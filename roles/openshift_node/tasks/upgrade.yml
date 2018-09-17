@@ -22,15 +22,16 @@
 
 - name: Ensure cri-o is updated
   package:
-    name: "{{ crio_pkgs | join (',') }}"
+    name: "{{ pkg_list | join (',') }}"
     state: latest
   when:
   - openshift_use_crio | bool
   register: crio_update
+  until: crio_update is succeeded
   vars:
-    crio_pkgs:
-    - "cri-o"
-    - "cri-tools"
+    pkg_list:
+    - cri-o
+    - cri-tools
 
 - name: Remove CRI-O default configuration files
   file:
@@ -41,9 +42,20 @@
   - "/etc/cni/net.d/100-crio-bridge.conf"
   when: crio_update is changed
 
+- name: Ensure crictl.yaml runtime-endpoint is updated
+  yedit:
+    src: /etc/crictl.yaml
+    key: runtime-endpoint
+    value: "{{ openshift_crio_var_sock }}"
+  when:
+  - openshift_use_crio | default(False) | bool
+
 - name: install pre-pulled rpms.
   import_tasks: upgrade/rpm_upgrade_install.yml
   when: not openshift_is_atomic | bool
+
+# TODO(michaelgugino): Remove in 3.12
+- import_tasks: selinux_container_cgroup.yml
 
 - include_tasks: "{{ node_config_hook }}"
   when: node_config_hook is defined

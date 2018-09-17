@@ -141,6 +141,9 @@ spec:
                 continue
               fi
             fi
+            # annotate node with md5sum of the config
+            oc annotate --config=/etc/origin/node/node.kubeconfig "node/${NODE_NAME}" \
+              node.openshift.io/md5sum="$( cat /tmp/.new | cut -d' ' -f1 )" --overwrite
             cp -f /tmp/.new /tmp/.old
             sleep 180 &
             wait $!

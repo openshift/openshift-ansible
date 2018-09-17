@@ -1,0 +1,11 @@
+---
+- name: Uninstall Metering ServiceMonitors from openshift-monitoring namespace
+  oc_obj:
+    state: absent
+    kind: "{{ obj.kind }}"
+    name: "{{ obj.metadata.name }}"
+    namespace: "openshift-monitoring"
+  vars:
+    obj: "{{ lookup('file', item) | from_yaml }}"
+  with_fileglob:
+  - "files/monitoring/service-monitors/*.yaml"

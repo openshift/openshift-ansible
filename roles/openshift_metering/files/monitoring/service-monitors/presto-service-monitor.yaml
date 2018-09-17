@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: metering-presto
+  namespace: openshift-monitoring
+  labels:
+    k8s-app: metering-presto
+spec:
+  jobLabel: k8s-app
+  endpoints:
+  - port: metrics
+    interval: 30s
+    scheme: "http"
+  selector:
+    matchLabels:
+      app: presto
+      metrics: "true"
+  namespaceSelector:
+    matchNames:
+    - openshift-metering

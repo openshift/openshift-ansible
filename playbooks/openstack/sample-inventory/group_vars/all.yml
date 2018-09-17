@@ -106,6 +106,15 @@ openshift_openstack_num_infra: 1
 openshift_openstack_num_cns: 0
 openshift_openstack_num_nodes: 2
 
+# # Public IP Allocation
+# # - manage which node roles are allocated public IP addresses
+# # - by default, all roles are given Public IP addresses
+#openshift_openstack_master_floating_ip: true
+#openshift_openstack_infra_floating_ip: true
+#openshift_openstack_etcd_floating_ip: true
+#openshift_openstack_load_balancer_floating_ip: true
+#openshift_openstack_compute_floating_ip: true
+
 # # Used Flavors
 # # - set specific flavors for roles by uncommenting corresponding lines
 # # - note: do note remove openshift_openstack_default_flavor definition
@@ -152,9 +161,12 @@ openshift_openstack_pool_start: "192.168.99.3"
 # The ending IP address for the OpenStack subnet allocation pool.
 openshift_openstack_pool_end: "192.168.99.254"
 
-## Red Hat subscription:
+## Red Hat subscription using user/password
 #rhsub_user: '<username>'
 #rhsub_pass: '<password>'
+# Or if using activation key:
+#rhsub_ak: '<ak>'
+#rhsub_orgid: '<orgid>'
 #rhsub_pool: '<pool name>'
 
 

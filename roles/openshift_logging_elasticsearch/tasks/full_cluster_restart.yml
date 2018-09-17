@@ -62,7 +62,7 @@
     annotate "dc/{{ _es_node }}"
     prior-replica-count=$({{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n {{ openshift_logging_elasticsearch_namespace }} get "dc/{{ _es_node }}" -o jsonpath='{.spec.replicas}')
     --overwrite
-  with_items: "{{ logging_restart_cluster_dcs }}"
+  with_items: "{{ logging_restart_cluster_dcs.split(' ') }}"
   loop_control:
     loop_var: _es_node
 
@@ -72,7 +72,7 @@
     kind: dc
     name: "{{ _es_node }}"
     replicas: 0
-  with_items: "{{ logging_restart_cluster_dcs }}"
+  with_items: "{{ logging_restart_cluster_dcs.split(' ') }}"
   loop_control:
     loop_var: _es_node
 
@@ -82,7 +82,7 @@
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     rollout latest {{ _es_node }}
     -n {{ openshift_logging_elasticsearch_namespace }}
-  with_items: "{{ logging_restart_cluster_dcs }}"
+  with_items: "{{ logging_restart_cluster_dcs.split(' ') }}"
   loop_control:
     loop_var: _es_node
 
@@ -93,7 +93,7 @@
     -n {{ openshift_logging_elasticsearch_namespace }}
     scale "dc/{{ _es_node }}"
     --replicas=$({{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n {{ openshift_logging_elasticsearch_namespace }} get "dc/{{ _es_node }}" -o jsonpath='{.metadata.annotations.prior-replica-count}')
-  with_items: "{{ logging_restart_cluster_dcs }}"
+  with_items: "{{ logging_restart_cluster_dcs.split(' ') }}"
   loop_control:
     loop_var: _es_node
 
@@ -113,7 +113,7 @@
   - _dc_output.results.results[0].status.updatedReplicas > 0
   retries: 60
   delay: 30
-  with_items: "{{ logging_restart_cluster_dcs }}"
+  with_items: "{{ logging_restart_cluster_dcs.split(' ') }}"
   loop_control:
     loop_var: _es_node
   failed_when: false

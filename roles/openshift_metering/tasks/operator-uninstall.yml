@@ -14,3 +14,6 @@
   oc_clusterrole:
     state: absent
     name: "openshift-metering-namespace-viewer-{{ __openshift_metering_namespace }}"
+
+- name: Uninstall monitoring resources
+  import_tasks: monitoring-uninstall.yml

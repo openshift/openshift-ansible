@@ -27,7 +27,7 @@ storage_option = [
 [crio.api]
 
 # listen is the path to the AF_LOCAL socket on which crio will listen.
-listen = "{{ l_crio_var_sock }}"
+listen = "/var/run/crio/crio.sock"
 
 # stream_address is the IP address on which the stream server will listen
 stream_address = ""
@@ -37,7 +37,7 @@ stream_port = "10010"
 
 # file_locking is whether file-based locking will be used instead of
 # in-memory locking
-file_locking = true
+file_locking = false
 
 # The "crio.runtime" table contains settings pertaining to the OCI
 # runtime used and options for how to set up and manage the OCI runtime.

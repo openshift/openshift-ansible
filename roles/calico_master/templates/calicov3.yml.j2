@@ -181,6 +181,10 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
+{% if calico_image_credentials is defined %}
+      imagePullSecrets:
+        - name: calico-pull-secret
+{% endif %}
       nodeSelector:
         projectcalico.org/ds-ready: "true"
       hostNetwork: true
@@ -339,13 +343,24 @@ spec:
             httpGet:
               path: /liveness
               port: 9099
+{% if calico_binary_checks %}
+              host: localhost
+{% endif %}
             periodSeconds: 10
             initialDelaySeconds: 10
             failureThreshold: 6
           readinessProbe:
+{% if calico_binary_checks %}
+            exec:
+              command:
+              - /bin/calico-node
+              - -bird-ready
+              - -felix-ready
+{% else %}
             httpGet:
               path: /readiness
               port: 9099
+{% endif %}
             periodSeconds: 10
           volumeMounts:
             - mountPath: /lib/modules

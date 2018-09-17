@@ -1,0 +1,24 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: metering-reporting-operator
+  namespace: openshift-monitoring
+  labels:
+    k8s-app: metering-reporting-operator
+spec:
+  jobLabel: k8s-app
+  endpoints:
+  - port: metrics
+    scheme: "https"
+    interval: 30s
+    tlsConfig:
+      caFile: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+      serverName: reporting-operator-metrics.openshift-metering.svc
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+  selector:
+    matchLabels:
+      app: reporting-operator
+      metrics: "true"
+  namespaceSelector:
+    matchNames:
+    - openshift-metering

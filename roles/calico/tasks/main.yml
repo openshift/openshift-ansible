@@ -30,7 +30,7 @@
   when: calico_node_image is not defined
 
 - name: Prepull Images
-  command: "docker pull {{ calico_node_image }}"
+  command: "{{ openshift_container_cli }} pull {{ calico_node_image }}"
 
 - name: Apply node label
   delegate_to: "{{ groups.oo_first_master.0 }}"

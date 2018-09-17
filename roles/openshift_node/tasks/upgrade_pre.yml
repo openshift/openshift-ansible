@@ -7,23 +7,27 @@
 
 - import_tasks: registry_auth.yml
 
+- name: Check that pod image is present
+  command: "{{ openshift_container_cli }} images -q {{ osn_pod_image }}"
+  register: pod_image
+
+# This task runs async to save time while other downloads proceed
+- name: pre-pull pod image
+  docker_image:
+    name: "{{ osn_pod_image }}"
+  environment:
+    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+  when: pod_image.stdout_lines == []
+  # 10 minutes to pull the image
+  async: 600
+  poll: 0
+  register: pod_image_prepull
+
 - name: update package meta data to speed install later.
   command: "{{ ansible_pkg_mgr }} makecache"
   register: result
   until: result is succeeded
   when: not openshift_is_atomic | bool
-
-- name: Check Docker image count
-  shell: "docker images -aq | wc -l"
-  register: docker_image_count
-  when:
-  - l_docker_upgrade is defined
-  - l_docker_upgrade | bool
-
-- debug: var=docker_image_count.stdout
-  when:
-  - l_docker_upgrade is defined
-  - l_docker_upgrade | bool
 
 # Prepull the rpms for docker upgrade, but don't install
 - name: download docker upgrade rpm
@@ -47,3 +51,13 @@
 
 - import_tasks: upgrade/rpm_upgrade.yml
   when: not openshift_is_atomic | bool
+
+- name: Check status of node pod image pre-pull
+  async_status:
+    jid: "{{ pod_image_prepull.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  when: pod_image.stdout_lines == []
+  retries: 20
+  delay: 30
+  failed_when: false

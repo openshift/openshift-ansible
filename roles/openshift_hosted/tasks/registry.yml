@@ -10,7 +10,7 @@
 - name: set openshift_hosted facts
   set_fact:
     # This determines the gluster_ips to use for the registry by looping over the glusterfs_registry group
-    openshift_hosted_registry_storage_glusterfs_ips: "{%- set gluster_ips = [] %}{% if groups.glusterfs_registry is defined %}{% for node in groups.glusterfs_registry %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% elif groups.glusterfs is defined %}{% for node in groups.glusterfs %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% else %}{{ openshift_hosted_registry_storage_glusterfs_ips }}{% endif %}"
+    openshift_hosted_registry_storage_glusterfs_ips: "{%- set gluster_ips = [] %}{% if groups.glusterfs_registry is defined %}{% for node in groups.glusterfs_registry %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip if 'openshift' in hostvars[node] else '')) %}{% endfor %}{{ gluster_ips }}{% elif groups.glusterfs is defined %}{% for node in groups.glusterfs %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip if 'openshift' in hostvars[node] else '')) %}{% endfor %}{{ gluster_ips }}{% else %}{{ openshift_hosted_registry_storage_glusterfs_ips }}{% endif %}"
 
 - name: Update registry environment variables when pushing via dns
   # OPENSHIFT_DEFAULT_REGISTRY is deprecated - keep until 3.11

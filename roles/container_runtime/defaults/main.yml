@@ -75,11 +75,7 @@ docker_http_proxy: "{{ openshift_http_proxy | default('') }}"
 docker_https_proxy: "{{ openshift.common.https_proxy | default('') }}"
 docker_no_proxy: "{{ openshift.common.no_proxy | default('') }}"
 
-openshift_crio_pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
-
 l_required_docker_version: '1.13'
-
-l_crio_var_sock: "/var/run/crio/crio.sock"
 
 l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l2_docker_insecure_registries)) }}"
 l_crio_registries: "{{ l2_docker_additional_registries + ['docker.io'] }}"

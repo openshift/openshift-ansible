@@ -53,6 +53,7 @@
       name: "{{ build_prefix }}-subnet"
       network_name: "{{ network.network.name }}"
       cidr: "{{ openshift_openstack_build_network_cidr | default('192.168.23.0/24') }}"
+      dns_nameservers: "{{ openshift_openstack_dns_nameservers }}"
     register: subnet
 
   - name: Create the router
@@ -141,6 +142,22 @@
 # to become a node.
 - import_playbook: ../../openshift-node/private/image_prep.yml
 
+- name: Finish image preparation
+  hosts: nodes
+  become: yes
+  tasks:
+  - name: Update to latest package versions
+    import_role:
+      name: os_update_latest
+    when:
+    - ansible_distribution == "RedHat"
+
+  - name: Unsubscribe image
+    import_role:
+      name: rhel_unsubscribe
+    when:
+    - ansible_distribution == "RedHat"
+    - (rhsub_user is defined and rhsub_pass is defined) or (rhsub_ak is defined and rhsub_orgid is defined)
 
 - name: Commit image
   hosts: localhost
@@ -155,7 +172,7 @@
     command: openstack server image create --wait --name "{{ openshift_openstack_default_image_name }}" "{{ image_vm.id }}"
 
   # Remove the temporary OpenStack resources
-  - name: Remove the imabe build instance
+  - name: Remove the image build instance
     os_server:
       name: "{{ image_vm.id }}"
       state: absent

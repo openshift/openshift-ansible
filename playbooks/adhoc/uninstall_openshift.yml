@@ -81,51 +81,61 @@
     with_items:
     - firewalld
 
-  - block:
-    - block:
+  - when: openshift_remove_all | default(true) | bool
+    block:
+
+    - when: not openshift_is_atomic | bool
+      block:
+
       - name: Remove packages
-        package: name={{ item }} state=absent
-        with_items:
-        - atomic-openshift
-        - atomic-openshift-clients
-        - atomic-openshift-excluder
-        - atomic-openshift-docker-excluder
-        - atomic-openshift-node
-        - atomic-openshift-sdn-ovs
-        - atomic-openshift-hyperkube
-        - cockpit-bridge
-        - cockpit-docker
-        - cockpit-system
-        - cockpit-ws
-        - kubernetes-client
-        - openshift
-        - openshift-node
-        - openshift-sdn
-        - openshift-sdn-ovs
-        - origin
-        - origin-excluder
-        - origin-docker-excluder
-        - origin-clients
-        - origin-node
-        - origin-sdn-ovs
-        - origin-hyperkube
-        - tuned-profiles-atomic-openshift-node
-        - tuned-profiles-origin-node
+        package:
+          name: "{{ pkg_list | join(',') }} "
+          state: absent
+        vars:
+          pkg_list:
+          - atomic-openshift
+          - atomic-openshift-clients
+          - atomic-openshift-excluder
+          - atomic-openshift-docker-excluder
+          - atomic-openshift-node
+          - atomic-openshift-sdn-ovs
+          - atomic-openshift-hyperkube
+          - cockpit-bridge
+          - cockpit-docker
+          - cockpit-system
+          - cockpit-ws
+          - kubernetes-client
+          - openshift
+          - openshift-node
+          - openshift-sdn
+          - openshift-sdn-ovs
+          - origin
+          - origin-excluder
+          - origin-docker-excluder
+          - origin-clients
+          - origin-node
+          - origin-sdn-ovs
+          - origin-hyperkube
+          - tuned-profiles-atomic-openshift-node
+          - tuned-profiles-origin-node
         register: result
         until: result is succeeded
 
       - name: Remove OVS package
-        package: name=openvswitch state=absent
+        package:
+          name: openvswitch
+          state: absent
         register: result
         until: result is succeeded
         when: openshift_use_openshift_sdn | default(True) | bool
 
       - name: Remove flannel package
-        package: name=flannel state=absent
+        package:
+          name: flannel
+          state: absent
         when: openshift_use_flannel | default(false) | bool
         register: result
         until: result is succeeded
-      when: not openshift_is_atomic | bool
 
     - shell: systemctl reset-failed
       changed_when: False
@@ -155,8 +165,6 @@
       with_items:
       - tun0
       when: openshift_use_openshift_sdn | default(True) | bool
-
-    when: openshift_remove_all | default(true) | bool
 
   - shell: atomic uninstall "{{ item }}"-node
     changed_when: False
@@ -310,27 +318,32 @@
     - atomic-openshift-master
 
   - name: Remove packages
-    package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
-    with_items:
-    - atomic-openshift
-    - atomic-openshift-clients
-    - atomic-openshift-excluder
-    - atomic-openshift-docker-excluder
-    - atomic-openshift-master
-    - cockpit-bridge
-    - cockpit-docker
-    - cockpit-system
-    - cockpit-ws
-    - corosync
-    - kubernetes-client
-    - openshift
-    - openshift-master
-    - origin
-    - origin-clients
-    - origin-excluder
-    - origin-docker-excluder
-    - origin-master
+    package:
+      name: "{{ pkg_list | join(',') }}"
+      state: absent
+    when:
+    - not openshift_is_atomic | bool
+    - openshift_remove_all | default(True) | bool
+    vars:
+      pkg_list:
+      - atomic-openshift
+      - atomic-openshift-clients
+      - atomic-openshift-excluder
+      - atomic-openshift-docker-excluder
+      - atomic-openshift-master
+      - cockpit-bridge
+      - cockpit-docker
+      - cockpit-system
+      - cockpit-ws
+      - corosync
+      - kubernetes-client
+      - openshift
+      - openshift-master
+      - origin
+      - origin-clients
+      - origin-excluder
+      - origin-docker-excluder
+      - origin-master
     register: result
     until: result is succeeded
 
@@ -426,11 +439,16 @@
     failed_when: false
 
   - name: Remove packages
-    package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
-    with_items:
-    - etcd
-    - etcd3
+    package:
+      name: "{{ pkg_list | join(',') }}"
+      state: absent
+    when:
+    - not openshift_is_atomic | bool
+    - openshift_remove_all | default(True) | bool
+    vars:
+      pkg_list:
+      - etcd
+      - etcd3
     register: result
     until: result is succeeded
 
@@ -486,10 +504,12 @@
     - firewalld
 
   - name: Remove packages
-    package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
-    with_items:
-    - haproxy
+    package:
+      name: haproxy
+      state: absent
+    when:
+    - not openshift_is_atomic | bool
+    - openshift_remove_all | default(True) | bool
     register: result
     until: result is succeeded
 

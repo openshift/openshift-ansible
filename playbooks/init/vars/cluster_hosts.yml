@@ -22,5 +22,4 @@ g_glusterfs_registry_hosts: "{{ groups.glusterfs_registry | default(g_glusterfs_
 g_all_hosts: "{{ g_master_hosts | union(g_node_hosts) | union(g_etcd_hosts)
                  | union(g_new_etcd_hosts) | union(g_lb_hosts) | union(g_nfs_hosts)
                  | union(g_new_node_hosts)| union(g_new_master_hosts)
-                 | union(g_glusterfs_hosts) | union(g_glusterfs_registry_hosts)
                  | default([]) }}"

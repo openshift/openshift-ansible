@@ -45,10 +45,8 @@ openshift_node_syscon_add_mounts_l: []
 
 default_r_openshift_node_image_prep_packages:
 - "{{ openshift_service_type }}-node"
-- "{{ openshift_service_type }}-docker-excluder"
 - ansible
 - bash-completion
-- docker
 - dnsmasq
 - ntp
 - logrotate
@@ -104,7 +102,6 @@ r_openshift_node_os_firewall_allow: "{{ default_r_openshift_node_os_firewall_all
 # oreg_url is defined by user input
 oreg_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
 l_bind_docker_reg_auth: False
-l_crio_var_sock: "/var/run/crio/crio.sock"
 
 openshift_docker_service_name: "docker"
 

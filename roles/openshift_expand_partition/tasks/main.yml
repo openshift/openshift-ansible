@@ -1,6 +1,8 @@
 ---
 - name: Ensure growpart is installed
-  package: name=cloud-utils-growpart state=present
+  package:
+    name: cloud-utils-growpart
+    state: present
   when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded

@@ -16,20 +16,9 @@
       get_mime: false
     register: service_signer_cert_stat
     changed_when: false
-  - name: verify api server
-    command: >
-      curl --silent --tlsv1.2
-      --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
-      {{ openshift.master.api_url }}/healthz/ready
-    args:
-      # Disables the following warning:
-      # Consider using get_url or uri module rather than running curl
-      warn: no
-    register: api_available_output
-    until: api_available_output.stdout == 'ok'
-    retries: 120
-    delay: 1
-    changed_when: false
+  - import_role:
+      name: openshift_control_plane
+      tasks_from: verify_api_server.yml
 
 - import_playbook: create_service_signer_cert.yml
 
@@ -239,3 +228,10 @@
       tasks_from: config.yml
     vars:
       openshift_master_host: "{{ groups.oo_first_master.0 }}"
+
+- name: Update sync DS
+  hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: openshift_node_group
+      tasks_from: sync.yml

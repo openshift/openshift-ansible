@@ -15,8 +15,7 @@
       name: rhel_unsubscribe
     when:
     - ansible_distribution == "RedHat"
-    - rhsub_user is defined
-    - rhsub_pass is defined
+    - (rhsub_user is defined and rhsub_pass is defined) or (rhsub_ak is defined and rhsub_orgid is defined)
 
 - name: Clean DNS entries
   hosts: localhost

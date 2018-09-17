@@ -119,7 +119,7 @@ debug_level=2
 # these variables are set to the defaults shown. You may override them here.
 # NOTE: You will still need to tag crio nodes with your given label(s)!
 # Enable docker garbage collection when using cri-o
-#openshift_crio_enable_docker_gc=True
+#openshift_crio_enable_docker_gc=False
 # Node Selectors to run the garbage collection
 #openshift_crio_docker_gc_node_selector={'runtime': 'cri-o'}
 
@@ -149,6 +149,8 @@ debug_level=2
 # etcd_debug=true
 # Set etcd log levels by package
 # etcd_log_package_levels="etcdserver=WARNING,security=DEBUG"
+# Comma-separated list of etcd cipher suites
+# etcd_cipher_suites="TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"
 
 # Upgrade Hooks
 #
@@ -168,7 +170,7 @@ debug_level=2
 # openshift_master_upgrade_post_hook=/usr/share/custom/post_master.yml
 
 # Cluster Image Source (registry) configuration
-# openshift-enterprise default is 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
+# openshift-enterprise default is 'registry.redhat.io/openshift3/ose-${component}:${version}'
 # origin default is 'docker.io/openshift/origin-${component}:${version}'
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 # If oreg_url points to a registry other than registry.redhat.io we can
