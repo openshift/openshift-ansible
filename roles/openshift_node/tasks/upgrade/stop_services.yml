@@ -11,7 +11,7 @@
   service:
     name: openvswitch
     state: stopped
-  when: not openshift_use_nsx | bool
+  when: not openshift_use_nsx | default(false) | bool
   failed_when: false
 
 - service:
