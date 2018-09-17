@@ -2,7 +2,7 @@
     "kind": "List",
     "apiVersion": "v1",
     "metadata": {
-        "name": "datavirt64-image-stream.json",
+        "name": "datavirt64-image-stream",
         "annotations": {
             "description": "ImageStream definitions for JBoss Middleware products.",
             "openshift.io/provider-display-name": "Red Hat, Inc."
