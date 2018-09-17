@@ -16,7 +16,7 @@
     state: present
     name: "{{ openshift_management_project }}"
     display_name: "{{ openshift_management_project_description }}"
-    node_selector: "{{ openshift_management_nodeselector }}"
+    node_selector: "{{ openshift_management_nodeselector | map_to_pairs }}"
 
 - name: Create and Authorize Management Accounts
   include_tasks: accounts.yml
