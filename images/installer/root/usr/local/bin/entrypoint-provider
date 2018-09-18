@@ -66,7 +66,7 @@ if [[ "$TYPE" == 'azure' ]]; then
     . "${FILES}/credentials"
     set +a
 
-    az login --service-principal --username "$AZURE_CLIENT_ID" --password "$AZURE_SECRET" --tenant "$AZURE_TENANT" >/dev/null
+    az login --service-principal --username "$AZURE_CLIENT_ID" --password "$AZURE_CLIENT_SECRET" --tenant "$AZURE_TENANT_ID" >/dev/null
 
   else
     echo "No service account file found at ${FILES}/credentials, bypassing login"
