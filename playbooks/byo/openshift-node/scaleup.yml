@@ -16,4 +16,9 @@
 
 - include: ../../common/openshift-cluster/std_include.yml
 
+- name: Ensure master facts are set
+  hosts: oo_masters_to_config
+  roles:
+  - openshift_master_facts
+
 - include: ../../common/openshift-node/config.yml
