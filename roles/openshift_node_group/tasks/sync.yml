@@ -84,7 +84,7 @@
     - node_status.results.results | length > 0
     - node_status.results.results[0]['items']
         | map(attribute='metadata.annotations') | map('list') | flatten
-        | select('match', '[\"node.openshift.io/md5sum\"]') | list | length ==
+        | select('match', 'node.openshift.io/md5sum') | list | length ==
       node_status.results.results[0]['items'] | length
   retries: 60
   delay: 10
