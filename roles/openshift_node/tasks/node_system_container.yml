@@ -16,27 +16,6 @@
   - "/var/lib/kubelet"
   - "/opt/cni/bin"
 
-- name: Check status of node image pre-pull
-  async_status:
-    jid: "{{ image_prepull.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  when:
-  - node_image is defined
-  - node_image.stdout_lines == []
-  retries: 20
-  delay: 30
-  failed_when: false
-
-- name: Copy node container image to ostree storage
-  command: >
-    atomic pull --storage=ostree docker:{{ osn_image }}
-  register: pull_result
-  retries: 3
-  delay: 5
-  until: pull_result.rc == 0
-  changed_when: "'Pulling layer' in pull_result.stdout"
-
 - import_tasks: node_system_container_install.yml
 
 # TODO: network manager on RHEL is failing to execute 99-origin-dns.sh with signal 13, an immediate

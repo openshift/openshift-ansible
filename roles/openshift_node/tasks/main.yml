@@ -59,6 +59,11 @@
 
 - import_tasks: registry_auth.yml
 
+- import_tasks: prepull_check.yml
+
+- import_tasks: copy_image_to_ostree.yml
+  when: openshift_is_atomic | bool
+
 - name: include standard node config
   import_tasks: config.yml
 
