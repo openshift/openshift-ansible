@@ -47,6 +47,7 @@
             "Name": "{{ item.name }}",
             "ansible-groups": "{{ item.ansible_groups | join(',') }}",
             "ansible-node-group": "{{ item.node_group }}",
+            "ansible-docker_storage_device": "{{ item.docker_storage_device | default('') }}",
           }
 
     - name: Add machine to inventory
@@ -58,6 +59,7 @@
         aws_region: "{{ aws_region }}"
         aws_ip: "{{ item.instances.0.public_ip }}"
         aws_id: "{{ item.instances.0.id }}"
+        docker_storage_device: "{{ item.instances.0.tags['ansible-docker_storage_device'] }}"
         openshift_node_group_name: "{{ item.instances.0.tags['ansible-node-group'] }}"
       with_items: "{{ ec2.results }}"
 
@@ -75,7 +77,15 @@
   tasks:
     - wait_for_connection: {}
     - setup: {}
-
+    - block:
+      - name: "Update /etc/sysconfig/docker-storage-setup"
+        lineinfile:
+          path: /etc/sysconfig/docker-storage-setup
+          insertafter: '^ROOT_SIZE'
+          line: 'DEVS="{{ docker_storage_device }}"'
+      - name: Setup docker storage
+        command: "docker-storage-setup"
+      when: docker_storage_device is defined
 
 - import_playbook: ../../playbooks/openshift-node/network_manager.yml
 - import_playbook: ../../playbooks/prerequisites.yml

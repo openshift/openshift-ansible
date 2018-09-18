@@ -37,3 +37,5 @@ aws_instances:
   # - device_name: /dev/sdb
   #   volume_size: 50
   #   delete_on_termination: yes
+  # Setup docker storage on this device
+  # docker_storage_device: 'xvdb'
