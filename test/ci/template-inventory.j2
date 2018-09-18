@@ -19,7 +19,7 @@ openshift_master_default_subdomain="{{ hostvars[groups[('lb' in groups) | ternar
 {% if group == "nodes" %}
 {% set addon_opts = addon_opts + " openshift_node_group_name='" + hostvars[entry]['openshift_node_group_name'] + "'" %}
 {% endif %}
-{{ entry }} ansible_host='{{ hostvars[entry]['ansible_host'] }}' aws_id='{{ hostvars[entry]['aws_id'] }}' {{ addon_opts }}
+{{ entry }} ansible_host='{{ hostvars[entry]['ansible_host'] }}' aws_id='{{ hostvars[entry]['aws_id'] }}'       docker_storage_device='{{ hostvars[entry]['docker_storage_device'] }}' aws_id='{{ hostvars[entry]['aws_id'] }}' {{ addon_opts }}
 {% endfor %}
 {% endif %}
 
