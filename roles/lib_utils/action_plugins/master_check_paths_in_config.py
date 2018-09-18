@@ -117,7 +117,7 @@ class ActionModule(ActionBase):
         # We migrate some paths for users automatically, so we pop those.
         pop_migrated_fields(mastercfg)
 
-        # Create an empty list to append strings from our config file to to check
+        # Create an empty list to append strings from our config file to check
         # later.
         strings_to_check = []
 

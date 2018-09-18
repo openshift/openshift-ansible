@@ -1056,7 +1056,7 @@ debug_level=2
 #
 # LOCAL NFS NOTE:
 #
-# You may may also change this value if you want to change the default
+# You may also change this value if you want to change the default
 # path used for local NFS exports.
 #openshift_management_storage_nfs_base_dir: /exports
 

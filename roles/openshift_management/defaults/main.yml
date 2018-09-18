@@ -70,7 +70,7 @@ openshift_management_storage_nfs_external_hostname: false
 #
 # LOCAL NFS NOTE:
 #
-# You may may also change this value if you want to change the default
+# You may also change this value if you want to change the default
 # path used for local NFS exports.
 openshift_management_storage_nfs_base_dir: /exports
 #

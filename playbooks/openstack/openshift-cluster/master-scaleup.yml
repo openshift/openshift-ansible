@@ -27,7 +27,7 @@
   # They'll be collected after `wait_for_connection`.
   gather_facts: no
   tasks:
-  - name: Wait for the the new nodes to come up
+  - name: Wait for the new nodes to come up
     wait_for_connection:
 
   - name: Gather facts for the new nodes
