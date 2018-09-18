@@ -14,3 +14,19 @@
   async: 600
   poll: 0
   register: image_prepull
+
+- name: Check that pod image is present
+  command: "{{ openshift_container_cli }} images -q {{ osn_pod_image }}"
+  register: pod_image
+
+# This task runs async to save time while other downloads proceed
+- name: pre-pull pod image
+  docker_image:
+    name: "{{ osn_pod_image }}"
+  environment:
+    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+  when: pod_image.stdout_lines == []
+  # 10 minutes to pull the image
+  async: 600
+  poll: 0
+  register: pod_image_prepull
