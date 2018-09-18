@@ -79,4 +79,40 @@ node_vm:
       name: localvol_disk
       interface: virtio
   state: running
-...
+
+openshift_ovirt_vm_manifest:
+######################################
+# Single Node Static Ip addresses
+######################################
+- name: 'master'
+  count: 1
+  profile: 'master_vm'
+  nic_mode:
+      master0:
+        nic_ip_address: '192.168.123.165'
+        nic_netmask: '255.255.255.0'
+        nic_gateway: '192.168.123.1'
+        nic_on_boot: True
+#######################################
+# Multiple Node Static Ip addresses
+#######################################
+- name: 'node'
+  count: 2
+  profile: 'node_vm'
+  nic_mode:
+      node0:     # This must fit the same name as this kind of vms. (e.g) if the name is test, this must be test0
+          nic_ip_address: '192.168.123.166'
+          nic_netmask: '255.255.255.0'
+          nic_gateway: '192.168.123.1'
+          nic_on_boot: True
+      node1:
+        nic_ip_address: '192.168.123.168'
+        nic_netmask: '255.255.255.0'
+        nic_gateway: '192.168.123.1'
+        nic_on_boot: True
+################################################
+# Multiple/Single Node Dynamic Ip addresses
+################################################
+- name: 'lb'
+  count: 1
+  profile: 'node_vm'
