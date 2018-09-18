@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.44
+Version:        3.9.45
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.45-1
+- Upgrade router and registry only when these are managed (vrutkovs@redhat.com)
+
 * Thu Sep 13 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.44-1
 - 
 
