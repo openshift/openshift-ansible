@@ -23,7 +23,7 @@ if [[ -n "{{ openshift_gcp_ssh_private_key }}" ]]; then
         pub_key=$(cut -d ' ' -f 2 <  "${pub_file}")
     fi
     key_tmp_file='/tmp/ocp-gce-keys'
-    if ! gcloud --project "{{ openshift_gcp_project }}" compute project-info describe | grep -q "$pub_key"; then
+    if ! gcloud --project "{{ openshift_gcp_project }}" compute project-info describe | grep "$pub_key" | grep -q cloud-user; then
         if gcloud --project "{{ openshift_gcp_project }}" compute project-info describe | grep -q ssh-rsa; then
             gcloud --project "{{ openshift_gcp_project }}" compute project-info describe | grep ssh-rsa | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/value: //' > "$key_tmp_file"
         fi
