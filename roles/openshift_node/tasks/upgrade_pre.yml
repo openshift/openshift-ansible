@@ -7,21 +7,8 @@
 
 - import_tasks: registry_auth.yml
 
-- name: Check that pod image is present
-  command: "{{ openshift_container_cli }} images -q {{ osn_pod_image }}"
-  register: pod_image
-
-# This task runs async to save time while other downloads proceed
-- name: pre-pull pod image
-  docker_image:
-    name: "{{ osn_pod_image }}"
-  environment:
-    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
-  when: pod_image.stdout_lines == []
-  # 10 minutes to pull the image
-  async: 600
-  poll: 0
-  register: pod_image_prepull
+# Prepull the node and pod image, it's used by lots of components
+- import_tasks: prepull.yml
 
 - name: update package meta data to speed install later.
   command: "{{ ansible_pkg_mgr }} makecache"
@@ -52,12 +39,7 @@
 - import_tasks: upgrade/rpm_upgrade.yml
   when: not openshift_is_atomic | bool
 
-- name: Check status of node pod image pre-pull
-  async_status:
-    jid: "{{ pod_image_prepull.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  when: pod_image.stdout_lines == []
-  retries: 20
-  delay: 30
-  failed_when: false
+- import_tasks: prepull_check.yml
+
+- import_tasks: copy_image_to_ostree.yml
+  when: openshift_is_atomic | bool
