@@ -83,11 +83,3 @@
     line: pause_image = "{{ openshift_crio_pause_image }}"
     regexp: '^pause_image ='
   when: crio_conf.stat.exists == True
-
-# NOTE: This is needed to make sure we are using the correct set
-#       of systemd unit files. The RPMs lay down defaults but
-#       the install/upgrade may override them in /etc/systemd/system/.
-# NOTE: We don't use the systemd module as some versions of the module
-#       require a service to be part of the call.
-- name: Reload systemd units
-  command: systemctl daemon-reload

@@ -4,7 +4,6 @@
 # - openshift_is_atomic
 # - node_config_hook
 # - openshift_pkg_version
-# - openshift_release
 
 # tasks file for openshift_node_upgrade
 
@@ -88,9 +87,11 @@
     msg: "Restarting dnsmasq"
   # changed_when: True required for debug tasks to trigger handlers.
   changed_when: True
-  notify: restart dnsmasq
+  notify:
+  - reload systemd units
+  - restart dnsmasq
 
-# Need to flush handlers here so dnsmasq is restarted.
+# Need to flush handlers here so dnsmasq is restarted and daemon-reload
 - meta: flush_handlers
 
 # Restart all services
