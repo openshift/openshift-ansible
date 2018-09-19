@@ -188,6 +188,7 @@ class ActionModule(ActionBase):
         result["failed"] = False
         result["msg"] = "persistent_volumes list and persistent_volume_claims list created"
         vars_to_check = ['openshift_hosted_registry_storage',
+                         'openshift_hosted_registry_glusterfs_storage',
                          'openshift_hosted_router_storage',
                          'openshift_hosted_etcd_storage',
                          'openshift_logging_storage',

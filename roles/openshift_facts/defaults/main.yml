@@ -87,7 +87,20 @@ openshift_hosted_registry_storage_glusterfs_ips: []
 openshift_hosted_registry_storage_hostpath_path: /var/lib/openshift_volumes
 # Default to ReadWriteOnce if using hostpath, else default to ReadWriteMany
 openshift_hosted_registry_storage_access_modes:
-  - "{{ (openshift_hosted_registry_storage_kind == 'hostpath') | ternary('ReadWriteOnce', 'ReadWriteMany') }}"
+  - "{{ (openshift_hosted_registry_storage_kind | default(none) == 'hostpath') | ternary('ReadWriteOnce', 'ReadWriteMany') }}"
+
+openshift_hosted_registry_glusterfs_namespace: "{{ openshift_hosted_registry_namespace }}"
+openshift_hosted_registry_glusterfs_storage_kind: 'glusterfs'
+openshift_hosted_registry_glusterfs_storage_volume_name: "{{ openshift_hosted_registry_storage_volume_name }}-glusterfs"
+openshift_hosted_registry_glusterfs_storage_volume_size: "{{ openshift_hosted_registry_storage_volume_size }}"
+openshift_hosted_registry_glusterfs_storage_create_pv: False
+openshift_hosted_registry_glusterfs_storage_create_pvc: False
+openshift_hosted_registry_glusterfs_storage_glusterfs_endpoints: "{{ openshift_hosted_registry_storage_glusterfs_endpoints }}"
+openshift_hosted_registry_glusterfs_storage_glusterfs_path: "{{ openshift_hosted_registry_storage_glusterfs_path }}"
+openshift_hosted_registry_glusterfs_storage_glusterfs_readOnly: "{{ openshift_hosted_registry_storage_glusterfs_readOnly }}"
+openshift_hosted_registry_glusterfs_storage_glusterfs_ips: "{{ openshift_hosted_registry_storage_glusterfs_ips }}"
+openshift_hosted_registry_glusterfs_storage_access_modes:
+  - 'ReadWriteMany'
 
 openshift_logging_storage_nfs_directory: '/exports'
 openshift_logging_storage_nfs_options: '*(rw,root_squash)'
