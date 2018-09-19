@@ -18,6 +18,7 @@ Environment variables may also be used.
 * [DNS Configuration](#dns-configuration)
 * [Floating IP Address Configuration](#floating-ip-address-configuration)
 * [All-in-one Deployment Configuration](#all-in-one-deployment-configuration)
+* [Multi-env Deployment Configuration](#multi-env-deployment-configuration)
 * [Building Node Images](#building-node-images)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
@@ -545,6 +546,36 @@ with an all-in-one setup the DNS wildcard record for the apps domain will not be
 added, because there are no dedicated infra nodes, so you will have to add it
 manually. See
 [Custom DNS Records Configuration](#custom-dns-records-configuration).
+
+## Multi-env Deployment Configuration
+
+If you want to deploy multiple OpenShift environments in the same OpenStack
+project, you can do so with a few configuration changes.
+
+First, set the `openshift_openstack_clusterid` option in the
+`inventory/group_vars/all.yml` file with specific unique name for cluster.
+
+```
+vi inventory/group_vars/all.yml
+
+openshift_openstack_clusterid: foobar
+openshift_openstack_public_dns_domain: example.com
+```
+
+Second, set `OPENSHIFT_CLUSTER` environment variables. The `OPENSHIFT_CLUSTER`
+environment variable has to consist of `openshift_openstack_clusterid` and
+`openshift_openstack_public_dns_domain`, that's required because cluster_id
+variable stored in the instance metadata is concatanated in the same way.
+If value will be different then instances won't be accessible in ansible inventory.
+
+```
+export OPENSHIFT_CLUSTER='foobar.example.com'
+```
+
+Then run the deployment playbooks as usual. When you finish deployment of first
+environment, please update above options that correspond to a new environment
+and run the deployment playbooks.
+
 
 ## Building Node Images
 

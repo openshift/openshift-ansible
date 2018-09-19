@@ -19,6 +19,8 @@ except ImportError:
 from keystoneauth1.exceptions.catalog import EndpointNotFound
 import shade
 
+OPENSHIFT_CLUSTER = os.getenv('OPENSHIFT_CLUSTER')
+
 
 def base_openshift_inventory(cluster_hosts):
     '''Set the base openshift inventory.'''
@@ -124,11 +126,12 @@ def build_inventory():
     # Use an environment variable to optionally skip returning the app nodes.
     show_compute_nodes = os.environ.get('OPENSTACK_SHOW_COMPUTE_NODES', 'true').lower() == "true"
 
-    # TODO(shadower): filter the servers based on the `OPENSHIFT_CLUSTER`
-    # environment variable.
+    # If `OPENSHIFT_CLUSTER` env variable is defined then it's used to
+    # filter servers by metadata.clusterid attribute value.
     cluster_hosts = [
         server for server in cloud.list_servers()
-        if 'metadata' in server and 'clusterid' in server.metadata and
+        if 'clusterid' in server.get('metadata', []) and
+        (OPENSHIFT_CLUSTER is None or server.metadata.clusterid == OPENSHIFT_CLUSTER) and
         (show_compute_nodes or server.metadata.get('sub-host-type') != 'app')]
 
     inventory = base_openshift_inventory(cluster_hosts)
@@ -183,7 +186,7 @@ def build_inventory():
 
 def _get_stack_outputs(cloud_client):
     """Returns a dictionary with the stack outputs"""
-    cluster_name = os.getenv('OPENSHIFT_CLUSTER', 'openshift-cluster')
+    cluster_name = OPENSHIFT_CLUSTER or 'openshift-cluster'
 
     stack = cloud_client.get_stack(cluster_name)
     if stack is None or stack['stack_status'] not in (
