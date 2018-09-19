@@ -12,7 +12,6 @@ openshift_metrics_install_metrics: false
 openshift_metrics_install_logging: false
 openshift_logging_install_logging: false
 openshift_management_install_management: false
-openshift_hosted_prometheus_deploy: false
 template_service_broker_install: false
 ansible_service_broker_install: false
 openshift_enable_service_catalog: false
