@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.48
+Version:        3.10.49
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Sep 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.49-1
+- 
+
 * Tue Sep 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.48-1
 - Ensure dnsmasq is restarted during upgrades (mgugino@redhat.com)
 - GCP upgrade: don't exclude nodes with tag_ocp-bootstrap (vrutkovs@redhat.com)
