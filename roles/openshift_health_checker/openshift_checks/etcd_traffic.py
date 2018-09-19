@@ -20,8 +20,8 @@ class EtcdTraffic(OpenShiftCheck):
         return super(EtcdTraffic, self).is_active() and valid_group_names and valid_version
 
     def run(self):
-        openshift_is_containerized = self.get_var("openshift_is_containerized")
-        unit = "etcd_container" if openshift_is_containerized else "etcd"
+        openshift_is_atomic = self.get_var("openshift_is_atomic")
+        unit = "etcd_container" if openshift_is_atomic else "etcd"
 
         log_matchers = [{
             "start_regexp": r"Starting Etcd Server",
