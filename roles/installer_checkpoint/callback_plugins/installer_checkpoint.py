@@ -19,6 +19,10 @@ class CallbackModule(CallbackBase):
 
     def v2_playbook_on_stats(self, stats):
 
+        # Return if there are no custom stats to process
+        if stats.custom == {}:
+            return
+
         phases = stats.custom['_run']
 
         # Find the longest phase title
