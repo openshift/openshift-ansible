@@ -75,36 +75,6 @@
     msg: "Network {{ openshift_openstack_external_network_name }} is not available"
   when: not openshift_openstack_provider_network_name|default(None)
 
-- name: Get subnet facts when using a custom subnet
-  os_subnets_facts:
-    name: "{{ openshift_openstack_node_subnet_name }}"
-  register: subnet_result
-  when: openshift_openstack_node_subnet_name is defined and openshift_openstack_node_subnet_name
-- name: Set custom network id
-  set_fact:
-    openshift_openstack_node_network_id: "{{ subnet_result.ansible_facts.openstack_subnets[0].network_id }}"
-  when: openshift_openstack_node_subnet_name is defined and openshift_openstack_node_subnet_name
-- name: Set custom subnet id
-  set_fact:
-    openshift_openstack_node_subnet_id: "{{ subnet_result.ansible_facts.openstack_subnets[0].id }}"
-  when: openshift_openstack_node_subnet_name is defined and openshift_openstack_node_subnet_name
-- name: Set custom subnet cidr
-  set_fact:
-    openshift_openstack_subnet_cidr: "{{ subnet_result.ansible_facts.openstack_subnets[0].cidr }}"
-  when: openshift_openstack_node_subnet_name is defined and openshift_openstack_node_subnet_name
-
-# TODO ltomasbo: there is no Ansible module for getting router facts
-- name: Get custom router id
-  command: >
-           python -c 'import shade; cloud = shade.openstack_cloud();
-           print cloud.get_router("{{ openshift_openstack_router_name }}").id'
-  register: router_info
-  when: openshift_openstack_router_name is defined and openshift_openstack_router_name
-- name: Set custom router id
-  set_fact:
-    openshift_openstack_router_id: "{{ router_info.stdout }}"
-  when: openshift_openstack_router_name is defined and openshift_openstack_router_name
-
 # Check keypair
 # TODO kpilatov: there is no Ansible module for getting OS keypairs
 #                (os_keypair is not suitable for this)
