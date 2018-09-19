@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.47
+Version:        3.10.48
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,37 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Sep 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.48-1
+- Ensure dnsmasq is restarted during upgrades (mgugino@redhat.com)
+- GCP upgrade: don't exclude nodes with tag_ocp-bootstrap (vrutkovs@redhat.com)
+- GCP upgrade: don't exclude nodes with tag_ocp-bootstrap (vrutkovs@redhat.com)
+- GlusterFS: Fix registry.yml playbook (jarrpa@redhat.com)
+- make sure `openshift_use_nsx` is always defined during 3.9 -> 3.10 upgrade
+  (vrutkovs@redhat.com)
+- Add EAP 7.2.beta to v3.10 add [Tech Preview] to template names drop AMQ 7
+  until an image is available (ken@zaptillion.net)
+- openshift_storage_nfs_lvm: fix with_sequence (jfchevrette@gmail.com)
+- Refactor image health checks (mgugino@redhat.com)
+- [3.10] ensure atomic and skopeo are installed (mgugino@redhat.com)
+- Refactor csr approval for client certs ignore ready (mgugino@redhat.com)
+- Update openshift ca redeploy to use correct node client-ca
+  (rteague@redhat.com)
+- Retry our etcd health check (sdodson@redhat.com)
+- Collect provider facts only if cloudprovider is set (vrutkovs@redhat.com)
+- [release-3.10]Do not stop and delete openvswitch when NSX is used #8015 and
+  #8134 (yasensim@gmail.com)
+- Set etcd facts necessary for etcd scaleup (rteague@redhat.com)
+- Filter openshift_cloudprovider_openstack_blockstorage_ignore_volume_az to
+  bool (alberto.rodriguez.peon@cern.ch)
+- Use true/false instead of yes/no (alberto.rodriguez.peon@cern.ch)
+- Allow to configure BlockStorage.ignore-volume-az for Openstack Cloud Provider
+  (alberto.rodriguez.peon@cern.ch)
+- GlusterFS: Tweak groups for external config (jarrpa@redhat.com)
+- Configure repositories if RHEL (e.minguez@gmail.com)
+- Run the kube-proxy once per cluster for Calico (mleung975@gmail.com)
+- Add separate Calico etcd (mleung975@gmail.com)
+- Update playbooks for Calico in OpenShift 3.10 (mleung975@gmail.com)
+
 * Tue Sep 11 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.47-1
 - Revert "[release-3.10] Don't fetch provider openshift_facts if
   openshift_cloud_provider_kind is not set" (roignac@gmail.com)
