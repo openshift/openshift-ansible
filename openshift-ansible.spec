@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.8
+Version:        3.11.9
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,12 @@ fi
 
 
 %changelog
+* Tue Sep 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.9-1
+- Ensure atomic hosts prepull node image during pre-upgrade
+  (mgugino@redhat.com)
+- Fix broken package list on fedora (mgugino@redhat.com)
+- upgrade: remove registry migration in 3.11 (vrutkovs@redhat.com)
+
 * Tue Sep 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.8-1
 - Ensure dnsmasq is restarted during upgrades (mgugino@redhat.com)
 - GCP upgrade: don't exclude nodes with tag_ocp-bootstrap (vrutkovs@redhat.com)
