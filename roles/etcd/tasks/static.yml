@@ -84,7 +84,7 @@
       - "{{ etcd_peer_key_file }}"
       - "--ca-file"
       - "{{ etcd_peer_ca_file }}"
-      - "-C"
+      - "--endpoints"
       - "{{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
       - "cluster-health"
   with_items:
