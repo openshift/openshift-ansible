@@ -69,7 +69,7 @@
       --docker-email=openshift@openshift.com --docker-password={{ item.password }}
       --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift
   when:
-    - openshift_additional_registry_credentials is defined
+    - openshift_additional_registry_credentials != []
   with_items:
     - "{{ openshift_additional_registry_credentials }}"
   register: oex_additional_creds

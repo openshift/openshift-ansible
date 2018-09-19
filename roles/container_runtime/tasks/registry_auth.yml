@@ -31,7 +31,7 @@
     test_image: "{{ item.test_image | default('openshift3/ose-pod') }}"
     tls_verify: "{{ item.tls_verify | default(omit) }}"
   when:
-  - openshift_additional_registry_credentials is defined
+  - openshift_additional_registry_credentials != []
   register: crt_addl_credentials_create
   retries: 3
   delay: 5
