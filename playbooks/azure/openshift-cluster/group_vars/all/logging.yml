@@ -29,4 +29,3 @@ journald_vars_to_replace:
 - { var: MaxFileSec, val: 1day }
 - { var: ForwardToSyslog, val: no }
 - { var: ForwardToWall, val: no }
-...
