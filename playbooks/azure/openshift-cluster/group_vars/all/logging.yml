@@ -1,0 +1,15 @@
+---
+journald_vars_to_replace:
+- { var: Storage, val: persistent }
+- { var: Compress, val: yes }
+- { var: SyncIntervalSec, val: 1s }
+- { var: RateLimitInterval, val: 1s }
+- { var: RateLimitBurst, val: 10000 }
+- { var: SystemMaxUse, val: 6G }
+- { var: SystemKeepFree, val: 20% }
+- { var: SystemMaxFileSize, val: 10M }
+- { var: MaxRetentionSec, val: 1month }
+- { var: MaxFileSec, val: 1day }
+- { var: ForwardToSyslog, val: no }
+- { var: ForwardToWall, val: no }
+...
