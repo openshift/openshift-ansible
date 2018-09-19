@@ -10,3 +10,5 @@ __ansible_service_broker_registry_whitelist:
   - '.*-apb$'
 __ansible_service_broker_registry_blacklist:
   - '.*automation-broker-apb$'
+__ansible_service_broker_registry_images: []
+__ansible_service_broker_registry_skip_verify_tls: false

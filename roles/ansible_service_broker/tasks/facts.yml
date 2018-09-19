@@ -17,5 +17,7 @@
     ansible_service_broker_registry_tag: "{{ ansible_service_broker_registry_tag | default(__ansible_service_broker_registry_tag) }}"
     ansible_service_broker_registry_whitelist: "{{ ansible_service_broker_registry_whitelist | default(__ansible_service_broker_registry_whitelist) }}"
     ansible_service_broker_registry_blacklist: "{{ ansible_service_broker_registry_blacklist | default(__ansible_service_broker_registry_blacklist) }}"
+    ansible_service_broker_registry_images: "{{ ansible_service_broker_registry_images | default(__ansible_service_broker_registry_images) }}"
+    ansible_service_broker_registry_skip_verify_tls: "{{ ansible_service_broker_registry_skip_verify_tls | default(__ansible_service_broker_registry_skip_verify_tls) }}"
 
 - include_tasks: validate_facts.yml

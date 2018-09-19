@@ -16,8 +16,12 @@ data:
         tag:  {{ ansible_service_broker_registry_tag }}
         white_list: {{  ansible_service_broker_registry_whitelist | to_yaml }}
         black_list: {{  ansible_service_broker_registry_blacklist | to_yaml }}
+{% if ansible_service_broker_registry_images | list %}
+        images: {{  ansible_service_broker_registry_images | to_yaml }}
+{% endif %}
         auth_type: "{{ ansible_service_broker_registry_auth_type | default("") }}"
         auth_name: "{{ ansible_service_broker_registry_auth_name | default("") }}"
+        skip_verify_tls: {{ ansible_service_broker_registry_skip_verify_tls }}
       - type: local_openshift
         name: localregistry
         white_list: {{ ansible_service_broker_local_registry_whitelist | to_yaml }}
