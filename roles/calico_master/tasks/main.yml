@@ -113,6 +113,7 @@
   when: (node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version >= '3.0.0') or (node_version == 'master') or (cnx == "cnx" and node_version >= '2.0.0')
 
 - name: Calico Master | Launch Calico
+  run_once: true
   command: >
     {{ openshift_client_binary }} apply
     -f {{ mktemp.stdout }}/calico.yml
