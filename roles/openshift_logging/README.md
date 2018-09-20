@@ -37,6 +37,7 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 - `openshift_logging_image_pull_secret`: The name of an existing pull secret to link to the logging service accounts
 
 - `openshift_logging_kibana_hostname`: The Kibana hostname. Defaults to 'kibana.example.com'.
+- `openshift_logging_kibana_session_timeout_seconds`: The time in seconds after which the session expires. Defaults to 604800 (168 hours). Only positive integeres are accepted.
 - `openshift_logging_kibana_cpu_request`: The minimum amount of CPU to allocate to Kibana or unset if not specified.
 - `openshift_logging_kibana_memory_limit`: The amount of memory to allocate to Kibana or unset if not specified.
 - `openshift_logging_kibana_proxy_debug`: When "True", set the Kibana Proxy log level to DEBUG. Defaults to 'false'.
