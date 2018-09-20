@@ -42,7 +42,7 @@
     test_image: "{{ item.test_image | default('openshift3/ose-pod') }}"
     tls_verify: "{{ item.tls_verify | default(omit) }}"
   when:
-    - openshift_additional_registry_credentials is defined
+    - openshift_additional_registry_credentials != []
   register: node_additional_registry_creds
   retries: 3
   delay: 5
@@ -56,4 +56,4 @@
     l_bind_docker_reg_auth: True
   when:
     - openshift_is_atomic | bool
-    - oreg_auth_user is defined or openshift_additional_registry_credentials is defined or node_oreg_auth_credentials_stat.stat.exists
+    - oreg_auth_user is defined or openshift_additional_registry_credentials != [] or ('stat' in node_oreg_auth_credentials_stat and node_oreg_auth_credentials_stat.stat.exists)
