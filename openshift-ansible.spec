@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.49
+Version:        3.10.50
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,15 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Sep 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.50-1
+- Update main.yml (sheldyakov@tutu.ru)
+- Ensure glusterfs host groups are correct for registry play
+  (mgugino@redhat.com)
+- Ensure atomic hosts prepull node image during pre-upgrade
+  (mgugino@redhat.com)
+- Switch openshift_crio_enable_docker_gc default to False (rteague@redhat.com)
+- Add default node groups to support running cri-o runtime (rteague@redhat.com)
+
 * Wed Sep 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.49-1
 - 
 
