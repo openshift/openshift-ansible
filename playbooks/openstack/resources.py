@@ -85,13 +85,14 @@ def _get_hostvars(server, docker_storage_mountpoints):
     }
 
     public_v4 = server.public_v4 or server.private_v4
+    private_v4 = server.private_v4 or server.public_v4
     if public_v4:
-        hostvars['public_v4'] = server.public_v4
-        hostvars['openshift_public_ip'] = server.public_v4
+        hostvars['public_v4'] = public_v4
+        hostvars['openshift_public_ip'] = public_v4
     # TODO(shadower): what about multiple networks?
-    if server.private_v4:
-        hostvars['private_v4'] = server.private_v4
-        hostvars['openshift_ip'] = server.private_v4
+    if private_v4:
+        hostvars['private_v4'] = private_v4
+        hostvars['openshift_ip'] = private_v4
 
         # NOTE(shadower): Yes, we set both hostname and IP to the private
         # IP address for each node. OpenStack doesn't resolve nodes by
@@ -99,7 +100,7 @@ def _get_hostvars(server, docker_storage_mountpoints):
         # DNS which would complicate the setup and potentially introduce
         # performance issues.
         hostvars['openshift_hostname'] = server.metadata.get(
-            'openshift_hostname', server.private_v4)
+            'openshift_hostname', private_v4)
     hostvars['openshift_public_hostname'] = server.name
 
     if server.metadata['host-type'] == 'cns':
