@@ -391,7 +391,7 @@ resources:
       gateway_ip: null
 {% endif %}
 
-{% if not openshift_openstack_router_name %}
+{% if not openshift_openstack_router_name and not openshift_openstack_node_subnet_name %}
   router:
     type: OS::Neutron::Router
     properties:
