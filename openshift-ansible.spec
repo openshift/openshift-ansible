@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.11
+Version:        3.11.12
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,17 @@ fi
 
 
 %changelog
+* Thu Sep 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.12-1
+- adding container.yaml (adammhaile@gmail.com)
+- Ensure glusterfs host groups are correct for registry play
+  (mgugino@redhat.com)
+- registry auth: fix check that node_oreg_auth_credentials_stat exists
+  (vrutkovs@redhat.com)
+- Fix openshift_additional_registry_credentials comparison
+  (vrutkovs@redhat.com)
+- move OpenStack network fact gathering from prereqs to provision tasks
+  (tzumainn@redhat.com)
+
 * Wed Sep 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.11-1
 - 
 
