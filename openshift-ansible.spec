@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.1.0%{?dist}
+Release:        0.2.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -170,6 +170,9 @@ fi
 
 
 %changelog
+* Fri Sep 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.2.0
+- 
+
 * Fri Sep 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.1.0
 - Don't re-deploy node system containers when deploying auth credentials
   (sdodson@redhat.com)
