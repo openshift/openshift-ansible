@@ -7,13 +7,6 @@
   - import_role:
       name: openshift_node
       tasks_from: registry_auth.yml
-  # If there were previously no authenticated registries, the credential file
-  # won't be mounted in the system container;  Need to rerun this step to ensure
-  # additional mounts are provided.
-  - import_role:
-      name: openshift_node
-      tasks_from: node_system_container_install.yml
-    when: openshift_is_atomic
 
 # l_reg_auth_restart_hosts is passed in via imageconfig.yml to prevent
 # the nodes from restarting because the sync pod will be restarting them
