@@ -247,7 +247,7 @@
     - update ca trust
   - name: Update node client kubeconfig CA data
     kubeclient_ca:
-      client_path: "{{ openshift.common.config_base }}/node/system:node:{{ openshift.common.hostname }}.kubeconfig"
+      client_path: "{{ openshift.common.config_base }}/node/node.kubeconfig"
       ca_path: "{{ openshift.common.config_base }}/node/client-ca.crt"
   handlers:
   # Normally this handler would restart docker after updating ca
