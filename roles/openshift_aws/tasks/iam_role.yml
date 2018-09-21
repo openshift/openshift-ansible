@@ -32,3 +32,12 @@
     policy_name: "{{ l_node_group_config[openshift_aws_node_group.group].policy_name }}"
     state: "{{ openshift_aws_iam_role_state | default('present') }}"
   when: "'iam_role' in l_node_group_config[openshift_aws_node_group.group]"
+
+- name: Wait until the role becomes available
+  iam_role_facts:
+    name: "{{ l_node_group_config[openshift_aws_node_group.group].iam_role }}"
+  register: iam_role_out
+  retries: 20
+  delay: 3
+  until: iam_role_out.iam_roles|length > 0
+

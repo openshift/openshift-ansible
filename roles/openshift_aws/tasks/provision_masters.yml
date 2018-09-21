@@ -3,8 +3,21 @@
 
 - import_tasks: provision_ec2_facts.yml
 
+- when: openshift_aws_create_iam_role
+  include_tasks: iam_role.yml
+  vars:
+    openshift_aws_node_group:
+      group: master
+    l_node_group_config:
+      master:
+        iam_role: "{{ openshift_aws_master_instance_config.iam_role }}"
+        policy_json: "{{ openshift_aws_master_instance_config.policy_json }}"
+        policy_name: "{{ openshift_aws_master_instance_config.policy_name }}"
+
 - name: include master instance creation
   import_tasks: provision_ec2.yml
+  vars:
+    l_instance_config: "{{ openshift_aws_master_instance_config }}"
 
 - name: fetch newly created instances
   ec2_instance_facts:
