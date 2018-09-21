@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.0.0%{?dist}
+Release:        0.1.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -170,6 +170,120 @@ fi
 
 
 %changelog
+* Fri Sep 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.1.0
+- Don't re-deploy node system containers when deploying auth credentials
+  (sdodson@redhat.com)
+- etcdv2 remove: avoid using failed_when (vrutkovs@redhat.com)
+- Bump Data Grid to version 1.1.1 (osni.oliveira@redhat.com)
+- remove unix prefix from crio path (sjenning@redhat.com)
+- adding container.yaml (adammhaile@gmail.com)
+- Fix openstack nsupdate record (tzumainn@redhat.com)
+- Always set openstack node private ip (tzumainn@redhat.com)
+- lib_utils_oo_oreg_image preserve path component (jkupfere@redhat.com)
+- Add unit test for oo_oreg_image filter (mgugino@redhat.com)
+- Update installer_checkpoint plugin to handle empty stats (rteague@redhat.com)
+- Fix etcd scaleup playbook (rteague@redhat.com)
+- registry auth: fix check that node_oreg_auth_credentials_stat exists
+  (vrutkovs@redhat.com)
+- Fix openshift_additional_registry_credentials comparison
+  (vrutkovs@redhat.com)
+- Ensure glusterfs host groups are correct for registry play
+  (mgugino@redhat.com)
+- move OpenStack network fact gathering from prereqs to provision tasks
+  (tzumainn@redhat.com)
+- Ensure atomic hosts prepull node image during pre-upgrade
+  (mgugino@redhat.com)
+- Make cloud-user SSH key maintenance more reliable (ironcladlou@gmail.com)
+- Simplify match filter when looking for sync annotations (vrutkovs@redhat.com)
+- Merge upgrade_control_plane playbooks back into one (vrutkovs@redhat.com)
+- test ci: add an option to terminate VMs instead of stopping
+  (vrutkovs@redhat.com)
+- Update main.yml (sheldyakov@tutu.ru)
+- Remove duplicate words (lxia@redhat.com)
+- Remove traces of containerized install (vrutkovs@redhat.com)
+- Move the cluster-cidr assignment to the correct configs (mleung975@gmail.com)
+- Ensure dnsmasq is restarted during upgrades (mgugino@redhat.com)
+- Don't install NM on atomic systems (vrutkovs@redhat.com)
+- openshift-prometheus: remove deprecated prometheus stack install
+  (pgier@redhat.com)
+- GCP upgrade: don't exclude nodes with tag_ocp-bootstrap (vrutkovs@redhat.com)
+- GCP upgrade: don't exclude nodes with tag_ocp-bootstrap (vrutkovs@redhat.com)
+- Hash the registry hostname to generate unique secret names
+  (sdodson@redhat.com)
+- Add retries around api service discovery (sdodson@redhat.com)
+- Ensure that recycler pod definition is deployed during upgrade
+  (sdodson@redhat.com)
+- Change upgrade playbooks to use 4.0 (vrutkovs@redhat.com)
+- Add 3 retries around all image stream create/replace (sdodson@redhat.com)
+- Fix wrong doc default value of logging (teleyic@gmail.com)
+- test/ci: setup network manager (vrutkovs@redhat.com)
+- Update uninstall_masters play to deal with standalone instances
+  (mazzystr@gmail.com)
+- Fix broken package list on fedora (mgugino@redhat.com)
+- certificate_expiry: gather facts so ansible_date_time is defined
+  (sdodson@redhat.com)
+- Fix volume recycler configuration on upgrade (sdodson@redhat.com)
+- openshift_storage_nfs_lvm: fix with_sequence (jfchevrette@gmail.com)
+- Removing launch.yml. (kwoodson@redhat.com)
+- Wait for sync DS to set annotations on all available nodes
+  (vrutkovs@redhat.com)
+- sync annotations: expected number of annotations should be a number of items
+  (vrutkovs@redhat.com)
+- reduce number of openstack heat retries (tzumainn@redhat.com)
+- Fix openstack parameter checks (tzumainn@redhat.com)
+- Add a wait for aggregated APIs when restarting control plane
+  (sdodson@redhat.com)
+- Update openshift ca redeploy to use correct node client-ca
+  (rteague@redhat.com)
+- Enable monitoring of openshift-metering via cluster monitoring
+  (chance.zibolski@coreos.com)
+- Refactor csr approval for client certs ignore ready (mgugino@redhat.com)
+- reducing /sys/fs/selinux/avc/cache_threshold to 8192 instead of 65535
+  (elvirkuric@gmail.com)
+- Add preview operators to OLM Catalog (cordell.evan@gmail.com)
+- Collect provider facts only if cloudprovider is set (vrutkovs@redhat.com)
+- - s3 variables check as part of importing the s3 tasks itself.
+  (sarumuga@redhat.com)
+- Add proper liveness and readiness checks for Calico 3.2 (mleung975@gmail.com)
+- Move controller args back to template (hekumar@redhat.com)
+- Retry our etcd health check (sdodson@redhat.com)
+- Set gquota on slash filesystem (mazzystr@gmail.com)
+- docker_creds: rename image_name to test_image (sdodson@redhat.com)
+- cluster-monitoring: Fix regex_replace to remove image tag
+  (fbranczyk@gmail.com)
+- fix arguments to controller (hekumar@redhat.com)
+- Update recyler to lsm_registry_url (hekumar@redhat.com)
+- cutting 4.0 (aos-team-art@redhat.com)
+- Use oreg_url rather than hardcoding path (hekumar@redhat.com)
+- Formatting fixes on olm and catalog operators (cordell.evan@gmail.com)
+- Update rh-operators catalog to latest (cordell.evan@gmail.com)
+- Update OLM CRDs to latest (cordell.evan@gmail.com)
+- Proper DNS for the subnet created (e.minguez@gmail.com)
+- Set etcd facts necessary for etcd scaleup (rteague@redhat.com)
+- Revert "Don't fetch provider openshift_facts if openshift_cloud_provider_kind
+  is not set" (roignac@gmail.com)
+- cluster-monitoring: Remove version tag for passing image repos
+  (fbranczyk@gmail.com)
+- Fixes: BZ1618547 disable keep ns on error in ASB to prevent resource
+  starvation (jmontleo@redhat.com)
+- Add openshift_additional_registry_credentials (sdodson@redhat.com)
+- docker_creds: Add tls_verify parameter (sdodson@redhat.com)
+- Avoid S3 deployment check (sarumuga@redhat.com)
+- Filter openshift_cloudprovider_openstack_blockstorage_ignore_volume_az to
+  bool (alberto.rodriguez.peon@cern.ch)
+- Add playbook to migrate node imageConfig.format (mgugino@redhat.com)
+- docker_creds: Use bool for test_login param (sdodson@redhat.com)
+- Run the kube-proxy once per cluster for Calico (mleung975@gmail.com)
+- Provide version information (hekumar@redhat.com)
+- Annotate nodes with md5sum of the applied config (vrutkovs@redhat.com)
+- Add a pod template for recycler pod (hekumar@redhat.com)
+- Bump repo constants to support 4.0 RPMs (ccoleman@redhat.com)
+- Add calico-pull-secret (mleung975@gmail.com)
+- Add separate Calico etcd (mleung975@gmail.com)
+- Use true/false instead of yes/no (alberto.rodriguez.peon@cern.ch)
+- Allow to configure BlockStorage.ignore-volume-az for Openstack Cloud Provider
+  (alberto.rodriguez.peon@cern.ch)
+
 * Tue Sep 11 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.35.0
 - cluster-monitoring: Fix incorrect handling of conditional PVCs
   (fbranczyk@gmail.com)
