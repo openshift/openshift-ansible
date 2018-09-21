@@ -25,6 +25,7 @@ if ! whoami &>/dev/null; then
 fi
 
 # Provide a "files_dir" variable that points to inventory/dynamic/injected
+mkdir -p "${WORK}/inventory/dynamic/${TYPE}/group_vars/all"
 echo "files_dir: \"${FILES}\"" > "${WORK}/inventory/dynamic/${TYPE}/group_vars/all/00_default_files_dir.yml"
 # Add any injected variable files into the group vars directory
 find "${FILES}" \( -name '*.yml' -or -name '*.yaml' -or -name vars \) -print0 | xargs -0 -L1 -I {} ln -fs {} "${WORK}/inventory/dynamic/${TYPE}/group_vars/all"
