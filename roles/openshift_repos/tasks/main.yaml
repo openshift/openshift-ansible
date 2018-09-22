@@ -42,8 +42,7 @@
       when:
       - ansible_distribution == 'RedHat'
       - openshift_deployment_type == 'openshift-enterprise'
-      - rhsub_user is defined
-      - rhsub_pass is defined
+      - (rhsub_user is defined and rhsub_pass is defined) or (rhsub_ak is defined and rhsub_orgid is defined)
 
     - include_tasks: centos_repos.yml
       when:
