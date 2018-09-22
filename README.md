@@ -28,7 +28,7 @@ If using CRIO, then check the `openshift_use_crio` parameter in the inventory/ho
 
 ## Getting the correct version of OKD
 
-When choosing an openshift release, ensure that the necessary origin packages
+When choosing an openshift (now known as OKD) release, ensure that the necessary origin packages
 are available in your distribution's repository.  By default, openshift-ansible
 will not configure extra repositories for testing or staging packages for
 end users.
