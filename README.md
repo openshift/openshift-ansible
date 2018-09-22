@@ -20,7 +20,7 @@ We clarify 'computing infrastructure' above because openshift ansible does not p
 infrastructure for you in any manner.  It can run against Bare metal machines, VMWare, GCE, EC2, or any other cloud provided machines (typically provisioned by tools such as terraform, vagrant, cloud formation, etc.).  The only requirement is that you craft a
 correct inventory file, and there are example of how to do this in this repository.
 
-## Container runtime
+## Choose a Container runtime.
 
 Openshift Ansible works with both `crio` and `docker`.  If using `docker`, then the Ansible playbooks in this repository require an RPM package that provides `docker` that is RHEL/Fedora based, [see this issue for details] (https://github.com/openshift/openshift-ansible/issues/2720).
 
