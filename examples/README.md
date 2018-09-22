@@ -1,6 +1,6 @@
 # openshift-ansible usage examples
 
-The primary use of `openshift-ansible` is to install, configure and upgrade OpenShift clusters.
+The primary use of `openshift-ansible` is to install, configure, and upgrade OpenShift on an existing cluster.
 
 This is typically done by direct invocation of Ansible tools like `ansible-playbook`. This use case is covered in detail in the [OpenShift advanced installation documentation](https://docs.okd.io/latest/install_config/install/advanced_install.html)
 

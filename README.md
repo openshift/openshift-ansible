@@ -5,17 +5,29 @@
 # OpenShift Ansible
 
 This repository contains [Ansible](https://www.ansible.com/) roles and
-playbooks to install, upgrade, and manage
-[OpenShift](https://www.openshift.com/) clusters.
+playbooks to install, upgrade, and manage the Origin Kubernetes Distribution in a fully managed container orchestration platform, on an existing computing infrastructure.  For an introduction to openshift [OpenShift](https://www.openshift.com/).
 
-**Note**: the Ansible playbooks in this repository require an RPM
-package that provides `docker`. Currently, the RPMs from
-[dockerproject.org](https://dockerproject.org/) do not provide this
-requirement, though they may in the future. This limitation is being
-tracked by
-[#2720](https://github.com/openshift/openshift-ansible/issues/2720).
+## For ansible or openshift newcomers
 
-## Getting the correct version
+If you've used kubernetes before, then openshift-ansible is the OKD equivalent to Kubeadm (rather then, say, KOPS): It configures the entire cluster on top of existing infrastructure, rather managing the spinning up of infrastructure *for you*.
+
+### Bring your own VMs or Hardware.
+
+OpenShift ansible can easily 'just work' on a single node, so a "real cluster" isn't necessary for your first installation.  Nevertheless: You need to provide the compute
+instance for ansible to run against.
+
+We clarify 'computing infrastructure' above because openshift ansible does not provision
+infrastructure for you in any manner.  It can run against Bare metal machines, VMWare, GCE, EC2, or any other cloud provided machines (typically provisioned by tools such as terraform, vagrant, cloud formation, etc.).  The only requirement is that you craft a
+correct inventory file, and there are example of how to do this in this repository.
+
+## Container runtime
+
+Openshift Ansible works with both `crio` and `docker`.  If using `docker`, then the Ansible playbooks in this repository require an RPM package that provides `docker` that is RHEL/Fedora based, [see this issue for details] (https://github.com/openshift/openshift-ansible/issues/2720).
+
+If using CRIO, then check the `openshift_use_crio` parameter in the inventory/hosts.example file in this repository.
+
+## Getting the correct version of OKD
+
 When choosing an openshift release, ensure that the necessary origin packages
 are available in your distribution's repository.  By default, openshift-ansible
 will not configure extra repositories for testing or staging packages for
@@ -35,8 +47,6 @@ tracks our current work **in development** and should be compatible
 with the
 [Origin master branch](https://github.com/openshift/origin/tree/master)
 (code in development).
-
-
 
 **Getting the right openshift-ansible release**
 
@@ -87,14 +97,18 @@ Metrics:
 
 ## Simple all-in-one localhost Installation
 This assumes that you've installed the base dependencies and you're running on
-Fedora or RHEL
+Fedora or RHEL.
+
 ```
 git clone https://github.com/openshift/openshift-ansible
 cd openshift-ansible
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/prerequisites.yml
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/deploy_cluster.yml
 ```
+
+
 ## Node Group Definition and Mapping
+
 In 3.10 and newer all members of the [nodes] inventory group must be assigned an
 `openshift_node_group_name`. This value is used to select the configmap that
 configures each node. By default there are three configmaps created; one for
@@ -103,13 +117,12 @@ each node group defined in `openshift_node_groups` and they're named
 to note that the configmap is also the authoritative definition of node labels,
 the old `openshift_node_labels` value is effectively ignored.
 
-There are also two configmaps that label nodes into multiple roles, these are
+There are also two configmaps which label nodes into multiple roles, these are
 not recommended for production clusters, however they're named
 `node-config-all-in-one` and `node-config-master-infra` if you'd like to use
 them to deploy non production clusters.
 
-The default set of node groups is defined in
-[roles/openshift_facts/defaults/main.yml] like so
+The default set of node groups is defined in [roles/openshift_facts/defaults/main.yml] like so:
 
 ```
 openshift_node_groups:
@@ -135,10 +148,10 @@ openshift_node_groups:
     edits: []
 ```
 
-When configuring this in the INI based inventory this must be translated into a
+For INI based inventorys, you must translate this into a
 Python dictionary. Here's an example of a group named `node-config-all-in-one`
 which is suitable for an All-In-One installation with
-kubeletArguments.pods-per-core set to 20
+`kubeletArguments.pods-per-core` set to 20
 
 ```
 openshift_node_groups=[{'name': 'node-config-all-in-one', 'labels': ['node-role.kubernetes.io/master=true', 'node-role.kubernetes.io/infra=true', 'node-role.kubernetes.io/compute=true'], 'edits': [{ 'key': 'kubeletArguments.pods-per-core','value': ['20']}]}]
@@ -149,7 +162,6 @@ configmaps in the openshift-node namespace. Please define
 `openshift_node_groups` as explained above or accept the defaults and run the
 playbooks/openshift-master/openshift_node_group.yml playbook to have them
 created for you automatically.
-
 
 ## Complete Production Installation Documentation:
 
