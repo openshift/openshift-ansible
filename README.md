@@ -102,7 +102,7 @@ Assuming you are on Centos 7 or RHEL, you can simply do:
 ```
 git clone https://github.com/openshift/openshift-ansible
 cd openshift-ansible
-sudo yum install -y docker # You should have this on Centos or RHEL distros
+sudo yum install -y ansible docker # You should have this on Centos or RHEL distros
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/prerequisites.yml
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/deploy_cluster.yml
 ```
