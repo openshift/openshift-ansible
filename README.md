@@ -148,7 +148,7 @@ openshift_node_groups:
     edits: []
 ```
 
-For INI based inventorys, you must translate this into a
+For INI based inventory files, you must translate this into a
 Python dictionary. Here's an example of a group named `node-config-all-in-one`
 which is suitable for an All-In-One installation with
 `kubeletArguments.pods-per-core` set to 20
