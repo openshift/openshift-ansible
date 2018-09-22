@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.2.0%{?dist}
+Release:        0.3.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -170,6 +170,11 @@ fi
 
 
 %changelog
+* Fri Sep 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.3.0
+- GlusterFS: Fix registry playbook PV creation (jarrpa@redhat.com)
+- Only create OpenStack router if both router and subnet are undefined
+  (tzumainn@redhat.com)
+
 * Fri Sep 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.2.0
 - 
 
