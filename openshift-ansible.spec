@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.12
+Version:        3.11.13
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,16 @@ fi
 
 
 %changelog
+* Sun Sep 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.13-1
+- Don't re-deploy node system containers when deploying auth credentials
+  (sdodson@redhat.com)
+- Don't install NM on atomic systems (vrutkovs@redhat.com)
+- test/ci: setup network manager (vrutkovs@redhat.com)
+- test ci: add an option to terminate VMs instead of stopping
+  (vrutkovs@redhat.com)
+- Simplify match filter when looking for sync annotations (vrutkovs@redhat.com)
+- remove unix prefix from crio path (sjenning@redhat.com)
+
 * Thu Sep 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.12-1
 - adding container.yaml (adammhaile@gmail.com)
 - Ensure glusterfs host groups are correct for registry play
