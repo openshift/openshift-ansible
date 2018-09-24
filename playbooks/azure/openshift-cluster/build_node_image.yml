@@ -24,6 +24,8 @@
       openshift_node_image_prep_packages:
       - strace
       - tcpdump
+      - vim-enhanced
+      - git
       etcd_ip: ETCD_IP_REPLACE
 
   - name: add insights-client to package installs when on rhel
