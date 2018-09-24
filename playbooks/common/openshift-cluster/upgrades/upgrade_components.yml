@@ -24,7 +24,7 @@
   when: openshift_enable_olm | default(false) | bool
 
 - import_playbook: ../../../openshift-monitoring/private/config.yml
-  when: openshift_cluster_monitoring_operator_install | default(true) | bool
+  when: openshift_cluster_monitoring_operator_install | default(False) | bool
 
 - import_playbook: ../../../openshift-monitor-availability/private/config.yml
   when: openshift_monitor_availability_install | default(false) | bool
