@@ -52,4 +52,4 @@ data:
       auth:
         - type: basic
           enabled: false
-
+    secrets: {{ ansible_service_broker_secrets | to_yaml }}

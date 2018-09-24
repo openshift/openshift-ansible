@@ -30,3 +30,9 @@ l_asb_default_images_default: "{{ l_asb_default_images_dict[openshift_deployment
 l_asb_image_url: "{{ oreg_url | default(l_asb_default_images_default) | regex_replace('${version}' | regex_escape, openshift_image_tag) }}"
 
 ansible_service_broker_image: "{{ l_asb_image_url | regex_replace('${component}' | regex_escape, 'ansible-service-broker') }}"
+# Secrets to be mounted for APBs. Format:
+# - title: Database credentials
+#   secret: db_creds
+#   apb_name: dh-rhscl-postgresql-apb
+# https://github.com/openshift/ansible-service-broker/blob/master/docs/config.md#secrets-configuration
+ansible_service_broker_secrets: []
