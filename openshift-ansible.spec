@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.13
+Version:        3.11.14
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,9 @@ fi
 
 
 %changelog
+* Sun Sep 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.14-1
+- 
+
 * Sun Sep 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.13-1
 - Don't re-deploy node system containers when deploying auth credentials
   (sdodson@redhat.com)
