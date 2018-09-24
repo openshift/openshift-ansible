@@ -66,6 +66,7 @@ cp inventory/hosts.* inventory/README.md docs/example-inventories/
 
 # openshift-ansible-playbooks install
 cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
+cp -rp test %{buildroot}%{_datadir}/ansible/%{name}/
 # remove contiv plabooks
 rm -rf %{buildroot}%{_datadir}/ansible/%{name}/playbooks/adhoc/contiv
 
@@ -161,6 +162,22 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/roles
 
 
+# ----------------------------------------------------------------------------------
+# openshift-ansible-tests subpackage
+# ----------------------------------------------------------------------------------
+%package test
+Summary:       Openshift and Atomic Enterprise Ansible Test Playbooks
+Requires:      %{name} = %{version}-%{release}
+Requires:      %{name}-roles = %{version}-%{release}
+Requires:      %{name}-playbooks = %{version}-%{release}
+Requires:      python-boto3
+BuildArch:     noarch
+
+%description test
+%{summary}.
+
+%files test
+%{_datadir}/ansible/%{name}/test
 
 %changelog
 * Tue Sep 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.51-1
