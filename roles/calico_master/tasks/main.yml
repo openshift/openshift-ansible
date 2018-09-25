@@ -64,6 +64,35 @@
   set_fact:
     node_version: "{{ calico_node_image | regex_replace('^.*node:v?(.*)$', '\\1') }}"
     cnx: "{{ calico_node_image | regex_replace('^.*/(.*)-node:.*$', '\\1') }}"
+    use_calico_credentials: "{{ calico_image_credentials is defined | bool }}"
+
+- name: Calico | Encode Docker Credentials
+  shell: >
+    cat {{ calico_image_credentials }} | openssl base64 -A
+  register: calico_encoded_credentials_output
+  failed_when: "calico_encoded_credentials_output.rc != 0 or calico_encoded_credentials_output.stdout == ''"
+  when: use_calico_credentials
+
+- name: Calico | Set Encoded Docker Credentials Fact
+  set_fact:
+    calico_encoded_credentials: "{{ calico_encoded_credentials_output.stdout }}"
+  when: use_calico_credentials
+
+- name: Calico | Write Calico Pull Secret
+  template:
+    dest: "{{ mktemp.stdout }}/calico-pull-secret.yml"
+    src: calico-pull-secret.yml.j2
+  when: use_calico_credentials
+
+- name: Calico | Create Calico Pull Secret
+  when: use_calico_credentials
+  command: >
+    {{ openshift_client_binary }} apply
+    -f {{ mktemp.stdout }}/calico-pull-secret.yml
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+  register: calico_pull_secret_create_output
+  failed_when: "calico_pull_secret_create_output.rc != 0"
+  changed_when: "('created' in calico_pull_secret_create_output.stdout) or ('configured' in calico_pull_secret_create_output.stdout)"
 
 - name: Calico Master | Write Calico v2
   template:
