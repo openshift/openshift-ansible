@@ -17,6 +17,15 @@
       'cloud_init':
       {
       'host_name': '{{ item.name }}{{ iter }}.{{ openshift_ovirt_dns_zone }}',
+      {% if item.nic_mode is defined -%}
+      'nic_boot_protocol': 'static',
+      'nic_ip_address': '{{ item["nic_mode"][item["name"] + iter | string ]["nic_ip_address"] }}',
+      'nic_netmask': '{{ item["nic_mode"][item["name"] + iter | string ]["nic_netmask"] }}',
+      'nic_gateway': '{{ item["nic_mode"][item["name"] + iter | string ]["nic_gateway"] }}',
+      'nic_on_boot': {{ item["nic_mode"][item["name"] + iter | string ]["nic_on_boot"] | default(true) | bool }},
+      'nic_name': '{{ item["nic_mode"][item["name"] + iter | string ]["nic_name"] | default("eth0") }}',
+      'dns_servers': '{{ item["nic_mode"][item["name"] + iter | string ]["dns_servers"] }}',
+      {% endif -%}
       'authorized_ssh_keys': '{{ openshift_ovirt_ssh_key }}'
       },
       'profile':  {{ openshift_ovirt_vm_profile[ item.profile ] }} ,
