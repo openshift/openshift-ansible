@@ -24,7 +24,9 @@
   when: openshift_prometheus_state == 'absent'
 
 - include_tasks: install_node_exporter.yaml
-  when: openshift_prometheus_node_exporter_install | default(true) | bool
+  when:
+    - openshift_prometheus_state == 'present'
+    - openshift_prometheus_node_exporter_install | default(true) | bool
 
 - name: Delete temp directory
   file:
