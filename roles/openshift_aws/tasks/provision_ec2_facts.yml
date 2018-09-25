@@ -85,3 +85,11 @@
       vpc-id: "{{ vpcout.vpcs[0].id }}"
     region: "{{ openshift_aws_region }}"
   register: ec2sgs
+
+- name: fetch the iam role
+  iam_role_facts:
+    name: "{{ openshift_aws_launch_config_iam_roles['master'].name }}"
+  register: l_profilename
+  retries: 3
+  delay: 3
+  when: openshift_aws_create_iam_role
