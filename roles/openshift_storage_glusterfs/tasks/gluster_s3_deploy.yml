@@ -33,7 +33,7 @@
 
 - name: Generate GlusterFS StorageClass for S3 file
   template:
-    src: "{{ openshift_examples_content_version }}/gluster-s3-storageclass.yml.j2"
+    src: "gluster-s3-storageclass.yml.j2"
     dest: "{{ mktemp.stdout }}/gluster-s3-storageclass.yml"
 
 - name: Create GlusterFS StorageClass for S3
