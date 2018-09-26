@@ -47,7 +47,7 @@
 - name: Copy gluster-s3 PVCs template file
   copy:
     src: "gluster-s3-pvcs-template.yml"
-    dest: "{{ mktemp.stdout }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/gluster-s3-pvcs-template.yml"
 
 - name: Create gluster-s3 PVCs template
   oc_obj:
@@ -88,7 +88,7 @@
 - name: Copy gluster-s3 template file
   copy:
     src: "gluster-s3-template.yml"
-    dest: "{{ mktemp.stdout }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/gluster-s3-template.yml"
 
 - name: Create gluster-s3 template
   oc_obj:
