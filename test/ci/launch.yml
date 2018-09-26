@@ -76,7 +76,9 @@
   tasks:
     - wait_for_connection: {}
     - setup: {}
-
+    - name: Make sure hostname is set to public ansible host
+      hostname:
+        name: "{{ ansible_host }}"
 
 - import_playbook: ../../playbooks/openshift-node/network_manager.yml
 - import_playbook: ../../playbooks/prerequisites.yml
