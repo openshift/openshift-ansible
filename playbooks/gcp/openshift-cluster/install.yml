@@ -25,7 +25,7 @@
 - name: install components
   import_playbook: ../../common/private/components.yml
 
-- hosts: primary_master
+- hosts: oo_first_master
   gather_facts: no
   tasks:
   - name: Retrieve cluster configuration

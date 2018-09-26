@@ -36,8 +36,7 @@ osm_cluster_network_cidr: 172.16.0.0/16
 osm_host_subnet_length: 9
 openshift_portal_net: 172.30.0.0/16
 
-# masters and infra are the same in CI
 openshift_gcp_node_group_mapping:
   masters: 'node-config-master'
-  infra: 'node-config-master'
-  compute: 'node-config-compute'
+  infra: 'node-config-node'
+  compute: 'node-config-node'
