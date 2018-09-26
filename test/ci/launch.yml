@@ -47,6 +47,7 @@
             "Name": "{{ item.name }}",
             "ansible-groups": "{{ item.ansible_groups | join(',') }}",
             "ansible-node-group": "{{ item.node_group }}",
+            "expirationDate": "{{ item.aws_expiration_date | default(aws_expiration_date) }}"
           }
 
     - name: Add machine to inventory
