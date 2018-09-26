@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.50
+Version:        3.10.51
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,26 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Sep 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.51-1
+- Fix for recent az changes. (kwoodson@redhat.com)
+- Fix S3 storage class path (sarumuga@redhat.com)
+- Move the cluster-cidr assignment to the correct configs (mleung975@gmail.com)
+- fix ca cert deploy for 3.10. addresses
+  https://bugzilla.redhat.com/show_bug.cgi?id=1585978 (judd@newgoliath.com)
+- Don't install NM on atomic systems (vrutkovs@redhat.com)
+- test/ci: setup network manager (vrutkovs@redhat.com)
+- test ci: add an option to terminate VMs instead of stopping
+  (vrutkovs@redhat.com)
+- Rework test CI (vrutkovs@redhat.com)
+- Bump Data Grid to version 1.1.1 (osni.oliveira@redhat.com)
+- lib_utils_oo_oreg_image preserve path component (jkupfere@redhat.com)
+- Fix etcd scaleup playbook (rteague@redhat.com)
+- Add 3 retries around all image stream create/replace (sdodson@redhat.com)
+- Add support for ak/orgid at uninstall (e.minguez@gmail.com)
+- Support ak/orgid and user/password (e.minguez@gmail.com)
+- Add calico-pull-secret (mleung975@gmail.com)
+- Add retry to openstack heat stack create (tzumainn@redhat.com)
+
 * Thu Sep 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.50-1
 - Update main.yml (sheldyakov@tutu.ru)
 - Ensure glusterfs host groups are correct for registry play
