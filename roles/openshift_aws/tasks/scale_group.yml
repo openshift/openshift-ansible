@@ -7,7 +7,7 @@
     health_check_type: "{{ l_node_group_config[openshift_aws_node_group.group].health_check.type }}"
     min_size: "{{ l_node_group_config[openshift_aws_node_group.group].min_size }}"
     max_size: "{{ l_node_group_config[openshift_aws_node_group.group].max_size }}"
-    desired_capacity: "{{ l_node_group_config[openshift_aws_node_group.group].desired_size }}"
+    desired_capacity: "{{ l_desired_capacity }}"
     region: "{{ openshift_aws_region }}"
     termination_policies: "{{ l_node_group_config[openshift_aws_node_group.group].termination_policy if 'termination_policy' in  l_node_group_config[openshift_aws_node_group.group] else omit }}"
     load_balancers: "{{ l_node_group_config[openshift_aws_node_group.group].elbs if 'elbs' in l_node_group_config[openshift_aws_node_group.group] else omit }}"

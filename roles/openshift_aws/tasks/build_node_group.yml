@@ -82,6 +82,40 @@
   delay: 3
   when: openshift_aws_create_iam_role
 
+- set_fact:
+    l_desired_capacity: "{{ l_node_group_config[openshift_aws_node_group.group].desired_size }}"
+  when:
+  - "openshift_cluster_autoscaler_install is not defined"
+  - "asgs.results | length == 0"
+
+- set_fact:
+    l_desired_capacity: "{{ asgs.results[0].desired_capacity if asgs.results[0].desired_capacity >= l_node_group_config[openshift_aws_node_group.group].desired_size
+                                                             else l_node_group_config[openshift_aws_node_group.group].desired_size }}"
+  when:
+  - "openshift_cluster_autoscaler_install is not defined"
+  - "asgs.results | length == 1"
+
+- set_fact:
+    l_desired_capacity: "{{ l_loop.min }}"
+  when:
+  - "openshift_cluster_autoscaler_install and openshift_cluster_autoscaler_node_groups is defined"
+  - "l_loop.name == l_node_group_name"
+  - "asgs.results | length == 0"
+  loop: "{{ openshift_cluster_autoscaler_node_groups }}"
+  loop_control:
+    loop_var: l_loop
+
+- set_fact:
+    l_desired_capacity: "{{ asgs.results[0].desired_capacity if asgs.results[0].desired_capacity >= ( l_loop.min | int )
+                                                             else l_loop.min }}"
+  when:
+  - "openshift_cluster_autoscaler_install and openshift_cluster_autoscaler_node_groups is defined"
+  - "l_loop.name == l_node_group_name"
+  - "asgs.results | length == 1"
+  loop: "{{ openshift_cluster_autoscaler_node_groups }}"
+  loop_control:
+    loop_var: l_loop
+
 - name: Set scale group instances autonaming
   set_fact:
     l_instance_tags: "{{ l_instance_tags | combine({'Name': l_node_group_name }) }}"
