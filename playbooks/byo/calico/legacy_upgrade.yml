@@ -71,6 +71,12 @@
       resource_name: privileged
       state: present
 
+  - name: Set default selector for kube-system
+    command: >
+      {{ openshift_client_binary }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      annotate  ns kube-system openshift.io/node-selector="" --overwrite
+    
   - name: Apply Calico manifest
     command: >
       {{ openshift_client_binary }} apply
