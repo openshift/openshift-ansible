@@ -47,6 +47,15 @@
 - name: Apply the config
   shell: >
     {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig apply -f {{ mktemp.stdout }}
+  register: __config_apply
+  failed_when:
+    - "'already exists' not in __config_apply.stderr"
+    - __config_apply.rc != 0
+
+- name: Checking prexisting node configuration
+  debug:
+    msg: "WARNING: prexisting node configuration objects found"
+  when: "'already exists' in __config_apply.stderr"
 
 - name: Remove temp directory
   file:
