@@ -14,6 +14,8 @@ aws_cluster_id: "ci"
 # us-east-1d
 aws_subnet: "subnet-cf57c596"
 
+aws_expiration_date: "{{ lookup('pipe','date -d \"4 hours\" --iso=minutes --utc') }}"
+
 aws_ami_tags:
   "tag:operating_system": "rhel"
   "tag:image_stage": "base"
@@ -40,3 +42,5 @@ aws_instances:
   # - device_name: /dev/sdb
   #   volume_size: 50
   #   delete_on_termination: yes
+  #Set expiration date for instances on CI namespace
+  #aws_expiration_date: "{{ lookup('pipe','date -d \"4 hours\" --iso=minutes --utc') }}"
