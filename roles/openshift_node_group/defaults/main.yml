@@ -15,3 +15,7 @@ openshift_node_group_name: 'node-config-compute'
 l_openshift_node_group_labels: []
 
 openshift_node_iptables_sync_period: '30s'
+
+# annotations should not be checked during 3.9 -> 3.10 upgrade,
+# as nodes are not yet bootstrapped when sync DS is created
+skip_sync_annotations_check: false

@@ -9,3 +9,22 @@
   until: node_schedulable is succeeded
   when: "'nodename' in openshift.node"
   delegate_to: "{{ openshift_master_host }}"
+
+- name: Wait for sync DS to set annotations on all nodes
+  oc_obj:
+    state: list
+    kind: node
+    selector: ""
+  register: node_status
+  until:
+    - node_status.results is defined
+    - node_status.results.results is defined
+    - node_status.results.results | length > 0
+    - node_status.results.results[0]['items']
+        | map(attribute='metadata.annotations') | list | oo_flatten
+        | select('match', 'node.openshift.io/md5sum') | list | length ==
+      node_status.results.results[0]['items'] | length
+  retries: 60
+  delay: 10
+  delegate_to: "{{ openshift_master_host }}"
+  when: not skip_sync_annotations_check

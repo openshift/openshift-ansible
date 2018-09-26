@@ -70,6 +70,7 @@
       tasks_from: config.yml
     vars:
       openshift_master_host: "{{ groups.oo_first_master.0 }}"
+      skip_sync_annotations_check: true
 
   # Run the post-upgrade hook if defined:
   - debug: msg="Running node post-upgrade hook {{ openshift_node_upgrade_post_hook }}"
