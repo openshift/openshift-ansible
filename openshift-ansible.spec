@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.4.0%{?dist}
+Release:        0.5.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -170,6 +170,18 @@ fi
 
 
 %changelog
+* Wed Sep 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.5.0
+- test/ci: set expirationDate flag for CI namespace garbage collector
+  (vrutkovs@redhat.com)
+- Refactored Calico and updated playbooks to reflect self-hosted Calico
+  installs only (mleung975@gmail.com)
+- Enable IAM roles for EC2s in AWS (mazzystr@gmail.com)
+- Fix for recent az changes. (kwoodson@redhat.com)
+- cluster-monitoring: Bump cluster monitoring operator in origin
+  (fbranczyk@gmail.com)
+- Added capability to fix static addresses to openshift_ovirt provider vms
+  (jparrill@redhat.com)
+
 * Mon Sep 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.4.0
 - Reload tuned service when node-config.yaml has changed.
   (jmencak@users.noreply.github.com)
