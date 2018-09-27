@@ -4,7 +4,7 @@
 # alone etcd hosts and master + etcd hosts too because we use the peer keys.
 etcdctl2() {
 
- cmd="ETCDCTL_API=2 etcdctl --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} -C https://`hostname`:2379 ${@}"
+ cmd="ETCDCTL_API=2 etcdctl --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} --endpoints https://`hostname`:2379 ${@}"
  if [[ -f /usr/local/bin/master-exec ]]; then
    /usr/local/bin/master-exec etcd etcd /bin/sh -c "$cmd"
  else
