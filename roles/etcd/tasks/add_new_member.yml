@@ -3,11 +3,8 @@
 - import_tasks: set_facts.yml
 
 - name: Add new etcd members to cluster
-  command: "{{ etcdctlv2 }} member add {{ etcd_hostname }} {{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}"
+  command: "{{ hostvars[etcd_ca_host].etcdctlv2 }} member add {{ etcd_hostname }} {{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}"
   delegate_to: "{{ etcd_ca_host }}"
-  failed_when:
-  - etcd_add_check.rc == 1
-  - ("peerURL exists" not in etcd_add_check.stderr)
   register: etcd_add_check
   retries: 3
   delay: 10
