@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.5.0%{?dist}
+Release:        0.6.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -187,6 +187,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Sep 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.6.0
+- Bug 1554293 - logging-eventrouter event not formatted correctly in
+  Elasticsearch when using MUX (nhosoi@redhat.com)
+- Add a new dockerfile to use in CI (vrutkovs@redhat.com)
+- Add new package which contains test playbooks (vrutkovs@redhat.com)
+
 * Wed Sep 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.5.0
 - test/ci: set expirationDate flag for CI namespace garbage collector
   (vrutkovs@redhat.com)
