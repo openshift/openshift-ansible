@@ -3,3 +3,4 @@
   set_fact:
     etcd_ip: "{{ etcd_ip }}"
     etcd_hostname: "{{ etcd_hostname }}"
+    etcdctlv2: "{{ etcdctlv2 }}"
