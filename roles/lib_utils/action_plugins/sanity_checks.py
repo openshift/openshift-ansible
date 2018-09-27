@@ -2,6 +2,7 @@
 Ansible action plugin to ensure inventory variables are set
 appropriately and no conflicting options have been provided.
 """
+import fnmatch
 import json
 import re
 
@@ -534,23 +535,6 @@ def is_registry_match(item, pattern):
     of the registries will be listed without the port and insecure flag.
     """
     item = "schema://" + item.split('://', 1)[-1]
-    return is_match(urlparse(item).hostname, pattern.rsplit(':', 1)[0])
-
-
-# taken from https://leetcode.com/problems/wildcard-matching/discuss/17845/python-dp-solution
-# (the same source as for openshift/origin/pkg/util/strings/wildcard.go)
-def is_match(item, pattern):
-    """implements DP algorithm for string matching"""
-    length = len(item)
-    if len(pattern) - pattern.count('*') > length:
-        return False
-    matches = [True] + [False] * length
-    for i in pattern:
-        if i != '*':
-            for index in reversed(range(length)):
-                matches[index + 1] = matches[index] and (i == item[index] or i == '?')
-        else:
-            for index in range(1, length + 1):
-                matches[index] = matches[index - 1] or matches[index]
-        matches[0] = matches[0] and i == '*'
-    return matches[-1]
+    pat = pattern.rsplit(':', 1)[0]
+    name = urlparse(item).hostname
+    return fnmatch.fnmatch(name, pat)
