@@ -45,8 +45,8 @@ osm_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape,
 repoquery_cmd: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0', 'repoquery --plugins') }}"
 repoquery_installed: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed', 'repoquery --plugins --installed') }}"
 
-openshift_use_crio: False
-openshift_use_crio_only: False
+openshift_use_crio: True
+openshift_use_crio_only: True
 openshift_crio_enable_docker_gc: False
 openshift_crio_var_sock: "/var/run/crio/crio.sock"
 openshift_crio_pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
