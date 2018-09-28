@@ -31,4 +31,4 @@
     - keys: "/openshift.io/oauth/authorizetokens"
       ttl: "{{ authorizeTokenMaxAgeSeconds }}s"
     - keys: "/openshift.io/leases/controllers"
-      ttl: "{{ controllerLeaseTTL }}s"
+      ttl: "{{ controllerLeaseTTL if (controllerLeaseTTL | int >= 1) else 1 }}s"
