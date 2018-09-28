@@ -13,9 +13,6 @@
     l_install_base_packages: True
     l_repo_hosts: "{{ l_scale_up_hosts | default('oo_all_hosts') }}"
 
-- import_playbook: init/validate_hostnames.yml
-  when: not (skip_validate_hostnames | default(False))
-
 # This is required for container runtime for crio, only needs to run once.
 - name: Configure os_firewall
   hosts: "{{ l_scale_up_hosts | default(l_default_firewall_hosts) }}"
