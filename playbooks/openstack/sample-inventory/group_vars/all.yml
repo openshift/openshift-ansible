@@ -1,4 +1,25 @@
 ---
+# Uncomment if you plan on using these features. Doing so is not required,
+# but enables pre-requisites checks that will confirm that the right parameters
+# are set.
+
+# Note that these features require other parameters to be set in the inventory.
+# It is highly recommended that you read the configuration documentation.
+
+#openshift_use_all_in_one_cluster_deployment: False
+#openshift_use_cinder_persistent_volume: False
+#openshift_use_cinder_registry: False
+#openshift_use_kuryr: False
+#openshift_use_openstack_ssl: False
+#openshift_use_swift_registry: False
+
+#openshift_openstack_use_neutron_internal_dns: False
+#openshift_openstack_use_no_floating_ip: False
+#openshift_openstack_use_nsupdate: True
+#openshift_openstack_use_provider_network: False
+
+############
+
 openshift_openstack_clusterid: "openshift"
 openshift_openstack_public_dns_domain: "example.com"
 openshift_openstack_dns_nameservers: []
@@ -25,7 +46,6 @@ openshift_openstack_external_network_name: "public"
 #openshift_openstack_kuryr_service_subnet_cidr: "172.30.0.0/16"
 
 ## You should set the following if you want to use Kuryr/Neutron as your SDN
-#openshift_use_kuryr: True
 #openshift_use_openshift_sdn: False
 
 # NOTE: you must uncomment these for Kuryr to work properly as well:
@@ -169,6 +189,9 @@ openshift_openstack_pool_end: "192.168.99.254"
 #rhsub_orgid: '<orgid>'
 #rhsub_pool: '<pool name>'
 
+
+# This parameter may need to be set if your nsupdate zone differs from the full OpenShift DNS name
+#openshift_openstack_nsupdate_zone: example.com
 
 # # Roll-your-own DNS
 #openshift_openstack_external_nsupdate_keys:

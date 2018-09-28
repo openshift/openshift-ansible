@@ -136,7 +136,11 @@ configuration file locally and specify it in `inventory/group_vars/OSEv3.yml`:
 ## OpenStack With SSL Configuration
 
 In order to configure your OpenShift cluster to work properly with OpenStack with
-SSL-endpoints, add the following to `inventory/group_vars/OSEv3.yml`:
+SSL-endpoints, set the following in `inventory/group_vars/all.yml`:
+
+* `openshift_use_openstack_ssl`: True
+
+Then add the following to `inventory/group_vars/OSEv3.yml`:
 
 ```
 openshift_certificates_redeploy: true
@@ -269,6 +273,7 @@ do not have it either. Nor should they use any other internal DNS server.
 Put this in your `inventory/group_vars/all.yml`:
 
 ```yaml
+openshift_openstack_use_neutron_internal_dns: True
 openshift_openstack_fqdn_nodes: false
 openshift_openstack_dns_nameservers: []
 ```
@@ -304,6 +309,8 @@ are created, but before we install anything on them).
 Add this to your `inventory/group_vars/all.yml`:
 
 ```
+    openshift_openstack_use_nsupdate: True
+
     openshift_openstack_external_nsupdate_keys:
       private:
         key_secret: <some nsupdate key>
@@ -484,6 +491,7 @@ You must do this from inside the "bastion" host created in the previous step.
 Put the following to `inventory/group_vars/all.yml`:
 
 ```yaml
+openshift_openstack_use_no_floating_ip: True
 openshift_openstack_router_name: openshift-router
 openshift_openstack_node_subnet_name: openshift
 openshift_openstack_master_floating_ip: false
@@ -500,10 +508,10 @@ And then run the `playbooks/openstack/openshift-cluster/*.yml` as usual.
 If you want to deploy OpenShift on a single node (e.g. for quick evaluation),
 you can do so with a few configuration changes.
 
-First, set the node counts and labels like so in
-`inventory/group_vars/all.yml`:
+First, set the following in `inventory/group_vars/all.yml`:
 
 ```
+openshift_use_all_in_one_cluster_deployment: True
 openshift_openstack_num_masters: 1
 openshift_openstack_num_infra: 0
 openshift_openstack_num_nodes: 0
@@ -835,12 +843,17 @@ resolve each other by name.
 
 In `inventory/group_vars/all.yml`:
 
+* `openshift_openstack_use_provider_network` True
 * `openshift_openstack_provider_network_name` Provider network name. Setting this will cause the `openshift_openstack_external_network_name` and `openshift_openstack_private_network_name` parameters to be ignored.
 
 
 ## Cinder-Backed Persistent Volumes Configuration
 
-In addition to [setting up an OpenStack cloud provider](#openstack-cloud-provider-configuration),
+Set the following in `inventory/group_vars/all.yml`:
+
+* `openshift_use_cinder_persistent_volume`: True
+
+Then, in addition to [setting up an OpenStack cloud provider](#openstack-cloud-provider-configuration),
 you must set the following in `inventory/group_vars/OSEv3.yml`:
 
 * `openshift_cloudprovider_openstack_blockstorage_version`: v2
@@ -882,7 +895,11 @@ openstack volume create --size <volume size in gb> <volume name>
 Alternatively, the playbooks can create the volume created automatically if you
 specify its name and size.
 
-In either case, you have to [set up an OpenStack cloud provider](#openstack-cloud-provider-configuration),
+Then, set the following in `inventory/group_vars/all.yml`:
+
+* `openshift_use_cinder_registry`: True
+
+And [set up an OpenStack cloud provider](#openstack-cloud-provider-configuration),
 and then set the following in `inventory/group_vars/OSEv3.yml`:
 
 * `openshift_hosted_registry_storage_kind`: openstack
@@ -909,7 +926,11 @@ infra nodes when the registry pod gets started.
 ## Swift or Ceph Rados GW Backed Registry Configuration
 
 You can use OpenStack Swift or Ceph Rados GW to store your OpenShift registry.
-In order to do so, set the following in `inventory/group_vars/OSEv3.yml`:
+In order to do so, set the following in `inventory/group_vars/all.yml`:
+
+* `openshift_use_swift_registry`: true
+
+And the following in `inventory/group_vars/OSEv3.yml`:
 
 * `openshift_hosted_registry_storage_kind`: object
 * `openshift_hosted_registry_storage_provider`: swift
