@@ -1020,8 +1020,7 @@ $ ansible-playbook --user openshift \
 
 
 ## Opening Optional Ports
-
-Certain features of Openshift that are not part of the default configuration may require ports to be opened. The following changes to openshift-ansible/roles/openshift_openstack/defaults/main.yml are needed to enable these features. This section assumes that these services were already properly enabled and configured in OSEv3.yml or all.yml, and will not include details pertaining to them.
+There are certian optional and legacy features that require ports to be opened. The code provided in the following sections can be used to enable these features.
 
 ### Metrics
 If you want to enable metrics in your openshift cluster, then port 10255 must be open on all nodes in the cluster. The following code should be added to openshift_openstack_node_secgroup_rules in main.yml.
