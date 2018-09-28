@@ -16,6 +16,7 @@
 - name: Auto-heal
   hosts: oo_first_master
   roles:
+  - role: openshift_facts
   - role: openshift_autoheal
 
 - name: Auto-heal Install Checkpoint End
