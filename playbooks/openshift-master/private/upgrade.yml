@@ -35,6 +35,9 @@
     failed_when:
     - l_pb_upgrade_control_plane_pre_upgrade_storage.rc != 0
     - openshift_upgrade_pre_storage_migration_fatal | default(true) | bool
+    until: l_pb_upgrade_control_plane_pre_upgrade_storage.rc == 0
+    retries: 6
+    delay: 30
 
 # Set openshift_master_facts separately. In order to reconcile
 # admission_config's, we currently must run openshift_master_facts and
@@ -126,6 +129,9 @@
     - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
     run_once: true
     delegate_to: "{{ groups.oo_first_master.0 }}"
+    until: l_pb_upgrade_control_plane_post_upgrade_storage.rc == 0
+    retries: 6
+    delay: 30
 
   - set_fact:
       master_update_complete: True
@@ -259,6 +265,9 @@
     failed_when:
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
     - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
+    until: l_pb_upgrade_control_plane_post_upgrade_storage.rc == 0
+    delay: 6
+    retries: 30
 
   - set_fact:
       reconcile_complete: True
