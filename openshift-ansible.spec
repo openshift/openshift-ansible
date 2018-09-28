@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.16
+Version:        3.11.17
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,11 @@ fi
 
 
 %changelog
+* Fri Sep 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.17-1
+- Remove oreg_auth_credentials_replace from inventory (sdodson@redhat.com)
+- test/ci: set expirationDate flag for CI namespace garbage collector
+  (vrutkovs@redhat.com)
+
 * Wed Sep 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.16-1
 - cluster-monitoring: Bump cluster monitoring operator in origin
   (fbranczyk@gmail.com)
