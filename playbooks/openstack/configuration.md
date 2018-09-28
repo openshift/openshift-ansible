@@ -532,6 +532,11 @@ this new group to it.
 Note that the "all in one" node must be the "master". openshift-ansible
 expects at least one node in the `masters` Ansible group.
 
+Also keep in mind that if you don't use [LBaaS](#load-balancer-as-a-service)
+with an all-in-one setup the DNS wildcard record for the apps domain will not be
+added, because there are no dedicated infra nodes, so you will have to add it
+manually. See
+[Custom DNS Records Configuration](#custom-dns-records-configuration).
 
 ## Building Node Images
 
