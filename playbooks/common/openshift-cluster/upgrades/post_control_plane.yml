@@ -70,4 +70,11 @@
     when:
     - __shared_resource_viewer_protected | default(false)
 
+# Tuned profile are removed when removing tuned-profiles-atomic-openshift-node rpm
+# Need to be re apply
+- name: Re apply tuned profiles
+  hosts: oo_first_master
+  roles:
+  - tuned
+
 - import_playbook: upgrade_components.yml

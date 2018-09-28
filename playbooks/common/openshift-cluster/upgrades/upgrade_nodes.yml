@@ -94,3 +94,12 @@
       name: openshift_excluder
     vars:
       r_openshift_excluder_action: enable
+
+# Tuned profile are removed when removing tuned-profiles-atomic-openshift-node rpm
+# Need to be re apply
+- name: Re-enable tuned profiles
+  hosts: oo_nodes_to_upgrade:!oo_masters_to_config
+  tasks:
+  - import_role:
+      name: tuned
+
