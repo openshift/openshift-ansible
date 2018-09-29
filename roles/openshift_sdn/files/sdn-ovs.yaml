@@ -63,16 +63,17 @@ spec:
               exit 0
           }
           trap quit SIGTERM
-          /usr/share/openvswitch/scripts/ovs-ctl start --system-id=random
+          /usr/share/openvswitch/scripts/ovs-ctl start --no-ovs-vswitchd --system-id=random
 
           # Restrict the number of pthreads ovs-vswitchd creates to reduce the
           # amount of RSS it uses on hosts with many cores
           # https://bugzilla.redhat.com/show_bug.cgi?id=1571379
           # https://bugzilla.redhat.com/show_bug.cgi?id=1572797
           if [[ `nproc` -gt 12 ]]; then
-              ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=4
-              ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=10
+              ovs-vsctl --no-wait set Open_vSwitch . other_config:n-revalidator-threads=4
+              ovs-vsctl --no-wait set Open_vSwitch . other_config:n-handler-threads=10
           fi
+          /usr/share/openvswitch/scripts/ovs-ctl start --no-ovsdb-server --system-id=random
           while true; do sleep 5; done
         securityContext:
           runAsUser: 0
