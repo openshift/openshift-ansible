@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.6.0%{?dist}
+Release:        0.7.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -187,6 +187,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Sep 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.7.0
+- Add OpenStack pre-requisites check for various features (tzumainn@redhat.com)
+- [openstack] Add configuration note for all-in-one and DNS (pep@redhat.com)
+- Remove oreg_auth_credentials_replace from inventory (sdodson@redhat.com)
+- test/ci: ensure AWS instances have public hostname (vrutkovs@redhat.com)
+
 * Thu Sep 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.6.0
 - Bug 1554293 - logging-eventrouter event not formatted correctly in
   Elasticsearch when using MUX (nhosoi@redhat.com)
