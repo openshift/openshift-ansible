@@ -580,7 +580,7 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules: {{ openshift_openstack_infra_secgroup_rules|to_json }}
-
+  {% if openshift_openstack_num_cns > 0 %}
   cns-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -595,6 +595,7 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules: {{ openshift_openstack_cns_secgroup_rules|to_json }}
+  {% endif %}
 {% endif %}
 
   lb-secgrp:
@@ -1093,7 +1094,9 @@ resources:
             - { get_resource: flat-secgrp }
 {% else %}
             - { get_resource: node-secgrp }
+{% if openshift_openstack_num_cns > 0 %}
             - { get_resource: cns-secgrp }
+{% endif %}
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_secgrp:
             - { get_resource: pod_access_sg }
