@@ -18,6 +18,12 @@
   with_fileglob:
     - "files/*.yaml"
 
+- name: Update the image name
+  yedit:
+    src: "{{ mktemp.stdout }}/sync-images.yaml"
+    key: 'metadata.name'
+    value: "{{ node_tag_name }}"
+
 - name: Update the image tag
   yedit:
     src: "{{ mktemp.stdout }}/sync-images.yaml"
@@ -34,15 +40,11 @@
 
 # TODO: temporary until we fix apply for image stream tags
 - name: Remove the image stream tag
-  command: >
-    {{ openshift_client_binary }}
-    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    delete -n openshift-node istag node:v3.11 --ignore-not-found
-  register: l_os_istag_del
-  # The istag might not be there, so we want to not fail in that case.
-  failed_when:
-    - l_os_istag_del.rc != 0
-    - "'have a resource type' not in l_os_istag_del.stderr"
+  oc_obj:
+    name: "{{ node_tag_name }}"
+    kind: istag
+    state: absent
+    namespace: openshift-node
 
 - name: Apply the config
   shell: >
