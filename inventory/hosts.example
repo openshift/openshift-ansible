@@ -105,15 +105,11 @@ debug_level=2
 
 # Configure extensionScripts in the master config for console customization
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#loading-custom-scripts-and-stylesheets
-#openshift_master_extension_scripts=['/path/to/script1.js','/path/to/script2.js']
+#openshift_web_console_extension_script_urls=['/path/to/script1.js','/path/to/script2.js']
 
 # Configure extensionStylesheets in the master config for console customization
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#loading-custom-scripts-and-stylesheets
-#openshift_master_extension_stylesheets=['/path/to/stylesheet1.css','/path/to/stylesheet2.css']
-
-# Configure extensions in the master config for console customization
-# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
-#openshift_master_extensions=[{'name': 'images', 'sourceDirectory': '/path/to/my_images'}]
+#openshift_web_console_extension_stylesheet_urls=['/path/to/stylesheet1.css','/path/to/stylesheet2.css']
 
 # Configure extensions in the master config for console customization
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
