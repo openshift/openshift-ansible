@@ -175,7 +175,7 @@ openshift_openstack_infra_secgroup_rules:
   - direction: ingress
     protocol: tcp
     port_range_min: 443
-    port_range_max: 443 
+    port_range_max: 443
 openshift_openstack_cns_secgroup_rules:
   # rpcbind
   - direction: ingress
