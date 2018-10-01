@@ -149,26 +149,6 @@
       - tun0
       when: openshift_use_openshift_sdn | default(True) | bool
 
-  - shell: atomic uninstall "{{ item }}"-node
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openshift-enterprise
-    - origin
-
-  - shell: atomic uninstall "{{ item }}"
-    changed_when: False
-    failed_when: False
-    with_items:
-    - etcd
-
-  - shell: atomic uninstall "{{ item }}"
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openvswitch
-    when: openshift_use_openshift_sdn | default(True) | bool
-
   - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
     changed_when: False
 

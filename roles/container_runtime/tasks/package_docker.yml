@@ -23,7 +23,6 @@
   vars:
     pkg_list:
     - "docker{{ '-' + docker_version if docker_version is defined else '' }}"
-    - atomic
     - skopeo
 
 - block:
