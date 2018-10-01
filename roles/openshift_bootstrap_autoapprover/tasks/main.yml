@@ -4,24 +4,12 @@
   register: mktemp
   changed_when: False
 
-- name: Copy templates to temp directory
-  copy:
+- name: Render templates to temp directory
+  template:
     src: "{{ item }}"
-    dest: "{{ mktemp.stdout }}/{{ item | basename }}"
+    dest: "{{ mktemp.stdout }}/{{ item | basename | splitext | first }}.yaml"
   with_fileglob:
     - "files/*.yaml"
-
-- name: Update the image name
-  yedit:
-    src: "{{ mktemp.stdout }}/openshift-bootstrap-images.yaml"
-    key: 'metadata.name'
-    value: "{{ node_tag_name }}"
-
-- name: Update the image tag
-  yedit:
-    src: "{{ mktemp.stdout }}/openshift-bootstrap-images.yaml"
-    key: 'tag.from.name'
-    value: "{{ osn_image }}"
 
 # TODO: temporary until we fix apply for image stream tags
 - name: Remove the image stream tag
@@ -35,6 +23,11 @@
   command: >
     {{ openshift_client_binary }} apply -f "{{ mktemp.stdout }}"
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+  register: bootstrap_apply_result
+  failed_when:
+    - bootstrap_apply_result.rc != 0
+    - "'AlreadyExists' not in bootstrap_apply_result.stderr"
+  changed_when: "'AlreadyExists' not in bootstrap_apply_result.stderr"
 
 - name: Remove temp directory
   file:

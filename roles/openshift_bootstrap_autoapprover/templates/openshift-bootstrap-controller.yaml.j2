@@ -5,7 +5,7 @@ metadata:
   namespace: openshift-infra
   annotations:
     image.openshift.io/triggers: |
-      [{"from":{"kind":"ImageStreamTag","name":"node:v3.11"},"fieldPath":"spec.template.spec.containers[?(@.name==\"signer\")].image"}]
+      [{"from":{"kind":"ImageStreamTag","name":"{{ node_tag_name }}"},"fieldPath":"spec.template.spec.containers[?(@.name==\"signer\")].image"}]
 spec:
   updateStrategy:
     type: RollingUpdate
