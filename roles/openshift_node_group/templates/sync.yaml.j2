@@ -8,7 +8,7 @@ metadata:
       This daemon set provides dynamic configuration of nodes and relabels nodes as appropriate.
     image.openshift.io/triggers: |
       [
-        {"from":{"kind":"ImageStreamTag","name":"node:v3.11"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sync\")].image"}
+        {"from":{"kind":"ImageStreamTag","name":"{{ node_tag_name }}"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sync\")].image"}
       ]
 spec:
   selector:
