@@ -3,8 +3,6 @@
   package:
     name: "etcd"
     state: present
-  when:
-  - not etcd_is_atomic | bool
   register: result
   until: result is succeeded
 

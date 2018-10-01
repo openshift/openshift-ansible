@@ -3,7 +3,6 @@
 # - openshift_service_type
 # - component
 # - openshift_pkg_version
-# - openshift_is_atomic
 
 # When we update package "a-${version}" and a requires b >= ${version} if we
 # don't specify the version of b yum will choose the latest version of b

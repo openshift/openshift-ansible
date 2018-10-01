@@ -31,10 +31,6 @@
   roles:
   - openshift_facts
   tasks:
-  - fail:
-      msg: Cannot upgrade Docker on Atomic operating systems.
-    when: openshift_is_atomic | bool
-
   - import_role:
       name: container_runtime
       tasks_from: docker_upgrade_check.yml

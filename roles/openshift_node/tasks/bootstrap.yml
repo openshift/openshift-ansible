@@ -1,7 +1,6 @@
 ---
 - name: include package installs
   import_tasks: install_rpms.yml
-  when: not (openshift_is_atomic | default(False) | bool)
 
 - name: create the directory for node
   file:

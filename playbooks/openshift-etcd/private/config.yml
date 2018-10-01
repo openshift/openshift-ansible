@@ -21,14 +21,6 @@
   hosts: oo_etcd_to_config
   any_errors_fatal: true
   tasks:
-  - fail:
-      msg: >
-        etcd stand-alone hosts on atomic is no longer supported. Please
-        co-locate your etcd hosts with masters.
-    when:
-    - openshift_is_atomic | bool
-    - not inventory_hostname in groups['oo_masters']
-
   - import_role:
       name: etcd
       tasks_from: set_facts.yml

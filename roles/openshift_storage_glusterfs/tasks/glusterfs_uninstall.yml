@@ -140,7 +140,6 @@
   with_items: "{{ glusterfs_nodes | default([]) }}"
   when:
   - not glusterfs_is_native | bool
-  - not openshift_is_atomic | bool
 
 - name: Get GlusterFS storage devices state
   command: "pvdisplay -C --noheadings -o pv_name,vg_name {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"

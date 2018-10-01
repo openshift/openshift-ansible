@@ -1,9 +1,4 @@
 ---
-- name: Fail if Atomic Host since this is an rpm request
-  fail: msg='Cannot use CRI-O as a package on Atomic Host'
-  when:
-    - openshift_is_atomic | bool
-
 - import_tasks: common/pre.yml
 
 - name: Check that overlay is in the kernel

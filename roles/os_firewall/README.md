@@ -4,9 +4,6 @@ OS Firewall
 OS Firewall manages firewalld and iptables installation.
 case.
 
-Note: firewalld is not supported on Atomic Host
-https://bugzilla.redhat.com/show_bug.cgi?id=1403331
-
 Requirements
 ------------
 

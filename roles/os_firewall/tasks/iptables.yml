@@ -24,7 +24,6 @@
     pkg_list:
       - iptables
       - iptables-services
-  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 

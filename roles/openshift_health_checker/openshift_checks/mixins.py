@@ -3,17 +3,6 @@ Mixin classes meant to be used with subclasses of OpenShiftCheck.
 """
 
 
-class NotContainerizedMixin(object):
-    """Mixin for checks that are only active when not in containerized mode."""
-    # permanent # pylint: disable=too-few-public-methods
-    # Reason: The mixin is not intended to stand on its own as a class.
-
-    def is_active(self):
-        """Only run on non-containerized hosts."""
-        openshift_is_atomic = self.get_var("openshift_is_atomic")
-        return super(NotContainerizedMixin, self).is_active() and not openshift_is_atomic
-
-
 class DockerHostMixin(object):
     """Mixin for checks that are only active on hosts that require Docker."""
 
@@ -27,13 +16,9 @@ class DockerHostMixin(object):
 
     def ensure_dependencies(self):
         """
-        Ensure that docker-related packages exist, but not on atomic hosts
-        (which would not be able to install but should already have them).
+        Ensure that docker-related packages exist.
         Returns: msg, failed
         """
-        if self.get_var("openshift_is_atomic"):
-            return "", False
-
         # NOTE: we would use the "package" module but it's actually an action plugin
         # and it's not clear how to invoke one of those. This is about the same anyway:
         result = self.execute_module_with_retries(

@@ -45,21 +45,18 @@ def test_package_version(openshift_release):
     assert result == return_value
 
 
-@pytest.mark.parametrize('group_names,openshift_is_atomic,is_active', [
-    (['oo_masters_to_config'], False, True),
-    # ensure check is skipped on containerized installs
-    (['oo_masters_to_config'], True, False),
-    (['oo_nodes_to_config'], False, True),
-    (['oo_masters_to_config', 'oo_nodes_to_config'], False, True),
-    (['oo_masters_to_config', 'oo_etcd_to_config'], False, True),
-    ([], False, False),
-    (['oo_etcd_to_config'], False, False),
-    (['lb'], False, False),
-    (['nfs'], False, False),
+@pytest.mark.parametrize('group_names,is_active', [
+    (['oo_masters_to_config'], True),
+    (['oo_nodes_to_config'], True),
+    (['oo_masters_to_config', 'oo_nodes_to_config'], True),
+    (['oo_masters_to_config', 'oo_etcd_to_config'], True),
+    ([], False),
+    (['oo_etcd_to_config'], False),
+    (['lb'], False),
+    (['nfs'], False),
 ])
-def test_package_version_skip_when_not_master_nor_node(group_names, openshift_is_atomic, is_active):
+def test_package_version_skip_when_not_master_nor_node(group_names, is_active):
     task_vars = dict(
         group_names=group_names,
-        openshift_is_atomic=openshift_is_atomic,
     )
     assert PackageVersion(None, task_vars).is_active() == is_active
