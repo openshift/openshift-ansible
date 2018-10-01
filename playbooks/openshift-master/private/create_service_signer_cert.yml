@@ -11,7 +11,7 @@
     when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
   - name: Chmod local temp directory
-    local_action: command chmod 777 "{{ local_cert_sync_tmpdir.stdout }}"
+    local_action: file path="{{ local_cert_sync_tmpdir.stdout }}" mode=0777
     changed_when: false
     when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
