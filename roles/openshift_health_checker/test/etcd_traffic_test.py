@@ -36,7 +36,6 @@ def test_log_matches_high_traffic_msg(group_names, matched, failed, extra_words)
 
     task_vars = dict(
         group_names=group_names,
-        openshift_is_atomic=False,
         openshift_service_type="origin"
     )
 
@@ -46,24 +45,3 @@ def test_log_matches_high_traffic_msg(group_names, matched, failed, extra_words)
         assert word in result.get("msg", "")
 
     assert result.get("failed", False) == failed
-
-
-@pytest.mark.parametrize('openshift_is_atomic,expected_unit_value', [
-    (False, "etcd"),
-    (True, "etcd_container"),
-])
-def test_systemd_unit_matches_deployment_type(openshift_is_atomic, expected_unit_value):
-    task_vars = dict(
-        openshift_is_atomic=openshift_is_atomic
-    )
-
-    def execute_module(module_name, args, *_):
-        assert module_name == "search_journalctl"
-        matchers = args["log_matchers"]
-
-        for matcher in matchers:
-            assert matcher["unit"] == expected_unit_value
-
-        return {"failed": False}
-
-    EtcdTraffic(execute_module, task_vars).run()

@@ -20,13 +20,6 @@ class DiskAvailability(OpenShiftCheck):
             'oo_nodes_to_config': 15 * 10**9,
             'oo_etcd_to_config': 20 * 10**9,
         },
-        # Used to copy client binaries into,
-        # see roles/lib_utils/library/openshift_container_binary_sync.py.
-        '/usr/local/bin': {
-            'oo_masters_to_config': 1 * 10**9,
-            'oo_nodes_to_config': 1 * 10**9,
-            'oo_etcd_to_config': 1 * 10**9,
-        },
         # Used as temporary storage in several cases.
         tempfile.gettempdir(): {
             'oo_masters_to_config': 1 * 10**9,

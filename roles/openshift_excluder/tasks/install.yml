@@ -1,7 +1,6 @@
 ---
 
 - when:
-  - not openshift_is_atomic | bool
   - r_openshift_excluder_install_ran is not defined
 
   block:

@@ -1,10 +1,9 @@
 """Check that required RPM packages are available."""
 
 from openshift_checks import OpenShiftCheck
-from openshift_checks.mixins import NotContainerizedMixin
 
 
-class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
+class PackageAvailability(OpenShiftCheck):
     """Check that required RPM packages are available."""
 
     name = "package_availability"

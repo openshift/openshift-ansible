@@ -13,7 +13,6 @@
     - cockpit-bridge
     - cockpit-docker
     - "{{ cockpit_plugins | join(',') }}"
-  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 
@@ -22,4 +21,3 @@
     name: cockpit.socket
     enabled: true
     state: started
-  when: not openshift_is_atomic | bool

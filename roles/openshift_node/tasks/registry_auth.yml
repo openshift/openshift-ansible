@@ -49,11 +49,3 @@
   until: node_additional_registry_creds is succeeded
   with_items:
     "{{ openshift_additional_registry_credentials }}"
-
-# Container images may need the registry credentials
-- name: Setup ro mount of /root/.docker for containerized hosts
-  set_fact:
-    l_bind_docker_reg_auth: True
-  when:
-    - openshift_is_atomic | bool
-    - oreg_auth_user is defined or openshift_additional_registry_credentials != [] or ('stat' in node_oreg_auth_credentials_stat and node_oreg_auth_credentials_stat.stat.exists)

@@ -1,5 +1,5 @@
 ---
-openshift_client_binary: "{{ (openshift_is_atomic | bool) | ternary('/usr/local/bin/oc', 'oc') }}"
+openshift_client_binary: "oc"
 
 system_images_registry_dict:
   openshift-enterprise: "registry.redhat.io"
