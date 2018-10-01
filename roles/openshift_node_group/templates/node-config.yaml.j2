@@ -73,6 +73,9 @@ servingInfo:
   bindAddress: 0.0.0.0:10250
   bindNetwork: tcp4
   clientCA: client-ca.crt
+proxyArguments:
+  cluster-cidr:
+    - {{ openshift_cluster_network_cidr }}
 volumeConfig:
   localQuota:
     perFSGroup: null

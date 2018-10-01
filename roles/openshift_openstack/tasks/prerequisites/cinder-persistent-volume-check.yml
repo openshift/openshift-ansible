@@ -1,0 +1,14 @@
+---
+# add localhost to OSEv3 so we can access OSEv3 inventory variables
+- name: Add localhost to OSEv3
+  add_host:
+    hostname: 'localhost'
+    groupname: 'OSEv3'
+
+- name: Check openshift_cloudprovider_openstack_blockstorage_version
+  assert:
+    that: openshift_cloudprovider_openstack_blockstorage_version == 'v2'
+    msg: "openshift_use_cinder_persistent_volume: openshift_cloudprovider_openstack_blockstorage_version must be set to v2"
+
+- name: Clear inventory
+  meta: refresh_inventory

@@ -1,4 +1,16 @@
 ---
+openshift_use_all_in_one_cluster_deployment: False
+openshift_use_cinder_persistent_volume: False
+openshift_use_cinder_registry: False
+openshift_use_kuryr: False
+openshift_use_openstack_ssl: False
+openshift_use_swift_registry: False
+
+openshift_openstack_use_neutron_internal_dns: False
+openshift_openstack_use_no_floating_ip: False
+openshift_openstack_use_nsupdate: True
+openshift_openstack_use_provider_network: False
+
 openshift_openstack_stack_state: 'present'
 
 openshift_openstack_ssh_ingress_cidr: 0.0.0.0/0
@@ -15,7 +27,6 @@ openshift_openstack_nodes_to_remove: []
 openshift_openstack_use_lbaas_load_balancer: false
 openshift_openstack_lbaasv2_provider: Octavia
 openshift_openstack_use_vm_load_balancer: false
-
 
 # container-storage-setup
 openshift_openstack_container_storage_setup:

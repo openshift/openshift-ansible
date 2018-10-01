@@ -1,0 +1,15 @@
+---
+- name: Check openshift_openstack_fqdn_nodes is false
+  assert:
+    that: not openshift_openstack_fqdn_nodes
+    msg: "openshift_openstack_use_neutron_internal_dns: openshift_openstack_fqdn_nodes must be false"
+
+- name: Check openshift_openstack_dns_nameservers is empty
+  assert:
+    that: openshift_openstack_dns_nameservers | count == 0
+    msg: "openshift_openstack_use_neutron_internal_dns: openshift_openstack_dns_nameservers must be empty"
+
+- name: Check openshift_openstack_external_nsupdate_keys does not contain private entry
+  assert:
+    that: openshift_openstack_external_nsupdate_keys.private is not defined
+    msg: "openshift_openstack_use_neutron_internal_dns: openshift_openstack_external_nsupdate_keys must not contain a private entry"

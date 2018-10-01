@@ -1,0 +1,15 @@
+---
+- name: Check openshift_openstack_provider_network_name is defined
+  assert:
+    that: openshift_openstack_provider_network_name is defined and openshift_openstack_provider_network_name
+    msg: "openshift_openstack_use_provider_network: openshift_openstack_provider_network_name must be defined"
+
+- name: Check openshift_openstack_external_network_name is undefined
+  assert:
+    that: openshift_openstack_external_network_name is undefined or not openshift_openstack_external_network_name
+    msg: "openshift_openstack_use_provider_network: openshift_openstack_external_network_name must not be defined"
+
+- name: Check openshift_openstack_private_network_name is undefined
+  assert:
+    that: openshift_openstack_private_network_name is undefined or not openshift_openstack_private_network_name
+    msg: "openshift_openstack_use_provider_network: openshift_openstack_private_network_name must not be defined"

@@ -48,7 +48,7 @@ repoquery_installed: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --l
 openshift_use_crio: False
 openshift_use_crio_only: False
 openshift_crio_enable_docker_gc: False
-openshift_crio_var_sock: "unix:///var/run/crio/crio.sock"
+openshift_crio_var_sock: "/var/run/crio/crio.sock"
 openshift_crio_pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
 openshift_container_cli: "{{ openshift_use_crio | bool | ternary('crictl', 'docker') }}"
 openshift_crio_docker_gc_node_selector:
@@ -87,7 +87,20 @@ openshift_hosted_registry_storage_glusterfs_ips: []
 openshift_hosted_registry_storage_hostpath_path: /var/lib/openshift_volumes
 # Default to ReadWriteOnce if using hostpath, else default to ReadWriteMany
 openshift_hosted_registry_storage_access_modes:
-  - "{{ (openshift_hosted_registry_storage_kind == 'hostpath') | ternary('ReadWriteOnce', 'ReadWriteMany') }}"
+  - "{{ (openshift_hosted_registry_storage_kind | default(none) == 'hostpath') | ternary('ReadWriteOnce', 'ReadWriteMany') }}"
+
+openshift_hosted_registry_glusterfs_namespace: "{{ openshift_hosted_registry_namespace }}"
+openshift_hosted_registry_glusterfs_storage_kind: 'glusterfs'
+openshift_hosted_registry_glusterfs_storage_volume_name: "{{ openshift_hosted_registry_storage_volume_name }}-glusterfs"
+openshift_hosted_registry_glusterfs_storage_volume_size: "{{ openshift_hosted_registry_storage_volume_size }}"
+openshift_hosted_registry_glusterfs_storage_create_pv: False
+openshift_hosted_registry_glusterfs_storage_create_pvc: False
+openshift_hosted_registry_glusterfs_storage_glusterfs_endpoints: "{{ openshift_hosted_registry_storage_glusterfs_endpoints }}"
+openshift_hosted_registry_glusterfs_storage_glusterfs_path: "{{ openshift_hosted_registry_storage_glusterfs_path }}"
+openshift_hosted_registry_glusterfs_storage_glusterfs_readOnly: "{{ openshift_hosted_registry_storage_glusterfs_readOnly }}"
+openshift_hosted_registry_glusterfs_storage_glusterfs_ips: "{{ openshift_hosted_registry_storage_glusterfs_ips }}"
+openshift_hosted_registry_glusterfs_storage_access_modes:
+  - 'ReadWriteMany'
 
 openshift_logging_storage_nfs_directory: '/exports'
 openshift_logging_storage_nfs_options: '*(rw,root_squash)'

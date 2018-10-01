@@ -47,6 +47,7 @@
             "Name": "{{ item.name }}",
             "ansible-groups": "{{ item.ansible_groups | join(',') }}",
             "ansible-node-group": "{{ item.node_group }}",
+            "expirationDate": "{{ item.aws_expiration_date | default(aws_expiration_date) }}"
           }
 
     - name: Add machine to inventory
@@ -75,7 +76,9 @@
   tasks:
     - wait_for_connection: {}
     - setup: {}
-
+    - name: Make sure hostname is set to public ansible host
+      hostname:
+        name: "{{ ansible_host }}"
 
 - import_playbook: ../../playbooks/openshift-node/network_manager.yml
 - import_playbook: ../../playbooks/prerequisites.yml

@@ -1,0 +1,16 @@
+---
+- name: Check openshift_openstack_nsupdate_zone is defined
+  assert:
+    that: openshift_openstack_nsupdate_zone is defined and openshift_openstack_nsupdate_zone
+    msg: "openshift_openstack_use_nsupdate: openshift_openstack_nsupdate_zone must be defined"
+
+- name: Check that there is a public or private entry in openshift_openstack_external_nsupdate_keys
+  assert:
+    that: openshift_openstack_external_nsupdate_keys.private is defined or openshift_openstack_external_nsupdate_keys.public is defined
+    msg: "openshift_openstack_use_nsupdate: openshift_openstack_external_nsupdate_keys must have at least one of a public or private entry"
+
+- name: Check that either openshift_openstack_public_hostname_suffix or openshift_openstack_private_hostname_suffix is defined
+  assert:
+    that: (openshift_openstack_public_hostname_suffix is defined and openshift_openstack_public_hostname_suffix) or (openshift_openstack_private_hostname_suffix is defined and openshift_openstack_private_hostname_suffix)
+    msg: "openshift_openstack_use_nsupdate: either openshift_openstack_public_hostname_suffix or openshift_openstack_private_hostname_suffix must be defined"
+  when: openshift_openstack_external_nsupdate_keys.private is defined and openshift_openstack_external_nsupdate_keys.public is defined

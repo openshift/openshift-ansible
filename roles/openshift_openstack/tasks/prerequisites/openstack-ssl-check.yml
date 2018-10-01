@@ -1,0 +1,30 @@
+---
+# add localhost to OSEv3 so we can access OSEv3 inventory variables
+- name: Add localhost to OSEv3
+  add_host:
+    hostname: 'localhost'
+    groupname: 'OSEv3'
+
+- name: Check openshift_certificates_redeploy is true
+  assert:
+    that: openshift_certificates_redeploy
+    msg: "openshift_use_openstack_ssl: openshift_certificates_redeploy must be true"
+
+- name: Check openshift_additional_ca is defined
+  assert:
+    that: openshift_additional_ca is defined and openshift_additional_ca
+    msg: "openshift_use_openstack_ssl: openshift_additional_ca must be defined"
+
+- name: Check kuryr_openstack_ca is defined
+  assert:
+    that: kuryr_openstack_ca is defined and kuryr_openstack_ca
+    msg: "openshift_use_openstack_ssl: kuryr_openstack_ca must be defined"
+  when: openshift_use_kuryr
+
+- name: Check openshift_cloudprovider_openstack_ca_file is defined
+  assert:
+    that: openshift_cloudprovider_openstack_ca_file is defined and openshift_cloudprovider_openstack_ca_file
+    msg: "openshift_use_openstack_ssl: openshift_cloudprovider_openstack_ca_file must be defined"
+
+- name: Clear inventory
+  meta: refresh_inventory

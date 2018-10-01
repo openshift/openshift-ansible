@@ -18,6 +18,10 @@
     volumes: "{{ openshift_aws_master_instance_config.volumes }}"
     vpc_subnet_id: "{{ l_loop }}"
     wait: yes
+    instance_profile_name: "{{ l_profilename.iam_roles[0].role_name if openshift_aws_create_iam_role and
+                                                                      openshift_aws_master_instance_config.iam_role is defined and
+                                                                      openshift_aws_master_instance_config.iam_role != ''
+                                                                    else omit }}"
   loop: "{{ l_subnetout_results | list }}"
   loop_control:
     loop_var: l_loop

@@ -74,15 +74,18 @@
     | combine({'openshift-node-group-config': openshift_aws_node_group.node_group_config | default('unset') }) }}"
     l_node_group_name: "{{ openshift_aws_node_group.name }} {{ l_deployment_serial }}"
 
+- name: fetch the iam role
+  iam_role_facts:
+    name: "{{ openshift_aws_launch_config_iam_roles[openshift_aws_node_group.group].name }}"
+  register: l_profilename
+  retries: 3
+  delay: 3
+  when: openshift_aws_create_iam_role
+
 - name: Set scale group instances autonaming
   set_fact:
     l_instance_tags: "{{ l_instance_tags | combine({'Name': l_node_group_name }) }}"
   when: openshift_aws_autoname_scale_group_instances | default(false)
-
-- when:
-  - openshift_aws_create_iam_role
-  - asgs.results|length != 2
-  include_tasks: iam_role.yml
 
 - when:
   - openshift_aws_create_launch_config

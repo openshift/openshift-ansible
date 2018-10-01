@@ -1,0 +1,24 @@
+---
+# add localhost to OSEv3 so we can access OSEv3 inventory variables
+- name: Add localhost to OSEv3
+  add_host:
+    hostname: 'localhost'
+    groupname: 'OSEv3'
+
+- name: Check openshift_hosted_registry_storage_kind value
+  assert:
+    that: openshift_hosted_registry_storage_kind == 'object'
+    msg: "openshift_use_swift_registry: openshift_hosted_registry_storage_kind must be set to object"
+
+- name: Check openshift_hosted_registry_storage_provider value
+  assert:
+    that: openshift_hosted_registry_storage_provider == 'swift'
+    msg: "openshift_use_swift_registry: openshift_hosted_registry_storage_provider must be set to swift"
+
+- name: Check openshift_hosted_registry_storage_swift_container is set
+  assert:
+    that: openshift_hosted_registry_storage_swift_container is defined
+    msg: "openshift_use_swift_registry: openshift_hosted_registry_storage_swift_container must be defined"
+
+- name: Clear inventory
+  meta: refresh_inventory
