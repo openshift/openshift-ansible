@@ -17,28 +17,14 @@
   hosts: localhost
   connection: local
   tasks:
-  - add_host:
-      name: "{{ item }}"
-      groups: oo_exclude_bootstrapped_nodes
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
-    changed_when: no
-    when: hostvars[item].openshift_is_bootstrapped | default(False) | bool
 
 - import_playbook: disable_excluders.yml
-  vars:
-    l_node_group: oo_nodes_to_config:!oo_exclude_bootstrapped_nodes
 
 - import_playbook: configure_nodes.yml
-  vars:
-    l_node_group: oo_nodes_to_config:!oo_exclude_bootstrapped_nodes
 
 - import_playbook: configure_bootstrap.yml
 
 - import_playbook: enable_excluders.yml
-  vars:
-    l_node_group: oo_nodes_to_config:!oo_exclude_bootstrapped_nodes
 
 - name: Node Bootstrap Preparation Checkpoint End
   hosts: all

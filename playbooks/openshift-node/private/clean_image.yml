@@ -1,6 +1,6 @@
 ---
 - name: Configure nodes
-  hosts: "{{ l_node_group }}"
+  hosts: oo_nodes_to_config
   tasks:
   - name: Remove any ansible facts created during AMI creation
     file:
