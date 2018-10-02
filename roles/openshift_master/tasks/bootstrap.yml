@@ -3,7 +3,7 @@
 # oc_serviceaccounts_kubeconfig
 - name: create service account kubeconfig with csr rights
   command: >
-    oc serviceaccounts create-kubeconfig {{ openshift_master_csr_sa }} -n {{ openshift_master_csr_namespace }}
+    oc --config={{ openshift.common.config_base }}/master/admin.kubeconfig serviceaccounts create-kubeconfig {{ openshift_master_csr_sa }} -n {{ openshift_master_csr_namespace }}
   register: kubeconfig_out
   until: kubeconfig_out.rc == 0
   retries: 24

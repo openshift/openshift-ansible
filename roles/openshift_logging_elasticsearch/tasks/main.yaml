@@ -314,7 +314,7 @@
       _restart_logging_components: "{{ _restart_logging_components | default([]) + [es_component] | unique }}"
 
   - shell: >
-      {{ openshift_client_binary }} get dc -l component="{{ es_component }}" -n "{{ openshift_logging_elasticsearch_namespace }}" -o name | cut -d'/' -f2
+      {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get dc -l component="{{ es_component }}" -n "{{ openshift_logging_elasticsearch_namespace }}" -o name | cut -d'/' -f2
     register: _es_dcs
 
   - set_fact:
