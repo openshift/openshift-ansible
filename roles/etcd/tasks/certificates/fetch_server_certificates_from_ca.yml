@@ -145,6 +145,8 @@
   unarchive:
     src: "/tmp/{{ inventory_hostname }}/{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
     dest: "{{ etcd_cert_config_dir }}"
+    owner: etcd
+    group: etcd
   when: etcd_server_certs_missing | bool
 
 - name: Create a tarball of the etcd ca certs
