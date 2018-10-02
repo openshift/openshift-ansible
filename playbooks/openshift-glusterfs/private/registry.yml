@@ -7,10 +7,11 @@
 
 - name: Create persistent volumes
   hosts: oo_first_master
+  vars:
+    openshift_hosted_registry_glusterfs_storage_create_pv: True
+    openshift_hosted_registry_glusterfs_storage_create_pvc: True
   roles:
   - role: openshift_persistent_volumes
-    when:
-    - openshift_hosted_registry_storage_kind | default(none) == 'glusterfs' or openshift_hosted_registry_storage_glusterfs_swap
 
 - import_playbook: ../../openshift-hosted/private/openshift_hosted_registry.yml
 
