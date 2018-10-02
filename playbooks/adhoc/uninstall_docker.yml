@@ -39,10 +39,3 @@
     shell: docker-storage-setup --reset
     failed_when: False
 
-  - name: rm -rf docker config files
-    shell: "rm {{ item }} -rf"
-    failed_when: False
-    with_items:
-    - /etc/docker*
-    - /etc/sysconfig/docker*
-    - /etc/systemd/system/docker*
