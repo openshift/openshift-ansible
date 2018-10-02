@@ -1105,18 +1105,13 @@ The following Documentation may prove helpful as well:
 - https://docs.openshift.com/enterprise/3.1/install_config/upgrading/pacemaker_to_native_ha.html
 
 ### Template Router
-If you are running a template router to expose your statistics, there are a few changes you need to make. First, add this to main.yml.
+If you are running a template router to expose your statistics, there are a few changes you need to make. First, add this to main.yml under the openshift_openstack_infra_secgroup_rules section.
 
 ```
+  # Required when running template router to access statistics
   - direction: ingress
     protocol: tcp
     port_range_min: 1936
     port_range_max: 1936
 ```
 
-You may have to update your iptable rules to make this work with the following command:
-
-```
-iptables -A OS_FIREWALL_ALLOW -p tcp -m state --state NEW -m tcp \
-    --dport 1936 -j ACCEPT
-```
