@@ -39,6 +39,11 @@
     shell: docker-storage-setup --reset
     failed_when: False
 
+  - name: Remove Docker
+    package:
+      name: docker
+      state: absent
+
   - name: rm -rf docker config files
     shell: "rm {{ item }} -rf"
     failed_when: False
