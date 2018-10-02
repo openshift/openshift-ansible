@@ -2,6 +2,8 @@
 [![Build Status](https://travis-ci.org/openshift/openshift-ansible.svg?branch=master)](https://travis-ci.org/openshift/openshift-ansible)
 [![Coverage Status](https://coveralls.io/repos/github/openshift/openshift-ansible/badge.svg?branch=master)](https://coveralls.io/github/openshift/openshift-ansible?branch=master)
 
+
+
 # OpenShift Ansible
 
 This repository contains [Ansible](https://www.ansible.com/) roles and
