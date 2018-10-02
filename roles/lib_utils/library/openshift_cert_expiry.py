@@ -10,6 +10,7 @@ import io
 import os
 import subprocess
 import yaml
+import dateutil.parser
 
 # pylint import-error disabled because pylint cannot find the package
 # when installed in a virtualenv
@@ -145,7 +146,7 @@ platforms missing the Python OpenSSL library.
                 # => 20190207181935Z
                 not_after_raw = l.partition(' : ')[-1]
                 # Last item: ('Not After', ' : ', 'Feb  7 18:19:35 2019 GMT')
-                not_after_parsed = datetime.datetime.strptime(not_after_raw, '%b %d %H:%M:%S %Y %Z')
+                not_after_parsed = dateutil.parser.parse(not_after_raw)
                 self.not_after = not_after_parsed.strftime('%Y%m%d%H%M%SZ')
 
             elif l.startswith('X509v3 Subject Alternative Name:'):
