@@ -341,7 +341,10 @@ debug_level=2
 #osm_controller_args={'resource-quota-sync-period': ['10s']}
 
 # Configure api server arguments
-#osm_api_server_args={'max-requests-inflight': ['400']}
+#osm_api_server_args={'max-requests-inflight': ['400'],'experimental-encryption-provider-config':['/etc/origin/master/encryption-config.yaml']}
+
+# Configure openshift encrypting config
+#openshift_encryption_config="{'kind': 'EncryptionConfig','apiVersion': 'v1','resources': [{'resources': ['secrets'],'providers': [{'aescbc': {'keys': [{'name': 'key1','secret': 'xxxxxxxx'}]}},{'identity': {}}]}]}"
 
 # additional cors origins
 #osm_custom_cors_origins=['foo.example.com', 'bar.example.com']
