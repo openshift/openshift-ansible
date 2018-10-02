@@ -179,6 +179,7 @@ Summary:       Openshift and Atomic Enterprise Ansible Test Playbooks
 Requires:      %{name} = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
 Requires:      %{name}-playbooks = %{version}-%{release}
+Requires:      python-boto
 Requires:      python-boto3
 BuildArch:     noarch
 
