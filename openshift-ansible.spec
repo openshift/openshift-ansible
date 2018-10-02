@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.51
+Version:        3.10.52
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,26 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Oct 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.52-1
+- Replace 'command chmod' with 'file mode=...' (vrutkovs@redhat.com)
+- Add CI scripts in hack/ (vrutkovs@redhat.com)
+- Start only the ovsdb so we can add the config safely (bbennett@redhat.com)
+- Remove blank space from Openstack uninstall playbook (juriarte@redhat.com)
+- Add a new dockerfile to use in CI (vrutkovs@redhat.com)
+- Add new package which contains test playbooks (vrutkovs@redhat.com)
+- Bug 1554293 - logging-eventrouter event not formatted correctly in
+  Elasticsearch when using MUX (nhosoi@redhat.com)
+- test/ci: set expirationDate flag for CI namespace garbage collector
+  (vrutkovs@redhat.com)
+- Annotate nodes with md5sum of the applied config (vrutkovs@redhat.com)
+- Use `oo_first_master` when copying admin.kubeconfig (vrutkovs@redhat.com)
+- Fix default mapping of infra nodes (vrutkovs@redhat.com)
+- Backport setup_scale_group_facts changes from master (vrutkovs@redhat.com)
+- Add proper liveness and readiness checks for Calico 3.2 (mleung975@gmail.com)
+- openshift_prometheus: don't try to install node exporter when uninstalling
+  prom (pgier@redhat.com)
+- Update openshift_master.py (crmarquesjc@gmail.com)
+
 * Tue Sep 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.51-1
 - Fix for recent az changes. (kwoodson@redhat.com)
 - Fix S3 storage class path (sarumuga@redhat.com)
