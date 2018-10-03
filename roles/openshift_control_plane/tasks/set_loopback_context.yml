@@ -24,7 +24,7 @@
     {{ openshift.master.loopback_user }}
     --config={{ openshift_master_loopback_config }}
   when:
-  - set_loopback_cluster | changed
+  - set_loopback_cluster is changed
   register: l_set_loopback_credentials
 
 - command: >
