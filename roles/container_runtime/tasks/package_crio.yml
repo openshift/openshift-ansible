@@ -37,6 +37,7 @@
       - cri-tools
       - atomic
       - skopeo
+      - podman
 
 - name: Remove CRI-O default configuration files
   file:
