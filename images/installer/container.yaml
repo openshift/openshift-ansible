@@ -1,0 +1,8 @@
+---
+compose:
+  packages:
+    - openshift-ansible
+    - atomic-openshift-clients
+    - python-boto
+    - python2-boto3
+    - python2-crypto
