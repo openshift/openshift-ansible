@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.64
+Version:        3.7.65
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.65-1
+- Ensure master facts are set during node scale-up (rteague@redhat.com)
+- Automatic profile setting for tuned 2.9 (jmencak@redhat.com)
+- Set TTL 1 for /openshift.io/leases/controllers if controllerLeaseTTL is less
+  than 1 (nakayamakenjiro@gmail.com)
+
 * Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.64-1
 - 
 
