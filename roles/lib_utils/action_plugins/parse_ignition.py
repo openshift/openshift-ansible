@@ -1,5 +1,6 @@
 """Ansible action plugin to decode ignition payloads"""
 
+import base64
 import os
 
 from ansible.plugins.action import ActionBase
@@ -13,8 +14,14 @@ def get_files(files_dict, systemd_dict, dir_list, data):
         path = item["path"]
         dir_list.add(os.path.dirname(path))
         # remove prefix "data:,"
-        contents = urllib.parse.unquote(item['contents']['source'][6:])
-        mode = str(item["mode"])
+        encoding, contents = item['contents']['source'].split(',', 1)
+        if 'base64' in encoding:
+            contents = base64.b64decode(contents).decode('utf-8')
+        else:
+            contents = urllib.parse.unquote(contents)
+        # convert from int to octal, padding at least to 4 places.
+        # eg, 420 becomes '0644'
+        mode = str(format(int(item["mode"]), '04o'))
         inode = {"contents": contents, "mode": mode}
         files_dict[path] = inode
     # get the systemd units files we're here
@@ -26,7 +33,7 @@ def get_files(files_dict, systemd_dict, dir_list, data):
         path = '/etc/systemd/system/' + name
         dir_list.add(os.path.dirname(path))
         files_dict[path] = inode
-        enabled = item['enabled']
+        enabled = item.get('enabled') or True
         systemd_dict[name] = enabled
 
 
