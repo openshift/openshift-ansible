@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.18
+Version:        3.11.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,13 @@ fi
 
 
 %changelog
+* Wed Oct 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.19-1
+- glusterfs: add probe script for liveness and readiness checks
+  (jmulligan@redhat.com)
+- Remove unlicensed code from internet in sanity checks (mgugino@redhat.com)
+- Start only the ovsdb so we can add the config safely (bbennett@redhat.com)
+- GlusterFS: Fix registry playbook PV creation (jarrpa@redhat.com)
+
 * Sun Sep 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.18-1
 - 
 
