@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.45
+Version:        3.9.46
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.46-1
+- Update the role to use the correct oc path (farandac@redhat.com)
+- Retry storage migrations (sdodson@redhat.com)
+- openshift_prometheus: don't try to install node exporter when uninstalling
+  prom (pgier@redhat.com)
+- Update Web Console customizations variables (gabisoft@freesurf.ch)
+- GlusterFS: Fix heketi URL in StorageClasses (jarrpa@redhat.com)
+- Ensure master facts are set during node scale-up (rteague@redhat.com)
+- Reverted includeAll and multi to true (mattiam7@gmail.com)
+- Using node_boot_time_seconds (mmascia@redhat.com)
+- node_boot_time metric not available anymore (mmascia@redhat.com)
+
 * Tue Sep 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.45-1
 - Upgrade router and registry only when these are managed (vrutkovs@redhat.com)
 
