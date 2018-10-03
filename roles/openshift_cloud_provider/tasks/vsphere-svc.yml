@@ -1,6 +1,6 @@
 ---
 - name: Check to see if the vsphere cluster role already exists
-  command: "{{ openshift_client_binary}}  get clusterrole"
+  command: "{{ openshift_client_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get clusterrole"
   register: cluster_role
 
 - block:
@@ -13,7 +13,7 @@
 
   - name: Create vsphere-svc on cluster
     run_once: true
-    command: "{{ openshift_client_binary}} create -f /tmp/vsphere-svc.yml"
+    command: "{{ openshift_client_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig create -f /tmp/vsphere-svc.yml"
 
   - name: Remove vsphere-svc file
     run_once: true
