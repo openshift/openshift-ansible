@@ -79,13 +79,13 @@
   with_items:
   - cluster-monitoring-operator.yaml
 
-- name: Set cluster-monitoring-operator configmap template
+- name: Process cluster-monitoring-operator configmap template
   template:
     src: cluster-monitoring-operator-config.j2
     dest: "{{ tempdir }}/templates/cluster-monitoring-operator-config.yaml"
   changed_when: no
 
-- name: Set cluster-monitoring-operator configmap
+- name: Create cluster-monitoring-operator configmap
   oc_obj:
     state: present
     name: "cluster-monitoring-config"
@@ -95,14 +95,14 @@
     - "{{ tempdir }}/templates/cluster-monitoring-operator-config.yaml"
     delete_after: true
 
-- name: Set cluster-monitoring-operator template
+- name: Process cluster-monitoring-operator deployment template
   template:
     src: cluster-monitoring-operator-deployment.j2
     dest: "{{ tempdir }}/templates/cluster-monitoring-operator-deployment.yaml"
   vars:
     namespace: "{{ openshift_cluster_monitoring_operator_namespace }}"
 
-- name: Set cluster-monitoring-operator template
+- name: Create cluster-monitoring-operator deployment
   oc_obj:
     state: present
     name: "cluster-monitoring-operator"
