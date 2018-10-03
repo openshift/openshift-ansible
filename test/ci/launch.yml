@@ -78,15 +78,27 @@
     - name: Make sure hostname is set to public ansible host
       hostname:
         name: "{{ ansible_host }}"
+    - name: Detecting Operating System
+      shell: ls /run/ostree-booted
+      ignore_errors: yes
+      failed_when: false
+      register: ostree_output
     - name: Update all packages
       package:
         name: '*'
         state: latest
+      when: ostree_output.rc != 0
+      register: yum_update
+    - name: Update Atomic system
+      command: atomic host upgrade
+      when: ostree_output.rc == 0
+      register: ostree_update
     - name: Reboot machines
       shell: sleep 5 && systemctl reboot
       async: 1
       poll: 0
       ignore_errors: true
+      when: yum_update | changed or ostree_update | changed
     - name: Wait for connection
       wait_for_connection:
         connect_timeout: 20
