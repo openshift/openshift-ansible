@@ -26,12 +26,9 @@
   openshift_facts:
     role: docker
 
-- name: Start openvswitch service
-  service:
-    name: openvswitch
-    state: started
-  when:
-    - openshift_use_openshift_sdn | default(true) | bool
+- name: Configure and start openvswitch systemd unit
+  include: openvswitch.yml
+  when: openshift_use_openshift_sdn | default(true) | bool
 
 - name: Start services
   service: name={{ item }} state=started
