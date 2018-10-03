@@ -11,12 +11,12 @@
     - openshift_is_atomic | bool
     - not inventory_hostname in groups['oo_masters']
 
-- name: Set etcd facts for all hosts
-  hosts: oo_etcd_to_config:oo_new_etcd_to_config
+- name: Set etcdctlv2 for etcd ca host
+  hosts: oo_etcd_to_config[0]
   tasks:
   - import_role:
       name: etcd
-      tasks_from: set_facts.yml
+      tasks_from: set_etcdctlv2.yml
 
 - name: Configure etcd
   hosts: oo_new_etcd_to_config
