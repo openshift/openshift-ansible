@@ -1,0 +1,29 @@
+---
+# l_scale_up_hosts may be passed in via various scaleup plays.
+
+- import_playbook: init/main.yml
+  vars:
+    l_install_base_packages: True
+    l_repo_hosts: "all:!all"
+
+# This is required for container runtime for crio, only needs to run once.
+- name: Configure os_firewall
+  hosts: "{{ l_scale_up_hosts | default(l_default_firewall_hosts) }}"
+  vars:
+    l_default_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nfs_to_config:oo_nodes_to_config"
+  roles:
+  - role: os_firewall
+
+- import_playbook: container-runtime/private/setup_storage.yml
+
+- import_playbook: container-runtime/private/config.yml
+
+- name: install nodes
+  hosts: bootkube_nodes
+  tasks:
+  - import_role:
+      name: openshift_node40
+      tasks_from: install.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: bootkube_config.yml
