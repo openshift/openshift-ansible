@@ -78,6 +78,21 @@
     - name: Make sure hostname is set to public ansible host
       hostname:
         name: "{{ ansible_host }}"
+    - name: Update all packages
+      package:
+        name: '*'
+        state: latest
+    - name: Reboot machines
+      shell: sleep 5 && systemctl reboot
+      async: 1
+      poll: 0
+      ignore_errors: true
+    - name: Wait for connection
+      wait_for_connection:
+        connect_timeout: 20
+        sleep: 5
+        delay: 5
+        timeout: 300
     - setup: {}
 
 - import_playbook: ../../playbooks/openshift-node/network_manager.yml
