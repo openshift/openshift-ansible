@@ -2,11 +2,9 @@
 r_etcd_common_backup_tag: ''
 r_etcd_common_backup_sufix_name: ''
 
-l_etcd_bootstrapped: '{{ openshift.node.bootstrapped }}'
-
 # TODO(michaelgugino): Remove these in 3.11
 l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
-l_etcd_static_pod: "{{ not (r_etcd_common_skip_command_shim is defined and r_etcd_common_skip_command_shim) or l_etcd_bootstrapped }}"
+l_etcd_static_pod: "{{ openshift.node.bootstrapped }}"
 
 # runc, docker, static pod, host
 r_etcd_common_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else ('static_pod' if l_etcd_static_pod else ('docker' if openshift_is_containerized else 'host')) }}"
