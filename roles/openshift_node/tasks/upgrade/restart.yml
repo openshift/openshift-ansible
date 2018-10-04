@@ -38,12 +38,30 @@
     enabled: true
   when: openshift_use_crio | bool
 
+- name: Create ovsdb-server systemd dropin folder
+  file:
+    path: /etc/systemd/system/ovsdb-server.service.d/
+    state: directory
+  when: openshift_node_use_openshift_sdn | bool
+
+- name: Create ovsdb-server dropin config
+  ini_file:
+    path: /etc/systemd/system/ovsdb-server.service.d/timeout.conf
+    section: Service
+    option: TimeoutStartSec
+    value: 300
+  register: ovsdb_config_result
+  when: openshift_node_use_openshift_sdn | bool
+
+- name: Reload systemd units for ovsdb config change
+  command: systemctl daemon-reload
+  when: ovsdb_config_result | changed
+
 - name: Start openvswitch service
   service:
     name: openvswitch
     state: started
-  when:
-    - openshift_node_use_openshift_sdn | bool
+  when: openshift_node_use_openshift_sdn | bool
 
 - name: Start services
   service: name={{ item }} state=started
