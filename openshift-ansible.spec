@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.7.0%{?dist}
+Release:        0.8.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,24 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Oct 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.8.0
+- roles/cluster_monitoring: minor wording improvement (pgier@redhat.com)
+- Remove unlicensed code from internet in sanity checks (mgugino@redhat.com)
+- Use clusterid attribute to filter servers in dynamic inventory
+  (rusichen@redhat.com)
+- Add CI scripts in hack/ (vrutkovs@redhat.com)
+- Replace 'command chmod' with 'file mode=...' (vrutkovs@redhat.com)
+- Start only the ovsdb so we can add the config safely (bbennett@redhat.com)
+- Add pyOpenSSL and iproute to RPM dependencies (sdodson@redhat.com)
+- Fixes #8267 (mavazque@redhat.com)
+- Node problem detector always pull images from registry.redhat.io for
+  openshift-enterprise (sgaikwad@redhat.com)
+- Replace undefined {{ item }} by filename (info@theothersolution.nl)
+- Pass admin kubeconfig (sdodson@redhat.com)
+- typo correction (i.am.emilio@gmail.com)
+- no longer creates cns security group when number of cns is 0
+  (i.am.emilio@gmail.com)
+
 * Fri Sep 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.7.0
 - Add OpenStack pre-requisites check for various features (tzumainn@redhat.com)
 - [openstack] Add configuration note for all-in-one and DNS (pep@redhat.com)
