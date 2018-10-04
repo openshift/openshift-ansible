@@ -1,22 +1,26 @@
 ---
+
 # This work is to migrate the OPENSHIFT_DEFAULT_REGISTRY variable
-# inside of the docker-registry's dc to REGISTRY_OPENSHIFT_SERVER_ADDR
-- name: migrate docker registry env var
-  oc_edit:
+# inside of the docker-registry's dc to REGISTRY_OPENSHIFT_SERVER_ADDR.
+- name: fetch env vars
+  oc_obj:
+    state: list
+    namespace: default
     kind: dc
-    name: "{{ openshift_hosted_registry_name }}"
-    namespace: "{{ openshift_hosted_registry_namespace }}"
-    edits:
-    - action: update
-      key: spec.template.spec.containers[0].env
-      value:
-        name: REGISTRY_OPENSHIFT_SERVER_ADDR
-        value: docker-registry.default.svc:5000
-      curr_value:
-        name: OPENSHIFT_DEFAULT_REGISTRY
-        value: docker-registry.default.svc:5000
-  register: editout
+    name: docker-registry
+  register: dc
 
 - debug:
-    var: editout
-    verbosity: 1
+    msg: "{{ dc.results.results[0]  }}"
+
+- set_fact:
+    env_vars: "{{ dc.results.results[0].spec.template.spec.containers[0] | json_query(\"env[?name!='OPENSHIFT_DEFAULT_REGISTRY']\") | union([{'name': 'REGISTRY_OPENSHIFT_SERVER_ADDR', 'value': openshift_hosted_default_registry_url }]) }}"
+
+- name: remove env vars
+  oc_edit:
+    name: docker-registry
+    kind: dc
+    edits:
+    - key: spec.template.spec.containers[0].env
+      value: "{{ env_vars }}"
+  register: output
