@@ -16,13 +16,10 @@
     import_role:
       name: openshift_sanitize_inventory
 
-  - name: Detecting Operating System from ostree_booted
-    stat:
-      path: /run/ostree-booted
-      get_checksum: false
-      get_attributes: false
-      get_mime: false
-    register: ostree_booted
+  - name: Detect OS Variant from /etc/os-release
+    fail:
+      msg: Atomic Host installations are no longer supported
+    when: lookup('ini', 'VARIANT_ID type=properties file=/etc/os-release') == 'atomic.host'
 
   # TODO(michaelgugino) remove this line once CI is updated.
   - name: set openshift_deployment_type if unset
