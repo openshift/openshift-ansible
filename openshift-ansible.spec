@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.11.0%{?dist}
+Release:        0.12.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Oct 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.12.0
+- 
+
 * Fri Oct 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.11.0
 - prelim/partial update to jenkins imagestream to enable tests (while we wait
   for global PR in openshift/origin to merge) (gmontero@redhat.com)
