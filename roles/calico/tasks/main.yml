@@ -35,7 +35,7 @@
 - name: Apply node label
   delegate_to: "{{ groups.oo_first_master.0 }}"
   command: >
-    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig label node {{ openshift.node.nodename | lower }} --overwrite projectcalico.org/ds-ready=true
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig label node {{ l_kubelet_node_name | lower }} --overwrite projectcalico.org/ds-ready=true
 
 - name: Wait for node running
   uri:

@@ -24,7 +24,7 @@
 
 - name: Wait for Node Registration
   oc_obj:
-    name: "{{ openshift.node.nodename }}"
+    name: "{{ l_kubelet_node_name | lower }}"
     kind: node
     state: list
   register: get_node
