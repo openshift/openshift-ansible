@@ -186,7 +186,7 @@ class Host:
         if self.public_ip_addr:
             info += "openshift_public_ip=" + self.public_ip_addr + " "
         if self.hostname:
-            info += "openshift_hostname=" + self.hostname + " "
+            info += "openshift_kubelet_name_override=" + self.hostname + " "
         if self.public_hostname:
             info += "openshift_public_hostname=" + self.public_hostname
 
