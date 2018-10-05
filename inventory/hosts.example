@@ -635,7 +635,7 @@ debug_level=2
 #openshift_persistentlocalstorage_enabled=False
 #openshift_persistentlocalstorage_classes=[]
 #openshift_persistentlocalstorage_path=/mnt/local-storage
-#openshift_persistentlocalstorage_provisionner_image=quay.io/external_storage/local-volume-provisioner:v1.0.1
+#openshift_persistentlocalstorage_provisioner_image=quay.io/external_storage/local-volume-provisioner:v1.0.1
 
 # Cluster monitoring
 #
