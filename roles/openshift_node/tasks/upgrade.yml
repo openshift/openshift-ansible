@@ -84,7 +84,7 @@
     oc_bin: "{{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }}"
     oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
     node_list:
-    - "{{ openshift.node.nodename | lower }}"
+    - "{{ l_kubelet_node_name | lower }}"
   delegate_to: "{{ groups.oo_first_master.0 }}"
   register: node_upgrade_oc_csr_approve
   retries: 30

@@ -1,7 +1,7 @@
 ---
 - name: Set node schedulability
   oc_adm_manage_node:
-    node: "{{ openshift.node.nodename | lower }}"
+    node: "{{ l_kubelet_node_name | lower }}"
     schedulable: "{{ 'true' if openshift_schedulable | default(true) | bool else 'false' }}"
   retries: 10
   delay: 5
