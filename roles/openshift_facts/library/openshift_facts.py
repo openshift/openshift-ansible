@@ -80,54 +80,6 @@ def first_ip(network):
     return itoa((atoi(address) & netmask_i) + 1)
 
 
-def hostname_valid(hostname):
-    """ Test if specified hostname should be considered valid
-
-        Args:
-            hostname (str): hostname to test
-        Returns:
-            bool: True if valid, otherwise False
-    """
-    if (not hostname or
-            hostname.startswith('localhost') or
-            hostname.endswith('localdomain') or
-            # OpenShift will not allow a node with more than 63 chars in name.
-            len(hostname) > 63):
-        return False
-
-    return True
-
-
-def choose_hostname(hostnames=None, fallback=''):
-    """ Choose a hostname from the provided hostnames
-
-        Given a list of hostnames and a fallback value, choose a hostname to
-        use. This function will prefer fqdns if they exist (excluding any that
-        begin with localhost or end with localdomain) over ip addresses.
-
-        Args:
-            hostnames (list): list of hostnames
-            fallback (str): default value to set if hostnames does not contain
-                            a valid hostname
-        Returns:
-            str: chosen hostname
-    """
-    hostname = fallback
-    if hostnames is None:
-        return hostname
-
-    ip_regex = r'\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z'
-    ips = [i for i in hostnames if i is not None and isinstance(i, string_types) and re.match(ip_regex, i)]
-    hosts = [i for i in hostnames if i is not None and i != '' and i not in ips]
-
-    for host_list in (hosts, ips):
-        for host in host_list:
-            if hostname_valid(host):
-                return host
-
-    return hostname
-
-
 def query_metadata(metadata_url, headers=None, expect_json=False):
     """ Return metadata from the provided metadata_url
 
@@ -478,8 +430,7 @@ def set_nodename(facts):
     """ set nodename """
     if 'node' in facts and 'common' in facts:
         if 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'gce':
-            facts['node']['nodename'] = facts['provider']['metadata']['instance']['hostname'].split('.')[0]
-
+            facts['node']['nodename'] = facts['common']['hostname']
         # TODO: The openstack cloudprovider nodename setting was too opinionaed.
         #       It needs to be generalized before it can be enabled again.
         # elif 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
@@ -673,11 +624,8 @@ def apply_provider_facts(facts, provider_facts):
         ip_value = provider_facts['network'].get(ip_var)
         if ip_value:
             facts['common'][ip_var] = ip_value
-
-        facts['common'][h_var] = choose_hostname(
-            [provider_facts['network'].get(h_var)],
-            facts['common'][h_var]
-        )
+        if provider_facts['network'].get(h_var):
+            facts['common'][h_var] = provider_facts['network'].get(h_var)
 
     facts['provider'] = provider_facts
     return facts
@@ -1089,9 +1037,7 @@ class OpenShiftFacts(object):
         ip_addr = self.system_facts['ansible_default_ipv4']['address']
         exit_code, output, _ = module.run_command(['hostname', '-f'])  # noqa: F405
         hostname_f = output.strip() if exit_code == 0 else ''
-        hostname_values = [hostname_f, self.system_facts['ansible_nodename'],
-                           self.system_facts['ansible_fqdn']]
-        hostname = choose_hostname(hostname_values, ip_addr).lower()
+        hostname = hostname_f.lower()
         exit_code, output, _ = module.run_command(['hostname'])  # noqa: F405
         raw_hostname = output.strip() if exit_code == 0 else hostname
 

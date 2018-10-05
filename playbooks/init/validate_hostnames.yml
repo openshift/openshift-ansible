@@ -3,9 +3,9 @@
   hosts: oo_nodes_to_config
   any_errors_fatal: true
   tasks:
-  - name: Query DNS for IP address of {{ openshift.common.hostname }}
+  - name: Query DNS for IP address of {{ openshift.node.nodename }}
     shell:
-      getent ahostsv4 {{ openshift.common.hostname }} | head -n 1 | awk '{ print $1 }'
+      getent ahostsv4 {{ openshift.node.nodename }} | head -n 1 | awk '{ print $1 }'
     register: lookupip
     changed_when: false
     failed_when: false
@@ -13,7 +13,7 @@
   - name: Validate openshift_kubelet_name_override when defined
     fail:
       msg: >
-        The hostname {{ openshift.common.hostname }} for {{ ansible_nodename }}
+        The hostname {{ openshift.node.nodename }} for {{ ansible_nodename }}
         doesn't resolve to an IP address owned by this host. Please set
         openshift_kubelet_name_override variable to a hostname that when resolved on the host
         in question resolves to an IP address matching an interface on this host.
