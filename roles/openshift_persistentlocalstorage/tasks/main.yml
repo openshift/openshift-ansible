@@ -115,7 +115,7 @@
                       fieldPath: metadata.namespace
                 - name: VOLUME_CONFIG_NAME
                   value: local-volume-provisioner-config
-                image: "{{ persistentlocalstorage_provisionner_image }}"
+                image: "{{ persistentlocalstorage_image }}"
                 name: provisioner
                 securityContext:
                   runAsUser: 0
