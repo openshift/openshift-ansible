@@ -108,6 +108,7 @@ REMOVED_VARIABLES = (
     ('openshift_cockpit_deployer_prefix', 'openshift_cockpit_deployer_image'),
     ('openshift_cockpit_deployer_basename', 'openshift_cockpit_deployer_image'),
     ('openshift_cockpit_deployer_version', 'openshift_cockpit_deployer_image'),
+    ('openshift_hostname', 'Removed: See documentation'),
 )
 
 # TODO(michaelgugino): Remove in 3.11
@@ -241,10 +242,10 @@ class ActionModule(ActionBase):
             raise errors.AnsibleModuleError(msg)
 
     def check_hostname_vars(self, hostvars, host):
-        """Checks to ensure openshift_hostname
+        """Checks to ensure openshift_kubelet_name_override
            and openshift_public_hostname
            conform to the proper length of 63 characters or less"""
-        for varname in ('openshift_public_hostname', 'openshift_hostname'):
+        for varname in ('openshift_public_hostname', 'openshift_kubelet_name_override'):
             var_value = self.template_var(hostvars, host, varname)
             if var_value and len(var_value) > 63:
                 msg = '{} must be 63 characters or less'.format(varname)
