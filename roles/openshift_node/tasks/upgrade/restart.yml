@@ -38,12 +38,9 @@
     enabled: true
   when: openshift_use_crio | bool
 
-- name: Start openvswitch service
-  service:
-    name: openvswitch
-    state: started
-  when:
-    - openshift_node_use_openshift_sdn | bool
+- name: Configure and start openvswitch systemd unit
+  include_tasks: openvswitch.yml
+  when: openshift_node_use_openshift_sdn | bool
 
 - name: Start services
   service: name={{ item }} state=started
