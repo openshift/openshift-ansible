@@ -24,7 +24,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_pkg_version=-3.0.0.0
 
 [masters]
-jdetiber-master.usersys.redhat.com openshift_public_hostname="{{ inventory_hostname }}" openshift_hostname="{{ ansible_default_ipv4.address }}"
+jdetiber-master.usersys.redhat.com openshift_public_hostname="{{ inventory_hostname }}"
 
 [etcd]
 jdetiber-etcd.usersys.redhat.com
@@ -33,5 +33,5 @@ jdetiber-etcd.usersys.redhat.com
 #ose3-lb-ansible.test.example.com
 
 [nodes]
-jdetiber-master.usersys.redhat.com openshift_public_hostname="{{ inventory_hostname }}" openshift_hostname="{{ ansible_default_ipv4.address }}" openshift_node_group_name="node-config-master"
-jdetiber-node[1:2].usersys.redhat.com openshift_public_hostname="{{ inventory_hostname }}" openshift_hostname="{{ ansible_default_ipv4.address }}" openshift_node_group_name="node-config-compute"
+jdetiber-master.usersys.redhat.com openshift_public_hostname="{{ inventory_hostname }}" openshift_node_group_name="node-config-master"
+jdetiber-node[1:2].usersys.redhat.com openshift_public_hostname="{{ inventory_hostname }}" openshift_node_group_name="node-config-compute"
