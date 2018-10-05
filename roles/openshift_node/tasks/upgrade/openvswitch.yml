@@ -1,0 +1,22 @@
+---
+- name: Create ovsdb-server systemd dropin folder
+  file:
+    path: /etc/systemd/system/ovsdb-server.service.d/
+    state: directory
+
+- name: Create ovsdb-server dropin config
+  ini_file:
+    path: /etc/systemd/system/ovsdb-server.service.d/timeout.conf
+    section: Service
+    option: TimeoutStartSec
+    value: 300
+  register: ovsdb_config_result
+
+- name: Reload systemd units for ovsdb config change
+  command: systemctl daemon-reload
+  when: ovsdb_config_result is changed
+
+- name: Start openvswitch service
+  service:
+    name: openvswitch
+    state: started
