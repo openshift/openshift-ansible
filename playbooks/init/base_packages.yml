@@ -41,10 +41,12 @@
         - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
         - libsemanage-python
         - yum-utils
-        - "{{ 'python3-docker' if ansible_distribution == 'Fedora' else 'python-docker' }}"
         pkg_list_non_fedora:
         - 'python-ipaddress'
         pkg_list_use_non_fedora: "{{ ansible_distribution != 'Fedora' | bool }}"
-        pkg_list: "{{ pkg_list_non_fedora | ternary(pkg_list_non_fedora, []) + pkg_list_temp }}"
+        pkg_list_use_docker: "{{ not openshift_use_crio_only | default(false) | bool }}"
+        pkg_list_docker:
+        - "{{ 'python3-docker' if ansible_distribution == 'Fedora' else 'python-docker' }}"
+        pkg_list: "{{ pkg_list_use_non_fedora | ternary(pkg_list_non_fedora, []) + pkg_list_use_docker | ternary(pkg_list_docker, []) + pkg_list_temp }}"
       register: result
       until: result is succeeded
