@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.52
+Version:        3.10.53
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Oct 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.53-1
+- Move etcdctlv2 fact setting to its own include (rteague@redhat.com)
+- Remove exclude-bootstrapped logic (mgugino@redhat.com)
+- Remove r_etcd_common_skip_command_shim reference (rteague@redhat.com)
+- Update installer_checkpoint plugin to handle empty stats (rteague@redhat.com)
+- Fix etcd scaleup on standalone hosts (rteague@redhat.com)
+
 * Tue Oct 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.52-1
 - Replace 'command chmod' with 'file mode=...' (vrutkovs@redhat.com)
 - Add CI scripts in hack/ (vrutkovs@redhat.com)
