@@ -45,6 +45,13 @@
     - key: spec.containers[0].readinessProbe.httpGet.port
       value: "{{ openshift_master_api_port }}"
 
+- name: ensure kubelet plugins dir exists
+  file:
+    path: "/etc/origin/kubelet-plugins"
+    state: directory
+    mode: "0755"
+  when: openshift_is_atomic | bool
+
 - name: Update controller-manager static pod on atomic host
   yedit:
     src: "{{ mktemp.stdout }}/controller.yaml"
