@@ -435,6 +435,7 @@
     dest: "{{ tempdir }}/templates/logging-es-dc.yml"
   vars:
     es_cluster_name: "{{ es_component }}"
+    configmap_name: "{{ elasticsearch_name }}"
     component: "{{ es_component }}"
     logging_component: elasticsearch
     deploy_name: "{{ es_deploy_name }}"

@@ -197,7 +197,7 @@ spec:
             secretName: logging-elasticsearch
         - name: elasticsearch-config
           configMap:
-            name: logging-elasticsearch
+            name: "{{configmap_name}}"
         - name: podinfo
           downwardAPI:
             items:
