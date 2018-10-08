@@ -64,6 +64,7 @@ IMAGE_POLICY_CONFIG_VAR = "openshift_master_image_policy_config"
 ALLOWED_REGISTRIES_VAR = "openshift_master_image_policy_allowed_registries_for_import"
 
 REMOVED_VARIABLES = (
+    ('openshift_hostname', 'Removed: See documentation'),
     # TODO(michaelgugino): Remove in 3.12
     ('oreg_auth_credentials_replace', 'Removed: Credentials are now always updated'),
     ('oreg_url_master', 'oreg_url'),
@@ -331,10 +332,10 @@ class ActionModule(ActionBase):
             raise errors.AnsibleModuleError(msg)
 
     def check_hostname_vars(self, hostvars, host):
-        """Checks to ensure openshift_hostname
+        """Checks to ensure openshift_kubelet_name_override
            and openshift_public_hostname
            conform to the proper length of 63 characters or less"""
-        for varname in ('openshift_public_hostname', 'openshift_hostname'):
+        for varname in ('openshift_public_hostname', 'openshift_kubelet_name_override'):
             var_value = self.template_var(hostvars, host, varname)
             if var_value and len(var_value) > 63:
                 msg = '{} must be 63 characters or less'.format(varname)
