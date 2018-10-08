@@ -16,7 +16,7 @@ template_service_broker_install: false
 ansible_service_broker_install: false
 openshift_enable_service_catalog: false
 osm_use_cockpit: false
-openshift_monitoring_deploy: false
+openshift_cluster_monitoring_operator_install: false
 openshift_metering_install: false
 openshift_metrics_server_install: false
 openshift_monitor_availability_install: false

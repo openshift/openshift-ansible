@@ -5,10 +5,12 @@ See the role for more information.
 
 ## Prequisites:
 
-This playbook requires Openshift Monitoring to be installed, to install it set this variable:
+This playbook requires Openshift Cluster Monitoring, which is installed by default.
+If Openshift Cluster Monitoring is not installed, check that the variable
+openshift\_cluster\_monitoring\_operator\_install is set to true.
 
 ```yaml
-openshift_monitoring_deploy: true
+openshift_cluster_monitoring_operator_install: true
 ```
 
 ## Installation
