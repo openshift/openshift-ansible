@@ -86,7 +86,7 @@
     when: >
           ('glusterfs' in groups and inventory_hostname in groups['glusterfs'])
           or ('glusterfs_registry' in groups and inventory_hostname in groups['glusterfs_registry'])
-  
+
   # Tuned profile are removed when removing tuned-profiles-atomic-openshift-node rpm
   # Need to be re apply
   - import_role:
@@ -99,4 +99,3 @@
       name: openshift_excluder
     vars:
       r_openshift_excluder_action: enable
-
