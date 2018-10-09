@@ -28,7 +28,7 @@
     oc_obj:
       state: list
       kind: node
-      name: "{{ openshift.node.nodename | lower }}"
+      name: "{{ l_kubelet_node_name | lower }}"
     register: node_output
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_config
