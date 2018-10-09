@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.16.0%{?dist}
+Release:        0.17.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,18 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Oct 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.17.0
+- Add missing option in Openstack documentation and sample file.
+  (juriarte@redhat.com)
+- Replace openshift.node.nodename with l_kubelet_node_name (mgugino@redhat.com)
+- Increase number of retries in sync DS (vrutkovs@redhat.com)
+- test/ci: update atomic hosts and restart only when necessary
+  (vrutkovs@redhat.com)
+- test/ci: make sure all packages are updated before starting install
+  (vrutkovs@redhat.com)
+- test/ci: set hostname before collecting facts (vrutkovs@redhat.com)
+- Fix etcd scaleup on standalone hosts (rteague@redhat.com)
+
 * Mon Oct 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.16.0
 - Fail on openshift_hostname defined; add openshift_kubelet_name_override
   (mgugino@redhat.com)
