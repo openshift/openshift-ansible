@@ -86,7 +86,7 @@ conmon_env = [
 # selinux indicates whether or not SELinux will be used for pod
 # separation on the host. If you enable this flag, SELinux must be running
 # on the host.
-selinux = true
+selinux = {{ l_crio_selinux_enabled | lower }}
 
 # seccomp_profile is the seccomp json profile path which is used as the
 # default for the runtime.

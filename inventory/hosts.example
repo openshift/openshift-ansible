@@ -123,6 +123,11 @@ debug_level=2
 # Node Selectors to run the garbage collection
 #openshift_crio_docker_gc_node_selector={'runtime': 'cri-o'}
 
+# Specify whether to run CRI-O daemon with SELinux enabled in containers. Default is True.
+# Uncomment below to disable; for example if your kernel does not support the
+# overlay/overlay2 storage drivers with SELinux enabled.
+#openshift_crio_selinux_enabled=False
+
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
 # Default value: "--log-driver=journald"
 #openshift_docker_options="-l warn --ipv6=false"
