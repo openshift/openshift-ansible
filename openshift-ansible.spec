@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.21
+Version:        3.11.22
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,10 @@ fi
 
 
 %changelog
+* Wed Oct 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.22-1
+- unmount just before removing (rmeggins@redhat.com)
+- GlusterFS uninstall: Only unlabel configured nodes (jarrpa@redhat.com)
+
 * Mon Oct 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.21-1
 - test/ci: ensure AWS instances have public hostname (vrutkovs@redhat.com)
 
