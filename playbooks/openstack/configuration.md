@@ -526,6 +526,7 @@ openshift_node_groups:
   - name: node-config-master
     labels:
       - 'node-role.kubernetes.io/master=true'
+      - 'pod_vif=nested-vlan'
     edits: []
   - name: node-config-infra
     labels:
