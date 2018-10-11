@@ -56,7 +56,7 @@
   tasks:
   - name: Mark node unschedulable
     oc_adm_manage_node:
-      node: "{{ openshift.node.nodename | lower }}"
+      node: "{{ l_kubelet_node_name | lower }}"
       schedulable: False
     delegate_to: "{{ groups.oo_first_master.0 }}"
     retries: 10
@@ -70,7 +70,7 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ l_kubelet_node_name | lower }}
       --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       --force --delete-local-data --ignore-daemonsets
       --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
@@ -94,7 +94,7 @@
 
   - name: Set node schedulability
     oc_adm_manage_node:
-      node: "{{ openshift.node.nodename | lower }}"
+      node: "{{ l_kubelet_node_name | lower }}"
       schedulable: True
     delegate_to: "{{ groups.oo_first_master.0 }}"
     retries: 10

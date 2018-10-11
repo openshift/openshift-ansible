@@ -1,6 +1,6 @@
 ---
 # NOTE(shadower): we need to do this because some of the install tasks seem to
-# ignore openshift_hostname and rely on the actual system's hostname
+# ignore openshift_kubelet_name_override and rely on the actual system's hostname
 - name: Update hostname to match the OpenStack name
   hostname:
     name: "{{ inventory_hostname }}"

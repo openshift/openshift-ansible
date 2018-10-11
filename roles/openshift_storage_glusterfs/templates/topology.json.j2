@@ -20,7 +20,7 @@
 {%- if 'glusterfs_hostname' in hostvars[node] -%}
                 "{{ hostvars[node].glusterfs_hostname }}"
 {%- elif 'openshift' in hostvars[node] -%}
-                "{{ hostvars[node].openshift.node.nodename }}"
+                "{{ hostvars[node].l_kubelet_node_name }}"
 {%- else -%}
                 "{{ node }}"
 {%- endif -%}
