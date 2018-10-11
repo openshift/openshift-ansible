@@ -5,6 +5,12 @@
 - set_fact:
     skip_node_svc_handlers: True
 
+- name: Place openshift_kubelet_name_override file
+  template:
+    src: KUBELET_HOSTNAME_OVERRIDE.j2
+    dest: "/etc/sysconfig/KUBELET_HOSTNAME_OVERRIDE"
+  when: openshift_kubelet_name_override is defined
+
 - import_tasks: registry_auth.yml
 
 # Prepull the node and pod image, it's used by lots of components
