@@ -33,6 +33,9 @@
   - 'router'
   when: glusterfs_is_native or glusterfs_heketi_is_native
 
+- import_tasks: glusterfs_wipe.yml
+  when: glusterfs_wipe
+
 - import_tasks: glusterfs_deploy.yml
   when: glusterfs_is_native
 
