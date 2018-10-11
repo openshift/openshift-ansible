@@ -46,3 +46,7 @@ def test_is_registry_match():
     assert not is_registry_match("https://example.com:443/prefix", pat_matchport)
     assert not is_registry_match("docker.io/library/my", pat_matchport)
     assert not is_registry_match("https://hello.registry/myapp", pat_matchport)
+
+
+if __name__ == '__main__':
+    test_is_registry_match()

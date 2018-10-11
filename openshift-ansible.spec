@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.18
+Version:        3.11.22
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,23 @@ fi
 
 
 %changelog
+* Wed Oct 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.22-1
+- unmount just before removing (rmeggins@redhat.com)
+- GlusterFS uninstall: Only unlabel configured nodes (jarrpa@redhat.com)
+
+* Mon Oct 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.21-1
+- test/ci: ensure AWS instances have public hostname (vrutkovs@redhat.com)
+
+* Thu Oct 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.20-1
+- 
+
+* Wed Oct 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.19-1
+- glusterfs: add probe script for liveness and readiness checks
+  (jmulligan@redhat.com)
+- Remove unlicensed code from internet in sanity checks (mgugino@redhat.com)
+- Start only the ovsdb so we can add the config safely (bbennett@redhat.com)
+- GlusterFS: Fix registry playbook PV creation (jarrpa@redhat.com)
+
 * Sun Sep 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.18-1
 - 
 
