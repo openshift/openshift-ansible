@@ -86,13 +86,13 @@
       name: openshift_master
       tasks_from: update_etcd_client_urls.yml
 
-- name: Update Service Catalog API server with new etcd members
+- name: Update Service Catalog apiserver daemonset with new etcd member url references
   hosts: oo_first_master
   tasks:
   - import_role:
       name: openshift_service_catalog
       tasks_from: update_api_server.yml
-    when: 
+    when:
     - openshift_enable_service_catalog | default(true) | bool
   vars:
     first_master: "{{ groups.oo_first_master[0] }}"

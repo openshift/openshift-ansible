@@ -13,7 +13,7 @@
 - name: Set service_catalog image facts
   set_fact:
     openshift_service_catalog_image_prefix: "{{ openshift_service_catalog_image_prefix | default(__openshift_service_catalog_image_prefix) }}"
-    openshift_service_catalog_image_version: "{{ openshift_service_catalog_image_version | default(__openshift_service_catalog_image_version) }}"  
+    openshift_service_catalog_image_version: "{{ openshift_service_catalog_image_version | default(__openshift_service_catalog_image_version) }}"
 
 - set_fact:
     generated_certs_dir: "{{ openshift.common.config_base }}/service-catalog"
@@ -30,7 +30,7 @@
     get_mime: false
   register: etcd_ca_crt
   check_mode: no
-  
+
 - template:
     src: api_server.j2
     dest: "{{ mktemp.stdout }}/service_catalog_api_server.yml"
@@ -46,7 +46,7 @@
     etcd_cafile: "{{ '/etc/origin/master/master.etcd-ca.crt' if etcd_ca_crt.stat.exists else '/etc/origin/master/ca-bundle.crt' }}"
     node_selector: {'node-role.kubernetes.io/master': 'true'}
     ca_hash: "{{ apiserver_ca.content|hash('sha1') }}"
-    
+
 - name: Set Service Catalog API Server daemonset
   oc_obj:
     state: present
@@ -60,7 +60,7 @@
 
 # Delete current pods so that they get respawned with new ds args.
 - oc_obj:
-   kind: po
-   namespace: "kube-service-catalog"
-   state: absent
-   selector: "app=apiserver"
+    kind: po
+    namespace: "kube-service-catalog"
+    state: absent
+    selector: "app=apiserver"
