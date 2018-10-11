@@ -11,7 +11,7 @@ COPY images/installer/origin-extra-root /
 RUN INSTALL_PKGS="python-lxml python-dns pyOpenSSL python2-cryptography openssl python2-passlib httpd-tools openssh-clients origin-clients iproute patch" \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
  && EPEL_PKGS="python2-boto python2-boto3 python2-crypto which python2-pip.noarch python2-scandir python2-packaging azure-cli" \
- && EPEL_TESTING_PKGS="ansible" \
+ && EPEL_TESTING_PKGS="ansible-2.6.5" \
  && yum install -y epel-release \
  && yum install -y --setopt=tsflags=nodocs $EPEL_PKGS \
  && yum install -y --setopt=tsflags=nodocs --enablerepo=epel-testing $EPEL_TESTING_PKGS \
