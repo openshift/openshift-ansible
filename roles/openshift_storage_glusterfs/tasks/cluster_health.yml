@@ -7,7 +7,7 @@
     oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
     oc_namespace: "{{ glusterfs_namespace }}"
     cluster_name: "{{ glusterfs_name }}"
-    exclude_node: "{{ openshift.common.hostname }}"
+    exclude_node: "{{ openshift.node.nodename }}"
   delegate_to: "{{ groups.oo_first_master.0 }}"
   retries: "{{ (glusterfs_health_timeout | int / 10) | int }}"
   delay: 10
