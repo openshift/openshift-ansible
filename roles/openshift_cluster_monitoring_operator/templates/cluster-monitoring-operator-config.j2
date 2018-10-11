@@ -28,6 +28,9 @@ data:
 {% if openshift_cluster_monitoring_operator_prometheus_storage_enabled | bool %}
       volumeClaimTemplate:
         spec:
+{% if openshift_cluster_monitoring_operator_prometheus_storage_class_name %}
+          storageClassName: {{ openshift_cluster_monitoring_operator_prometheus_storage_class_name }}
+{% endif %}
           resources:
             requests:
               storage: {{ openshift_cluster_monitoring_operator_prometheus_storage_capacity }}
@@ -43,6 +46,9 @@ data:
 {% if openshift_cluster_monitoring_operator_alertmanager_storage_enabled | bool %}
       volumeClaimTemplate:
         spec:
+{% if openshift_cluster_monitoring_operator_alertmanager_storage_class_name %}
+          storageClassName: {{ openshift_cluster_monitoring_operator_alertmanager_storage_class_name }}
+{% endif %}
           resources:
             requests:
               storage: {{ openshift_cluster_monitoring_operator_alertmanager_storage_capacity }}
