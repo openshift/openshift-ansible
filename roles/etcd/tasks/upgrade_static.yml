@@ -3,12 +3,7 @@
 
 # INPUT r_etcd_upgrade_version
 
-- name: Verify cluster is healthy pre-upgrade
-  command: "{{ etcdctlv2 }} cluster-health"
-  register: cluster_health
-  retries: 30
-  delay: 6
-  until: cluster_health.rc == 0
+- import_tasks: verify_cluster_health.yml
 
 - name: Check for old etcd service files
   stat:
@@ -54,9 +49,4 @@
 - set_fact:
     r_etcd_common_etcd_runtime: static_pod
 
-- name: Verify cluster is healthy
-  command: "{{ etcdctlv2 }} cluster-health"
-  register: etcdctl
-  until: etcdctl.rc == 0 and 'stopped' not in etcdctl.stderr
-  retries: 30
-  delay: 10
+- import_tasks: verify_cluster_health.yml

@@ -1,5 +1,5 @@
 ---
-- name: Configure etcd
+- name: Check for etcd stand-alone hosts on atomic
   hosts: oo_etcd_to_config
   any_errors_fatal: true
   tasks:
@@ -11,6 +11,9 @@
     - openshift_is_atomic | bool
     - not inventory_hostname in groups['oo_masters']
 
+- name: Set etcd facts for all hosts
+  hosts: oo_etcd_to_config:oo_new_etcd_to_config
+  tasks:
   - import_role:
       name: etcd
       tasks_from: set_facts.yml
@@ -19,24 +22,31 @@
   hosts: oo_new_etcd_to_config
   serial: 1
   any_errors_fatal: true
-  pre_tasks:
+  tasks:
   - import_role:
       name: etcd
       tasks_from: add_new_member.yml
+    vars:
+      etcd_peer: "{{ hostvars[etcd_ca_host].etcd_ip }}"
+
   - import_role:
       name: etcd
       tasks_from: server_certificates.yml
     vars:
       etcd_peers: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
       etcd_certificates_etcd_hosts: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
-  tasks:
+
   - import_role:
       name: os_firewall
     when: etcd_add_check.rc == 0
 
+  # Setup etcd as a static pod if collocated with a master
   - import_role:
       name: etcd
-    when: etcd_add_check.rc == 0
+      tasks_from: static.yml
+    when:
+    - etcd_add_check.rc == 0
+    - inventory_hostname in groups['oo_masters']
     vars:
       etcd_peers: "{{ groups.oo_etcd_to_config | union(groups.oo_new_etcd_to_config)| default([], true) }}"
       etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
@@ -44,24 +54,27 @@
       etcd_initial_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
       etcd_ca_setup: False
 
-  # etcd_hostname fact is set in add_new_member.yml called above.
-  - name: Verify cluster is stable
-    command: >
-      {{ r_etcd_common_etcdctl_command }}
-                       --cert-file {{ etcd_peer_cert_file }}
-                       --key-file {{ etcd_peer_key_file }}
-                       --ca-file {{ etcd_peer_ca_file }}
-                       -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_hostname }}:{{ etcd_client_port }}
-                       cluster-health
-    register: scaleup_health
-    retries: 3
-    delay: 30
-    until: scaleup_health.rc == 0
+  - import_role:
+      name: etcd
+      tasks_from: rpm.yml
+    when:
+    - etcd_add_check.rc == 0
+    - not inventory_hostname in groups['oo_masters']
+    vars:
+      etcd_peers: "{{ groups.oo_etcd_to_config | union(groups.oo_new_etcd_to_config)| default([], true) }}"
+      etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+      etcd_initial_cluster_state: "existing"
+      etcd_initial_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
+      etcd_ca_setup: False
+
+  - import_role:
+      name: etcd
+      tasks_from: verify_cluster_health.yml
 
 - name: Update master etcd client urls
   hosts: oo_masters_to_config
   serial: 1
-  pre_tasks:
+  tasks:
   - set_fact:
       openshift_master_etcd_hosts: "{{ hostvars
                                        | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config'] | default([]) ))
@@ -78,7 +91,6 @@
     vars:
       l_use_ssl: "{{ openshift_master_etcd_use_ssl | default(True) | bool}}"
 
-  post_tasks:
   - import_role:
       name: openshift_control_plane
       tasks_from: update_etcd_client_urls.yml

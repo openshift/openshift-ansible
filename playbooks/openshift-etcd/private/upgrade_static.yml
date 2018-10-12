@@ -6,6 +6,4 @@
   - import_role:
       name: etcd
       tasks_from: upgrade_static.yml
-    vars:
-      etcd_peer: "{{ openshift.common.hostname }}"
     when: inventory_hostname in groups['oo_masters']
