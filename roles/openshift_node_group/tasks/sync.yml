@@ -94,7 +94,7 @@
         | map(attribute='metadata.annotations') | map('list') | flatten
         | select('match', 'node.openshift.io/md5sum') | list | length ==
       node_status.results.results[0]['items'] | length
-  retries: 60
+  retries: 180
   delay: 10
 
 # Sync DS may have restarted masters
