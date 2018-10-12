@@ -230,4 +230,3 @@ openshift_node_group_edits_crio:
       - "10m"
 
 openshift_master_manage_htpasswd: True
-l_openshift_upgrade_in_progress: False
