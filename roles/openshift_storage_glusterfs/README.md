@@ -63,7 +63,7 @@ their configuration as GlusterFS nodes:
 | Name               | Default value             | Description                             |
 |--------------------|---------------------------|-----------------------------------------|
 | glusterfs_cluster  | 1                         | The ID of the cluster this node should belong to. This is useful when a single heketi service is expected to manage multiple distinct clusters. **NOTE:** For natively-hosted clusters, all pods will be in the same OpenShift namespace
-| glusterfs_hostname | openshift.node.nodename   | A hostname (or IP address) that will be used for internal GlusterFS communication
+| glusterfs_hostname | l_kubelet_node_name  | A hostname (or IP address) that will be used for internal GlusterFS communication
 | glusterfs_ip       | openshift.common.ip       | An IP address that will be used by pods to communicate with the GlusterFS node. **NOTE:** Required for external GlusterFS nodes
 | glusterfs_zone     | 1                         | A zone number for the node. Zones are used within the cluster for determining how to distribute the bricks of GlusterFS volumes. heketi will try to spread each volumes' bricks as evenly as possible across all zones
 

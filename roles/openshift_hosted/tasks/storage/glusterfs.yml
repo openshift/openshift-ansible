@@ -35,7 +35,7 @@
   mount:
     state: mounted
     fstype: glusterfs
-    src: "{% if 'glusterfs_registry' in groups and groups['glusterfs_registry'] | length > 0  %}{% set node = groups.glusterfs_registry[0] %}{% elif 'glusterfs' in groups and groups['glusterfs'] | length > 0 %}{% set node = groups.glusterfs[0] %}{% endif %}{% if openshift_hosted_registry_storage_glusterfs_ips is defined and openshift_hosted_registry_storage_glusterfs_ips|length > 0 %}{{ openshift_hosted_registry_storage_glusterfs_ips[0] }}{% elif 'glusterfs_hostname' in hostvars[node] %}{{ hostvars[node].glusterfs_hostname }}{% elif 'openshift' in hostvars[node] %}{{ hostvars[node].openshift.node.nodename }}{% else %}{{ node }}{% endif %}:/{{ openshift_hosted_registry_storage_glusterfs_path }}"
+    src: "{% if 'glusterfs_registry' in groups and groups['glusterfs_registry'] | length > 0  %}{% set node = groups.glusterfs_registry[0] %}{% elif 'glusterfs' in groups and groups['glusterfs'] | length > 0 %}{% set node = groups.glusterfs[0] %}{% endif %}{% if openshift_hosted_registry_storage_glusterfs_ips is defined and openshift_hosted_registry_storage_glusterfs_ips|length > 0 %}{{ openshift_hosted_registry_storage_glusterfs_ips[0] }}{% elif 'glusterfs_hostname' in hostvars[node] %}{{ hostvars[node].glusterfs_hostname }}{% elif 'openshift' in hostvars[node] %}{{ hostvars[node].l_kubelet_node_name }}{% else %}{{ node }}{% endif %}:/{{ openshift_hosted_registry_storage_glusterfs_path }}"
     name: "{{ mktemp.stdout }}"
 
 - name: Set registry volume permissions

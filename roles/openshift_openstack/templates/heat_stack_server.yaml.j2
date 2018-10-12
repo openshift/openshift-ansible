@@ -242,7 +242,7 @@ resources:
         sub-host-type:    { get_param: subtype }
         openshift_node_group_name: { get_param: openshift_node_group_name }
 {% if openshift_openstack_dns_nameservers %}
-        openshift_hostname: { get_param: name }
+        openshift_kubelet_name_override: { get_param: name }
 {% endif %}
       scheduler_hints: { get_param: scheduler_hints }
 

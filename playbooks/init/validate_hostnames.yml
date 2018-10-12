@@ -10,19 +10,20 @@
     changed_when: false
     failed_when: false
 
-  - name: Validate openshift_hostname when defined
+  - name: Validate openshift_kubelet_name_override when defined
     fail:
       msg: >
         The hostname {{ openshift.common.hostname }} for {{ ansible_nodename }}
         doesn't resolve to an IP address owned by this host. Please set
-        openshift_hostname variable to a hostname that when resolved on the host
+        openshift_kubelet_name_override variable to a hostname that when resolved on the host
         in question resolves to an IP address matching an interface on this host.
         This will ensure proper functionality of OpenShift networking features.
-        Inventory setting: openshift_hostname={{ openshift_hostname | default ('undefined') }}
+        Inventory setting: openshift_kubelet_name_override={{ openshift_kubelet_name_override | default ('undefined') }}
         This check can be overridden by setting openshift_hostname_check=false in
         the inventory.
         See https://docs.openshift.org/latest/install_config/install/advanced_install.html#configuring-host-variables
     when:
+    - openshift_kubelet_name_override is defined
     - lookupip.stdout != '127.0.0.1'
     - lookupip.stdout not in ansible_all_ipv4_addresses
     - openshift_hostname_check | default(true) | bool
