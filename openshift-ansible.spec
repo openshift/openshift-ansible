@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.19.0%{?dist}
+Release:        0.20.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Oct 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.20.0
+- Require ansible 2.6.5 (vrutkovs@redhat.com)
+- Dockerfile: install ansible 2.6 and remove epel-testing (vrutkovs@redhat.com)
+- Dockerfile: install ansible 2.6 (vrutkovs@redhat.com)
+
 * Fri Oct 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.19.0
 - README: ansible 2.7 is not supported (vrutkovs@redhat.com)
 - Modify sync pod to check for KUBELET_HOSTNAME_OVERRIDE (mgugino@redhat.com)
