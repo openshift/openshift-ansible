@@ -181,8 +181,10 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
-      nodeSelector:
-        projectcalico.org/ds-ready: "true"
+{% if calico_image_credentials is defined %}
+      imagePullSecrets:
+        - name: calico-pull-secret
+{% endif %}
       hostNetwork: true
       tolerations:
         # Make sure calico/node gets scheduled on all nodes.
@@ -290,7 +292,7 @@ spec:
             # chosen from this range. Changing this value after installation will have
             # no effect. This should fall within '--cluster-cidr'.
             - name: CALICO_IPV4POOL_CIDR
-              value: "{{ openshift.master.sdn_cluster_network_cidr }}"
+              value: "{{ openshift_cluster_network_cidr }}"
             - name: CALICO_IPV4POOL_IPIP
               value: "{{ calico_ipv4pool_ipip }}"
             # Disable IPv6 on Kubernetes.
@@ -339,13 +341,24 @@ spec:
             httpGet:
               path: /liveness
               port: 9099
+{% if calico_binary_checks %}
+              host: localhost
+{% endif %}
             periodSeconds: 10
             initialDelaySeconds: 10
             failureThreshold: 6
           readinessProbe:
+{% if calico_binary_checks %}
+            exec:
+              command:
+              - /bin/calico-node
+              - -bird-ready
+              - -felix-ready
+{% else %}
             httpGet:
               path: /readiness
               port: 9099
+{% endif %}
             periodSeconds: 10
           volumeMounts:
             - mountPath: /lib/modules

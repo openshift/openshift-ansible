@@ -13,6 +13,4 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- role: lib_utils
 - role: openshift_facts
-- role: kube_proxy_and_dns
