@@ -21,7 +21,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
-        image: {{ openshift_node_problem_detector_image_prefix }}node-problem-detector:{{ openshift_node_problem_detector_image_version }}
+        image: {{ openshift_node_problem_detector_image }}
         imagePullPolicy: {{ openshift_node_problem_detector_image_pull_policy }}
         name: {{ openshift_node_problem_detector_daemonset_name }}
         resources: {}
