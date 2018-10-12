@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.18.0%{?dist}
+Release:        0.19.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Oct 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.19.0
+- README: ansible 2.7 is not supported (vrutkovs@redhat.com)
+- Modify sync pod to check for KUBELET_HOSTNAME_OVERRIDE (mgugino@redhat.com)
+- Configure Ansible service broker secrets (simon.ruegg@vshn.ch)
+
 * Wed Oct 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.18.0
 - Update main.yml (sgaikwad@redhat.com)
 - Openshift autoheal fails to pull images even if oreg_url is specified
