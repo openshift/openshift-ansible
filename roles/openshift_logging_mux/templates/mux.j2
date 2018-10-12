@@ -128,6 +128,10 @@ spec:
               resource: limits.memory
         - name: "FILE_BUFFER_LIMIT"
           value: "{{ openshift_logging_mux_file_buffer_limit | default('2Gi') }}"
+{% if openshift_logging_install_eventrouter is defined and (openshift_logging_install_eventrouter | bool) %}
+        - name: "TRANSFORM_EVENTS"
+          value: "true"
+{% endif %}
 
 {% if openshift_logging_mux_remote_syslog is defined and openshift_logging_mux_remote_syslog %}
         - name: USE_REMOTE_SYSLOG
