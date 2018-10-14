@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.169
+Version:        3.5.170
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -276,6 +276,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.5.170-1
+- Fix test compatibility with OpenSSL 1.1.0 (pierre-
+  louis.bonicoli@libregerbil.fr)
+- Add missing mock for locate_oc_binary method (pierre-
+  louis.bonicoli@libregerbil.fr)
+- Bump pyOpenSSL to 17.5.0 (rteague@redhat.com)
+- Bug 1544783 - Specify all packages during upgrade (rteague@redhat.com)
+
 * Fri Jun 08 2018 Justin Pierce <jupierce@redhat.com> 3.5.169-1
 - 
 
