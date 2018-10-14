@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.65
+Version:        3.7.68
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.68-1
+- Override ovsdb-server systemd unit timeout when upgrading. (pdd@redhat.com)
+
 * Wed Oct 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.65-1
 - Ensure master facts are set during node scale-up (rteague@redhat.com)
 - Automatic profile setting for tuned 2.9 (jmencak@redhat.com)
