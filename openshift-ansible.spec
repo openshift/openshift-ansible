@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.22
+Version:        3.11.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,51 @@ fi
 
 
 %changelog
+* Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.23-1
+- typo correction (i.am.emilio@gmail.com)
+- no longer creates cns security group when number of cns is 0
+  (i.am.emilio@gmail.com)
+- Update main.yml (sgaikwad@redhat.com)
+- Openshift autoheal fails to pull images even if oreg_url is specified
+  (sgaikwad@redhat.com)
+- Require ansible 2.6.5 (vrutkovs@redhat.com)
+- Dockerfile: install ansible 2.6 and remove epel-testing (vrutkovs@redhat.com)
+- Dockerfile: install ansible 2.6 (vrutkovs@redhat.com)
+- Modify sync pod to check for KUBELET_HOSTNAME_OVERRIDE (mgugino@redhat.com)
+- README: ansible 2.7 is not supported (vrutkovs@redhat.com)
+- Replace openshift.node.nodename with l_kubelet_node_name (mgugino@redhat.com)
+- Add missing option in Openstack documentation and sample file.
+  (juriarte@redhat.com)
+- Increase number of retries in sync DS (vrutkovs@redhat.com)
+- Add support for only installing and running the schema installer job
+  (ruben.vp8510@gmail.com)
+- Fail on openshift_hostname defined; add openshift_kubelet_name_override
+  (mgugino@redhat.com)
+- Atomic upgrade: ensure /etc/origin/kubelet-plugins exists
+  (vrutkovs@redhat.com)
+- Node problem detector always pull images from registry.redhat.io for
+  openshift-enterprise (sgaikwad@redhat.com)
+- bug 1636248. Delete logging cluster service if clusterIP != None
+  (jcantril@redhat.com)
+- Remove unused registry migration task (vrutkovs@redhat.com)
+- roles/cluster_monitoring: minor wording improvement (pgier@redhat.com)
+- Pass admin kubeconfig (sdodson@redhat.com)
+- Replace 'command chmod' with 'file mode=...' (vrutkovs@redhat.com)
+- Add CI scripts in hack/ (vrutkovs@redhat.com)
+- Fix etcd scaleup on standalone hosts (rteague@redhat.com)
+- Update installer_checkpoint plugin to handle empty stats (rteague@redhat.com)
+- Fix etcd scaleup playbook (rteague@redhat.com)
+- Bug 1554293 - logging-eventrouter event not formatted correctly in
+  Elasticsearch when using MUX (nhosoi@redhat.com)
+- Refactored Calico and updated playbooks to reflect self-hosted Calico
+  installs only (mleung975@gmail.com)
+- Move the cluster-cidr assignment to the correct configs (mleung975@gmail.com)
+- Update main.yml (sheldyakov@tutu.ru)
+- Add calico-pull-secret (mleung975@gmail.com)
+- Run the kube-proxy once per cluster for Calico (mleung975@gmail.com)
+- Add proper liveness and readiness checks for Calico 3.2 (mleung975@gmail.com)
+- Add separate Calico etcd (mleung975@gmail.com)
+
 * Wed Oct 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.22-1
 - unmount just before removing (rmeggins@redhat.com)
 - GlusterFS uninstall: Only unlabel configured nodes (jarrpa@redhat.com)
