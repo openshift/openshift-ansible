@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.46
+Version:        3.9.47
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.47-1
+- Override ovsdb-server systemd unit timeout when upgrading. (pdd@redhat.com)
+- Override ovsdb-server systemd unit timeout when upgrading. (pdd@redhat.com)
+- Bug 1554293 - logging-eventrouter event not formatted correctly in
+  Elasticsearch when using MUX (nhosoi@redhat.com)
+- Add 3 retries around all image stream create/replace (sdodson@redhat.com)
+- hosts.example: document openshift_hosted_infra_selector and TSB selector
+  (vrutkovs@redhat.com)
+
 * Wed Oct 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.46-1
 - Update the role to use the correct oc path (farandac@redhat.com)
 - Retry storage migrations (sdodson@redhat.com)
