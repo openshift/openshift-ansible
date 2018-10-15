@@ -848,8 +848,6 @@ def get_openshift_version(facts):
             version: the current openshift version
     """
     version = None
-    image_type_dict = {'origin': 'openshift/origin',
-                       'openshift-enterprise': 'openshift3/ose'}
 
     # No need to run this method repeatedly on a system if we already know the
     # version
@@ -866,7 +864,12 @@ def get_openshift_version(facts):
         image_tag = get_container_openshift_version(deployment_type)
         if image_tag is None:
             return version
-        cli_image = image_type_dict[deployment_type] + ":" + image_tag
+
+        openshift_cli_image = facts['common'].get('openshift_cli_image')
+        if not openshift_cli_image:
+            return version
+
+        cli_image = openshift_cli_image + ":" + image_tag
         _, output, _ = module.run_command(['docker', 'run', '--rm', cli_image, 'version'])  # noqa: F405
         version = parse_openshift_version(output)
 
