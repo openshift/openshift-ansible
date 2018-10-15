@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.53
+Version:        3.10.54
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,22 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Oct 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.54-1
+- Dockerfile: install ansible 2.6 (vrutkovs@redhat.com)
+- Modify sync pod to check for KUBELET_HOSTNAME_OVERRIDE (mgugino@redhat.com)
+- Replace openshift.node.nodename with l_kubelet_node_name (mgugino@redhat.com)
+- Fail on openshift_hostname defined; add openshift_kubelet_name_override
+  (mgugino@redhat.com)
+- Atomic upgrade: ensure /etc/origin/kubelet-plugins exists
+  (vrutkovs@redhat.com)
+- Dockerfile: install ansible 2.4 (vrutkovs@redhat.com)
+- Place openshift_kubelet_name_override file (mgugino@redhat.com)
+- Add missing option in Openstack documentation and sample file.
+  (juriarte@redhat.com)
+- unmount just before removing (rmeggins@redhat.com)
+- Update Fuse templates with 7.1 release (antonin@stefanutti.fr)
+- test/ci: ensure AWS instances have public hostname (vrutkovs@redhat.com)
+
 * Fri Oct 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.53-1
 - Move etcdctlv2 fact setting to its own include (rteague@redhat.com)
 - Remove exclude-bootstrapped logic (mgugino@redhat.com)
