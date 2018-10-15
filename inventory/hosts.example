@@ -390,6 +390,10 @@ debug_level=2
 # glusterfs plugin dependencies will be installed, if available.
 #osn_storage_plugin_deps=['ceph','glusterfs','iscsi']
 
+# Configure datastore layer encryption, the encryption key can be gererated
+# with the following command: 'head -c 32 /dev/urandom | base64'
+#openshift_encryption_config="{'kind': 'EncryptionConfig','apiVersion': 'v1','resources': [{'resources': ['secrets'],'providers': [{'aescbc': {'keys': [{'name': 'key1','secret': 'xxxxxxxx'}]}},{'identity': {}}]}]}"
+#
 # OpenShift Router Options
 #
 # An OpenShift router will be created during install if there are

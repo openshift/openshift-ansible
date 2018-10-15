@@ -66,6 +66,12 @@
     dest: "{{ openshift_master_scheduler_conf }}"
     backup: true
 
+- name: Generate encryption config
+  copy:
+    content: "{{ openshift_encryption_config }}"
+    dest: "{{ openshift_encryption_config_file }}"
+  when: openshift_encryption_config is defined
+
 - import_tasks: htpass_provider.yml
 
 - name: Create the ldap ca file if needed
