@@ -1247,20 +1247,6 @@ def set_buildoverrides_facts(facts):
     return facts
 
 
-# pylint: disable=too-many-statements
-def set_container_facts_if_unset(facts):
-    """ Set containerized facts.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated containerization
-            facts
-    """
-
-    return facts
-
-
 def pop_obsolete_local_facts(local_facts):
     """Remove unused keys from local_facts"""
     keys_to_remove = {
@@ -1382,7 +1368,6 @@ class OpenShiftFacts(object):
         facts = set_identity_providers_if_unset(facts)
         facts = set_deployment_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
-        facts = set_container_facts_if_unset(facts)
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
