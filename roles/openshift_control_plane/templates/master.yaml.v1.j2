@@ -73,6 +73,10 @@ kubeletClientInfo:
 kubernetesMasterConfig:
   apiServerArguments:
     {{ openshift.master.api_server_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
+{% if openshift_encryption_config is defined %}
+    experimental-encryption-provider-config:
+    - {{ openshift_encryption_config_file }}
+{% endif %}
     storage-backend:
     - etcd3
     storage-media-type:
