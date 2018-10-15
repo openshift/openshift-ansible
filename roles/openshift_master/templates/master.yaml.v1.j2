@@ -100,6 +100,10 @@ kubeletClientInfo:
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
   apiServerArguments: {{ openshift.master.api_server_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
+{% if openshift_encryption_config is defined %}
+    experimental-encryption-provider-config:
+    - {{ openshift_encryption_config_file }}
+{% endif %}
 {% if r_openshift_master_etcd3_storage or ( r_openshift_master_clean_install and openshift.common.version_gte_3_6 ) %}
     storage-backend:
     - etcd3

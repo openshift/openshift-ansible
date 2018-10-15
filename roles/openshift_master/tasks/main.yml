@@ -71,6 +71,15 @@
   - restart master api
   - restart master controllers
 
+- name: Generate encryption config
+  copy:
+    content: "{{ openshift_encryption_config }}"
+    dest: "{{ openshift_encryption_config_file }}"
+  when: openshift_encryption_config is defined
+  notify:
+  - restart master api
+  - restart master controllers
+
 - name: Install httpd-tools if needed
   package: name=httpd-tools state=present
   when:
