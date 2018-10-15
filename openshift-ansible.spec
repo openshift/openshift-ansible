@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.54
+Version:        3.10.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Oct 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.55-1
+- Validate nodeName during upgrade (mgugino@redhat.com)
+
 * Mon Oct 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.54-1
 - Dockerfile: install ansible 2.6 (vrutkovs@redhat.com)
 - Modify sync pod to check for KUBELET_HOSTNAME_OVERRIDE (mgugino@redhat.com)
