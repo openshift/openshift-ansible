@@ -7,8 +7,7 @@
   register: etcd_image_exists
 
 - name: Pre-pull etcd image
-  docker_image:
-    name: "{{ etcd_image }}"
+  command: "{{ openshift_container_cli }} pull {{ etcd_image }}"
   environment:
     NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
   when: etcd_image_exists.stdout_lines == []
