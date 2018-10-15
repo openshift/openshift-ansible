@@ -3,53 +3,55 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "REST example using CXF in Karaf container. This quickstart demonstrates how to create a RESTful (JAX-RS) web service using CXF and expose it through the OSGi HTTP Service",
+      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel log with Karaf",
+      "openshift.io/provider-display-name": "Red Hat, Inc.",
+      "description": "A simple Camel route in Karaf container. This quickstart shows a simple Apache Camel application that logs a message to the server log every 5th second.",
       "tags": "quickstart,java,karaf,fis,jboss-fuse",
-      "iconClass": "icon-jboss",
-      "version": "2.0"
+      "iconClass": "icon-rh-integration",
+      "version": "1.1"
     },
-    "name": "s2i-karaf2-cxf-rest"
+    "name": "s2i-fuse71-karaf-camel-log"
   },
   "labels": {
-    "template": "s2i-karaf2-cxf-rest"
+    "template": "s2i-fuse71-karaf-camel-log"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-karaf2-cxf-rest",
+      "value": "s2i-fuse71-karaf-camel-log",
       "description": "The name assigned to the application."
     },
     {
       "name": "GIT_REPO",
       "displayName": "Git Repository URL",
-      "value": "https://github.com/fabric8-quickstarts/karaf2-cxf-rest.git",
+      "value": "https://github.com/fabric8-quickstarts/karaf-camel-log.git",
       "required": true,
       "description": "The URL of the repository with your application source code."
     },
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf2-cxf-rest-1.0.0.redhat-000022",
+      "value": "karaf-camel-log-1.0.0.fuse-710018-redhat-00002",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
       "name": "SERVICE_NAME",
       "displayName": "Service Name",
-      "value": "s2i-karaf2-cxf-rest",
+      "value": "s2i-fuse70-karaf-camel-log",
       "description": "Exposed Service name."
     },
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "2.0",
+      "value": "1.1",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000022",
+      "value": "1.0.0.fuse-710018-redhat-00002",
       "description": "The application version."
     },
     {
@@ -76,16 +78,23 @@
       "description": "Namespace in which the Fuse ImageStreams are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project."
     },
     {
+      "name": "BUILD_SECRET",
+      "displayName": "Git Build Secret",
+      "generate": "expression",
+      "description": "The secret needed to trigger a build.",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
       "name": "CPU_REQUEST",
       "displayName": "CPU request",
       "value": "0.2",
       "required": true,
-      "description": "The amount of CPU to requests."
+      "description": "The amount of CPU to request."
     },
     {
       "name": "MEMORY_REQUEST",
       "displayName": "Memory request",
-      "value": "1.5G",
+      "value": "128Mi",
       "required": true,
       "description": "The amount of memory required for the container to run."
     },
@@ -99,68 +108,26 @@
     {
       "name": "MEMORY_LIMIT",
       "displayName": "Memory limit",
-      "value": "2G",
+      "value": "512Mi",
       "required": true,
       "description": "The amount of memory the container is limited to use."
+    },
+    {
+      "name": "BUILD_MEMORY_REQUEST",
+      "displayName": "Build Memory request",
+      "value": "0.7G",
+      "required": true,
+      "description": "The amount of memory to request for builds."
+    },
+    {
+      "name": "BUILD_MEMORY_LIMIT",
+      "displayName": "Build Memory limit",
+      "value": "0.8G",
+      "required": true,
+      "description": "The amount of memory the build container is limited to use."
     }
   ],
   "objects": [
-    {
-      "apiVersion": "v1",
-      "kind": "Route",
-      "metadata": {
-        "labels": {
-          "container": "java",
-          "component": "${APP_NAME}",
-          "provider": "s2i",
-          "project": "${APP_NAME}",
-          "version": "${APP_VERSION}",
-          "group": "quickstarts"
-        },
-        "name": "${SERVICE_NAME}-route"
-      },
-      "spec": {
-        "to": {
-          "kind": "Service",
-          "name": "${SERVICE_NAME}"
-        }
-      }
-    },
-    {
-      "apiVersion": "v1",
-      "kind": "Service",
-      "metadata": {
-        "annotations": {
-        },
-        "labels": {
-          "container": "karaf",
-          "component": "${APP_NAME}",
-          "provider": "s2i",
-          "project": "${APP_NAME}",
-          "version": "${APP_VERSION}",
-          "group": "quickstarts"
-        },
-        "name": "${SERVICE_NAME}"
-      },
-      "spec": {
-        "clusterIP": "None",
-        "deprecatedPublicIPs": [],
-        "ports": [
-          {
-            "port": 9412,
-            "protocol": "TCP",
-            "targetPort": 8181
-          }
-        ],
-        "selector": {
-          "container": "karaf",
-          "project": "${APP_NAME}",
-          "component": "${APP_NAME}",
-          "provider": "s2i",
-          "group": "quickstarts"
-        }
-      }
-    },
     {
       "kind": "ImageStream",
       "apiVersion": "v1",
@@ -171,7 +138,7 @@
           "component": "${APP_NAME}",
           "container": "karaf",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
@@ -191,7 +158,7 @@
           "component": "${APP_NAME}",
           "container": "karaf",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
@@ -231,7 +198,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "${IMAGE_STREAM_NAMESPACE}",
-              "name": "fis-karaf-openshift:${BUILDER_VERSION}"
+              "name": "fuse7-karaf-openshift:${BUILDER_VERSION}"
             },
             "forcePull": true,
             "incremental": true,
@@ -261,7 +228,14 @@
             "name": "${APP_NAME}:latest"
           }
         },
-        "resources": {}
+        "resources": {
+          "requests": {
+            "memory": "${BUILD_MEMORY_REQUEST}"
+          },
+          "limits": {
+            "memory": "${BUILD_MEMORY_LIMIT}"
+          }
+        }
       },
       "status": {
         "lastVersion": 0
@@ -277,15 +251,12 @@
           "component": "${APP_NAME}",
           "container": "karaf",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
       },
       "spec": {
-        "strategy": {
-          "resources": {}
-        },
         "triggers": [
           {
             "type": "ConfigChange"
@@ -310,7 +281,7 @@
           "container": "karaf",
           "deploymentconfig": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         },
@@ -322,7 +293,7 @@
               "container": "karaf",
               "deploymentconfig": "${APP_NAME}",
               "group": "quickstarts",
-              "project": "${APP_NAME}",
+              "app": "${APP_NAME}",
               "provider": "s2i",
               "version": "${APP_VERSION}"
             }
