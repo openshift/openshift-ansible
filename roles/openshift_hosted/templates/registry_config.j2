@@ -56,6 +56,9 @@ storage:
 {%   if openshift_hosted_registry_storage_swift_domainid is defined %}
     domainid: {{ openshift_hosted_registry_storage_swift_domainid }}
 {%   endif -%}
+{%   if openshift_hosted_registry_storage_swift_insecureskipverify is defined %}
+    insecureskipverify: {{ openshift_hosted_registry_storage_swift_insecureskipverify }}
+{%   endif -%}
 {% elif openshift_hosted_registry_storage_provider | default('') == 'gcs' %}
   gcs:
     bucket: {{ openshift_hosted_registry_storage_gcs_bucket }}
