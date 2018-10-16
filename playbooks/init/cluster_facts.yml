@@ -3,6 +3,7 @@
   # l_init_fact_hosts is passed in via play during control-plane-only
   # upgrades and scale-up plays; otherwise oo_all_hosts is used.
   hosts: "{{ l_init_fact_hosts | default('oo_all_hosts') }}"
+  any_errors_fatal: yes
   roles:
   - role: openshift_facts
   - role: lib_utils
@@ -82,7 +83,7 @@
     - name: Fail when nodeName is wrong
       fail:
         msg: >
-          nodeName mismatch from node's config; existing name in config: {{ l_nodeconfig_name }};
+          nodeName mismatch from node's config; existing name in config: {{ l_nodeconfig_nodename }};
           discovered nodename from openshift_facts: {{ l_kubelet_node_name }}
       vars:
         l_nodeconfig_yaml: "{{ node_config_slurp.content | b64decode| from_yaml }}"
