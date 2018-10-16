@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.23
+Version:        3.11.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,12 @@ fi
 
 
 %changelog
+* Tue Oct 16 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.24-1
+- Add ansible 2.6 repo (vrutkovs@redhat.com)
+- openshift-prometheus: remove deprecated prometheus stack install
+  (pgier@redhat.com)
+- Add 3 retries around all image stream create/replace (sdodson@redhat.com)
+
 * Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.23-1
 - typo correction (i.am.emilio@gmail.com)
 - no longer creates cns security group when number of cns is 0
