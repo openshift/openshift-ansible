@@ -129,8 +129,9 @@
   yedit:
     src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: "kubernetesMasterConfig.apiServerArguments.runtime-config"
-    value: "{{ runtime_config.result | join(',') | regex_replace('(?:,)*apis/settings\\.k8s\\.io/v1alpha1=true','') }}"
-  when: runtime_config.result
+    value: "{{ r_c | difference(['apis/settings.k8s.io/v1alpha1=true']) }}"
+  vars:
+    r_c: "{{ runtime_config.result | default([]) }}"
 
 # The master package gets updated due to the dependencies of the atomic-openshift
 # package when upgrading from 3.9 to 3.10.
