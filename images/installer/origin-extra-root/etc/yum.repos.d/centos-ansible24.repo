@@ -1,0 +1,6 @@
+
+[centos-ansible24-release]
+name=CentOS Ansible 2.4 release repo
+baseurl=https://cbs.centos.org/repos/configmanagement7-ansible-24-release/x86_64/os/
+enabled=1
+gpgcheck=0
