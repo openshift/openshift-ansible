@@ -6,8 +6,9 @@ wait_for_ip: true
 openshift_ovirt_cluster: Default
 template_name: openshift_node
 
-# User must provide the dns zone
+# User must provide those vars:
 openshift_ovirt_dns_zone:
+openshift_ovirt_ssh_key:
 
 # oVirt VM Profiles
 openshift_ovirt_vm_profile:
