@@ -8,7 +8,7 @@
 - fail:
     msg: "The openshift_ovirt_dns_zone variable is required."
   when:
-  - openshift_ovirt_dns_zone is not defined
+  - openshift_ovirt_dns_zone is none
 - name: Create virtual machine list fact
   set_fact:
     vms: >-
