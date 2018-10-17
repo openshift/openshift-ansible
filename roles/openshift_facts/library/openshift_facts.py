@@ -848,8 +848,6 @@ def get_openshift_version(facts):
             version: the current openshift version
     """
     version = None
-    image_type_dict = {'origin': 'openshift/origin',
-                       'openshift-enterprise': 'openshift3/ose'}
 
     # No need to run this method repeatedly on a system if we already know the
     # version
@@ -866,7 +864,12 @@ def get_openshift_version(facts):
         image_tag = get_container_openshift_version(deployment_type)
         if image_tag is None:
             return version
-        cli_image = image_type_dict[deployment_type] + ":" + image_tag
+
+        openshift_cli_image = facts['common'].get('openshift_cli_image')
+        if not openshift_cli_image:
+            return version
+
+        cli_image = openshift_cli_image + ":" + image_tag
         _, output, _ = module.run_command(['docker', 'run', '--rm', cli_image, 'version'])  # noqa: F405
         version = parse_openshift_version(output)
 
@@ -1244,20 +1247,6 @@ def set_buildoverrides_facts(facts):
     return facts
 
 
-# pylint: disable=too-many-statements
-def set_container_facts_if_unset(facts):
-    """ Set containerized facts.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated containerization
-            facts
-    """
-
-    return facts
-
-
 def pop_obsolete_local_facts(local_facts):
     """Remove unused keys from local_facts"""
     keys_to_remove = {
@@ -1379,7 +1368,6 @@ class OpenShiftFacts(object):
         facts = set_identity_providers_if_unset(facts)
         facts = set_deployment_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
-        facts = set_container_facts_if_unset(facts)
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)

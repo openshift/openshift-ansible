@@ -21,6 +21,7 @@
         https_proxy: "{{ openshift_https_proxy | default(None) }}"
         no_proxy: "{{ openshift_no_proxy | default(None) }}"
         generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
+        openshift_cli_image: "{{ openshift_cli_image }}"
 
   - name: Set fact of no_proxy_internal_hostnames
     openshift_facts:
