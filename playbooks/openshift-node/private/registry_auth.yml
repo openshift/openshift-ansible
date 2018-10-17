@@ -4,6 +4,16 @@
 - name: Update registry authentication credentials
   hosts: oo_nodes_to_config
   tasks:
+  - name: Install registry_auth dependencies
+    package:
+      name: "{{ pkg_list | join(',') }}"
+      state: present
+    register: result
+    until: result is succeeded
+    vars:
+      pkg_list:
+      - atomic
+      - skopeo
   - import_role:
       name: openshift_node
       tasks_from: registry_auth.yml
