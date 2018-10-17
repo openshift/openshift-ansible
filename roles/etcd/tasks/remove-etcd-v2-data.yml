@@ -10,12 +10,17 @@
   - name: Remove etcdv2 kubernetes data
     command: "{{ etcdctlv2 }} rm -r /kubernetes.io"
     register: etcdv2_remove_k8s
-    failed_when: ('Key not found' not in etcdv2_remove_k8s.stderr)
+    when: ('Key not found' not in etcdv2_migrated_status.stderr)
+
+  - name: Get openshift data
+    command: "{{ etcdctlv2 }} get /openshift.io"
+    register: etcdv2_openshift_data
+    failed_when: ('stdout' not in etcdv2_openshift_data)
 
   - name: Remove etcdv2 openshift data
     command: "{{ etcdctlv2 }} rm -r /openshift.io"
     register: etcdv2_remove_openshift
-    failed_when: ('Key not found' not in etcdv2_remove_openshift.stderr)
+    when: ('Key not found' not in etcdv2_openshift_data.stderr)
 
   - name: Set migrated mark
     command: "{{ etcdctlv2 }} set /kubernetes.io migrated"
