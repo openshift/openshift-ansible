@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.57
+Version:        3.10.58
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,16 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Oct 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.58-1
+- Fix scaleup failure for hostname override (mgugino@redhat.com)
+- Fix hostname warning (mgugino@redhat.com)
+- Ensure raw_hostname used as openshift.node.nodename (mgugino@redhat.com)
+- Add ansible 2.4 repo (vrutkovs@redhat.com)
+- remove unix prefix from crio path (sjenning@redhat.com)
+- Increase number of retries in sync DS (vrutkovs@redhat.com)
+- Add support for only installing and running the schema installer job
+  (ruben.vp8510@gmail.com)
+
 * Mon Oct 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.57-1
 - 
 
