@@ -82,7 +82,7 @@
     - name: Fail when nodeName is wrong
       fail:
         msg: >
-          nodeName mismatch from node's config; existing name in config: {{ l_nodeconfig_name }};
+          nodeName mismatch from node's config; existing name in config: {{ l_nodeconfig_nodename }};
           discovered nodename from openshift_facts: {{ l_kubelet_node_name }}
       vars:
         l_nodeconfig_yaml: "{{ node_config_slurp.content | b64decode| from_yaml }}"
