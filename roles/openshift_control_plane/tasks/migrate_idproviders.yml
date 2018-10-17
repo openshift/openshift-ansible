@@ -16,3 +16,12 @@
   when:
   - openshift_master_existing_idproviders is defined
   - openshift_master_manage_htpasswd
+
+- name: modify providers which need CA to have set
+  yedit:
+    src: /etc/origin/master/master-config.yaml
+    edits:
+    - key: oauthConfig.identityProviders
+      value: "{{ openshift_master_existing_idproviders | lib_utils_mutate_providers_with_ca }}"
+  when:
+  - openshift_master_existing_idproviders is defined
