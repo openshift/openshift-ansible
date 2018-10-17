@@ -3,7 +3,7 @@
 # lib_utils/library/glusterfs_check_containerized.py
 - name: Check for cluster health of glusterfs
   glusterfs_check_containerized:
-    oc_bin: "{{ first_master_client_binary }}"
+    oc_bin: "{{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }}"
     oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
     oc_namespace: "{{ openshift_storage_glusterfs_namespace }}"
     cluster_name: "{{ openshift_storage_glusterfs_name }}"
@@ -20,7 +20,7 @@
 
 - name: Check for cluster health of glusterfs (registry)
   glusterfs_check_containerized:
-    oc_bin: "{{ first_master_client_binary }}"
+    oc_bin: "{{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }}"
     oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
     oc_namespace: "{{ openshift_storage_glusterfs_registry_namespace }}"
     cluster_name: "{{ openshift_storage_glusterfs_registry_name }}"
