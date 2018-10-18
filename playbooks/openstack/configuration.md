@@ -918,6 +918,7 @@ In order to do so, set the following in `inventory/group_vars/OSEv3.yml`:
 * `openshift_hosted_registry_storage_swift_tenantid`: "{{ lookup('env','OS_PROJECT_ID') }}" _# can also specify tenant_
 * `openshift_hosted_registry_storage_swift_domain`: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}" _# optional; can also specifiy domainid_
 * `openshift_hosted_registry_storage_swift_domainid`: "{{ lookup('env','OS_USER_DOMAIN_ID') }}" _# optional; can also specifiy domain_
+* `openshift_hosted_registry_storage_swift_insecureskipverify`: "false" # optional; true to skip TLS verification
 
 Note that the exact environment variable names may vary depending on the contents of
 your OpenStack RC file. If you use Keystone v2, you may not need to set all of these
