@@ -5,7 +5,7 @@
 # OpenShift Ansible
 
 This repository contains [Ansible](https://www.ansible.com/) roles and
-playbooks to install, upgrade, and manage different Openshift environments on an existing computing infrastructure.  For an introduction to openshift [OpenShift](https://www.openshift.com/).
+playbooks to install, upgrade, and manage different Openshift environments on an existing computing infrastructure.  For an introduction to openshift [OpenShift](https://www.openshift.com/) 
 
 ## For ansible or openshift newcomers
 
@@ -16,8 +16,7 @@ If you've used kubernetes before, then openshift-ansible is the OKD equivalent t
 OpenShift ansible can easily 'just work' on a single node, so a "real cluster" isn't necessary for your first installation.  Nevertheless: You need to provide the compute
 instance for ansible to run against.
 
-We clarify 'computing infrastructure' above because openshift ansible does not provision
-infrastructure for you in any manner.  It can run against Bare metal machines, VMWare, GCE, EC2, or any other cloud provided machines (typically provisioned by tools such as terraform, vagrant, cloud formation, etc.).  The only requirement is that you craft a
+We clarify 'computing infrastructure' above because openshift ansible does not provision infrastructure for you in any manner.  It can run against Bare metal machines, VMWare, GCE, EC2, or any other cloud provided machines (typically provisioned by tools such as terraform, vagrant, cloud formation, etc.).  The only requirement is that you craft a
 correct inventory file, and there are example of how to do this in this repository.
 
 ## Choose a Container runtime.
@@ -28,10 +27,7 @@ If using CRIO, then check the `openshift_use_crio` parameter in the inventory/ho
 
 ## Getting the correct version of OKD
 
-When choosing an openshift (now known as OKD) release, ensure that the necessary origin packages
-are available in your distribution's repository.  By default, openshift-ansible
-will not configure extra repositories for testing or staging packages for
-end users.
+When choosing an openshift (i.e. OKD, Origin) release, ensure that the necessary origin packages are available in your distribution's repository.  By default, openshift-ansible will not configure extra repositories for testing or staging packages for end users.
 
 We recommend using a release branch. We maintain stable branches
 corresponding to upstream Origin releases, e.g.: we guarantee an
@@ -102,7 +98,7 @@ Assuming you are on Centos 7 or RHEL, you can simply do:
 ```
 git clone https://github.com/openshift/openshift-ansible
 cd openshift-ansible
-sudo yum install -y ansible docker # You should have this on Centos or RHEL distros
+sudo yum install -y ansible docker # You should have this on Centos or RHEL distros, make sure you pick the right ansible version based on openshit-ansible's existing release.
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/prerequisites.yml
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/deploy_cluster.yml
 ```
