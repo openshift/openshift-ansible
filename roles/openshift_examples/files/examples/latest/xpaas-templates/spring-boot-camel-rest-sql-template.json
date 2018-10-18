@@ -3,22 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
+      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel REST SQL with Spring Boot",
+      "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Spring Boot, Camel REST DSL and MySQL QuickStart. This quickstart demonstrates how to connect a Spring Boot application to a MySQL database and expose a REST API with Camel on OpenShift. In this example we will use two containers, one container to run as a MySQL server, and another as a client to the database, where the Camel routes are running. This quickstart requires the MySQL server to be deployed and started first, one simple way to run a MySQL service is following the documentation of the OpenShift MySQL container image related to the mysql-ephemeral template.",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
-      "iconClass": "icon-jboss",
-      "version": "2.0"
+      "iconClass": "icon-rh-integration",
+      "version": "1.1"
     },
-    "name": "s2i-spring-boot-camel-rest-sql"
+    "name": "s2i-fuse71-spring-boot-camel-rest-sql"
   },
   "labels": {
-    "template": "s2i-spring-boot-camel-rest-sql"
+    "template": "s2i-fuse71-spring-boot-camel-rest-sql"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-spring-boot-camel-rest-sql",
+      "value": "s2i-fuse71-spring-boot-camel-rest-sql",
       "description": "The name assigned to the application."
     },
     {
@@ -31,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-rest-sql-1.0.0.redhat-000067",
+      "value": "spring-boot-camel-rest-sql-1.0.0.fuse-710017-redhat-00002",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -66,13 +68,13 @@
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "2.0",
+      "value": "1.1",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000067",
+      "value": "1.0.0.fuse-710017-redhat-00002",
       "description": "The application version."
     },
     {
@@ -110,7 +112,14 @@
       "displayName": "CPU request",
       "value": "0.2",
       "required": true,
-      "description": "The amount of CPU to requests."
+      "description": "The amount of CPU to request."
+    },
+    {
+      "name": "MEMORY_REQUEST",
+      "displayName": "Memory request",
+      "value": "256Mi",
+      "required": true,
+      "description": "The amount of memory required for the container to run."
     },
     {
       "name": "CPU_LIMIT",
@@ -118,6 +127,27 @@
       "value": "1.0",
       "required": true,
       "description": "The amount of CPU the container is limited to use."
+    },
+    {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory limit",
+      "value": "256Mi",
+      "required": true,
+      "description": "The amount of memory the container is limited to use."
+    },
+    {
+      "name": "BUILD_MEMORY_REQUEST",
+      "displayName": "Build Memory request",
+      "value": "0.7G",
+      "required": true,
+      "description": "The amount of memory to request for builds."
+    },
+    {
+      "name": "BUILD_MEMORY_LIMIT",
+      "displayName": "Build Memory limit",
+      "value": "0.8G",
+      "required": true,
+      "description": "The amount of memory the build container is limited to use."
     }
   ],
   "objects": [
@@ -128,7 +158,7 @@
         "labels": {
           "component": "${APP_NAME}",
           "provider": "s2i",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "version": "${APP_VERSION}",
           "group": "quickstarts"
         },
@@ -150,7 +180,7 @@
         "labels": {
           "component": "${APP_NAME}",
           "provider": "s2i",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "version": "${APP_VERSION}",
           "group": "quickstarts"
         },
@@ -167,7 +197,7 @@
           }
         ],
         "selector": {
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "component": "${APP_NAME}",
           "provider": "s2i",
           "group": "quickstarts"
@@ -183,7 +213,7 @@
         "labels": {
           "component": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
@@ -202,7 +232,7 @@
         "labels": {
           "component": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
@@ -242,7 +272,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "${IMAGE_STREAM_NAMESPACE}",
-              "name": "fis-java-openshift:${BUILDER_VERSION}"
+              "name": "fuse7-java-openshift:${BUILDER_VERSION}"
             },
             "forcePull": true,
             "incremental": true,
@@ -272,7 +302,14 @@
             "name": "${APP_NAME}:latest"
           }
         },
-        "resources": {}
+        "resources": {
+          "requests": {
+            "memory": "${BUILD_MEMORY_REQUEST}"
+          },
+          "limits": {
+            "memory": "${BUILD_MEMORY_LIMIT}"
+          }
+        }
       },
       "status": {
         "lastVersion": 0
@@ -287,15 +324,12 @@
         "labels": {
           "component": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
       },
       "spec": {
-        "strategy": {
-          "resources": {}
-        },
         "triggers": [
           {
             "type": "ConfigChange"
@@ -319,7 +353,7 @@
           "component": "${APP_NAME}",
           "deploymentconfig": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         },
@@ -330,7 +364,7 @@
               "component": "${APP_NAME}",
               "deploymentconfig": "${APP_NAME}",
               "group": "quickstarts",
-              "project": "${APP_NAME}",
+              "app": "${APP_NAME}",
               "provider": "s2i",
               "version": "${APP_VERSION}"
             }
@@ -386,10 +420,12 @@
                 } ],
                 "resources": {
                   "requests": {
-                    "cpu": "${CPU_REQUEST}"
+                    "cpu": "${CPU_REQUEST}",
+                    "memory": "${MEMORY_REQUEST}"
                   },
                   "limits": {
-                    "cpu": "${CPU_LIMIT}"
+                    "cpu": "${CPU_LIMIT}",
+                    "memory": "${MEMORY_LIMIT}"
                   }
                 }
               }
