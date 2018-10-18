@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.26.0%{?dist}
+Release:        0.27.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Oct 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.27.0
+- Make sure images are prepulled when CRIO is used (vrutkovs@redhat.com)
+- pin azure cli to version 2.0.47 and fix start copy playbook task
+  (akalugwu@redhat.com)
+
 * Wed Oct 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.26.0
 - 
 
