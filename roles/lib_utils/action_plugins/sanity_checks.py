@@ -444,9 +444,9 @@ class ActionModule(ActionBase):
     def check_for_oreg_password(self, hostvars, host, odt):
         """Ensure oreg_password is defined when using registry.redhat.io"""
         reg_to_check = 'registry.redhat.io'
-        err_msg = ("oreg_auth_user and oreg_auth_password must be provided when"
+        err_msg = ("oreg_auth_user and oreg_auth_password must be provided when "
                    "deploying openshift-enterprise")
-        err_msg2 = ("oreg_auth_user and oreg_auth_password must be provided when using"
+        err_msg2 = ("oreg_auth_user and oreg_auth_password must be provided when using "
                     "{}".format(reg_to_check))
 
         oreg_password = self.template_var(hostvars, host, 'oreg_auth_password')
