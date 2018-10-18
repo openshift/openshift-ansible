@@ -280,7 +280,7 @@
     - reconcile_jenkins_role_binding_result.rc == 0
     when: openshift.common.version_gte_3_4_or_1_4  | bool
 
-  - when: (openshift.common.version_gte_3_6 | bool) and (not openshift.common.version_gte_3_7 | bool)
+  - when: openshift.common.version_gte_3_6 | bool
     block:
     - name: Retrieve shared-resource-viewer
       oc_obj:
