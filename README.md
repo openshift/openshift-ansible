@@ -5,7 +5,7 @@
 # OpenShift Ansible
 
 This repository contains [Ansible](https://www.ansible.com/) roles and
-playbooks to install, upgrade, and manage the Origin Kubernetes Distribution in a fully managed container orchestration platform, on an existing computing infrastructure.  For an introduction to openshift [OpenShift](https://www.openshift.com/).
+playbooks to install, upgrade, and manage different Openshift environments on an existing computing infrastructure.  For an introduction to openshift [OpenShift](https://www.openshift.com/).
 
 ## For ansible or openshift newcomers
 
