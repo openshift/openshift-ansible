@@ -1,5 +1,8 @@
 ---
-# l_scale_up_hosts may be passed in via various scaleup plays.
+# Generate config using openshift-installer, set Base Domain to <master IP>.xip.io
+# Add all hosts in [nodes] group
+# Set ignition_file for each host
+# Add boostrap host to [bootstrap] group
 
 - import_playbook: init/main.yml
   vars:
