@@ -10,7 +10,8 @@ from six.moves import urllib
 
 def get_files(files_dict, systemd_dict, dir_list, data):
     """parse data to populate file_dict"""
-    for item in data['storage']['files']:
+    files = data.get('storage', []).get('files', [])
+    for item in files:
         path = item["path"]
         dir_list.add(os.path.dirname(path))
         # remove prefix "data:,"
@@ -25,7 +26,8 @@ def get_files(files_dict, systemd_dict, dir_list, data):
         inode = {"contents": contents, "mode": mode}
         files_dict[path] = inode
     # get the systemd units files we're here
-    for item in data['systemd']['units']:
+    systemd_units = data.get('systemd', []).get('units', [])
+    for item in systemd_units:
         contents = item['contents']
         mode = "0644"
         inode = {"contents": contents, "mode": mode}
