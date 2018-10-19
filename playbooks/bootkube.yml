@@ -3,6 +3,8 @@
 # Add bootstrap host in [bootstrap] group and set ignition_file
 # Add master host to [masters] group
 # Add worker hosts in [workers] group
+# Make sure bootstrap has <clusterid>-api.<dns base> name
+# Make sure masters have <clusterid>-etcd-<index>.<dns base> name
 
 # FIXME: use dnsmasq to fake DNS entries
 # FIXME: add etcd user on masters, otherwise it fails to start
