@@ -40,10 +40,10 @@
           {% endif -%}
         {% endif -%}
         {% if item.dns_servers is defined -%}
-      'dns_servers': '{{ item["name"]["dns_servers"] }}',
+      'dns_servers': '{{ item["dns_servers"] }}',
         {% endif -%}
         {% if item.dns_search is defined -%}
-      'dns_search': '{{ item["name"]["dns_search"] }}',
+      'dns_search': '{{ item["dns_search"] }}',
         {% endif -%}
       {% elif item.count > 1 -%}
       'host_name': '{{ item.name }}{{ iter }}.{{ openshift_ovirt_dns_zone }}',
@@ -62,10 +62,10 @@
           {% endif -%}
         {% endif -%}
         {% if item.dns_servers is defined -%}
-      'dns_servers': '{{ item["nic_mode"][item["name"] + iter | string ]["dns_servers"] }}',
+      'dns_servers': '{{ item["dns_servers"] }}',
         {% endif -%}
         {% if item.dns_search is defined -%}
-      'dns_search': '{{ item["nic_mode"][item["name"] + iter | string ]["dns_search"] }}',
+      'dns_search': '{{ item["dns_search"] }}',
         {% endif -%}
       {% endif -%}
       'authorized_ssh_keys': '{{ openshift_ovirt_ssh_key }}'
