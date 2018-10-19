@@ -765,6 +765,12 @@ If your cloud uses the deprecated Neutron LBaaSv2 provider set:
 
     openshift_openstack_lbaasv2_provider: "Neutron::LBaaS"
 
+The Octavia listeners connection timeout associated to the API can be modified
+by setting the next variable in miliseconds (default value 500000):
+
+    openshift_openstack_api_lb_listeners_timeout: 500000
+
+
 ### VM-based Load Balancer
 
 If you can't use OpenStack's LBaaS, we can create and configure a virtual

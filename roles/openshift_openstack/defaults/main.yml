@@ -15,6 +15,7 @@ openshift_openstack_nodes_to_remove: []
 openshift_openstack_use_lbaas_load_balancer: false
 openshift_openstack_lbaasv2_provider: Octavia
 openshift_openstack_use_vm_load_balancer: false
+openshift_openstack_api_lb_listeners_timeout: 500000
 
 
 # container-storage-setup
