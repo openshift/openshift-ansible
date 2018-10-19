@@ -4,13 +4,7 @@
 # Add master host to [masters] group
 # Add worker hosts in [workers] group
 
-# Add /etc/hosts entries:
-# <bootstrap IP> <clusterid>-api.<base domain>
-# <master 1 IP> <clusterid>-etcd-0.<base domain>
-# <master 2 IP> <clusterid>-etcd-1.<base domain>
-# <master 3 IP> <clusterid>-etcd-2.<base domain>
-
-# FIXME: use dnsmasq, as /etc/hosts would be rewritten for DNS hack
+# FIXME: use dnsmasq to fake DNS entries
 # FIXME: add etcd user on masters, otherwise it fails to start
 
 - import_playbook: init/main.yml
@@ -74,8 +68,6 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
-  - pause:
-      prompt: "Master /etc/hosts has been rewritten, re-add -api and -etcd entries"
   - import_role:
       name: openshift_node40
       tasks_from: systemd.yml
