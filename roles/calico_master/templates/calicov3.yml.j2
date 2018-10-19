@@ -474,6 +474,10 @@ spec:
       labels:
         k8s-app: calico-kube-controllers
     spec:
+{% if calico_image_credentials is defined %}
+      imagePullSecrets:
+        - name: calico-pull-secret
+{% endif %}
       # The controllers must run in the host network namespace so that
       # it isn't governed by policy that would prevent it from working.
       hostNetwork: true
