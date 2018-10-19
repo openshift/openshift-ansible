@@ -80,10 +80,9 @@
   tasks:
   # TODO Read this from master's ignition file
   - set_fact:
-      openshift_bootstrap_endpoint: "https://{{ bootstrap }}:49500/config/worker?etcd_index={{ index }}"
+      openshift_bootstrap_endpoint: "https://{{ bootstrap }}:49500/config/worker"
     vars:
       bootstrap: "{{ hostvars[groups['bootstrap'][0]]['ansible_host'] }}"
-      index: "{{ groups['workers'].index(inventory_hostname) }}"
   - name: Wait for bootstrap endpoint to show up
     uri:
       url: "{{ openshift_bootstrap_endpoint }}"
