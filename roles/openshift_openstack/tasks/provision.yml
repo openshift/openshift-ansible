@@ -127,6 +127,23 @@
   when:
   - openshift_openstack_api_lb_provider|default(None) == "haproxy"
 
+# NOTE(ltomasbo): Increasing OpenShift API Loadbalancer timeouts to 500 secs
+# as 50 seconds resulted on failed deployments due to:
+# https://bugzilla.redhat.com/show_bug.cgi?id=1618685
+# The timeout can be configured by changing:
+# openshift_openstack_api_lb_listeners_timeout
+- name: Octavia OpenShift API listeners timeout correction
+  os_lbaas_listener_timeout:
+    timeout: "{{ openshift_openstack_api_lb_listeners_timeout | int }}"
+    listener_name: "{{ item }}"
+  with_items:
+  - "openshift-ansible-{{ openshift_openstack_full_dns_domain }}-api-lb-listener"
+  - "openshift-ansible-{{ openshift_openstack_full_dns_domain }}-api-lb-internal-listener"
+  when:
+  - openshift_openstack_lbaasv2_provider == "Octavia"
+  - (openshift_openstack_use_lbaas_load_balancer) or (openshift_use_kuryr | default(false) | bool and not openshift_openstack_provider_network_name)
+  ignore_errors: true
+
 - name: CleanUp
   include_tasks: cleanup.yml
   when:
