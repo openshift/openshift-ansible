@@ -9,7 +9,7 @@ playbooks to install, upgrade, and manage different Openshift environments on an
 
 ## For ansible or openshift newcomers
 
-If you've used kubernetes before, then openshift-ansible is the OKD equivalent to Kubeadm (rather then, say, KOPS): It configures the entire cluster on top of existing infrastructure, rather managing the spinning up of infrastructure *for you*.
+If you've used kubernetes before, then openshift-ansible is the similar to Kubespray (in that it is an ansible based, production deployer) or kubeadm (in that it doesn't focus on managing infrastructure for you, although it has some abilities to dynamically configure cloud resources).  It is different then all-in-one, more opinionated solutions such as KOPS).
 
 ### Bring your own VMs or Hardware.
 
