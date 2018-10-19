@@ -28,7 +28,7 @@ def get_files(files_dict, systemd_dict, dir_list, data):
     # get the systemd units files we're here
     systemd_units = data.get('systemd', []).get('units', [])
     for item in systemd_units:
-        contents = item['contents']
+        contents = item['contents'].decode('unicode-escape')
         mode = "0644"
         inode = {"contents": contents, "mode": mode}
         name = item['name']
