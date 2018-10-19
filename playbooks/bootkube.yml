@@ -17,11 +17,9 @@
 - import_playbook: container-runtime/private/setup_storage.yml
 
 - import_playbook: container-runtime/private/config.yml
-  vars:
-    l_scale_up_hosts: bootkube_nodes
 
 - name: install nodes
-  hosts: bootkube_nodes
+  hosts: nodes
   tasks:
   - import_role:
       name: openshift_node40
@@ -38,7 +36,7 @@
       tasks_from: aws.yml
 
 - name: start services
-  hosts: bootkube_nodes
+  hosts: nodes
   tasks:
   - import_role:
       name: openshift_node40
