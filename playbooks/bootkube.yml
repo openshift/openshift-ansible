@@ -1,21 +1,25 @@
 ---
-# Generate config using openshift-installer, set Base Domain to <master IP>.xip.io
-# Add all hosts in [nodes] group
-# Set ignition_file for bootstrap host only
-# Add boostrap host to [bootstrap] group
+# Generate config using openshift-installer, set Base Domain to testing.tt
+# Add bootstrap host in [bootstrap] group and set ignition_file
+# Add master host to [masters] group
+# Add worker hosts in [workers] group
+
+# Add /etc/hosts entries:
+# <bootstrap IP> <clusterid>-api.<base domain>
+# <master 1 IP> <clusterid>-etcd-0.<base domain>
+# <master 2 IP> <clusterid>-etcd-1.<base domain>
+# <master 3 IP> <clusterid>-etcd-2.<base domain>
+
+# FIXME: use dnsmasq, as /etc/hosts would be rewritten for DNS hack
+# FIXME: add etcd user on masters, otherwise it fails to start
 
 - import_playbook: init/main.yml
   vars:
     l_install_base_packages: True
     l_repo_hosts: "all:!all"
 
-# This is required for container runtime for crio, only needs to run once.
-- name: Configure os_firewall
-  hosts: "{{ l_scale_up_hosts | default(l_default_firewall_hosts) }}"
-  vars:
-    l_default_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nfs_to_config:oo_nodes_to_config"
-  roles:
-  - role: os_firewall
+# TODO: proper firewalld setup
+# 49500 on bootstrap; 2379, 6443, 10250 on masters, 10250 on workers
 
 - import_playbook: container-runtime/private/setup_storage.yml
 
@@ -67,6 +71,8 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
+  - pause:
+      prompt: "Master /etc/hosts has been rewritten, re-add -api and -etcd entries"
   - import_role:
       name: openshift_node40
       tasks_from: systemd.yml
