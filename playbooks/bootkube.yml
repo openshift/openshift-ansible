@@ -1,7 +1,7 @@
 ---
 # Generate config using openshift-installer, set Base Domain to <master IP>.xip.io
 # Add all hosts in [nodes] group
-# Set ignition_file for each host
+# Set ignition_file for bootstrap host only
 # Add boostrap host to [bootstrap] group
 
 - import_playbook: init/main.yml
@@ -66,7 +66,10 @@
       - result.status == 200
   - import_role:
       name: openshift_node40
-      tasks_from: bootkube_config.yml
+      tasks_from: config.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: systemd.yml
 
 - name: start services on all nodes
   hosts: nodes
@@ -86,4 +89,7 @@
       - result.status == 200
   - import_role:
       name: openshift_node40
-      tasks_from: bootkube_config.yml
+      tasks_from: config.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: systemd.yml
