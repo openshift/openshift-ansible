@@ -1,7 +1,7 @@
 ---
 - name: Wait for APIs to become available
   command: >
-    {{ openshift_client_binary }} get --raw /apis/{{ item }}/v1
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get --raw /apis/{{ item }}/v1
   register: openshift_apis
   until: openshift_apis.rc == 0
   with_items: "{{ l_core_api_list }}"
