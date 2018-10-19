@@ -68,6 +68,9 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
+  - name: Make sure etcd user exists
+    user:
+      name: etcd
   - import_role:
       name: openshift_node40
       tasks_from: systemd.yml
