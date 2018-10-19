@@ -27,9 +27,6 @@
   - import_role:
       name: openshift_node40
       tasks_from: install.yml
-  - import_role:
-      name: openshift_node40
-      tasks_from: config.yml
 
 - name: setup AWS creds
   hosts: masters:bootstrap
@@ -38,9 +35,55 @@
       name: openshift_node40
       tasks_from: aws.yml
 
-- name: start services
-  hosts: nodes
+- name: Config bootstrap node
+  hosts: bootstrap
   tasks:
   - import_role:
       name: openshift_node40
+      tasks_from: aws.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: config.yml
+  - import_role:
+      name: openshift_node40
       tasks_from: systemd.yml
+
+- name: Config masters
+  hosts: masters
+  tasks:
+  # TODO Read this from master's ignition file
+  - set_fact:
+      openshift_bootstrap_endpoint: "https://{{ hostvars[groups['bootstrap'][0]]['ansible_host'] }}:49500/config/master?etcd_index=0"
+  - name: Wait for bootstrap endpoint to show up
+    uri:
+      url: "{{ openshift_bootstrap_endpoint }}"
+      validate_certs: false
+    delay: 10
+    retries: 60
+    register: result
+    until:
+      - "'status' in result"
+      - result.status == 200
+  - import_role:
+      name: openshift_node40
+      tasks_from: bootkube_config.yml
+
+- name: start services on all nodes
+  hosts: nodes
+  tasks:
+  # TODO Read this from master's ignition file
+  - set_fact:
+      openshift_bootstrap_endpoint: "https://{{ hostvars[groups['bootstrap'][0]]['ansible_host'] }}:49500/config/worker"
+  - name: Wait for bootstrap endpoint to show up
+    uri:
+      url: "{{ openshift_bootstrap_endpoint }}"
+      validate_certs: false
+    delay: 10
+    retries: 60
+    register: result
+    until:
+      - "'status' in result"
+      - result.status == 200
+  - import_role:
+      name: openshift_node40
+      tasks_from: bootkube_config.yml
