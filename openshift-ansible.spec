@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.25
+Version:        3.11.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,9 @@ fi
 
 
 %changelog
+* Thu Oct 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.26-1
+- Bump Data Grid to version 1.1.1 (osni.oliveira@redhat.com)
+
 * Thu Oct 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.25-1
 - Make sure images are prepulled when CRIO is used (vrutkovs@redhat.com)
 - etcdv2 remove: avoid using failed_when (vrutkovs@redhat.com)
