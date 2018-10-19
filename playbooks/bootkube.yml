@@ -27,6 +27,17 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
+
+- name: setup AWS creds
+  hosts: masters
+  tasks:
+  - import_role:
+      name: openshift_node40
+      tasks_from: aws.yml
+
+- name: start services
+  hosts: bootkube_nodes
+  tasks:
   - import_role:
       name: openshift_node40
       tasks_from: systemd.yml
