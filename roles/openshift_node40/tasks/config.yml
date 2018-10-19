@@ -1,7 +1,4 @@
 ---
-
-
-
 - name: get worker ignition file
   command: >
     curl -k {{ openshift_bootstrap_endpoint }}
@@ -50,3 +47,4 @@
     name: container_manage_cgroup
     state: yes
     persistent: yes
+  ignore_errors: true

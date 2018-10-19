@@ -30,3 +30,4 @@
     name: container_manage_cgroup
     state: yes
     persistent: yes
+  ignore_errors: true
