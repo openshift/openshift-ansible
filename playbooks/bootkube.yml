@@ -29,7 +29,7 @@
       tasks_from: config.yml
 
 - name: setup AWS creds
-  hosts: masters
+  hosts: masters:bootstrap
   tasks:
   - import_role:
       name: openshift_node40
