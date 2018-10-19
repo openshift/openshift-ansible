@@ -46,7 +46,7 @@
       name: openshift_node40
       tasks_from: systemd.yml
 
-- name: Config masters
+- name: Start masters
   hosts: masters
   tasks:
   # TODO Read this from master's ignition file
@@ -75,8 +75,8 @@
       name: openshift_node40
       tasks_from: systemd.yml
 
-- name: start services on all nodes
-  hosts: nodes
+- name: Start workers
+  hosts: workers
   tasks:
   # TODO Read this from master's ignition file
   - set_fact:
