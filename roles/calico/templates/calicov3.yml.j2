@@ -14,6 +14,7 @@ rules:
       - namespaces
       - networkpolicies
       - nodes
+      - serviceaccounts
     verbs:
       - watch
       - list
@@ -49,6 +50,7 @@ rules:
   - apiGroups: [""]
     resources:
       - pods
+      - namespaces
       - nodes
     verbs:
       - get
