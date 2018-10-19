@@ -7,7 +7,6 @@
 # Make sure masters have <clusterid>-etcd-<index>.<dns base> name
 
 # FIXME: use dnsmasq to fake DNS entries
-# FIXME: add etcd user on masters, otherwise it fails to start
 
 - import_playbook: init/main.yml
   vars:
