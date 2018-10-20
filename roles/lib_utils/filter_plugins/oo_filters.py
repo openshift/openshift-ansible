@@ -502,7 +502,7 @@ def lib_utils_oo_loadbalancer_backends(
     loadbalancer_backends = [{'name': 'atomic-openshift-api',
                               'mode': 'http',
                               'custom_options':['http-check expect string ok'],
-                              'options': ['ssl-hello-chk','httpchk GET /healthz HTTP/1.0'],
+                              'options': ['ssl-hello-chk', 'httpchk GET /healthz HTTP/1.0'],
                               'balance': 'source',
                               'servers': haproxy_backend_masters_https(servers_hostvars, api_port)}]
     if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
