@@ -48,7 +48,7 @@ def test_parse_json_encoded_files():
 
 
 def parse_json2():
-    ign_data = read_ign('test_data/bs.ign.json')
+    ign_data = read_ign('test_data/bootstrap2.ign.json')
     files_dict = {}
     systemd_dict = {}
     dir_list = set()

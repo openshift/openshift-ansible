@@ -8,6 +8,9 @@
     content: "{{ item.value.contents }}"
     dest: "{{ item.key }}"
     mode: "{{ l_file_mode }}"
+    # owner and group will accept uid/gid respectively.
+    owner: "{{ item.value['uid'] | default(omit) }}"
+    group: "{{ item.value['gid'] | default(omit) }}"
   with_dict: "{{ l_parse_ignition_dict.files_dict }}"
   vars:
     l_mode_prepend: "{{ '0' if (item.value.mode | length < 4) else '' }}"

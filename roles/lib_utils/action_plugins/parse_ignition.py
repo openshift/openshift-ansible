@@ -23,6 +23,13 @@ def get_files(files_dict, systemd_dict, dir_list, data):
         # eg, 420 becomes '0644'
         mode = str(format(int(item["mode"]), '04o'))
         inode = {"contents": contents, "mode": mode}
+        # user and group might not be present
+        if 'user' in item and 'id' in item['user']:
+            inode['uid'] = item['user']['id']
+        if 'group' in item and 'id' in item['group']:
+            inode['gid'] = item['group']['id']
+
+
         files_dict[path] = inode
     # get the systemd units files we're here
     for item in data['systemd']['units']:

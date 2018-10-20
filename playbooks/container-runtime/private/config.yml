@@ -8,12 +8,6 @@
     - role: container_runtime
   tasks:
     - import_role:
-        name: openshift_excluder
-        tasks_from: enable.yml
-      vars:
-        r_openshift_excluder_action: enable
-        r_openshift_excluder_enable_openshift_excluder: false
-    - import_role:
         name: container_runtime
         tasks_from: package_docker.yml
       when:
