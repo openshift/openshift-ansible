@@ -76,6 +76,11 @@ backend {{ backend.name }}
     option {{ option }}
 {% endfor %}
 {% endif %}
+{% if 'custom_options' in backend %}
+{% for custom in backend.custom_options %}
+    {{ custom }}
+{% endfor %}
+{% endif %}
 {% for server in backend.servers %}
     server      {{ server.name }} {{ server.address }} {{ server.opts }}
 {% endfor %}

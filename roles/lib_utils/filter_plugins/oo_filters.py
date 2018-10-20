@@ -267,9 +267,23 @@ def lib_utils_oo_list_to_dict(lst, separator='='):
     return {k: v for k, v in kvs}
 
 
-def haproxy_backend_masters(hosts, port):
+def haproxy_backend_masters_https(hosts, port):
     """ This takes an array of dicts and returns an array of dicts
-        to be used as a backend for the haproxy role
+        to be used as an https backend for the haproxy role
+    """
+    servers = []
+    for idx, host_info in enumerate(hosts):
+        server = dict(name="master%s" % idx)
+        server_ip = host_info['openshift']['common']['ip']
+        server['address'] = "%s:%s" % (server_ip, port)
+        server['opts'] = 'check ssl verify none'
+        servers.append(server)
+    return servers
+
+
+def haproxy_backend_masters_tcp(hosts, port):
+    """ This takes an array of dicts and returns an array of dicts
+        to be used as a tcp backend for the haproxy role
     """
     servers = []
     for idx, host_info in enumerate(hosts):
@@ -486,17 +500,19 @@ def lib_utils_oo_loadbalancer_backends(
         api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
     """TODO: Document me."""
     loadbalancer_backends = [{'name': 'atomic-openshift-api',
-                              'mode': 'tcp',
-                              'option': 'tcplog',
+                              'mode': 'http',
+                              'custom_options':['http-check expect string ok'],
+                              'options': ['ssl-hello-chk','httpchk GET /healthz HTTP/1.0'],
                               'balance': 'source',
-                              'servers': haproxy_backend_masters(servers_hostvars, api_port)}]
+                              'servers': haproxy_backend_masters_https(servers_hostvars, api_port)}]
     if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
         # pylint: disable=line-too-long
         loadbalancer_backends.append({'name': 'nuage-monitor',
                                       'mode': 'tcp',
-                                      'option': 'tcplog',
+                                      'custom_options':[],
+                                      'options': ['tcplog'],
                                       'balance': 'source',
-                                      'servers': haproxy_backend_masters(servers_hostvars, nuage_rest_port)})
+                                      'servers': haproxy_backend_masters_tcp(servers_hostvars, nuage_rest_port)})
     return loadbalancer_backends
 
 

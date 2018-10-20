@@ -52,19 +52,23 @@ Example Playbook
       default_backend: atomic-openshift-api
     openshift_loadbalancer_backends:
     - name: atomic-openshift-api
-      mode: tcp
-      option: tcplog
+      mode: http
+      custom_options:
+      - http-check expect string ok
+      options:
+      - ssl-hello-chk
+      - httpchk GET /healthz HTTP/1.0
       balance: source
       servers:
       - name: master1
         address: "192.168.122.221:8443"
-	opts: check
+	opts: check ssl verify none
       - name: master2
         address: "192.168.122.222:8443"
-	opts: check
+	opts: check ssl verify none
       - name: master3
         address: "192.168.122.223:8443"
-	opts: check
+	opts: check ssl verify none
     openshift_image_tag: v3.6.153
 ```
 
