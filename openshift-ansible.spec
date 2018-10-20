@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.47
+Version:        3.9.48
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Oct 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.48-1
+- Use first_master_client_binary from hostvars[groups.oo_first_master.0]
+  (nakayamakenjiro@gmail.com)
+- Remove empty function set_container_facts_if_unset. (pdd@redhat.com)
+- Use openshift_cli_image to find version in openshift_facts when
+  containerized. (pdd@redhat.com)
+- fix trailing spaces and blank lines (fgrosjean@redhat.com)
+- move tuned role from post_control_plane.yml to an additional task in
+  upgrade.yml (fgrosjean@redhat.com)
+- move tuned role from a separated play to a post task in upgrade_nodes.yml
+  (fgrosjean@redhat.com)
+- Update Fuse templates with 7.1 release (antonin@stefanutti.fr)
+- re-apply tuned profile dunring upgrade (fgrosjean@redhat.com)
+
 * Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.47-1
 - Override ovsdb-server systemd unit timeout when upgrading. (pdd@redhat.com)
 - Override ovsdb-server systemd unit timeout when upgrading. (pdd@redhat.com)
