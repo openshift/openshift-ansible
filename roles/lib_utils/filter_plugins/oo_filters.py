@@ -501,7 +501,7 @@ def lib_utils_oo_loadbalancer_backends(
     """TODO: Document me."""
     loadbalancer_backends = [{'name': 'atomic-openshift-api',
                               'mode': 'http',
-                              'custom_options':['http-check expect string ok'],
+                              'custom_options': ['http-check expect string ok'],
                               'options': ['ssl-hello-chk', 'httpchk GET /healthz HTTP/1.0'],
                               'balance': 'source',
                               'servers': haproxy_backend_masters_https(servers_hostvars, api_port)}]
@@ -509,7 +509,7 @@ def lib_utils_oo_loadbalancer_backends(
         # pylint: disable=line-too-long
         loadbalancer_backends.append({'name': 'nuage-monitor',
                                       'mode': 'tcp',
-                                      'custom_options':[],
+                                      'custom_options': [],
                                       'options': ['tcplog'],
                                       'balance': 'source',
                                       'servers': haproxy_backend_masters_tcp(servers_hostvars, nuage_rest_port)})
