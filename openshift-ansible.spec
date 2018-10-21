@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.132
+Version:        3.6.173.0.133
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Oct 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.133-1
+- Remove 3.7 version check for shared-resource-viewer in control plane upgrade.
+  (pdd@redhat.com)
+
 * Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.132-1
 - Add a block to set openshift_push_via_dns when running upgrade_control
   (nakayamakenjiro@gmail.com)
