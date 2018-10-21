@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.68
+Version:        3.7.69
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Oct 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.69-1
+- loopback_user varible changed to equal hostname (rhowe@redhat.com)
+- Adding set-credential when set_loopback_cluster is changed (rhowe@redhat.com)
+
 * Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.68-1
 - Override ovsdb-server systemd unit timeout when upgrading. (pdd@redhat.com)
 
