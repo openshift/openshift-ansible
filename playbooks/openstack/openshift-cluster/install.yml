@@ -13,6 +13,9 @@
 
 - import_playbook: ../../prerequisites.yml
 
+- name: Run the init
+  import_playbook: ../../init/main.yml
+
 - name: Prepare the Nodes in the cluster for installation
   any_errors_fatal: true
   hosts: oo_all_hosts
