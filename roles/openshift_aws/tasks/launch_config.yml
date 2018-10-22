@@ -21,10 +21,10 @@
     image_id: "{{ openshift_aws_ami_map[openshift_aws_node_group.group] | default(openshift_aws_ami) }}"
     instance_type: "{{ l_node_group_config[openshift_aws_node_group.group].instance_type }}"
     security_groups: "{{ openshift_aws_launch_config_security_group_id  | default(ec2sgs.security_groups | map(attribute='group_id')| list) }}"
-    instance_profile_name: "{{ l_node_group_config[openshift_aws_node_group.group].iam_role if l_node_group_config[openshift_aws_node_group.group].iam_role is defined and
-                                                                           l_node_group_config[openshift_aws_node_group.group].iam_role != '' and
-                                                                           openshift_aws_create_iam_role
-                                                                        else omit }}"
+    instance_profile_name: "{{ l_profilename.iam_roles[0].role_name if openshift_aws_create_iam_role and
+                                                                      l_node_group_config[openshift_aws_node_group.group].iam_role is defined and
+                                                                      l_node_group_config[openshift_aws_node_group.group].iam_role != ''
+                                                                    else omit }}"
     user_data: "{{ lookup('template', 'user_data.j2') }}"
     key_name: "{{ openshift_aws_ssh_key_name }}"
     ebs_optimized: False
