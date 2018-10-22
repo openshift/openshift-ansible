@@ -93,13 +93,6 @@ def _get_hostvars(server, docker_storage_mountpoints):
         hostvars['private_v4'] = server.private_v4
         hostvars['openshift_ip'] = server.private_v4
 
-        # NOTE(shadower): Yes, we set both hostname and IP to the private
-        # IP address for each node. OpenStack doesn't resolve nodes by
-        # name at all, so using a hostname here would require an internal
-        # DNS which would complicate the setup and potentially introduce
-        # performance issues.
-        hostvars['openshift_kubelet_name_override'] = server.metadata.get(
-            'openshift_kubelet_name_override', server.private_v4)
     hostvars['openshift_public_hostname'] = server.name
 
     if server.metadata['host-type'] == 'cns':
