@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.31.0%{?dist}
+Release:        0.32.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Oct 22 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.32.0
+- Allow Ansible 2.5.7 (tomas@sedovic.cz)
+- Remove value rather than replacing it with an empty string
+  (sdodson@redhat.com)
+
 * Sun Oct 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.31.0
 - 
 
