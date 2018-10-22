@@ -136,6 +136,8 @@
       - cloud-init
       - cloud-utils-growpart
 
+- name: run the init
+  import_playbook: ../../init/main.yml
 
 # This is the part that installs all of the software and configs for the instance
 # to become a node.
