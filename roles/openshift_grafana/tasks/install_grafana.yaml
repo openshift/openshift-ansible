@@ -27,6 +27,7 @@
   command: >
     {{ openshift_client_binary }} annotate --overwrite -n {{ grafana_namespace }}
     serviceaccount {{ grafana_serviceaccount_name }} {{ item }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
   with_items:
     "{{ grafana_serviceaccount_annotations }}"
 
@@ -139,11 +140,11 @@
   retries: "{{ (grafana_timeout | int / 10) | int }}"
 
 - name: Get the prometheus SA token
-  shell: "{{ openshift_client_binary }} sa get-token {{ grafana_prometheus_serviceaccount }} -n {{ grafana_prometheus_namespace }}"
+  shell: "{{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig sa get-token {{ grafana_prometheus_serviceaccount }} -n {{ grafana_prometheus_namespace }}"
   register: prometheus_sa_token
 
 - name: Get the grafana SA token
-  shell: "{{ openshift_client_binary }} sa get-token {{ grafana_serviceaccount_name }} -n {{ grafana_namespace }}"
+  shell: "{{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig sa get-token {{ grafana_serviceaccount_name }} -n {{ grafana_namespace }}"
   register: grafana_sa_token
 
 - name: Get prometheus route
