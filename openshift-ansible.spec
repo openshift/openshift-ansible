@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.29
+Version:        3.11.30
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,16 @@ fi
 
 
 %changelog
+* Tue Oct 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.30-1
+- cluster-monitoring: Adds storageclass name variable (davivcgarcia@gmail.com)
+- Mount /etc/pki into apiserver pod (sdodson@redhat.com)
+- Enable IAM roles for EC2s in AWS (mazzystr@gmail.com)
+- This relaxes the Ansible version checking to allow 2.5.7.
+  (ltomasbo@redhat.com)
+- pin azure cli to version 2.0.47 (akalugwu@redhat.com)
+- Fix scaleup failure for hostname override (mgugino@redhat.com)
+- Fail on openshift_kubelet_name_override for new hosts. (mgugino@redhat.com)
+
 * Sun Oct 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.29-1
 - 
 
