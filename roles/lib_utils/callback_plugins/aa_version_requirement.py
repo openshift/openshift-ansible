@@ -7,6 +7,8 @@ The plugin is named with leading `aa_` to ensure this plugin is loaded
 first (alphanumerically) by Ansible.
 """
 import sys
+from distutils import version
+
 from ansible import __version__
 
 if __version__ < '2.0':
@@ -29,13 +31,15 @@ else:
 
 
 # Set to minimum required Ansible version
-REQUIRED_VERSION = '2.5.7'
+REQUIRED_VERSION = version.StrictVersion('2.5.7')
 DESCRIPTION = "Supported versions: %s or newer" % REQUIRED_VERSION
 
 
-def version_requirement(version):
+def version_requirement(ver):
     """Test for minimum required version"""
-    return version >= REQUIRED_VERSION
+    if not isinstance(ver, version.StrictVersion):
+        ver = version.StrictVersion(ver)
+    return ver >= REQUIRED_VERSION
 
 
 class CallbackModule(CallbackBase):
