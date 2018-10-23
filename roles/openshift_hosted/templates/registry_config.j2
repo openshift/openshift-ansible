@@ -1,6 +1,6 @@
 version: 0.1
 log:
-  level: {{ openshift_hosted_registry_log_level }} 
+  level: {{ openshift_hosted_registry_log_level }}
 http:
   addr: :5000
 storage:
@@ -55,6 +55,9 @@ storage:
 {%   endif -%}
 {%   if openshift_hosted_registry_storage_swift_domainid is defined %}
     domainid: {{ openshift_hosted_registry_storage_swift_domainid }}
+{%   endif -%}
+{%   if openshift_hosted_registry_storage_swift_insecureskipverify | default(false) | bool %}
+    insecureskipverify: {{ openshift_hosted_registry_storage_swift_insecureskipverify }}
 {%   endif -%}
 {% elif openshift_hosted_registry_storage_provider | default('') == 'gcs' %}
   gcs:
