@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.60
+Version:        3.10.61
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Oct 22 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.61-1
+- 
+
 * Sat Oct 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.60-1
 - Pass admin kubeconfig (sdodson@redhat.com)
 - Make sure images are prepulled when CRIO is used (vrutkovs@redhat.com)
