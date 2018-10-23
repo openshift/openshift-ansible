@@ -27,7 +27,7 @@ COPY images/installer/origin-extra-root /
 RUN yum install -y epel-release && \
     rm -rf /etc/yum.repos.d/centos-openshift-origin.repo && \
     yum-config-manager --enable built > /dev/null && \
-    INSTALL_PKGS="openssh google-cloud-sdk azure-cli" \
+    INSTALL_PKGS="openssh google-cloud-sdk azure-cli-2.0.47" \
     yum install --setopt=tsflags=nodocs -y $INSTALL_PKGS openshift-ansible-test && \
     yum clean all
 
