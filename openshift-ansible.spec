@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.61
+Version:        3.10.62
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Oct 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.62-1
+- Mount /etc/pki into apiserver pod (sdodson@redhat.com)
+- pin azure cli to version 2.0.47 (akalugwu@redhat.com)
+
 * Mon Oct 22 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.61-1
 - 
 
