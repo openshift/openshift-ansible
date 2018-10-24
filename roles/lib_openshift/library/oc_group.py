@@ -1522,7 +1522,7 @@ class OCGroup(OpenShiftCLI):
         result = self._get(self.kind, self.config.name)
         if result['returncode'] == 0:
             self.group = Group(content=result['results'][0])
-        elif 'groups \"{}\" not found'.format(self.config.name) in result['stderr']:
+        elif 'groups.user.openshift.io \"{}\" not found'.format(self.config.name) in result['stderr']:
             result['returncode'] = 0
             result['results'] = [{}]
 
