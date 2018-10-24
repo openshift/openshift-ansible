@@ -2,6 +2,7 @@
 Ansible action plugin to ensure inventory variables are set
 appropriately and no conflicting options have been provided.
 """
+import fnmatch
 import json
 import re
 
@@ -63,6 +64,7 @@ IMAGE_POLICY_CONFIG_VAR = "openshift_master_image_policy_config"
 ALLOWED_REGISTRIES_VAR = "openshift_master_image_policy_allowed_registries_for_import"
 
 REMOVED_VARIABLES = (
+    ('openshift_hostname', 'Removed: See documentation'),
     # TODO(michaelgugino): Remove in 3.12
     ('oreg_auth_credentials_replace', 'Removed: Credentials are now always updated'),
     ('oreg_url_master', 'oreg_url'),
@@ -330,10 +332,10 @@ class ActionModule(ActionBase):
             raise errors.AnsibleModuleError(msg)
 
     def check_hostname_vars(self, hostvars, host):
-        """Checks to ensure openshift_hostname
+        """Checks to ensure openshift_kubelet_name_override
            and openshift_public_hostname
            conform to the proper length of 63 characters or less"""
-        for varname in ('openshift_public_hostname', 'openshift_hostname'):
+        for varname in ('openshift_public_hostname', 'openshift_kubelet_name_override'):
             var_value = self.template_var(hostvars, host, varname)
             if var_value and len(var_value) > 63:
                 msg = '{} must be 63 characters or less'.format(varname)
@@ -442,9 +444,9 @@ class ActionModule(ActionBase):
     def check_for_oreg_password(self, hostvars, host, odt):
         """Ensure oreg_password is defined when using registry.redhat.io"""
         reg_to_check = 'registry.redhat.io'
-        err_msg = ("oreg_auth_user and oreg_auth_password must be provided when"
+        err_msg = ("oreg_auth_user and oreg_auth_password must be provided when "
                    "deploying openshift-enterprise")
-        err_msg2 = ("oreg_auth_user and oreg_auth_password must be provided when using"
+        err_msg2 = ("oreg_auth_user and oreg_auth_password must be provided when using "
                     "{}".format(reg_to_check))
 
         oreg_password = self.template_var(hostvars, host, 'oreg_auth_password')
@@ -534,23 +536,6 @@ def is_registry_match(item, pattern):
     of the registries will be listed without the port and insecure flag.
     """
     item = "schema://" + item.split('://', 1)[-1]
-    return is_match(urlparse(item).hostname, pattern.rsplit(':', 1)[0])
-
-
-# taken from https://leetcode.com/problems/wildcard-matching/discuss/17845/python-dp-solution
-# (the same source as for openshift/origin/pkg/util/strings/wildcard.go)
-def is_match(item, pattern):
-    """implements DP algorithm for string matching"""
-    length = len(item)
-    if len(pattern) - pattern.count('*') > length:
-        return False
-    matches = [True] + [False] * length
-    for i in pattern:
-        if i != '*':
-            for index in reversed(range(length)):
-                matches[index + 1] = matches[index] and (i == item[index] or i == '?')
-        else:
-            for index in range(1, length + 1):
-                matches[index] = matches[index - 1] or matches[index]
-        matches[0] = matches[0] and i == '*'
-    return matches[-1]
+    pat = pattern.rsplit(':', 1)[0]
+    name = urlparse(item).hostname
+    return fnmatch.fnmatch(name, pat)

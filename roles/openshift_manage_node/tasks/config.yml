@@ -1,7 +1,7 @@
 ---
 - name: Set node schedulability
   oc_adm_manage_node:
-    node: "{{ openshift.node.nodename | lower }}"
+    node: "{{ l_kubelet_node_name | lower }}"
     schedulable: "{{ 'true' if openshift_schedulable | default(true) | bool else 'false' }}"
   retries: 10
   delay: 5
@@ -24,6 +24,6 @@
         | map(attribute='metadata.annotations') | map('list') | flatten
         | select('match', 'node.openshift.io/md5sum') | list | length ==
       node_status.results.results[0]['items'] | length
-  retries: 60
+  retries: 180
   delay: 10
   delegate_to: "{{ openshift_master_host }}"

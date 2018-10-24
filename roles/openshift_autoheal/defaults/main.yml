@@ -2,17 +2,8 @@
 
 #
 # Image name:
-#
-openshift_autoheal_image_dict:
-  origin:
-    prefix: "docker.io/openshift/"
-    version: v0.0.1
-  openshift-enterprise:
-    prefix: "registry.redhat.io/openshift3/ose-"
-    version: "{{ openshift_image_tag }}"
-openshift_autoheal_image_prefix: "{{ openshift_autoheal_image_dict[openshift_deployment_type]['prefix'] }}"
-openshift_autoheal_image_version: "{{ openshift_autoheal_image_dict[openshift_deployment_type]['version'] }}"
-openshift_autoheal_image: "{{ openshift_autoheal_image_prefix }}autoheal:{{ openshift_autoheal_image_version }}"
+
+openshift_autoheal_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'autoheal') }}"
 
 #
 # Content of the configuration file of the auto-heal service. Note that this is

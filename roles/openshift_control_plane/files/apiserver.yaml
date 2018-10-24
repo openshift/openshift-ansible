@@ -34,6 +34,8 @@ spec:
        name: master-cloud-provider
      - mountPath: /var/lib/origin/
        name: master-data
+     - mountPath: /etc/pki
+       name: master-pki
     livenessProbe:
       httpGet:
         scheme: HTTPS
@@ -58,3 +60,6 @@ spec:
   - name: master-data
     hostPath:
       path: /var/lib/origin
+  - name: master-pki
+    hostPath:
+      path: /etc/pki

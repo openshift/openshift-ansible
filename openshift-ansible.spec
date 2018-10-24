@@ -10,14 +10,14 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.7.0%{?dist}
+Release:        0.33.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:      ansible >= 2.6.2
+Requires:      ansible >= 2.5.7
 Requires:      python2
 Requires:      python-six
 Requires:      tar
@@ -189,6 +189,141 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Oct 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.33.0
+- Remove hostname override from OpenStack inventory (tomas@sedovic.cz)
+- Fixing Typo (jparrill@redhat.com)
+- quick fix for formatting of error messages, bz# 1640823 (pruan@redhat.com)
+- Mount /etc/pki into apiserver pod (sdodson@redhat.com)
+- Set openshift_hosted_registry_storage_swift_insecureskipverify's default
+  (mickael.canevet@camptocamp.com)
+- Document openshift_hosted_registry_storage_swift_insecureskipverify
+  (mickael.canevet@camptocamp.com)
+- Added capability to add dns_search and dns_server even without static
+  configuration (jparrill@redhat.com)
+- Fixes #10415 maintains the name and host_name when vm count field are 1.
+  (jparrill@redhat.com)
+- Add openshift_hosted_registry_storage_swift_insecureskipverify parameter
+  (mickael.canevet@camptocamp.com)
+- Updated logging namespace name (andy.block@gmail.com)
+- Update oc_group.py in src (camabeh@gmail.com)
+- cluster-monitoring: Adds storageclass name variable (davivcgarcia@gmail.com)
+- Update tests (camabeh@gmail.com)
+- Fix oc group get (camabeh@gmail.com)
+
+* Mon Oct 22 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.32.0
+- Allow Ansible 2.5.7 (tomas@sedovic.cz)
+- Remove value rather than replacing it with an empty string
+  (sdodson@redhat.com)
+
+* Sun Oct 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.31.0
+- 
+
+* Sat Oct 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.30.0
+- 
+
+* Fri Oct 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.29.0
+- 
+
+* Thu Oct 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.28.0
+- Fix scaleup failure for hostname override (mgugino@redhat.com)
+- Fail on openshift_kubelet_name_override for new hosts. (mgugino@redhat.com)
+
+* Thu Oct 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.27.0
+- Make sure images are prepulled when CRIO is used (vrutkovs@redhat.com)
+- pin azure cli to version 2.0.47 and fix start copy playbook task
+  (akalugwu@redhat.com)
+
+* Wed Oct 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.26.0
+- 
+
+* Wed Oct 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.25.0
+- 
+
+* Tue Oct 16 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.24.0
+- 
+
+* Mon Oct 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.23.0
+- Add ansible 2.6 repo (vrutkovs@redhat.com)
+
+* Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.22.0
+- 
+
+* Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.21.0
+- 
+
+* Fri Oct 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.20.0
+- Require ansible 2.6.5 (vrutkovs@redhat.com)
+- Dockerfile: install ansible 2.6 and remove epel-testing (vrutkovs@redhat.com)
+- Dockerfile: install ansible 2.6 (vrutkovs@redhat.com)
+
+* Fri Oct 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.19.0
+- README: ansible 2.7 is not supported (vrutkovs@redhat.com)
+- Modify sync pod to check for KUBELET_HOSTNAME_OVERRIDE (mgugino@redhat.com)
+- Configure Ansible service broker secrets (simon.ruegg@vshn.ch)
+
+* Wed Oct 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.18.0
+- Update main.yml (sgaikwad@redhat.com)
+- Openshift autoheal fails to pull images even if oreg_url is specified
+  (sgaikwad@redhat.com)
+
+* Tue Oct 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.17.0
+- Add missing option in Openstack documentation and sample file.
+  (juriarte@redhat.com)
+- Replace openshift.node.nodename with l_kubelet_node_name (mgugino@redhat.com)
+- Increase number of retries in sync DS (vrutkovs@redhat.com)
+- test/ci: update atomic hosts and restart only when necessary
+  (vrutkovs@redhat.com)
+- test/ci: make sure all packages are updated before starting install
+  (vrutkovs@redhat.com)
+- test/ci: set hostname before collecting facts (vrutkovs@redhat.com)
+- Fix etcd scaleup on standalone hosts (rteague@redhat.com)
+
+* Mon Oct 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.16.0
+- Fail on openshift_hostname defined; add openshift_kubelet_name_override
+  (mgugino@redhat.com)
+
+* Sun Oct 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.15.0
+- 
+
+* Sun Oct 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.14.0
+- 
+
+* Sat Oct 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.13.0
+- unmount just before removing (rmeggins@redhat.com)
+
+* Fri Oct 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.12.0
+- 
+
+* Fri Oct 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.11.0
+- prelim/partial update to jenkins imagestream to enable tests (while we wait
+  for global PR in openshift/origin to merge) (gmontero@redhat.com)
+- Remove unused registry migration task (vrutkovs@redhat.com)
+
+* Thu Oct 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.10.0
+- glusterfs: add probe script for liveness and readiness checks
+  (jmulligan@redhat.com)
+
+* Thu Oct 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.9.0
+- 
+
+* Wed Oct 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.8.0
+- roles/cluster_monitoring: minor wording improvement (pgier@redhat.com)
+- Remove unlicensed code from internet in sanity checks (mgugino@redhat.com)
+- Use clusterid attribute to filter servers in dynamic inventory
+  (rusichen@redhat.com)
+- Add CI scripts in hack/ (vrutkovs@redhat.com)
+- Replace 'command chmod' with 'file mode=...' (vrutkovs@redhat.com)
+- Start only the ovsdb so we can add the config safely (bbennett@redhat.com)
+- Add pyOpenSSL and iproute to RPM dependencies (sdodson@redhat.com)
+- Fixes #8267 (mavazque@redhat.com)
+- Node problem detector always pull images from registry.redhat.io for
+  openshift-enterprise (sgaikwad@redhat.com)
+- Replace undefined {{ item }} by filename (info@theothersolution.nl)
+- Pass admin kubeconfig (sdodson@redhat.com)
+- typo correction (i.am.emilio@gmail.com)
+- no longer creates cns security group when number of cns is 0
+  (i.am.emilio@gmail.com)
+
 * Fri Sep 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.7.0
 - Add OpenStack pre-requisites check for various features (tzumainn@redhat.com)
 - [openstack] Add configuration note for all-in-one and DNS (pep@redhat.com)

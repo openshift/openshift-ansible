@@ -141,7 +141,7 @@ openshift_ovirt_vm_manifest:
   count: 1
   profile: 'node_vm'
   nic_mode:
-      lb0:
+      lb:
         nic_ip_address: '192.168.123.170'
         nic_netmask: '255.255.255.0'
         nic_gateway: '192.168.123.1'
@@ -185,6 +185,8 @@ Example Playbook
       tags:
         - always
 ```
+
+**Side Note:** Regarding the behaviour, of the iterations, If we have a `count: 1` in our vm definition, the name that you put in the proper field will be preserved, but if we have more than 1 a counter will be raised and the vm name will be `name + iteration` (EG) _node0_, _node1_, _node2_ in case of `count: 3`
 
 License
 -------

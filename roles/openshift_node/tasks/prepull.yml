@@ -21,8 +21,7 @@
 
 # This task runs async to save time while other downloads proceed
 - name: pre-pull pod image
-  docker_image:
-    name: "{{ osn_pod_image }}"
+  command: "{{ openshift_container_cli }} pull {{ osn_pod_image }}"
   environment:
     NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
   when: pod_image.stdout_lines == []

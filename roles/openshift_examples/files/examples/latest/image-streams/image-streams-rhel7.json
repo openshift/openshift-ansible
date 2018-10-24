@@ -112,7 +112,7 @@
             },
             "from": {
               "kind": "DockerImage",
-              "name": "registry.redhat.io/openshift3/jenkins-2-rhel7:v3.11"
+              "name": "registry.redhat.io/openshift3/jenkins-2-rhel7:v4.0"
             },
             "name": "2",
             "referencePolicy": {

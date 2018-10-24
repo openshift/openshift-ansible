@@ -54,7 +54,8 @@
 
 - name: Create the policy file if it does not already exist
   command: >
-    {{ openshift_client_binary }} adm create-bootstrap-policy-file
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      adm create-bootstrap-policy-file
       --filename={{ openshift_master_policy }}
   args:
     creates: "{{ openshift_master_policy }}"
@@ -175,7 +176,7 @@
   oc_obj:
     state: list
     kind: pod
-    name: "master-{{ item }}-{{ openshift.node.nodename | lower }}"
+    name: "master-{{ item }}-{{ l_kubelet_node_name | lower }}"
     namespace: kube-system
   register: control_plane_pods
   until:
@@ -227,7 +228,7 @@
   oc_obj:
     state: list
     kind: pod
-    name: "master-{{ item }}-{{ openshift.node.nodename | lower }}"
+    name: "master-{{ item }}-{{ l_kubelet_node_name | lower }}"
     namespace: kube-system
   register: control_plane_health
   until:

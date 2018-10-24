@@ -2,7 +2,7 @@
 # This play runs when new gluster hosts are part of new_nodes group during
 # master or node scaleup.
 
-# Need to gather facts on glusterfs hosts to ensure we collect openshift.node.nodename
+# Need to gather facts on glusterfs hosts to ensure we collect l_kubelet_node_name
 # for topology file.
 - import_playbook: ../../init/basic_facts.yml
   vars:
