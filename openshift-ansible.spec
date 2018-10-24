@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.30
+Version:        3.11.31
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,10 @@ fi
 
 
 %changelog
+* Tue Oct 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.31-1
+- Ensure we don't attempt to yum install on atomic (mgugino@redhat.com)
+- Remove hostname override from OpenStack inventory (tomas@sedovic.cz)
+
 * Tue Oct 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.30-1
 - cluster-monitoring: Adds storageclass name variable (davivcgarcia@gmail.com)
 - Mount /etc/pki into apiserver pod (sdodson@redhat.com)
