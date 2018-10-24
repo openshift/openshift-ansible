@@ -14,6 +14,7 @@
 - import_tasks: static_shim.yml
 
 - import_tasks: upgrade/upgrade_scheduler.yml
+- import_tasks: create_ca_files.yml
 
 # master_config_hook is passed in from upgrade play.
 - include_tasks: "upgrade/{{ master_config_hook }}"

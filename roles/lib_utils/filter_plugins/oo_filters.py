@@ -708,6 +708,36 @@ def lib_utils_mutate_htpass_provider(idps):
     return idps
 
 
+def lib_utils_mutate_providers_with_ca(idps):
+    '''Updates identityProviders list to mutate CA path'''
+    providers = [
+        {
+            'kind': 'LDAPPasswordIdentityProvider',
+            'ca_field': 'ca',
+            'ca_postfix': 'ldap'
+        },
+        {
+            'kind': 'RequestHeaderIdentityProvider',
+            'ca_field': 'clientCA',
+            'ca_postfix': 'request_header'
+        },
+        {
+            'kind': 'OpenIDIdentityProvider',
+            'ca_field': 'ca',
+            'ca_postfix': 'openid'
+        }
+    ]
+    for idp in idps:
+        if 'provider' in idp:
+            idp_p = idp['provider']
+            for provider in providers:
+                if idp_p['kind'] == provider['kind']:
+                    if not idp_p.get('insecure'):
+                        idp_p[provider['ca_field']] = '/etc/origin/master/{0}_{1}_ca.crt'.format(
+                            idp['name'], provider['ca_postfix'])
+    return idps
+
+
 def lib_utils_oo_oreg_image(image_default, oreg_url):
     '''Converts default image string to utilize oreg_url, if defined.
        oreg_url should be passed in as string "None" if undefined.
@@ -766,6 +796,7 @@ class FilterModule(object):
             "map_to_pairs": map_to_pairs,
             "lib_utils_oo_etcd_host_urls": lib_utils_oo_etcd_host_urls,
             "lib_utils_mutate_htpass_provider": lib_utils_mutate_htpass_provider,
+            "lib_utils_mutate_providers_with_ca": lib_utils_mutate_providers_with_ca,
             "lib_utils_oo_oreg_image": lib_utils_oo_oreg_image,
             "oo_flatten": oo_flatten,
         }
