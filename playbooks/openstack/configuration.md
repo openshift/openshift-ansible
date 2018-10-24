@@ -30,6 +30,7 @@ Environment variables may also be used.
 * [Scaling The OpenShift Cluster](#scaling-the-openshift-cluster)
 * [Deploying At Scale](#deploying-at-scale)
 * [Using A Static Inventory](#using-a-static-inventory)
+* [Using CRI-O](#using-cri-o)
 
 
 ## OpenStack Configuration
@@ -1075,3 +1076,51 @@ $ ansible-playbook --user openshift \
   -i inventory \
   openshift-ansible/playbooks/openstack/openshift-cluster/install.yml
 ```
+
+## Using CRI-O
+
+To avoid installing docker as dependency in cockpit-docker, it is required to first set osm_use_cockpit=false (in the OSEv3.yml file)
+
+There are some different scenarios to customize the container runtime in the
+instances:
+
+* All hosts use docker (no changes required)
+* All hosts using cri-o. Modify the all.yml and add the following variables:
+
+```
+openshift_use_crio_only: true
+openshift_use_crio: true
+```
+
+NOTE: Currently, OpenShift builds require docker.
+
+* Masters/app/infra_nodes use cri-o:
+
+Add the proper variables to the `~/inventory/group_vars/` files in the ansible host such as:
+
+* `~/inventory/group_vars/[masters|infra_nodes|app].yml`:
+
+```
+openshift_use_crio_only: true/false
+openshift_use_crio: true/false
+```
+
+* Some app nodes using cri-o, some others docker, some others cri-o and docker. This scenario requires the following steps:
+
+* After all the instances are up running (after running the provision.yml playbook)
+* Tag some nodes with a proper tag in OSP.
+  * For cri-o only:
+```bash
+$ openstack server set --property container-runtime='cri-o' <mynode1> <mynode2>...
+```
+  * For docker only (optionally, by default it will install docker):
+```bash
+$ openstack server set --property container-runtime='docker' <mynode1> <mynode2>...
+```
+  * For both cri-o and docker:
+```bash
+$ openstack server set --property container-runtime='both' <mynode1> <mynode2>...
+```
+
+Run the installation playbook as the variables will be automatically set by
+the inventory.

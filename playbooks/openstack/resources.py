@@ -116,8 +116,19 @@ def _get_hostvars(server, docker_storage_mountpoints):
         if server.id in docker_storage_mountpoints:
             hostvars['docker_storage_mountpoints'] = ' '.join(
                 docker_storage_mountpoints[server.id])
-    return hostvars
 
+    container_runtime = server.metadata.get('container-runtime')
+
+    if container_runtime == 'cri-o':
+        hostvars['openshift_use_crio_only'] = True
+        hostvars['openshift_use_crio'] = True
+    elif container_runtime == 'docker':
+        hostvars['openshift_use_crio'] = False
+    elif container_runtime == 'both':
+        hostvars['openshift_use_crio_only'] = False
+        hostvars['openshift_use_crio'] = True
+
+    return hostvars
 
 def build_inventory():
     '''Build the dynamic inventory.'''
