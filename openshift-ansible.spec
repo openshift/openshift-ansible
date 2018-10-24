@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.33.0%{?dist}
+Release:        0.34.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Oct 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.34.0
+- Fix incorrect until condition in servicecatalog api check
+  (sdodson@redhat.com)
+- Run the init playbooks to properly set vars (e.minguez@gmail.com)
+- Add permissions for the Calico CNI plugin to access namespaces
+  (mleung975@gmail.com)
+
 * Tue Oct 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.33.0
 - Remove hostname override from OpenStack inventory (tomas@sedovic.cz)
 - Fixing Typo (jparrill@redhat.com)
