@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.32.0%{?dist}
+Release:        0.33.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,27 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Oct 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.33.0
+- Remove hostname override from OpenStack inventory (tomas@sedovic.cz)
+- Fixing Typo (jparrill@redhat.com)
+- quick fix for formatting of error messages, bz# 1640823 (pruan@redhat.com)
+- Mount /etc/pki into apiserver pod (sdodson@redhat.com)
+- Set openshift_hosted_registry_storage_swift_insecureskipverify's default
+  (mickael.canevet@camptocamp.com)
+- Document openshift_hosted_registry_storage_swift_insecureskipverify
+  (mickael.canevet@camptocamp.com)
+- Added capability to add dns_search and dns_server even without static
+  configuration (jparrill@redhat.com)
+- Fixes #10415 maintains the name and host_name when vm count field are 1.
+  (jparrill@redhat.com)
+- Add openshift_hosted_registry_storage_swift_insecureskipverify parameter
+  (mickael.canevet@camptocamp.com)
+- Updated logging namespace name (andy.block@gmail.com)
+- Update oc_group.py in src (camabeh@gmail.com)
+- cluster-monitoring: Adds storageclass name variable (davivcgarcia@gmail.com)
+- Update tests (camabeh@gmail.com)
+- Fix oc group get (camabeh@gmail.com)
+
 * Mon Oct 22 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.32.0
 - Allow Ansible 2.5.7 (tomas@sedovic.cz)
 - Remove value rather than replacing it with an empty string
