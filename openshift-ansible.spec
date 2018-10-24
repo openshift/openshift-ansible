@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.62
+Version:        3.10.63
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,24 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Oct 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.63-1
+- Add permissions for the Calico CNI plugin to access namespaces
+  (mleung975@gmail.com)
+- Fix incorrect until condition in servicecatalog api check
+  (sdodson@redhat.com)
+- Add retries around api service discovery (sdodson@redhat.com)
+- Add a wait for aggregated APIs when restarting control plane
+  (sdodson@redhat.com)
+- Remove value rather than replacing it with an empty string
+  (sdodson@redhat.com)
+- Update oc_group.py in src (camabeh@gmail.com)
+- Update tests (camabeh@gmail.com)
+- Fix oc group get (camabeh@gmail.com)
+- Remove hostname override from OpenStack inventory (tomas@sedovic.cz)
+- Update master config to set CA when LDAP/RequestHeader or OpenID identity
+  providers are used (vrutkovs@redhat.com)
+- Update LDAP files when upgrading from 3.9 to 3.10 (vrutkovs@redhat.com)
+
 * Tue Oct 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.62-1
 - Mount /etc/pki into apiserver pod (sdodson@redhat.com)
 - pin azure cli to version 2.0.47 (akalugwu@redhat.com)
