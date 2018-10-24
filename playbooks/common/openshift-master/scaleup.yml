@@ -27,7 +27,7 @@
     - restart master controllers
   handlers:
   - name: restart master api
-    service: name={{ openshift.common.service_type }}-master-controllers state=restarted
+    service: name={{ openshift.common.service_type }}-master-api state=restarted
     notify: verify api server
   - name: restart master controllers
     service: name={{ openshift.common.service_type }}-master-controllers state=restarted
