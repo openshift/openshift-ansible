@@ -170,6 +170,14 @@ openshift_openstack_node_secgroup_rules:
   # NOTE(shadower): the 53 rules are needed for Kuryr
   - direction: ingress
     protocol: tcp
+    port_range_min: 53
+    port_range_max: 53
+  - direction: ingress
+    protocol: udp
+    port_range_min: 53
+    port_range_max: 53
+  - direction: ingress
+    protocol: tcp
     port_range_min: 10250
     port_range_max: 10250
     remote_mode: remote_group_id
