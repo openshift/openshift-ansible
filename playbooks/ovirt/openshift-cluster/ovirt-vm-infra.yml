@@ -20,7 +20,7 @@
         tasks_from: build_vm_list.yml
 
   roles:
-    - oVirt.image-template
+    - { role: oVirt.image-template, when: qcow_url is defined }
     - oVirt.vm-infra
 
   post_tasks:

@@ -20,6 +20,7 @@ openshift_ovirt_ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 # Template Creation
 # https://github.com/oVirt/ovirt-ansible-image-template
 ##########################
+# If you comment the 'qcow_url' variable the template upload role will not be loaded  
 qcow_url:                       # https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2c
 image_path: "{{ lookup('env', 'HOME') }}/Downloads/{{ template_name }}.qcow2"
 template_name:                  # rhel75
