@@ -96,7 +96,7 @@
 
 - name: Calico | Set the correct liveness and readiness checks
   set_fact:
-    calico_binary_checks: "{{ (node_version > '3.2.0' and cnx != 'cnx') or (node_version > '2.2.0' and cnx == 'cnx') | bool }}"
+    calico_binary_checks: "{{ (node_version >= '3.2.0' and cnx != 'cnx') or (node_version >= '2.2.0' and cnx == 'cnx') | bool }}"
 
 - name: Calico | Write Calico v2
   template:
