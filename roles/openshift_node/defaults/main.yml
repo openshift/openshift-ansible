@@ -63,10 +63,6 @@ default_r_openshift_node_image_prep_packages:
 - glusterfs-fuse
 - device-mapper-multipath
 - nfs-utils
-- cockpit-ws
-- cockpit-system
-- cockpit-bridge
-- cockpit-docker
 - iscsi-initiator-utils
 - ceph-common
 r_openshift_node_image_prep_packages: "{{ default_r_openshift_node_image_prep_packages | union(openshift_node_image_prep_packages | default([])) }}"
