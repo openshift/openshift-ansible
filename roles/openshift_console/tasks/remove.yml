@@ -4,4 +4,8 @@
     name: openshift-console
     state: absent
 
-# TODO: Remove OAuthClient
+- name: Remove openshift-console OAuth client
+  oc_obj:
+    kind: oauthclient
+    name: openshift-console
+    state: absent
