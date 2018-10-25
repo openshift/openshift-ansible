@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.63
+Version:        3.10.64
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Oct 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.64-1
+- Add pull secret to the Calico controllers (mleung975@gmail.com)
+
 * Wed Oct 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.63-1
 - Add permissions for the Calico CNI plugin to access namespaces
   (mleung975@gmail.com)
