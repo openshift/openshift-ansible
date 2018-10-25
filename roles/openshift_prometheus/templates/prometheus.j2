@@ -142,6 +142,7 @@ spec:
         - -cookie-secret-file=/etc/proxy/secrets/session_secret
         - -openshift-ca=/etc/pki/tls/cert.pem
         - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        - -skip-auth-regex=^/metrics
         volumeMounts:
         - mountPath: /etc/tls/private
           name: alerts-tls-secret
@@ -171,9 +172,6 @@ spec:
         volumeMounts:
         - mountPath: /alert-buffer
           name: alerts-data
-        ports:
-        - containerPort: 9099
-          name: alert-buf
 
       # Deploy alertmanager behind oauth alertmanager-proxy
       - name: alertmanager-proxy
@@ -238,9 +236,6 @@ spec:
 {% if openshift_prometheus_alertmanager_cpu_limit is defined and openshift_prometheus_alertmanager_cpu_limit is not none %}
             cpu: "{{ openshift_prometheus_alertmanager_cpu_limit }}"
 {% endif %}
-        ports:
-        - containerPort: 9093
-          name: web
         volumeMounts:
         - mountPath: /etc/alertmanager
           name: alertmanager-config
@@ -249,7 +244,7 @@ spec:
 
       restartPolicy: Always
       volumes:
-      
+
       - name: prometheus-config
         configMap:
           defaultMode: 420
@@ -273,10 +268,10 @@ spec:
           name: alertmanager
       - name: alertmanager-proxy-secret
         secret:
-          secretName: alertmanager-proxy  
+          secretName: alertmanager-proxy
       - name: alertmanager-tls-secret
         secret:
-          secretName: alertmanager-tls 
+          secretName: alertmanager-tls
       - name: alerts-tls-secret
         secret:
           secretName: alerts-tls
