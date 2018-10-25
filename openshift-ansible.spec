@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.31
+Version:        3.11.32
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,30 @@ fi
 
 
 %changelog
+* Thu Oct 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.32-1
+- Fix Calico liveness and readiness checks to include Calico 3.2
+  (mleung975@gmail.com)
+- Add pull secret to the Calico controllers (mleung975@gmail.com)
+- fix fluentd prometheus scrape scheme (jcantril@redhat.com)
+- Add permissions for the Calico CNI plugin to access namespaces
+  (mleung975@gmail.com)
+- Fix incorrect until condition in servicecatalog api check
+  (sdodson@redhat.com)
+- Run the init playbooks to properly set vars (e.minguez@gmail.com)
+- Remove value rather than replacing it with an empty string
+  (sdodson@redhat.com)
+- Update oc_group.py in src (camabeh@gmail.com)
+- Update tests (camabeh@gmail.com)
+- Fix oc group get (camabeh@gmail.com)
+- Set openshift_hosted_registry_storage_swift_insecureskipverify's default
+  (mickael.canevet@camptocamp.com)
+- Document openshift_hosted_registry_storage_swift_insecureskipverify
+  (mickael.canevet@camptocamp.com)
+- Add openshift_hosted_registry_storage_swift_insecureskipverify parameter
+  (mickael.canevet@camptocamp.com)
+- bug 1627689. Peg logging-es-ops to appropriate configmap
+  (jcantril@redhat.com)
+
 * Tue Oct 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.31-1
 - Ensure we don't attempt to yum install on atomic (mgugino@redhat.com)
 - Remove hostname override from OpenStack inventory (tomas@sedovic.cz)
