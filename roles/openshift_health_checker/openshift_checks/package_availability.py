@@ -38,10 +38,6 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
             "{rpm_prefix}-clients".format(rpm_prefix=rpm_prefix),
             "{rpm_prefix}-hyperkube".format(rpm_prefix=rpm_prefix),
             "bash-completion",
-            "cockpit-bridge",
-            "cockpit-docker",
-            "cockpit-system",
-            "cockpit-ws",
             "httpd-tools",
         ]
 
