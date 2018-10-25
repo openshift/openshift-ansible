@@ -2,7 +2,6 @@
 - name: Create the OpenStack resources for cluster installation
   import_playbook: provision_resources.yml
 
-
 - name: Evaluate OpenStack groups from the dynamic inventory
   import_playbook: evaluate_groups.yml
 
@@ -42,6 +41,9 @@
 
 
 - import_playbook: ../../init/basic_facts.yml
+
+- name: Run the init
+  import_playbook: ../../init/main.yml
 
 - name: Optionally subscribe the RHEL nodes
   any_errors_fatal: true
