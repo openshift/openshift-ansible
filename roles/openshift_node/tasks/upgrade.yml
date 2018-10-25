@@ -1,7 +1,6 @@
 ---
 # input variables:
 # - l_docker_upgrade
-# - openshift_is_atomic
 # - node_config_hook
 # - openshift_pkg_version
 
@@ -51,7 +50,6 @@
 
 - name: install pre-pulled rpms.
   import_tasks: upgrade/rpm_upgrade_install.yml
-  when: not openshift_is_atomic | bool
 
 # TODO(michaelgugino): Remove in 3.12
 - import_tasks: selinux_container_cgroup.yml

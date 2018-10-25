@@ -4,7 +4,6 @@
   package:
     name: flannel
     state: present
-  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 

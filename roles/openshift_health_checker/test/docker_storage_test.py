@@ -4,21 +4,16 @@ from openshift_checks import OpenShiftCheckException
 from openshift_checks.docker_storage import DockerStorage
 
 
-@pytest.mark.parametrize('openshift_is_atomic, group_names, is_active', [
-    (False, ["oo_masters_to_config", "oo_etcd_to_config"], False),
-    (False, ["oo_masters_to_config", "oo_nodes_to_config"], True),
-    (True, ["oo_etcd_to_config"], False),
+@pytest.mark.parametrize('group_names, is_active', [
+    (["oo_masters_to_config", "oo_etcd_to_config"], False),
+    (["oo_masters_to_config", "oo_nodes_to_config"], True),
+    (["oo_etcd_to_config"], False),
 ])
-def test_is_active(openshift_is_atomic, group_names, is_active):
+def test_is_active(group_names, is_active):
     task_vars = dict(
-        openshift_is_atomic=openshift_is_atomic,
         group_names=group_names,
     )
     assert DockerStorage(None, task_vars).is_active() == is_active
-
-
-def non_atomic_task_vars():
-    return {"openshift_is_atomic": False}
 
 
 @pytest.mark.parametrize('docker_info, failed, expect_msg', [
@@ -100,7 +95,7 @@ def test_check_storage_driver(docker_info, failed, expect_msg):
             raise ValueError("not expecting module " + module_name)
         return docker_info
 
-    check = DockerStorage(execute_module, non_atomic_task_vars())
+    check = DockerStorage(execute_module, {})
     check.check_dm_usage = lambda status: dict()  # stub out for this test
     check.check_overlay_usage = lambda info: dict()  # stub out for this test
     result = check.run()
@@ -292,7 +287,7 @@ ansible_mounts_zero_size = [{
     ),
 ])
 def test_overlay_usage(ansible_mounts, threshold, expect_fail, expect_msg):
-    task_vars = non_atomic_task_vars()
+    task_vars = {}
     task_vars["ansible_mounts"] = ansible_mounts
     if threshold is not None:
         task_vars["max_overlay_usage_percent"] = threshold

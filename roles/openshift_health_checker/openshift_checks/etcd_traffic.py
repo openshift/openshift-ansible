@@ -20,13 +20,10 @@ class EtcdTraffic(OpenShiftCheck):
         return super(EtcdTraffic, self).is_active() and valid_group_names and valid_version
 
     def run(self):
-        openshift_is_atomic = self.get_var("openshift_is_atomic")
-        unit = "etcd_container" if openshift_is_atomic else "etcd"
-
         log_matchers = [{
             "start_regexp": r"Starting Etcd Server",
             "regexp": r"etcd: sync duration of [^,]+, expected less than 1s",
-            "unit": unit
+            "unit": "etcd"
         }]
 
         match = self.execute_module("search_journalctl", {"log_matchers": log_matchers})

@@ -83,12 +83,6 @@ oc_adm_router.py:
 - class/oc_adm_router.py
 - ansible/oc_adm_router.py
 
-oc_atomic_container.py:
-- doc/generated
-- doc/license
-- doc/atomic_container
-- ansible/oc_atomic_container.py
-
 oc_configmap.py:
 - doc/generated
 - doc/license

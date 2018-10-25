@@ -4,7 +4,6 @@
     name: heketi-client
     state: present
   when:
-  - not openshift_is_atomic | bool
   - not glusterfs_heketi_is_native | bool
   register: result
   until: result is succeeded

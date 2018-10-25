@@ -5,7 +5,6 @@
     state: present
   when:
   - item.kind == 'HTPasswdPasswordIdentityProvider'
-  - not openshift_is_atomic | bool
   with_items: "{{ openshift_master_identity_providers }}"
   register: result
   until: result is succeeded

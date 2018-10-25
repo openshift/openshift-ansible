@@ -1,9 +1,8 @@
 """Check that a yum update would not run into conflicts with available packages."""
 from openshift_checks import OpenShiftCheck
-from openshift_checks.mixins import NotContainerizedMixin
 
 
-class PackageUpdate(NotContainerizedMixin, OpenShiftCheck):
+class PackageUpdate(OpenShiftCheck):
     """Check that a yum update would not run into conflicts with available packages."""
 
     name = "package_update"

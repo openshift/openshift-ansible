@@ -16,13 +16,10 @@
     import_role:
       name: openshift_sanitize_inventory
 
-  - name: Detecting Operating System from ostree_booted
-    stat:
-      path: /run/ostree-booted
-      get_checksum: false
-      get_attributes: false
-      get_mime: false
-    register: ostree_booted
+  - name: Detect OS Variant from /etc/os-release
+    fail:
+      msg: Atomic Host installations are no longer supported
+    when: lookup('ini', 'VARIANT_ID type=properties file=/etc/os-release') == 'atomic.host'
 
   # TODO(michaelgugino) remove this line once CI is updated.
   - name: set openshift_deployment_type if unset
@@ -31,32 +28,6 @@
     when:
     - openshift_deployment_type is undefined
     - deployment_type is defined
-
-  - name: initialize_facts set fact openshift_is_atomic
-    set_fact:
-      openshift_is_atomic: "{{ ostree_booted.stat.exists }}"
-
-  # TODO: Should this be moved into health checks??
-  # Seems as though any check that happens with a corresponding fail should move into health_checks
-  # Fail as early as possible if Atomic and old version of Docker
-  - when:
-    - openshift_is_atomic | bool
-    block:
-
-    # See https://access.redhat.com/articles/2317361
-    # and https://github.com/ansible/ansible/issues/15892
-    # NOTE: the "'s can not be removed at this level else the docker command will fail
-    # NOTE: When ansible >2.2.1.x is used this can be updated per
-    # https://github.com/openshift/openshift-ansible/pull/3475#discussion_r103525121
-    - name: Determine Atomic Host Docker Version
-      shell: 'CURLY="{"; docker version --format "$CURLY{json .Server.Version}}"'
-      register: l_atomic_docker_version
-
-    - name: assert atomic host docker version is 1.12 or later
-      assert:
-        that:
-        - l_atomic_docker_version.stdout | replace('"', '') is version('1.12','>=')
-        msg: Installation on Atomic Host requires Docker 1.12 or later. Please upgrade and restart the Atomic Host.
 
 - name: Retrieve existing master configs and validate
   hosts: oo_masters_to_config

@@ -1,14 +1,8 @@
 ---
 - import_tasks: common/pre.yml
 
-# In some cases, some services may be run as containers and docker may still
-# be installed via rpm.
-- import_tasks: common/atomic_proxy.yml
-  when: openshift_is_atomic
-
 - name: Get current installed Docker version
   command: "{{ repoquery_installed }} --qf '%{version}' docker"
-  when: not openshift_is_atomic | bool
   register: curr_docker_version
   retries: 4
   until: curr_docker_version is succeeded
@@ -24,14 +18,11 @@
   package:
     name: "{{ pkg_list | join(',') }}"
     state: present
-  when:
-  - not (openshift_is_atomic | bool)
   register: result
   until: result is succeeded
   vars:
     pkg_list:
     - "docker{{ '-' + docker_version if docker_version is defined else '' }}"
-    - atomic
     - skopeo
 
 - block:

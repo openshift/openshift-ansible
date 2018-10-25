@@ -2,26 +2,6 @@
 - name: setup firewall
   import_tasks: firewall.yml
 
-- name: Set the Nuage certificate directory fact for Atomic hosts
-  set_fact:
-    cert_output_dir: /var/usr/share/nuage-openshift-monitor
-  when: openshift_is_atomic | bool
-
-- name: Set the Nuage kubeconfig file path fact for Atomic hosts
-  set_fact:
-    kube_config: /var/usr/share/nuage-openshift-monitor/nuage.kubeconfig
-  when: openshift_is_atomic | bool
-
-- name: Set the Nuage monitor yaml location fact for Atomic hosts
-  set_fact:
-    kubemon_yaml: /var/usr/share/nuage-openshift-monitor/nuage-openshift-monitor.yaml
-  when: openshift_is_atomic | bool
-
-- name: Set the Nuage monitor certs location fact for Atomic hosts
-  set_fact:
-    nuage_master_crt_dir: /var/usr/share/nuage-openshift-monitor/
-  when: openshift_is_atomic | bool
-
 - name: Set the Nuage master config directory for daemon sets install
   set_fact:
     nuage_master_config_dsets_mount_dir: /var/usr/share/
@@ -32,35 +12,10 @@
     nuage_node_config_dsets_mount_dir: /var/usr/share/
   when: slave_host_type == "is_atomic"
 
-- name: Set the Nuage CNI plugin binary directory for daemon sets install
-  set_fact:
-    nuage_cni_bin_dsets_mount_dir: /var/opt/cni/bin
-  when: openshift_is_atomic | bool
-
 - name: Set the Nuage VRS mount dir for daemon sets install
   set_fact:
     nuage_vrs_mount_dir: /etc/default
   when: nuage_personality == "evdf"
-
-- name: Create directory /usr/share/nuage-openshift-monitor
-  become: yes
-  file: path=/usr/share/nuage-openshift-monitor state=directory
-  when: not openshift_is_atomic | bool
-
-- name: Create directory /var/usr/share/nuage-openshift-monitor
-  become: yes
-  file: path=/var/usr/share/nuage-openshift-monitor state=directory
-  when: openshift_is_atomic | bool
-
-- name: Create directory /var/usr/bin for monitor binary on atomic
-  become: yes
-  file: path=/var/usr/bin state=directory
-  when: openshift_is_atomic | bool
-
-- name: Create CNI bin directory /var/opt/cni/bin
-  become: yes
-  file: path=/var/opt/cni/bin state=directory
-  when: openshift_is_atomic | bool
 
 - name: Create the log directory
   become: yes

@@ -7,19 +7,6 @@
 #    images
 #    RPMs
 ---
-- hosts: OSEv3:children
-  become: yes
-  tasks:
-  - name: Detecting Operating System
-    shell: ls /run/ostree-booted
-    ignore_errors: yes
-    failed_when: false
-    register: ostree_output
-
-  # Since we're not calling openshift_facts we'll do this for now
-  - set_fact:
-      openshift_is_atomic: "{{ ostree_output.rc == 0 }}"
-
 - hosts: nodes:masters
   become: yes
   tasks:

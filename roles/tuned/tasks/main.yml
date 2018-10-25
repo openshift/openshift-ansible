@@ -9,10 +9,6 @@
 
 - name: Tuned service setup
   block:
-  - name: Set tuned OpenShift variables
-    set_fact:
-      openshift_tuned_guest_profile: "{{ 'atomic-guest' if openshift_is_atomic else 'virtual-guest' }}"
-
   - name: Ensure directory structure exists
     file:
       state: directory

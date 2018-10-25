@@ -227,6 +227,5 @@ def test_no_nodes():
 def test_sdn_skip_when_not_master_nor_node(group_names, expected):
     task_vars = dict(
         group_names=group_names,
-        openshift_is_atomic=True,
     )
     assert SDNCheck(None, task_vars).is_active() == expected

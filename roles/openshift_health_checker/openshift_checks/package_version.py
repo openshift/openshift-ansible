@@ -1,10 +1,9 @@
 """Check that available RPM packages match the required versions."""
 
 from openshift_checks import OpenShiftCheck
-from openshift_checks.mixins import NotContainerizedMixin
 
 
-class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
+class PackageVersion(OpenShiftCheck):
     """Check that available RPM packages match the required versions."""
 
     name = "package_version"

@@ -6,7 +6,6 @@
   until: job_result.finished
   when:
   - node_image.stdout_lines == []
-  - not openshift_is_atomic | bool
   retries: 20
   delay: 30
   failed_when: false

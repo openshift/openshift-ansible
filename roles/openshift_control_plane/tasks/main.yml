@@ -38,19 +38,11 @@
     src: "recycler_pod.yaml.j2"
     dest: "/etc/origin/master/recycler_pod.yaml"
 
-- name: Create flexvolume directory when on atomic hosts
-  file:
-    state: directory
-    path: "/etc/origin/kubelet-plugins/volume/exec"
-    mode: '0750'
-  when: openshift_is_atomic | bool
-
-- name: Flex volume directory on non-atomic host
+- name: Create flex volume directory on host
   file:
     state: directory
     path: "/usr/libexec/kubernetes/kubelet-plugins/volume/exec/"
     mode: '0750'
-  when: not openshift_is_atomic | bool
 
 - name: Create the policy file if it does not already exist
   command: >

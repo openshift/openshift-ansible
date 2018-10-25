@@ -7,19 +7,6 @@
 #    images
 #    RPMs
 ---
-- hosts: OSEv3:children
-  become: yes
-  tasks:
-  - name: Detecting Operating System
-    shell: ls /run/ostree-booted
-    ignore_errors: yes
-    failed_when: false
-    register: ostree_output
-
-  # Since we're not calling openshift_facts we'll do this for now
-  - set_fact:
-      openshift_is_atomic: "{{ ostree_output.rc == 0 }}"
-
 # Stop services on all hosts prior to removing files.
 - hosts: nodes
   become: yes
@@ -83,58 +70,55 @@
   - when: openshift_remove_all | default(true) | bool
     block:
 
-    - when: not openshift_is_atomic | bool
-      block:
+    - name: Remove packages
+      package:
+        name: "{{ pkg_list | join(',') }} "
+        state: absent
+      vars:
+        pkg_list:
+        - atomic-openshift
+        - atomic-openshift-clients
+        - atomic-openshift-excluder
+        - atomic-openshift-docker-excluder
+        - atomic-openshift-node
+        - atomic-openshift-sdn-ovs
+        - atomic-openshift-hyperkube
+        - cockpit-bridge
+        - cockpit-docker
+        - cockpit-system
+        - cockpit-ws
+        - kubernetes-client
+        - openshift
+        - openshift-node
+        - openshift-sdn
+        - openshift-sdn-ovs
+        - origin
+        - origin-excluder
+        - origin-docker-excluder
+        - origin-clients
+        - origin-node
+        - origin-sdn-ovs
+        - origin-hyperkube
+        - tuned-profiles-atomic-openshift-node
+        - tuned-profiles-origin-node
+      register: result
+      until: result is succeeded
 
-      - name: Remove packages
-        package:
-          name: "{{ pkg_list | join(',') }} "
-          state: absent
-        vars:
-          pkg_list:
-          - atomic-openshift
-          - atomic-openshift-clients
-          - atomic-openshift-excluder
-          - atomic-openshift-docker-excluder
-          - atomic-openshift-node
-          - atomic-openshift-sdn-ovs
-          - atomic-openshift-hyperkube
-          - cockpit-bridge
-          - cockpit-docker
-          - cockpit-system
-          - cockpit-ws
-          - kubernetes-client
-          - openshift
-          - openshift-node
-          - openshift-sdn
-          - openshift-sdn-ovs
-          - origin
-          - origin-excluder
-          - origin-docker-excluder
-          - origin-clients
-          - origin-node
-          - origin-sdn-ovs
-          - origin-hyperkube
-          - tuned-profiles-atomic-openshift-node
-          - tuned-profiles-origin-node
-        register: result
-        until: result is succeeded
+    - name: Remove OVS package
+      package:
+        name: openvswitch
+        state: absent
+      register: result
+      until: result is succeeded
+      when: openshift_use_openshift_sdn | default(True) | bool
 
-      - name: Remove OVS package
-        package:
-          name: openvswitch
-          state: absent
-        register: result
-        until: result is succeeded
-        when: openshift_use_openshift_sdn | default(True) | bool
-
-      - name: Remove flannel package
-        package:
-          name: flannel
-          state: absent
-        when: openshift_use_flannel | default(false) | bool
-        register: result
-        until: result is succeeded
+    - name: Remove flannel package
+      package:
+        name: flannel
+        state: absent
+      when: openshift_use_flannel | default(false) | bool
+      register: result
+      until: result is succeeded
 
     - shell: systemctl reset-failed
       changed_when: False
@@ -164,26 +148,6 @@
       with_items:
       - tun0
       when: openshift_use_openshift_sdn | default(True) | bool
-
-  - shell: atomic uninstall "{{ item }}"-node
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openshift-enterprise
-    - origin
-
-  - shell: atomic uninstall "{{ item }}"
-    changed_when: False
-    failed_when: False
-    with_items:
-    - etcd
-
-  - shell: atomic uninstall "{{ item }}"
-    changed_when: False
-    failed_when: False
-    with_items:
-    - openvswitch
-    when: openshift_use_openshift_sdn | default(True) | bool
 
   - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
     changed_when: False
@@ -321,7 +285,6 @@
       name: "{{ pkg_list | join(',') }}"
       state: absent
     when:
-    - not openshift_is_atomic | bool
     - openshift_remove_all | default(True) | bool
     vars:
       pkg_list:
@@ -435,7 +398,6 @@
       name: "{{ pkg_list | join(',') }}"
       state: absent
     when:
-    - not openshift_is_atomic | bool
     - openshift_remove_all | default(True) | bool
     vars:
       pkg_list:
@@ -500,7 +462,6 @@
       name: haproxy
       state: absent
     when:
-    - not openshift_is_atomic | bool
     - openshift_remove_all | default(True) | bool
     register: result
     until: result is succeeded
