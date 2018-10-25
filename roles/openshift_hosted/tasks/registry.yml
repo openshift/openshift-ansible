@@ -65,7 +65,6 @@
     clusterip: '{{ openshift_hosted_registry_clusterip | default(omit) }}'
 
 - include_tasks: secure.yml
-  run_once: true
   when:
   - not (openshift_docker_hosted_registry_insecure | default(False)) | bool
 

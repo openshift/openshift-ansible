@@ -12,4 +12,3 @@
 
 - when: openshift_cloudprovider_kind == 'azure'
   include_tasks: azure.yml
-  run_once: true
