@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.34.0%{?dist}
+Release:        0.35.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,18 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Oct 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.35.0
+- Don't install cockpit unless required (e.minguez@gmail.com)
+- openshift_ovirt: Add a task to create the VMs (rgolan@redhat.com)
+- Decalre the dns variable in the defaults (rgolan@redhat.com)
+- Fix version number in upgrade readme to 4.0. (pdd@redhat.com)
+- Add pull secret to the Calico controllers (mleung975@gmail.com)
+- Fix Calico liveness and readiness checks to include Calico 3.2
+  (mleung975@gmail.com)
+- Fail installation if Atomic Host variant ID is detected (vrutkovs@redhat.com)
+- Don't use 'atomic' RPM (vrutkovs@redhat.com)
+- Remove an option to install 4.0 on Atomic Hosts (vrutkovs@redhat.com)
+
 * Wed Oct 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.34.0
 - Fix incorrect until condition in servicecatalog api check
   (sdodson@redhat.com)
