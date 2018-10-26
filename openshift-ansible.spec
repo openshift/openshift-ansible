@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.32
+Version:        3.11.33
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,9 @@ fi
 
 
 %changelog
+* Fri Oct 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.33-1
+- Don't install cockpit unless required (e.minguez@gmail.com)
+
 * Thu Oct 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.32-1
 - Fix Calico liveness and readiness checks to include Calico 3.2
   (mleung975@gmail.com)
