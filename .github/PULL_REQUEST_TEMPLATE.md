@@ -1,6 +1,6 @@
 TEMPLATE
 ========
-The pull request title should be one line summary that completes the sentance
+The pull request title should be one line summary that completes the sentence
 "If merged, this change will ..."
 
 PR Description should explain why the change is necessary and reasoning
