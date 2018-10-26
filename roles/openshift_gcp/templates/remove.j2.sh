@@ -131,29 +131,17 @@ teardown "{{ openshift_gcp_prefix }}master-ssl-lb-backend" compute backend-servi
 teardown "{{ openshift_gcp_prefix }}master-ssl-lb-health-check" compute health-checks
 ) &
 
-#Firewall rules
-#['name']='parameters for "gcloud compute firewall-rules create"'
-#For all possible parameters see: gcloud compute firewall-rules create --help
-declare -A FW_RULES=(
-  ['icmp']=""
-  ['ssh-external']=""
-  ['ssh-internal']=""
-  ['master-internal']=""
-  ['master-external']=""
-  ['node-internal']=""
-  ['infra-node-internal']=""
-  ['infra-node-external']=""
-)
-for rule in "${!FW_RULES[@]}"; do
-    ( if gcloud --project "{{ openshift_gcp_project }}" compute firewall-rules describe "{{ openshift_gcp_prefix }}$rule" &>/dev/null; then
-        # retry a few times because this call can be flaky
-        for i in `seq 1 3`; do 
-            if gcloud -q --project "{{ openshift_gcp_project }}" compute firewall-rules delete "{{ openshift_gcp_prefix }}$rule"; then
-                break
-            fi
-        done
-    fi ) &
-done
+# Firewall rules
+(
+    if ! firewalls=$( gcloud --project "{{ openshift_gcp_project }}" compute firewall-rules list --filter="network~projects/{{ openshift_gcp_project }}/global/networks/{{ openshift_gcp_network_name }}" --format="value[terminator=' '](name)" 2>/dev/null ); then
+        exit 0
+    fi
+    firewalls="${firewalls%?}"
+    if [[ -z "${firewalls}" ]]; then
+        exit 0
+    fi
+    gcloud --project "{{ openshift_gcp_project }}" compute firewall-rules delete -q ${firewalls}
+) &
 
 for i in `jobs -p`; do wait $i; done
 
@@ -172,12 +160,9 @@ for name in $( gcloud --project "{{ openshift_gcp_project }}" compute images lis
     ( gcloud --project "{{ openshift_gcp_project }}" compute images delete "${name}" ) &
 done
 
-# Network
-( teardown "{{ openshift_gcp_network_name }}" compute networks ) &
-
 # Disks
 (
-    if ! disks=$( gcloud --project "{{ openshift_gcp_project }}" compute disks list --filter="users~projects/{{ openshift_gcp_project }}/zones/{{ openshift_gcp_zone }}/instances/{{ openshift_gcp_prefix }}-.*" --format="value[terminator=' '](name)" 2>/dev/null ); then
+    if ! disks=$( gcloud --project "{{ openshift_gcp_project }}" compute disks list --filter="users~projects/{{ openshift_gcp_project }}/zones/{{ openshift_gcp_zone }}/instances/{{ openshift_gcp_prefix }}.*" --format="value[terminator=' '](name)" 2>/dev/null ); then
         exit 0
     fi
     disks="${disks%?}"
@@ -185,7 +170,10 @@ done
         echo "warning: No disks in use by {{ openshift_gcp_prefix }}" 1>&2
         exit 0
     fi
-    gcloud --project "{{ openshift_gcp_project }}" compute disks delete "${disks}"
+    gcloud --project "{{ openshift_gcp_project }}" compute disks delete -q "${disks}"
 ) &
+
+# Network
+( teardown "{{ openshift_gcp_network_name }}" compute networks ) &
 
 for i in `jobs -p`; do wait $i; done
