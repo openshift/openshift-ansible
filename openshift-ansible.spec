@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.35.0%{?dist}
+Release:        0.36.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Oct 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.36.0
+- Fix ansible version checking (celebdor@gmail.com)
+
 * Thu Oct 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.35.0
 - Don't install cockpit unless required (e.minguez@gmail.com)
 - openshift_ovirt: Add a task to create the VMs (rgolan@redhat.com)
