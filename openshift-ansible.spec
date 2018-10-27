@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.36.0%{?dist}
+Release:        0.37.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,18 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Oct 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.37.0
+- Added validation to avoid upload template always (jparrill@redhat.com)
+- openshift_console: remove OAuthClient when uninstalling (mlibra@redhat.com)
+- adding kuryr ports back (egarcia@redhat.com)
+- Prepull node image using openshift_container_cli (vrutkovs@redhat.com)
+- clarification in response to comments (iamemilio@users.noreply.github.com)
+- correction (i.am.emilio@gmail.com)
+- clearer instructions (iamemilio@users.noreply.github.com)
+- Certain ports were incorrectly configured by default. (i.am.emilio@gmail.com)
+- Update existing template for registry-console and make sure created objects
+  are updated (vrutkovs@redhat.com)
+
 * Fri Oct 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.36.0
 - Fix ansible version checking (celebdor@gmail.com)
 
