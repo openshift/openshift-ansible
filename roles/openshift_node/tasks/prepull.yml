@@ -5,10 +5,7 @@
 
 # This task runs async to save time while the node is being configured
 - name: Pre-pull node image
-  docker_image:
-    name: "{{ osn_image }}"
-  environment:
-    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+  command: "{{ openshift_container_cli }} pull {{ osn_image }}"
   when: node_image.stdout_lines == []
   # 10 minutes to pull the image
   async: 600
