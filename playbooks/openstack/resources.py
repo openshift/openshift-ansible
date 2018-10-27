@@ -51,8 +51,9 @@ def base_openshift_inventory(cluster_hosts):
     # NOTE: everything that should go to the `[nodes]` group:
     nodes = list(set(masters + infra_hosts + app + cns))
 
-    # NOTE: all OpenShift nodes, including `[lb]`, `[nfs]`, etc.:
-    osev3 = list(set(nodes + load_balancers))
+    # NOTE: all OpenShift nodes + any "supporting" roles,
+    #       i.e.: `[etcd]`, `[lb]`, `[nfs]`, etc.:
+    osev3 = list(set(nodes + etcd + load_balancers))
 
     inventory['OSEv3'] = {'hosts': osev3, 'vars': {}}
     inventory['openstack_nodes'] = {'hosts': nodes}
