@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.48
+Version:        3.9.49
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Oct 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.49-1
+- Update oc_group.py in src (camabeh@gmail.com)
+- Update tests (camabeh@gmail.com)
+- Fix oc group get (camabeh@gmail.com)
+- roles/openshift-prometheus: fix failing prometheus service discovery scrapes
+  (pgier@redhat.com)
+- Pass admin kubeconfig (sdodson@redhat.com)
+
 * Sat Oct 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.48-1
 - Use first_master_client_binary from hostvars[groups.oo_first_master.0]
   (nakayamakenjiro@gmail.com)
