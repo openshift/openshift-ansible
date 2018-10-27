@@ -17,7 +17,7 @@
 
 - name: Create registry-console template
   command: >
-    {{ openshift_client_binary }} create
+    {{ openshift_client_binary }} apply
     -f {{ mktemp.stdout }}/registry-console.yaml
     --config={{ mktemp.stdout }}/admin.kubeconfig
     -n openshift
@@ -48,14 +48,15 @@
   register: registry_console_cockpit_kube
 
 - name: Deploy registry-console
-  command: >
-    {{ openshift_client_binary }} new-app --template=registry-console
+  shell: >
+    {{ openshift_client_binary }} process openshift//registry-console
     -p IMAGE_NAME="{{ openshift_cockpit_deployer_image }}"
     -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
     -p REGISTRY_HOST="{{ docker_registry_route.results[0].spec.host }}"
     -p COCKPIT_KUBE_URL="https://{{ registry_console_cockpit_kube.results.results[0].spec.host }}"
     --config={{ mktemp.stdout }}/admin.kubeconfig
     -n default
+    | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
   register: deploy_registry_console
   changed_when: "'already exists' not in deploy_registry_console.stderr"
   failed_when:
