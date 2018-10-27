@@ -49,7 +49,7 @@ def base_openshift_inventory(cluster_hosts):
                       if server.metadata['host-type'] == 'lb']
 
     # NOTE: everything that should go to the `[nodes]` group:
-    nodes = list(set(masters + etcd + infra_hosts + app + cns))
+    nodes = list(set(masters + infra_hosts + app + cns))
 
     # NOTE: all OpenShift nodes, including `[lb]`, `[nfs]`, etc.:
     osev3 = list(set(nodes + load_balancers))
