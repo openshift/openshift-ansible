@@ -125,6 +125,7 @@ openshift_openstack_num_masters: 1
 openshift_openstack_num_infra: 1
 openshift_openstack_num_cns: 0
 openshift_openstack_num_nodes: 2
+openshift_openstack_num_etcd: 0
 
 # # Public IP Allocation
 # # - manage which node roles are allocated public IP addresses
