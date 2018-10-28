@@ -161,11 +161,8 @@ parameters:
 
   extra_cns_volume_size:
     type: number
-    description: Size of the root volume to be created.
+    description: Size of the cns volume to be created.
     default: 0
-      constraints:
-      - range: { min: 0, max: 1024 }
-        description: must be between 0 and 1024 Gb.
 
   openshift_node_group_name:
     type: string
