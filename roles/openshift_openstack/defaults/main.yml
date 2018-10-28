@@ -105,6 +105,15 @@ openshift_openstack_cns_volume_size: "{{ openshift_openstack_docker_volume_size 
 openshift_openstack_node_volume_size: "{{ openshift_openstack_docker_volume_size }}"
 openshift_openstack_etcd_volume_size: 2
 openshift_openstack_lb_volume_size: 5
+
+openshift_openstack_root_volume_size: 60
+openshift_openstack_master_root_volume_size: "{{ openshift_openstack_root_volume_size }}"
+openshift_openstack_infra_root_volume_size: "{{ openshift_openstack_root_volume_size }}"
+openshift_openstack_cns_root_volume_size: "{{ openshift_openstack_root_volume_size }}"
+openshift_openstack_node_root_volume_size: "{{ openshift_openstack_root_volume_size }}"
+openshift_openstack_etcd_root_volume_size: "{{ openshift_openstack_root_volume_size }}"
+openshift_openstack_lb_root_volume_size: "{{ openshift_openstack_root_volume_size }}"
+
 openshift_openstack_ephemeral_volumes: false
 openshift_openstack_master_group_name: node-config-master
 openshift_openstack_infra_group_name: node-config-infra

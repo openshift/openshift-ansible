@@ -680,6 +680,7 @@ resources:
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_etcd_volume_size }}
+          root_volume_size: {{ openshift_openstack_etcd_root_volume_size }}
 {% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
@@ -763,6 +764,7 @@ resources:
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_lb_volume_size }}
+          root_volume_size: {{ openshift_openstack_lb_root_volume_size }}
 {% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
@@ -854,6 +856,7 @@ resources:
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_master_volume_size }}
+          root_volume_size: {{ openshift_openstack_master_root_volume_size }}
 {% if openshift_openstack_master_server_group_policies|length > 0 %}
           scheduler_hints:
             group: { get_resource: master_server_group }
@@ -937,6 +940,7 @@ resources:
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_node_volume_size }}
+          root_volume_size: {{ openshift_openstack_node_root_volume_size }}
 {% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
@@ -1024,6 +1028,7 @@ resources:
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_infra_volume_size }}
+          root_volume_size: {{ openshift_openstack_infra_root_volume_size }}
 {% if openshift_openstack_infra_server_group_policies|length > 0 %}
           scheduler_hints:
             group: { get_resource: infra_server_group }
@@ -1106,6 +1111,7 @@ resources:
           floating_network: {{ openshift_openstack_external_network_name }}
 {% endif %}
           volume_size: {{ openshift_openstack_cns_volume_size }}
+          root_volume_size: {{ openshift_openstack_cns_root_volume_size }}
 {% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
     depends_on:
       - interface
