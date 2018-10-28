@@ -1024,6 +1024,7 @@ resources:
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_infra_volume_size }}
+          extra_cns_volume_size: {{ openshift_openstack_infra_extra_cns_volume_size }}
 {% if openshift_openstack_infra_server_group_policies|length > 0 %}
           scheduler_hints:
             group: { get_resource: infra_server_group }

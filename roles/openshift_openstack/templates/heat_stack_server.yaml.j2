@@ -159,6 +159,14 @@ parameters:
       - range: { min: 1, max: 1024 }
         description: must be between 1 and 1024 Gb.
 
+  extra_cns_volume_size:
+    type: number
+    description: Size of the root volume to be created.
+    default: 0
+      constraints:
+      - range: { min: 0, max: 1024 }
+        description: must be between 0 and 1024 Gb.
+
   openshift_node_group_name:
     type: string
     default: ''
@@ -200,6 +208,7 @@ outputs:
         - addr
 
 conditions:
+  cns_volume: {not: { equals: [{get_param: extra_cns_volume_size },0] } }
   no_floating: {not: { get_param: attach_float_net} }
 {% if openshift_use_flannel|default(False)|bool %}
   no_data_subnet: {not: { get_param: attach_data_net} }
@@ -333,6 +342,23 @@ resources:
       instance_uuid: { get_resource: server }
 {% endif %}
 
+{% if openshift_openstack_infra_extra_cns_volume_size|default(0) > 0 %}
+  cns_volume:
+    condition: cns_volume
+    type: OS::Cinder::Volume
+    properties:
+      size: { get_param: extra_cns_volume_size }
+      availability_zone: { get_param: availability_zone }
+      metadata:
+        purpose: openshift_cns_storage
+
+  cns_volume_attachment:
+    condition: cns_volume
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      volume_id: { get_resource: cns_volume }
+      instance_uuid: { get_resource: server }
+{% endif %}
 
   api_lb_member:
     type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
