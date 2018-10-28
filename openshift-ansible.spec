@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.133
+Version:        3.6.173.0.134
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Oct 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.134-1
+- 
+
 * Sun Oct 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.133-1
 - Remove 3.7 version check for shared-resource-viewer in control plane upgrade.
   (pdd@redhat.com)
