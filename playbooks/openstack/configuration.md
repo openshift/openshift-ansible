@@ -18,6 +18,7 @@ Environment variables may also be used.
 * [DNS Configuration](#dns-configuration)
 * [Floating IP Address Configuration](#floating-ip-address-configuration)
 * [All-in-one Deployment Configuration](#all-in-one-deployment-configuration)
+* [Separate etcd Deployment Configuration](#separate-etcd-deployment-configuration)
 * [Multi-env Deployment Configuration](#multi-env-deployment-configuration)
 * [Building Node Images](#building-node-images)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
@@ -39,10 +40,12 @@ In `inventory/group_vars/all.yml`:
 * `openshift_openstack_keypair_name` OpenStack keypair to use.
 * Role Node Counts
   * `openshift_openstack_num_masters` Number of master nodes to create.
+  * `openshift_openstack_num_etcd` Number of etcd nodes to create (0 if co-hosted on master hosts).
   * `openshift_openstack_num_infra` Number of infra nodes to create.
   * `openshift_openstack_num_nodes` Number of app nodes to create.
 * Role Node Floating IP Allocation
   * `openshift_openstack_master_floating_ip` Assign floating IP to master nodes. Defaults to `True`.
+  * `openshift_openstack_etcd_floating_ip` Assign floating IP to etcd nodes (if any). Defaults to `True`.
   * `openshift_openstack_infra_floating_ip` Assign floating IP to infra nodes. Defaults to `True`.
   * `openshift_openstack_compute_floating_ip` Assign floating IP to app nodes. Defaults to `True`.
 * Role Images
@@ -514,6 +517,7 @@ First, set the following in `inventory/group_vars/all.yml`:
 ```
 openshift_use_all_in_one_cluster_deployment: True
 openshift_openstack_num_masters: 1
+openshift_openstack_num_etcd: 0
 openshift_openstack_num_infra: 0
 openshift_openstack_num_nodes: 0
 
@@ -546,6 +550,29 @@ with an all-in-one setup the DNS wildcard record for the apps domain will not be
 added, because there are no dedicated infra nodes, so you will have to add it
 manually. See
 [Custom DNS Records Configuration](#custom-dns-records-configuration).
+
+
+## Separate etcd Deployment Configuration
+
+If you want to deploy OpenShift Container Platform with the etcd running on separate hosts
+appart from the master hosts, the following changes need to be made to the inventory:
+
+Single master and single etcd host:
+```
+ :
+openshift_openstack_num_masters: 1
+openshift_openstack_num_etcd: 1
+ :
+```
+
+Multiple master and multiple etcd hosts:
+```
+ :
+openshift_openstack_num_masters: 3
+openshift_openstack_num_etcd: 3
+ :
+```
+
 
 ## Multi-env Deployment Configuration
 
