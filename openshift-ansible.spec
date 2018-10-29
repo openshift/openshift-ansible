@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.33
+Version:        3.11.34
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,9 @@ fi
 
 
 %changelog
+* Sun Oct 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.34-1
+- Prepull node image using openshift_container_cli (vrutkovs@redhat.com)
+
 * Fri Oct 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.33-1
 - Don't install cockpit unless required (e.minguez@gmail.com)
 
