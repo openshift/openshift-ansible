@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.38.0%{?dist}
+Release:        0.39.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Oct 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.39.0
+- Increase Octavia OpenShift API loadbalancer timeouts (ltomasbo@redhat.com)
+
 * Sun Oct 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.38.0
 - Improve cleanup of networks and disks in GCP (ccoleman@redhat.com)
 
