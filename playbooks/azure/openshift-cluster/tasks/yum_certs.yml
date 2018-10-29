@@ -13,7 +13,7 @@
   when: ansible_distribution == "RedHat"
 
 - name: add yum repositories
-  import_role:
+  include_role:
     name: openshift_repos
   vars:
     r_openshift_repos_has_run: True
