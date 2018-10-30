@@ -655,7 +655,7 @@ def lib_utils_oo_oreg_image(image_default, oreg_url):
     # if no oreg_url is specified, we just return the original default
     if oreg_url == 'None':
         return image_default
-    oreg_parts = oreg_url.split('/')
+    oreg_parts = oreg_url.rsplit('/', 2)
     if len(oreg_parts) < 2:
         raise errors.AnsibleFilterError("oreg_url malformed: {}".format(oreg_url))
     if not (len(oreg_parts) >= 3 and '.' in oreg_parts[0]):
