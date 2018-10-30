@@ -58,6 +58,11 @@ options:
             - Attempt to connect to registry with username + password provided.
         default: true
         required: false
+    test_timeout:
+        description:
+            - Timeout in seconds for each attempt to connect to registry.
+        default: 20
+        required: false
 
 author:
     - "Michael Gugino <mgugino@redhat.com>"
@@ -72,6 +77,7 @@ EXAMPLES = '''
     username: myuser
     password: mypassword
     test_login: True
+    test_timeout: 30
 '''
 
 
@@ -132,13 +138,13 @@ def load_config_file(module, dest):
 
 
 # pylint: disable=too-many-arguments
-def gen_skopeo_cmd(registry, username, password, proxy_vars, test_image, tls_verify):
+def gen_skopeo_cmd(registry, username, password, proxy_vars, test_timeout, test_image, tls_verify):
     '''Generate skopeo command to run'''
-    skopeo_temp = ("{proxy_vars} timeout 10 skopeo inspect"
+    skopeo_temp = ("{proxy_vars} timeout {test_timeout} skopeo inspect"
                    " {creds} docker://{registry}/{test_image}")
     # this will quote the entire creds argument to account for special chars.
     creds = pipes.quote('--creds={}:{}'.format(username, password))
-    skopeo_args = {'proxy_vars': proxy_vars, 'creds': creds,
+    skopeo_args = {'proxy_vars': proxy_vars, 'test_timeout': test_timeout, 'creds': creds,
                    'registry': registry, 'test_image': test_image,
                    'tls_verify': tls_verify}
     return skopeo_temp.format(**skopeo_args).strip()
@@ -200,6 +206,7 @@ def run_module():
         password=dict(type='str', required=True, no_log=True),
         test_login=dict(type='bool', required=False, default=True),
         proxy_vars=dict(type='str', required=False, default=''),
+        test_timeout=dict(type='int', required=False, default=20),
         test_image=dict(type='str', required=True),
         tls_verify=dict(type='bool', required=False, default=True)
     )
@@ -216,6 +223,7 @@ def run_module():
     password = module.params['password']
     test_login = module.params['test_login']
     proxy_vars = module.params['proxy_vars']
+    test_timeout = module.params['test_timeout']
     test_image = module.params['test_image']
     tls_verify = module.params['tls_verify']
 
@@ -230,7 +238,7 @@ def run_module():
     # Test the credentials
     if test_login:
         skopeo_command = gen_skopeo_cmd(registry, username, password,
-                                        proxy_vars, test_image, tls_verify)
+                                        proxy_vars, test_timeout, test_image, tls_verify)
         validate_registry_login(module, skopeo_command)
 
     # base64 encode our username:password string
