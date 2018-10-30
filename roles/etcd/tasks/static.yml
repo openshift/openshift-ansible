@@ -15,6 +15,11 @@
   async: 600
   poll: 0
   register: etcd_prepull
+  until:
+  - "'rc' in etcd_prepull"
+  - etcd_prepull.rc == 0
+  retries: 5
+  delay: 10
 
 - import_tasks: drop_etcdctl.yml
 

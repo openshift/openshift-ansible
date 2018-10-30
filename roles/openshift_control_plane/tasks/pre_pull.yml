@@ -13,3 +13,8 @@
   async: 600
   poll: 0
   register: image_prepull
+  until:
+  - "'rc' in image_prepull"
+  - image_prepull.rc == 0
+  retries: 5
+  delay: 10
