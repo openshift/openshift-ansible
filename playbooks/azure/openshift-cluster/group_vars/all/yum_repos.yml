@@ -33,16 +33,16 @@ azure_node_repos:
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
-  - name: rhel-7-server-ansible-2.4-rpms
-    baseurl: https://mirror.openshift.com/enterprise/rhel/rhel-7-server-ansible-2.4-rpms/
+  - name: rhel-7-server-ansible-2.6-rpms
+    baseurl: https://mirror.openshift.com/enterprise/rhel/rhel-7-server-ansible-2.6-rpms/
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
     sslclientcert: /var/lib/yum/client-cert.pem
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
-  # TODO: Replace me post GA with https://mirror.openshift.com/libra/rhui-rhel-server-7-ose-4.0/
-  - name: rhel-server-7-ose-4.0
-    baseurl: https://mirror.openshift.com/enterprise/all/4.0/latest/x86_64/os
+  # TODO: Replace me post GA with https://mirror.openshift.com/libra/rhui-rhel-server-7-ose-3.11/
+  - name: rhel-server-7-ose-3.11
+    baseurl: https://mirror.openshift.com/enterprise/all/3.11/latest/x86_64/os
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
     # TODO: Remove me post GA
     gpgcheck: false
