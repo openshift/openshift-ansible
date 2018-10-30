@@ -2,6 +2,13 @@
 - name: Install the systemd units
   import_tasks: systemd_units.yml
 
+- name: Install node system container
+  import_tasks: node_system_container.yml
+  when: openshift_is_atomic | bool
+
+- import_tasks: config/configure-node-settings.yml
+- import_tasks: configure-proxy-settings.yml
+
 - name: Configure Node Environment Variables
   lineinfile:
     dest: /etc/sysconfig/{{ openshift_service_type }}-node

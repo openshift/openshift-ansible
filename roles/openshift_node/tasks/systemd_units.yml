@@ -12,10 +12,3 @@
   when: not openshift_is_atomic | bool
   notify:
   - reload systemd units
-
-- name: Install node system container
-  import_tasks: node_system_container.yml
-  when: openshift_is_atomic | bool
-
-- import_tasks: config/configure-node-settings.yml
-- import_tasks: configure-proxy-settings.yml
