@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.34
+Version:        3.11.35
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,15 @@ fi
 
 
 %changelog
+* Tue Oct 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.35-1
+- Ensure proper task ordering atomic upgrades. (mgugino@redhat.com)
+- Increase Octavia OpenShift API loadbalancer timeouts (ltomasbo@redhat.com)
+- Update existing template for registry-console and make sure created objects
+  are updated (vrutkovs@redhat.com)
+- Fix ansible version checking (celebdor@gmail.com)
+- Add unit test for oo_oreg_image filter (mgugino@redhat.com)
+- lib_utils_oo_oreg_image preserve path component (jkupfere@redhat.com)
+
 * Sun Oct 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.34-1
 - Prepull node image using openshift_container_cli (vrutkovs@redhat.com)
 
