@@ -82,6 +82,17 @@
   - item.kind == 'OpenIDIdentityProvider'
   with_items: "{{ openshift_master_identity_providers }}"
 
+- name: Create the GitHub (Enterprise) ca file if needed
+  copy:
+    dest: "/etc/origin/master/{{ item.name }}_github_ca.crt"
+    content: "{{ openshift.master.github_ca }}"
+    mode: 0600
+    backup: yes
+  when:
+  - openshift.master.github_ca is defined
+  - item.kind == 'GitHubIdentityProvider'
+  with_items: "{{ openshift_master_identity_providers }}"
+
 - name: Create the request header ca file if needed
   copy:
     dest: "/etc/origin/master/{{ item.name }}_request_header_ca.crt"
