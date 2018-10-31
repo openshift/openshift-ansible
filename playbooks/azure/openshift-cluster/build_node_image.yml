@@ -90,7 +90,9 @@
     copy:
       dest: "/etc/origin/oreg_url"
       content: "{{ oreg_url }}"
-    when: oreg_url is defined
+    when: 
+    - oreg_url is defined
+    - oreg_url != ""
 
   - name: create a file with image name
     copy:
