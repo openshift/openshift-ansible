@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.40.0%{?dist}
+Release:        0.41.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Oct 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.41.0
+- 4.0 -> 3.11 (mangirdas@judeikis.lt)
+- add 3.11 build steps (mangirdas@judeikis.lt)
+- rollback azure cli version and sas image config path (mangirdas@judeikis.lt)
+- Make timeout a param and increase default to 20 for docker_creds.py
+  (chmurphy@redhat.com)
+- Ensure Kuryr-controller runs on infra nodes (ltomasbo@redhat.com)
+- Updating clean up task to match become of creation task (ewolinet@redhat.com)
+
 * Mon Oct 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.40.0
 - 
 
