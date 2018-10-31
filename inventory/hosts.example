@@ -249,6 +249,20 @@ debug_level=2
 # or
 #openshift_master_request_header_ca_file=<path to local ca file to use>
 
+# GitHub auth
+#openshift_master_identity_providers=[{"name": "github", "login": "true", "challenge": "false", "kind": "GitHubIdentityProvider", "mappingMethod": "claim", "client_id": "my_client_id", "client_secret": "my_client_secret", "teams": ["team1", "team2"], "hostname": "githubenterprise.example.com", "ca": "" }]
+#
+# Configure github CA certificate
+# Specify either the ASCII contents of the certificate or the path to
+# the local file that will be copied to the remote host. CA
+# certificate contents will be copied to master systems and saved
+# within /etc/origin/master/ with a filename matching the "ca" key set
+# within the GitHubIdentityProvider.
+#
+#openshift_master_github_ca=<ca text>
+# or
+#openshift_master_github_ca_file=<path to local ca file to use>
+
 # CloudForms Management Engine (ManageIQ) App Install
 #
 # Enables installation of MIQ server. Recommended for dedicated
