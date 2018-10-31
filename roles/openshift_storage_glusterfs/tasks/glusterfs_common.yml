@@ -76,12 +76,6 @@
   - glusterfs_heketi_is_native
   - glusterfs_heketi_is_missing
 
-- name: Check if gluster-s3 can't be deployed
-  set_fact:
-    glusterfs_s3_deploy: False
-  when:
-  - "glusterfs_s3_account is not defined or glusterfs_s3_user is not defined or glusterfs_s3_password is not defined"
-
 - block:
   - name: Create heketi secret
     oc_secret:
@@ -108,8 +102,7 @@
       name: "glusterfs-{{ glusterfs_name }}"
       files:
       - "{{ mktemp.stdout }}/glusterfs-storageclass.yml"
-  when:
-  - glusterfs_storageclass or glusterfs_s3_deploy
+  when: glusterfs_storageclass
 
 - import_tasks: glusterblock_deploy.yml
   when: glusterfs_block_deploy
@@ -118,4 +111,8 @@
   when: glusterfs_block_storageclass
 
 - import_tasks: gluster_s3_deploy.yml
-  when: glusterfs_s3_deploy
+  when:
+  - glusterfs_s3_deploy
+  - glusterfs_s3_account is defined
+  - glusterfs_s3_user is defined
+  - glusterfs_s3_password is defined
