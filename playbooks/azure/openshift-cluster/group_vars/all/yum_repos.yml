@@ -33,8 +33,8 @@ azure_node_repos:
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
-  - name: rhel-7-server-ansible-2.4-rpms
-    baseurl: https://mirror.openshift.com/enterprise/rhel/rhel-7-server-ansible-2.4-rpms/
+  - name: rhel-7-server-ansible-2.6-rpms
+    baseurl: https://mirror.openshift.com/enterprise/rhel/rhel-7-server-ansible-2.6-rpms/
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
     sslclientcert: /var/lib/yum/client-cert.pem
     sslclientkey: /var/lib/yum/client-key.pem
