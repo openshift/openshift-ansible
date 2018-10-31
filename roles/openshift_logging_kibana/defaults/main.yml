@@ -42,3 +42,7 @@ openshift_logging_kibana_key: ""
 #The absolute path on the control node to the CA file to use
 #for the public facing kibana certs
 openshift_logging_kibana_ca: ""
+
+# Value in OauthClient object definition that overwrites master-config
+# 1 week = 168 hours = 604800 seconds
+openshift_logging_kibana_session_timeout_seconds: 604800
