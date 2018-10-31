@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.35
+Version:        3.11.36
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -170,6 +170,11 @@ fi
 
 
 %changelog
+* Wed Oct 31 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.36-1
+- Make timeout a param and increase default to 20 for docker_creds.py
+  (chmurphy@redhat.com)
+- Updating clean up task to match become of creation task (ewolinet@redhat.com)
+
 * Tue Oct 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.35-1
 - Ensure proper task ordering atomic upgrades. (mgugino@redhat.com)
 - Increase Octavia OpenShift API loadbalancer timeouts (ltomasbo@redhat.com)
