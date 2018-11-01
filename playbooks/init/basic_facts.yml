@@ -32,10 +32,9 @@
     - openshift_deployment_type is undefined
     - deployment_type is defined
 
-  - name: initialize_facts set fact openshift_is_atomic and openshift_is_containerized
+  - name: initialize_facts set fact openshift_is_atomic
     set_fact:
       openshift_is_atomic: "{{ ostree_booted.stat.exists }}"
-      openshift_is_containerized: "{{ ostree_booted.stat.exists or (containerized | default(false) | bool) }}"
 
   # TODO: Should this be moved into health checks??
   # Seems as though any check that happens with a corresponding fail should move into health_checks
