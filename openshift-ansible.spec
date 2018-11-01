@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.42.0%{?dist}
+Release:        0.43.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Nov 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.43.0
+- Update playbooks/azure/openshift-cluster/build_node_image.yml
+  (roignac@gmail.com)
+- add oreg_url check (mangirdas@judeikis.lt)
+
 * Wed Oct 31 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.42.0
 - Adding configuration documentation for etcd (bedin@redhat.com)
 - Fixing provisioning of separate etcd (bedin@redhat.com)
