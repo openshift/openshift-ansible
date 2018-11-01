@@ -2,6 +2,7 @@
 openshift_openstack_stack_state: 'present'
 
 openshift_openstack_ssh_ingress_cidr: 0.0.0.0/0
+openshift_openstack_master_ingress_cidr: 0.0.0.0/0
 openshift_openstack_node_ingress_cidr: 0.0.0.0/0
 openshift_openstack_lb_ingress_cidr: 0.0.0.0/0
 openshift_openstack_num_etcd: 0
@@ -162,6 +163,11 @@ openshift_openstack_etcd_secgroup_rules:
   - direction: ingress
     protocol: tcp
     port_range_min: 2379
+    port_range_max: 2379
+    remote_ip_prefix: "{{ openshift_openstack_master_ingress_cidr }}"
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 2380
     port_range_max: 2380
     remote_mode: remote_group_id
 openshift_openstack_node_secgroup_rules:
