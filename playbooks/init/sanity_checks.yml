@@ -17,3 +17,38 @@
   # node_group_checks is a custom action plugin defined in lib_utils.
   - name: Validate openshift_node_groups and openshift_node_group_name
     node_group_checks: {}
+  - name: Validate openshift_master_ca_certificate when defined
+    fail:
+      msg: >
+        If defined, openshift_master_ca_certificate must include two
+        parameters: certfile and keyfile. The certfile parameter must contain
+        only the single certificate that signs the OpenShift Container Platform
+        certificates. If you have intermediate certificates in your chain, you
+        must bundle them into a different file.
+        See https://docs.openshift.org/latest/install_config/redeploying_certificates.html#redeploying-new-custom-ca
+    when:
+    - openshift_master_ca_certificate is defined
+    - ( 'certfile' not in openshift_master_ca_certificate )
+      or 'keyfile' not in openshift_master_ca_certificate
+      or lookup('file', openshift_master_ca_certificate.certfile) | regex_findall('BEGIN CERTIFICATE') | count != 1
+  - name: Fetch ca.crt from cluster if exists
+    slurp:
+      src: "{{ openshift.common.config_base }}/master/ca.crt"
+    failed_when: false
+    changed_when: false
+    register: l_existing_master_ca_certificate
+  - name: Validate ca.crt from cluster if exists
+    fail:
+      msg: >
+        There is an issue with the existing ca.crt in the cluster
+        ( {{ inventory_hostname }}:{{ openshift.common.config_base }}/master/ca.crt ).
+        It must contain only the single certificate that signs the OpenShift
+        Container Platform certificates. If you have intermediate certificates
+        in your chain, you must bundle them into ca-bundle.crt. It is possible
+        the ca.crt and ca-bundle.crt files are symlinked, in which case you
+        will need to seperate the two to achieve the desired configuration.
+        See https://docs.openshift.org/latest/install_config/redeploying_certificates.html#redeploying-new-custom-ca
+    when:
+    - l_existing_master_ca_certificate is defined
+    - l_existing_master_ca_certificate.content is defined
+    - l_existing_master_ca_certificate.content | b64decode | regex_findall('BEGIN CERTIFICATE') | count != 1
