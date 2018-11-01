@@ -90,7 +90,7 @@
     copy:
       dest: "/etc/origin/oreg_url"
       content: "{{ oreg_url }}"
-    when: 
+    when:
     - oreg_url is defined
     - oreg_url != ""
 
