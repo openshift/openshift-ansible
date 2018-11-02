@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.36
+Version:        3.11.37
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -187,6 +187,21 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Nov 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.37-1
+- Backporting PR 10541 to release-3.11 (bedin@redhat.com)
+- downgrade azure cli (mangirdas@judeikis.lt)
+- Ensure Kuryr-controller runs on infra nodes (ltomasbo@redhat.com)
+- add 3.11 build steps (mangirdas@judeikis.lt)
+- Fixes #8267 (mavazque@redhat.com)
+- set kibana session timeout to 168 hours (jkarasek@redhat.com)
+- Add a new dockerfile to use in CI (vrutkovs@redhat.com)
+- Add new package which contains test playbooks (vrutkovs@redhat.com)
+- Remove traces of containerized install (vrutkovs@redhat.com)
+- openshift_storage_nfs_lvm: fix with_sequence (jfchevrette@gmail.com)
+- - s3 variables check as part of importing the s3 tasks itself.
+  (sarumuga@redhat.com)
+- Avoid S3 deployment check (sarumuga@redhat.com)
+
 * Wed Oct 31 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.36-1
 - Make timeout a param and increase default to 20 for docker_creds.py
   (chmurphy@redhat.com)
