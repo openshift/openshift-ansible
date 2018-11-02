@@ -122,7 +122,7 @@
     state: absent
 - name: Find current value for runtime-config
   yedit:
-    src: "/tmp/master-config.yaml"
+    src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: "kubernetesMasterConfig.apiServerArguments.runtime-config"
     state: list
   register: runtime_config
