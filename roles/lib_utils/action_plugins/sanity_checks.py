@@ -386,7 +386,7 @@ class ActionModule(ActionBase):
             if kind == 'nfs':
                 raise errors.AnsibleModuleError(
                     'nfs is an unsupported type for {}. '
-                    'openshift_enable_unsupported_configurations=True must'
+                    'openshift_enable_unsupported_configurations=True must '
                     'be specified to continue with this configuration.'
                     ''.format(storage))
         return None
