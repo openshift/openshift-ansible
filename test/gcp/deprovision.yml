@@ -6,5 +6,4 @@
   tasks:
   - include_role:
       name: openshift_gcp
-    vars:
-      state: absent
+      tasks_from: deprovision.yml

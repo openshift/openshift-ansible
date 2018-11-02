@@ -1,3 +1,4 @@
+---
 - name: Configure AWS Cloud Provider Settings
   lineinfile:
     dest: /etc/kubernetes/kubelet-env

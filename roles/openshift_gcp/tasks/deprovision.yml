@@ -1,0 +1,79 @@
+---
+- name: Fetch instance group managers
+  gcp_compute_instance_group_manager_facts:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    zone: "{{ openshift_gcp_zone }}"
+    filters:
+    - "name : {{ openshift_gcp_prefix }}ig*"
+  register: instance_group_managers
+
+- name: Fetch instance templates
+  gcp_compute_instance_template_facts:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    filters:
+    - "name : {{ openshift_gcp_prefix }}instance-template*"
+  register: instance_templates
+
+- name: Remove GCP Instance Groups
+  gcp_compute_instance_group_manager:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    zone: "{{ openshift_gcp_zone }}"
+    name: "{{ item[0].name }}"
+    base_instance_name: "{{ item[0].name }}"
+    instance_template: "{{ item[1] }}"
+    state: absent
+  with_nested:
+  - "{{ instance_group_managers['items'] }}"
+  - "{{ instance_templates['items'] }}"
+
+- name: Remove GCP instance templates
+  gcp_compute_instance_template:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    name: "{{ item.name }}"
+    state: absent
+  with_items: "{{ instance_templates['items'] }}"
+
+- name: Remove GCP firewall
+  gcp_compute_firewall:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    name: "{{ openshift_gcp_prefix }}{{ item.rule }}"
+    state: absent
+  with_items: "{{ openshift_gcp_firewall_rules }}"
+
+- name: Remove GCP network
+  gcp_compute_network:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    name: "{{ openshift_gcp_network_name }}"
+    state: absent
+
+- name: Templatize DNS script
+  template: src=remove.j2.sh dest=/tmp/remove.sh mode=u+rx
+
+- name: Run DNS cleanup script
+  command: /tmp/remove.sh
+  args:
+    chdir: "{{ files_dir }}"
