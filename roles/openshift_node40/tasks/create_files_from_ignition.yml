@@ -1,6 +1,8 @@
 ---
 - name: Create all the directories we will need
-  command: "mkdir -p {{ item }}"
+  file:
+    path: "{{ item }}"
+    state: directory
   with_items: "{{ l_parse_ignition_dict.dir_list }}"
 
 - name: create files from ignition contents
