@@ -131,27 +131,6 @@ openshift_metrics_storage_nfs_options: '*(rw,root_squash)'
 openshift_metrics_storage_access_modes:
   - 'ReadWriteOnce'
 
-openshift_prometheus_storage_volume_name: 'prometheus'
-openshift_prometheus_storage_volume_size: '10Gi'
-openshift_prometheus_storage_access_modes:
-  - 'ReadWriteOnce'
-openshift_prometheus_storage_create_pv: True
-openshift_prometheus_storage_create_pvc: False
-
-openshift_prometheus_alertmanager_storage_volume_name: 'prometheus-alertmanager'
-openshift_prometheus_alertmanager_storage_volume_size: '10Gi'
-openshift_prometheus_alertmanager_storage_access_modes:
-  - 'ReadWriteOnce'
-openshift_prometheus_alertmanager_storage_create_pv: True
-openshift_prometheus_alertmanager_storage_create_pvc: False
-
-openshift_prometheus_alertbuffer_storage_volume_name: 'prometheus-alertbuffer'
-openshift_prometheus_alertbuffer_storage_volume_size: '10Gi'
-openshift_prometheus_alertbuffer_storage_access_modes:
-  - 'ReadWriteOnce'
-openshift_prometheus_alertbuffer_storage_create_pv: True
-openshift_prometheus_alertbuffer_storage_create_pvc: False
-
 openshift_service_type_dict:
   origin: origin
   openshift-enterprise: atomic-openshift
