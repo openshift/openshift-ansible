@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.37
+Version:        3.11.38
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -187,6 +187,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Nov 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.38-1
+- 
+
 * Thu Nov 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.37-1
 - Backporting PR 10541 to release-3.11 (bedin@redhat.com)
 - downgrade azure cli (mangirdas@judeikis.lt)
