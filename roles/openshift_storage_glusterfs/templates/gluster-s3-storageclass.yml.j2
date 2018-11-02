@@ -5,7 +5,7 @@ metadata:
   name: glusterfs-{{ glusterfs_name }}-s3
 provisioner: kubernetes.io/glusterfs
 parameters:
-  resturl: "http://{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}"
+  resturl: "http://{% if glusterfs_heketi_is_native %}heketi-{{ glusterfs_name }}.{{ glusterfs_namespace }}.svc:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %}"
   restuser: "admin"
 {% if glusterfs_heketi_admin_key is defined %}
   secretNamespace: "{{ glusterfs_namespace }}"

@@ -23,14 +23,6 @@
   - glusterfs_heketi_is_native
   - glusterfs_heketi_url is not defined
 
-- name: Determine StorageClass heketi URL
-  set_fact:
-    glusterfs_heketi_url: "{{ heketi_endpoints.results.results[0]['subsets'][0]['addresses'][0]['ip'] }}"
-    glusterfs_heketi_port: "{{ heketi_endpoints.results.results[0]['subsets'][0]['ports'][0]['port'] }}"
-  when:
-  - glusterfs_heketi_is_native
-  - glusterfs_heketi_url is not defined
-
 - name: Generate GlusterFS StorageClass for S3 file
   template:
     src: "gluster-s3-storageclass.yml.j2"
