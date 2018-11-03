@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.68
+Version:        3.10.69
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Nov 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.69-1
+- Validate openshift_master_ca_certificate (jstuever@redhat.com)
+- Update playbooks/azure/openshift-cluster/build_node_image.yml
+  (roignac@gmail.com)
+- add oreg_url check (mangirdas@judeikis.lt)
+- Updating clean up task to match become of creation task (ewolinet@redhat.com)
+
 * Wed Oct 31 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.68-1
 - osa - downgrade azure cli (mangirdas@judeikis.lt)
 
