@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.44.0%{?dist}
+Release:        0.45.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Nov 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.45.0
+- added needed space in error message as stated in bug# 1645718
+  (pruan@redhat.com)
+
 * Fri Nov 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.44.0
 - glusterfs: Fix a typo in the README (obnox@redhat.com)
 
