@@ -45,4 +45,3 @@
     state: absent
   tags: logging_cleanup
   changed_when: False
-  become: false
