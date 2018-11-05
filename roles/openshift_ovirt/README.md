@@ -34,6 +34,7 @@ The `openshift_ovirt_vm_manifest` variable can contain following attributes
 | Name      | Type | Default value |                                                                                                                 |
 |-----------|------|---------------|-----------------------------------------------------------------------------------------------------------------|
 | nic_mode  | Dict | UNDEF         | If you define this variable means that the interface on the VM will have static address instead of dynamic one. |
+| empty_hostname  | Bool | UNDEF   | If True, the VM's Hostname will remain empty in cloud-init, and will relays the VM's hostname on DHCP name. |
 
 Below `nic_mode` we can find this other parameters
 
@@ -102,6 +103,7 @@ openshift_ovirt_vm_manifest:
 - name: 'master'
   count: 3
   profile: 'master'
+  empty_hostname: True
   nic_mode:
       # This must fit the same name as this kind of vms. (e.g) if the name is test, this must be test0
       master0:
