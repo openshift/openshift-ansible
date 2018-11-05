@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.38
+Version:        3.11.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -187,6 +187,19 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Nov 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.39-1
+- added needed space in error message as stated in bug# 1645718
+  (pruan@redhat.com)
+- Replace undefined {{ item }} by filename (info@theothersolution.nl)
+- Improve cleanup of networks and disks in GCP (ccoleman@redhat.com)
+- Fix master-config.yaml path (sdodson@redhat.com)
+- glusterfs: Fix a typo in the README (obnox@redhat.com)
+- Adhoc fix first atomic master after upgrade fails (mgugino@redhat.com)
+- Update playbooks/azure/openshift-cluster/build_node_image.yml
+  (roignac@gmail.com)
+- add oreg_url check (mangirdas@judeikis.lt)
+- add version bind (mangirdas@judeikis.lt)
+
 * Fri Nov 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.38-1
 - 
 
