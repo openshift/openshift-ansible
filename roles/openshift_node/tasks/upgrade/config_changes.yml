@@ -32,7 +32,6 @@
 # /etc/fstab and runs swapoff -a, if necessary.
 - name: Disable swap
   swapoff: {}
-  when: openshift_disable_swap | default(true) | bool
 
 - name: Apply 3.6 dns config changes
   yedit:
