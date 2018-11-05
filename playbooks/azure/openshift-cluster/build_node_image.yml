@@ -31,9 +31,9 @@
       etcdctlv2: ETCD_CTL2_REPLACE
       openshift_use_crio: True
 
-  - name: add insights-client to package installs when on rhel
+  - name: add insights-client and subscription-manager to package installs when on rhel
     set_fact:
-      openshift_node_image_prep_packages: "{{ openshift_node_image_prep_packages | union(['insights-client']) }}"
+      openshift_node_image_prep_packages: "{{ openshift_node_image_prep_packages | union(['insights-client', 'subscription-manager']) }}"
     when: openshift_deployment_type == 'openshift-enterprise'
 
   - set_fact:
