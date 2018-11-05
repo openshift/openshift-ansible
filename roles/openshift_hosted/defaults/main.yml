@@ -1,6 +1,7 @@
 ---
 r_openshift_hosted_router_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_hosted_router_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
+r_openshift_hosted_router_prometheus_enabled: "{{ openshift_prometheus_state is defined and openshift_prometheus_state == 'present' | default(True) }}"
 
 r_openshift_hosted_registry_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_hosted_registry_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
@@ -40,7 +41,10 @@ openshift_hosted_registry_cert_expire_days: 730
 openshift_hosted_router_create_certificate: True
 
 r_openshift_hosted_router_os_firewall_deny: []
-r_openshift_hosted_router_os_firewall_allow: []
+r_openshift_hosted_router_os_firewall_allow:
+- service: Router Statistics Port
+  port: "{{ stats_port }}/tcp"
+  cond: "{{ r_openshift_hosted_router_prometheus_enabled }}"
 
 r_openshift_hosted_registry_os_firewall_deny: []
 r_openshift_hosted_registry_os_firewall_allow:
