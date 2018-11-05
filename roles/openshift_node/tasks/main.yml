@@ -21,7 +21,6 @@
 # /etc/fstab and runs swapoff -a, if necessary.
 - name: Disable swap
   swapoff: {}
-  when: openshift_disable_swap | default(true) | bool
 
 - name: include node installer
   import_tasks: install.yml
