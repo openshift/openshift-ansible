@@ -1,17 +1,10 @@
 ---
 # l_scale_up_hosts may be passed in via various scaleup plays.
-- name: Fail openshift_kubelet_name_override for new hosts
-  hosts: "{{ l_scale_up_hosts | default('nodes') }}"
-  tasks:
-  - name: Fail when openshift_kubelet_name_override is defined
-    fail:
-      msg: "openshift_kubelet_name_override Cannot be defined for new hosts"
-    when: openshift_kubelet_name_override is defined
 
 - import_playbook: init/main.yml
   vars:
     l_install_base_packages: True
-    l_repo_hosts: "{{ l_scale_up_hosts | default('oo_all_hosts') }}"
+    l_repo_hosts: "all:!all"
 
 # This is required for container runtime for crio, only needs to run once.
 - name: Configure os_firewall
@@ -24,3 +17,13 @@
 - import_playbook: container-runtime/private/setup_storage.yml
 
 - import_playbook: container-runtime/private/config.yml
+
+- name: install nodes
+  hosts: bootkube_nodes
+  tasks:
+  - import_role:
+      name: openshift_node40
+      tasks_from: install.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: bootkube_config.yml

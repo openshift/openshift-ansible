@@ -1,38 +1,19 @@
 ---
-- name: Set var to exclude bootstrapped nodes
-  set_fact:
-    bootstrapped_nodes: "{{ all_nodes | default(false) | ternary([], groups['tag_ocp-bootstrap']) | default([]) }}"
-
-- name: Add node instances to node group
+- name: Add bootstrap instances
   add_host:
     name: "{{ hostvars[item].gce_name }}"
-    groups: nodes, new_nodes
-    openshift_node_group_name: "{{ openshift_gcp_node_group_mapping['compute'] }}"
-  with_items: "{{ groups['tag_ocp-node'] | default([]) | difference(bootstrapped_nodes) }}"
-
-- name: Add bootstrap node instances as nodes
-  add_host:
-    name: "{{ item }}"
-    groups: nodes, new_nodes
+    groups: bootstrap
+    ignition_file: "{{ openshift_gcp_bootstrap_ignition_file }}"
   with_items: "{{ groups['tag_ocp-bootstrap'] | default([]) }}"
-  when: all_nodes | default(False)
 
-- name: Add non-bootstrapping master node instances to node group
+- name: Add master instances
   add_host:
     name: "{{ hostvars[item].gce_name }}"
-    groups: nodes
-  with_items: "{{ groups['tag_ocp-master'] | default([]) | difference(bootstrapped_nodes) }}"
+    groups: masters
+  with_items: "{{ groups['tag_ocp-master'] | default([]) }}"
 
-- name: Add infra node instances to node group
+- name: Add worker instances
   add_host:
     name: "{{ hostvars[item].gce_name }}"
-    groups: nodes, new_nodes
-    openshift_node_group_name: "{{ openshift_gcp_node_group_mapping['infra'] }}"
-  with_items: "{{ groups['tag_ocp-infra-node'] | default([]) | difference(bootstrapped_nodes) }}"
-
-- name: Add masters to requisite groups
-  add_host:
-    name: "{{ hostvars[item].gce_name }}"
-    groups: masters, etcd
-    openshift_node_group_name: "{{ openshift_gcp_node_group_mapping['masters'] }}"
-  with_items: "{{ groups['tag_ocp-master'] }}"
+    groups: workers
+  with_items: "{{ groups['tag_ocp-worker'] | default([]) }}"
