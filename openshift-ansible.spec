@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.69
+Version:        3.10.70
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Nov 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.70-1
+- Remove openshift_disable_swap for new install (rteague@redhat.com)
+- Fix master-config.yaml path (sdodson@redhat.com)
+- Replace undefined {{ item }} by filename (info@theothersolution.nl)
+
 * Fri Nov 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.69-1
 - Validate openshift_master_ca_certificate (jstuever@redhat.com)
 - Update playbooks/azure/openshift-cluster/build_node_image.yml
