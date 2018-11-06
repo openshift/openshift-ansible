@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.48.0%{?dist}
+Release:        0.49.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Nov 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.49.0
+- Add instructions to use cri-o in openstack (e.minguez@gmail.com)
+- Fix broken link in README.md (artheus@users.noreply.github.com)
+- openshift_prometheus: cleanup unused variables (pgier@redhat.com)
+- fix gce-logging problem (rmeggins@redhat.com)
+- Run the init/main playbook properly (e.minguez@gmail.com)
+
 * Mon Nov 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.48.0
 - 
 
