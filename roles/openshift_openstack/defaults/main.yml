@@ -193,6 +193,12 @@ openshift_openstack_node_secgroup_rules:
     port_range_min: 4789
     port_range_max: 4789
     remote_mode: remote_group_id
+  # NOTE: 10010/tcp required by cri-o stream protocol (oc exec/oc rsh)
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 10010
+    port_range_max: 10010
+    remote_mode: remote_group_id
 openshift_openstack_infra_secgroup_rules:
   - direction: ingress
     protocol: tcp
