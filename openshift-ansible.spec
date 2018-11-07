@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.40
+Version:        3.11.41
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -187,6 +187,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Nov 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.41-1
+- Don't attemp to install packages on atomic (sdodson@redhat.com)
+- Fix master paths check, while using Istio (faust64@gmail.com)
+- openshift_prometheus: cleanup unused variables (pgier@redhat.com)
+
 * Wed Nov 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.40-1
 - add default(false) to openshift_autoheal_deploy (gpei@redhat.com)
 - Add Openshift 3.11 Repo (mail@jkroepke.de)
