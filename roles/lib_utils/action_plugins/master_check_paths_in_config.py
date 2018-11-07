@@ -29,6 +29,7 @@ ITEMS_TO_POP = (
 MIGRATED_ITEMS = ", ".join([".".join(x) for x in ITEMS_TO_POP])
 
 ALLOWED_DIRS = (
+    '/dev/null',
     '/etc/origin/master/',
     '/var/lib/origin',
     '/etc/origin/cloudprovider',
