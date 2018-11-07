@@ -29,7 +29,7 @@
     tasks_from: server_certificates
   vars:
     etcd_cert_prefix: calico-etcd-
-    etcd_cert_config_dir: "{{ calico_etcd_cert_dir }}"
+    etcd_conf_dir: "{{ calico_etcd_cert_dir }}"
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_cert_subdir: "calico-etcd-{{ openshift.common.hostname }}"
 
