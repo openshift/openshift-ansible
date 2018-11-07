@@ -31,20 +31,22 @@ etcdctl_dict:
 r_etcd_common_etcdctl_command: "{{ etcdctl_dict[r_etcd_common_etcd_runtime | default('runc')] }}"
 
 # etcd server vars
+# etcd_cert_prefix is to facilitate multiple etcd instances on one host
+# in one path
+etcd_cert_prefix: ''
 etcd_conf_dir: '/etc/etcd'
 etcd_conf_file: "{{ etcd_conf_dir }}/etcd.conf"
-etcd_ca_file: "{{ etcd_conf_dir }}/ca.crt"
-etcd_cert_file: "{{ etcd_conf_dir }}/server.crt"
+etcd_ca_file: "{{ etcd_conf_dir }}/{{ etcd_cert_prefix }}ca.crt"
+etcd_cert_file: "{{ etcd_conf_dir }}/{{ etcd_cert_prefix }}server.crt"
 etcd_cert_subdir: "etcd-{{ openshift.common.hostname }}"
-etcd_key_file: "{{ etcd_conf_dir }}/server.key"
-etcd_peer_ca_file: "{{ etcd_conf_dir }}/ca.crt"
-etcd_peer_cert_file: "{{ etcd_conf_dir }}/peer.crt"
-etcd_peer_key_file: "{{ etcd_conf_dir }}/peer.key"
+etcd_key_file: "{{ etcd_conf_dir }}/{{ etcd_cert_prefix }}server.key"
+etcd_peer_ca_file: "{{ etcd_conf_dir }}/{{ etcd_cert_prefix }}ca.crt"
+etcd_peer_cert_file: "{{ etcd_conf_dir }}/{{ etcd_cert_prefix }}peer.crt"
+etcd_peer_key_file: "{{ etcd_conf_dir }}/{{ etcd_cert_prefix }}peer.key"
 
 # etcd ca vars
 etcd_ca_dir: "{{ etcd_conf_dir}}/ca"
 etcd_generated_certs_dir: "{{ etcd_conf_dir }}/generated_certs"
-etcd_cert_prefix: ''
 etcd_cert_config_dir: "/etc/etcd"
 etcd_ca_cert: "{{ etcd_ca_dir }}/ca.crt"
 etcd_ca_key: "{{ etcd_ca_dir }}/ca.key"

@@ -16,9 +16,9 @@
     get_attributes: false
     get_mime: false
   with_items:
-  - "{{ etcd_cert_config_dir }}/{{ etcd_cert_prefix }}server.crt"
-  - "{{ etcd_cert_config_dir }}/{{ etcd_cert_prefix }}peer.crt"
-  - "{{ etcd_cert_config_dir }}/{{ etcd_cert_prefix }}ca.crt"
+  - "{{ etcd_cert_file }}"
+  - "{{ etcd_peer_cert_file }}"
+  - "{{ etcd_ca_file }}"
   register: g_etcd_server_cert_stat_result
   when: not etcd_certificates_redeploy | default(false) | bool
 
@@ -200,6 +200,7 @@
   - "{{ etcd_peer_cert_file }}"
   - "{{ etcd_peer_key_file }}"
 
+# this may not be right
 - name: Validate permissions on the config dir
   file:
     path: "{{ etcd_conf_dir }}"
