@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.39
+Version:        3.11.40
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -187,6 +187,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Nov 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.40-1
+- add default(false) to openshift_autoheal_deploy (gpei@redhat.com)
+- Add Openshift 3.11 Repo (mail@jkroepke.de)
+- Remove openshift_disable_swap for new install (rteague@redhat.com)
+- Reload tuned service when node-config.yaml has changed.
+  (jmencak@users.noreply.github.com)
+
 * Sun Nov 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.39-1
 - added needed space in error message as stated in bug# 1645718
   (pruan@redhat.com)
