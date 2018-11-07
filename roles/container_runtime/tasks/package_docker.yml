@@ -71,7 +71,7 @@
 - name: Place additional/blocked/insecure registries in /etc/containers/registries.conf
   template:
     dest: "{{ containers_registries_conf_path }}"
-    src: registries.conf
+    src: registries.conf.j2
   when: openshift_docker_use_etc_containers | bool
   notify:
   - restart container runtime
