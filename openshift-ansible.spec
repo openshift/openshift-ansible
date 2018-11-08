@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.70
+Version:        3.10.71
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Nov 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.71-1
+- Add readiness + liveness probes for Service Catalog (jaboyd@redhat.com)
+- Don't attemp to install packages on atomic (sdodson@redhat.com)
+- Fixes #8267 (mavazque@redhat.com)
+
 * Mon Nov 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.70-1
 - Remove openshift_disable_swap for new install (rteague@redhat.com)
 - Fix master-config.yaml path (sdodson@redhat.com)
