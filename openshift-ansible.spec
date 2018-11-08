@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.51.0%{?dist}
+Release:        0.52.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,17 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Nov 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.52.0
+- Simplify PR template and add text to README.md (sdodson@redhat.com)
+- Pre-pull CLI image using openshift_container_cli (vrutkovs@redhat.com)
+- Start node image prepull after CRIO is restarted (vrutkovs@redhat.com)
+- sdn: tolerate all taints (vrutkovs@redhat.com)
+- sync: tolerate all taints (vrutkovs@redhat.com)
+- Update centos_repos.yml (camabeh@users.noreply.github.com)
+- Update centos_repos.yml (camabeh@users.noreply.github.com)
+- Update .github/PULL_REQUEST_TEMPLATE.md (roignac@gmail.com)
+- Add notice about MASTER branch (sdodson@redhat.com)
+
 * Thu Nov 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.51.0
 - Mount /etc/pki into controller pod (mchappel@redhat.com)
 
