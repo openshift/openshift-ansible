@@ -196,3 +196,6 @@ spec:
       - hostPath:
           path: /run/systemd/system
         name: run-systemd-system
+      # Sync daemonset should tolerate all taints to make sure it runs on all nodes
+      tolerations:
+      - operator: "Exists"
