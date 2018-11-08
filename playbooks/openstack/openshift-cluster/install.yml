@@ -8,13 +8,13 @@
 # values here. We do it in the OSEv3 group vars. Do we need to add
 # some logic here?
 
+- name: Run the init
+  import_playbook: ../../init/main.yml
+
 - name: Evaluate basic OpenStack groups
   import_playbook: evaluate_groups.yml
 
 - import_playbook: ../../prerequisites.yml
-
-- name: Run the init
-  import_playbook: ../../init/main.yml
 
 - name: Prepare the Nodes in the cluster for installation
   any_errors_fatal: true
