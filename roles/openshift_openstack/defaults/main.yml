@@ -28,6 +28,8 @@ openshift_openstack_debug_packages:
   - vim-enhanced
   - wget
 
+openshift_docker_service_name: "docker"
+
 # container-storage-setup
 openshift_openstack_container_storage_setup:
   docker_dev: "/dev/sdb"
