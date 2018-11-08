@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.49.0%{?dist}
+Release:        0.50.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Nov 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.50.0
+- Restart docker after openstack storage setup (tzumainn@redhat.com)
+- Update crio.conf.j2 template for registries (umohnani@redhat.com)
+- Fix master paths check, while using Istio (faust64@gmail.com)
+
 * Tue Nov 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.49.0
 - Add instructions to use cri-o in openstack (e.minguez@gmail.com)
 - Fix broken link in README.md (artheus@users.noreply.github.com)
