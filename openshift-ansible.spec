@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.50.0%{?dist}
+Release:        0.51.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Nov 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.51.0
+- Mount /etc/pki into controller pod (mchappel@redhat.com)
+
 * Wed Nov 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.50.0
 - Restart docker after openstack storage setup (tzumainn@redhat.com)
 - Update crio.conf.j2 template for registries (umohnani@redhat.com)
