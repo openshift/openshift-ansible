@@ -18,6 +18,7 @@ openshift_openstack_lbaasv2_provider: Octavia
 openshift_openstack_use_vm_load_balancer: false
 openshift_openstack_api_lb_listeners_timeout: 500000
 
+openshift_docker_service_name: "docker"
 
 # container-storage-setup
 openshift_openstack_container_storage_setup:
