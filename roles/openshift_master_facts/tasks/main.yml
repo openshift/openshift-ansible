@@ -43,6 +43,7 @@
       session_name: "{{ openshift_master_session_name | default(None) }}"
       ldap_ca: "{{ openshift_master_ldap_ca | default(lookup('file', openshift_master_ldap_ca_file) if openshift_master_ldap_ca_file is defined else None) }}"
       openid_ca: "{{ openshift_master_openid_ca | default(lookup('file', openshift_master_openid_ca_file) if openshift_master_openid_ca_file is defined else None) }}"
+      github_ca: "{{ openshift_master_github_ca | default(lookup('file', openshift_master_github_ca_file) if openshift_master_github_ca_file is defined else None) }}"
       registry_url: "{{ oreg_url | default(None) }}"
       registry_selector: "{{ openshift_registry_selector | default(None) }}"
       api_server_args: "{{ osm_api_server_args | default(None) }}"
