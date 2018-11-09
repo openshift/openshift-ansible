@@ -1,0 +1,29 @@
+---
+- name: Set core dump pattern on node
+  command: echo "/var/crashes/core.%e.%p.%h.%t" > /proc/sys/kernel/core_pattern
+
+- name: Stat for loopback plugin
+  stat:
+    path: "/opt/cni/bin/loopback"
+  register: loopback
+
+- when:
+  - loopback.stat.exists == False
+
+  block:
+  - name: Ensure CNI bin path exists
+    file:
+      path: "/opt/cni/bin"
+      recurse: True
+      state: directory
+
+  - name: Download & extract loopback CNI binary
+    unarchive:
+      src: "https://github.com/containernetworking/cni/releases/download/{{ cni_version }}/cni-{{ cni_version }}.tgz"
+      dest: "/opt/cni/bin"
+      mode: a+x
+      remote_src: True
+    register: result
+    until: result is success
+    retries: 3
+    delay: 10

@@ -1,0 +1,6 @@
+---
+- name: Determine contrail masters
+  include_tasks: determine_contrail_masters.yaml
+
+- name: Convert hostnames to ip
+  include_tasks: hosts_to_ip.yaml

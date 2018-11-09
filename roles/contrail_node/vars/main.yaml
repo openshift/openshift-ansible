@@ -1,0 +1,2 @@
+---
+contrail_containerized_bind_mounts: 'CONTRAIL_ADDTL_BIND_MOUNTS=-v /opt/cni/bin:/opt/cni/bin -v /etc/cni/net.d:/etc/cni/net.d -v /var/lib/contrail:/var/lib/contrail'

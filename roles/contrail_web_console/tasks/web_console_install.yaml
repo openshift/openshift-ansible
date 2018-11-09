@@ -1,0 +1,199 @@
+---
+- name: Ensure openshift-web-console project exists
+  oc_project:
+    name: openshift-web-console
+    state: present
+    node_selector:
+    - ""
+  register: create_console_project
+
+- name: Make temp directory for web console templates
+  command: mktemp -d /tmp/console-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Copy admin client config
+  command: >
+    cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+  changed_when: false
+
+- name: Copy web console templates to temp directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+  - "{{ __console_template_file }}"
+  - "{{ __console_config_file }}"
+
+# Check if an existing webconsole-config config map exists. If so, use those
+# contents so we don't overwrite changes.
+- name: Read the existing web console config map
+  oc_configmap:
+    namespace: openshift-web-console
+    name: webconsole-config
+    state: list
+  register: webconsole_config_map
+
+- set_fact:
+    existing_config_map_data: "{{ webconsole_config_map.results.results[0].data | default({}) }}"
+
+- name: Copy the existing web console config to temp directory
+  copy:
+    content: "{{ existing_config_map_data['webconsole-config.yaml'] }}"
+    dest: "{{ mktemp.stdout }}/{{ __console_config_file }}"
+  when: existing_config_map_data['webconsole-config.yaml'] is defined
+
+# Generate a new config when a config map is not defined.
+- when: existing_config_map_data['webconsole-config.yaml'] is not defined
+  block:
+  # Migrate the previous master-config.yaml asset config if it exists into the new
+  # web console config config map.
+  - name: Read existing assetConfig in master-config.yaml
+    slurp:
+      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    register: master_config_output
+
+  - set_fact:
+      config_to_migrate: "{{ master_config_output.content | b64decode | from_yaml }}"
+
+  - set_fact:
+      cro_plugin_enabled: "{{ config_to_migrate.admissionConfig is defined and config_to_migrate.admissionConfig.pluginConfig is defined and config_to_migrate.admissionConfig.pluginConfig.ClusterResourceOverrides is defined }}"
+
+  # Update properties in the config template based on inventory vars when the
+  # asset config does not exist.
+  - name: Set web console config properties from inventory variables
+    yedit:
+      src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
+      edits:
+      - key: clusterInfo#consolePublicURL
+        # Must have a trailing slash
+        value: "{{ openshift.master.public_console_url }}/"
+      - key: clusterInfo#masterPublicURL
+        value: "{{ openshift.master.public_api_url }}"
+      - key: clusterInfo#logoutPublicURL
+        value: "{{ openshift.master.logout_url | default('') }}"
+      - key: features#inactivityTimeoutMinutes
+        value: "{{ openshift_web_console_inactivity_timeout_minutes | default(0) }}"
+      - key: features#clusterResourceOverridesEnabled
+        value: "{{ openshift_web_console_cluster_resource_overrides_enabled | default(cro_plugin_enabled) }}"
+      - key: extensions#scriptURLs
+        value: "{{ openshift_web_console_extension_script_urls | default([]) }}"
+      - key: extensions#stylesheetURLs
+        value: "{{ openshift_web_console_extension_stylesheet_urls | default([]) }}"
+      - key: extensions#properties
+        value: "{{ openshift_web_console_extension_properties | default({}) }}"
+      separator: '#'
+      state: present
+    when: config_to_migrate.assetConfig is not defined
+
+  - name: Migrate assetConfig from master-config.yaml
+    yedit:
+      src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
+      edits:
+      - key: clusterInfo#consolePublicURL
+        value: "{{ config_to_migrate.assetConfig.publicURL }}"
+      - key: clusterInfo#masterPublicURL
+        value: "{{ config_to_migrate.assetConfig.masterPublicURL }}"
+      - key: clusterInfo#logoutPublicURL
+        value: "{{ config_to_migrate.assetConfig.logoutURL | default('') }}"
+      - key: clusterInfo#metricsPublicURL
+        value: "{{ config_to_migrate.assetConfig.metricsPublicURL | default('') }}"
+      - key: clusterInfo#loggingPublicURL
+        value: "{{ config_to_migrate.assetConfig.loggingPublicURL | default('') }}"
+      - key: servingInfo#maxRequestsInFlight
+        value: "{{ config_to_migrate.assetConfig.servingInfo.maxRequestsInFlight | default(0) }}"
+      - key: servingInfo#requestTimeoutSeconds
+        value: "{{ config_to_migrate.assetConfig.servingInfo.requestTimeoutSeconds | default(0) }}"
+      - key: features#clusterResourceOverridesEnabled
+        value: "{{ openshift_web_console_cluster_resource_overrides_enabled | default(cro_plugin_enabled) }}"
+      separator: '#'
+      state: present
+    when: config_to_migrate.assetConfig is defined
+
+- slurp:
+    src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
+  register: updated_console_config
+
+- name: Open hosts network previledges for webconsole
+  command: oc adm policy add-scc-to-user hostnetwork -z webconsole -n openshift-web-console
+  run_once: True
+  ignore_errors: True
+
+- name: Apply the web console template file
+  shell: >
+    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __console_template_file }}"
+    --param API_SERVER_CONFIG="{{ updated_console_config['content'] | b64decode }}"
+    --param IMAGE="{{ openshift_web_console_prefix }}{{ openshift_web_console_image_name }}:{{ openshift_web_console_version }}"
+    --param NODE_SELECTOR={{ openshift_web_console_contrail_nodeselector | to_json | quote }}
+    --param REPLICA_COUNT="{{ openshift_web_console_replica_count }}"
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
+
+# Wait to give the rollout time to start before verifying that the console is
+# running. Unfortunately, we can't check if the deployment revision changed
+# because it's possible applying the template did not result in any changes to
+# the pod template spec, which would skip a new revision.
+- name: Pause for the web console deployment to start
+  pause:
+    seconds: 30
+  # Skip if the project didn't exist since there was no previous deployment.
+  when: not create_console_project.changed
+
+- name: Verify that the web console is running
+  command: >
+    curl -k https://webconsole.openshift-web-console.svc/healthz
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: console_health
+  until: console_health.stdout == 'ok'
+  retries: 60
+  delay: 1
+  changed_when: false
+  # Ignore errors so we can log troubleshooting info on failures.
+  ignore_errors: yes
+
+# Log the result of `oc status`, `oc get pods`, `oc get events`, and `oc logs deployment/webconsole` for troubleshooting failures.
+- when: console_health.stdout != 'ok'
+  block:
+  - name: Check status in the openshift-web-console namespace
+    command: >
+      {{ openshift_client_binary }} status --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
+    register: console_status
+    ignore_errors: true
+  - debug:
+      msg: "{{ console_status.stdout_lines }}"
+  - name: Get pods in the openshift-web-console namespace
+    command: >
+      {{ openshift_client_binary }} get pods --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console -o wide
+    register: console_pods
+    ignore_errors: true
+  - debug:
+      msg: "{{ console_pods.stdout_lines }}"
+  - name: Get events in the openshift-web-console namespace
+    command: >
+      {{ openshift_client_binary }} get events --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
+    register: console_events
+    ignore_errors: true
+  - debug:
+      msg: "{{ console_events.stdout_lines }}"
+  - name: Get console pod logs
+    command: >
+      {{ openshift_client_binary }} logs deployment/webconsole --tail=50 --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
+    register: console_log
+    ignore_errors: true
+  - debug:
+      msg: "{{ console_log.stdout_lines }}"
+
+- name: Remove temp directory
+  file:
+    state: absent
+    name: "{{ mktemp.stdout }}"
+  changed_when: False
+
+# This health check is not reported currently because of dnsmasq issue
+#- name: Report console errors
+#  fail:
+#    msg: Console install failed.
+#  when: console_health.stdout != 'ok'

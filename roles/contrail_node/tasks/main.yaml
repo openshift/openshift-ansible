@@ -1,0 +1,14 @@
+---
+- name: Get contrail nodes and ips
+  include_role:
+    name: contrail_common
+
+- name: Set ntp on nodes
+  include_tasks: ntp.yml
+
+- name: Configure all openshift nodes
+  include_tasks: node_config.yaml
+
+- name: Set bind mounts for containerized install
+  include_tasks: bind_mounts.yaml
+  when: openshift_is_containerized | bool

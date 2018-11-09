@@ -1,0 +1,221 @@
+---
+- name: Create the get IP file to convert hostname to ip
+  template:
+    src: getIp.j2
+    dest: /tmp/getIp.py
+    owner: root
+    mode: 0644
+  run_once: true
+
+- set_fact:
+    api_vip: "{{ groups.lb.0 | ipaddr }}"
+  when: groups.lb is defined
+
+- set_fact:
+    api_vip: "{{ openshift_master_cluster_public_hostname }}"
+  when: openshift_master_cluster_public_hostname is defined
+
+- set_fact:
+    api_vip: "{{ groups.masters.0 | ipaddr }}"
+  when: api_vip is not defined
+
+- name: validate api_vip hostname or ip
+  command: python /tmp/getIp.py {{ api_vip }}
+  register: api_vip_result
+
+- name: set api_vip
+  set_fact:
+    api_vip: "{{ api_vip_result.stdout }}"
+  when: api_vip_result is success
+
+- name: Create the agent template file
+  template:
+    src: contrail-image-downloader-5.j2
+    dest: /tmp/contrail-image-downloader.yaml
+    owner: root
+    mode: 0644
+  run_once: true
+  when:
+    - contrail_version is version('5.0', '>=')
+    - contrail_version is version('5.1', '<')
+
+- name: Create the agent template file
+  template:
+    src: contrail-agent-installer-5.j2
+    dest: /tmp/contrail-agent-installer.yaml
+    owner: root
+    mode: 0644
+  run_once: true
+  when:
+    - contrail_version is version('5.0', '>=')
+    - contrail_version is version('5.1', '<')
+
+- name: Create the contrail infrastructure template file
+  template:
+    src: contrail-infra-installer-5.j2
+    dest: /tmp/contrail-infra-installer.yaml
+    owner: root
+    mode: 0644
+  run_once: true
+  when:
+    - contrail_version is version('5.0', '>=')
+    - contrail_version is version('5.1', '<')
+
+- name: Create Contrail single YAML file for Contrail 4.0
+  template:
+    src: contrail-installer-4.j2
+    dest: /tmp/contrail-installer.yaml
+    owner: root
+    mode: 0644
+  run_once: true
+  when:
+    - contrail_version is version('5.0', '<')
+
+- name: Create Contrail single YAML file for Contrail 5.0
+  template:
+    src: contrail-controller-installer-5.j2
+    dest: /tmp/contrail-installer.yaml
+    owner: root
+    mode: 0644
+  run_once: true
+  when:
+    - contrail_version is version('5.0', '>=')
+    - contrail_version is version('5.1', '<')
+
+- name: Create Contrail single YAML file for Contrail 5.1
+  template:
+    src: contrail-installer-5.1.j2
+    dest: /tmp/contrail-installer.yaml
+    owner: root
+    mode: 0644
+  run_once: true
+  when:
+    - contrail_version is version('5.1', '>=')
+
+- name: Create Contrail single YAML file for Contrail nested mode
+  template:
+    src: contrail-nested.j2
+    dest: /tmp/contrail-installer.yaml
+    owner: root
+    mode: 0644
+  when:
+    - nested_mode_contrail == "true"
+
+- name: Copy the wait for POD script to master node
+  template:
+    src: wait_for_pod.j2
+    dest: /tmp/wait_for_pod.sh
+    owner: root
+    mode: 0777
+  run_once: true
+
+- name: Add Contrail service account to privileged scc
+  oc_adm_policy_user:
+    user: system:serviceaccount:kube-system:contrail
+    resource_kind: scc
+    resource_name: privileged
+    state: present
+  run_once: True
+
+- name: Add the daemonset-controller service account to privileged scc
+  oc_adm_policy_user:
+    user: system:serviceaccount:kube-system:daemon-set-controller
+    resource_kind: scc
+    resource_name: privileged
+    state: present
+  run_once: True
+
+- name: Label infra nodes with node-role.kubernetes.io/compute=true
+  command: "{{ openshift_client_binary }} label nodes --selector=region=infra node-role.kubernetes.io/compute=true --overwrite=true"
+  run_once: True
+
+- name: Label contrail master nodes with opencontrail.org/controller=true
+  command: "{{ openshift_client_binary }} label nodes {{ hostvars[item]['openshift_hostname'] }} opencontrail.org/controller=true --overwrite=true"
+  with_items: "{{ contrail_masters.split() }}"
+
+- name: Create Contrail registry secret
+  command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n kube-system"
+  run_once: True
+  when: contrail_registry_username is defined
+  ignore_errors: True
+
+- name: Starting the images download
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-image-downloader.yaml"
+  run_once: True
+  ignore_errors: True
+  when:
+    - contrail_version is version('5.0', '>=')
+    - contrail_version is version('5.1', '<')
+
+- name: sleep for 300 seconds and continue with play
+  wait_for: timeout=300
+  delegate_to: localhost
+
+- name: Check Pods script to Master Node
+  command: /tmp/wait_for_pod.sh
+  register: command_result
+  failed_when: "'ERROR' in command_result.stdout"
+  run_once: True
+
+- name: Starting the agent pod on required nodes
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-agent-installer.yaml"
+  run_once: True
+  ignore_errors: True
+  when:
+    - contrail_version is version('5.0', '>=')
+    - contrail_version is version('5.1', '<')
+
+- name: sleep for 180 seconds and continue with play
+  wait_for: timeout=180
+  delegate_to: localhost
+
+- name: Check Pods script to Master Node
+  command: /tmp/wait_for_pod.sh
+  register: command_result
+  failed_when: "'ERROR' in command_result.stdout"
+  run_once: True
+
+- name: Restart dnsmasq
+  service: name="dnsmasq" state=restarted enabled=yes
+  delegate_to: "{{ item }}"
+  with_items: "{{ contrail_masters.split() }}"
+  ignore_errors: True
+
+- name: Starting the infrastructure pods on required nodes
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-infra-installer.yaml"
+  run_once: True
+  ignore_errors: True
+  when:
+    - contrail_version is version('5.0', '>=')
+    - contrail_version is version('5.1', '<')
+
+- name: Check Pods script to Master Node
+  command: /tmp/wait_for_pod.sh
+  register: command_result
+  failed_when: "'ERROR' in command_result.stdout"
+  run_once: True
+
+- name: sleep for 180 seconds and continue with play
+  wait_for: timeout=180
+  delegate_to: localhost
+
+- name: Launch the Contrail installer
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-installer.yaml"
+  run_once: True
+  ignore_errors: True
+
+- name: sleep for 300 seconds and continue with play
+  wait_for: timeout=300
+  delegate_to: localhost
+
+- name: Check Pods script to Master Node
+  command: /tmp/wait_for_pod.sh
+  register: command_result
+  failed_when: "'ERROR' in command_result.stdout"
+  run_once: True
+
+- name: Patch restricted scc
+  command: >
+    "{{ openshift_client_binary }} patch scc restricted --patch='{ "runAsUser": { "type": "RunAsAny" } }'"
+  run_once: True
+  ignore_errors: True

@@ -1,0 +1,15 @@
+---
+- name: Get contrail nodes and ips
+  include_role:
+    name: contrail_common
+
+- block:
+  - name: Set master as ntp server
+    include_tasks: ntp.yml
+    when: ntpserver is not defined
+
+  - name: Set master as client to provided ntp server
+    include_role:
+      name: contrail_node
+      tasks_from: ntp.yml
+    when: ntpserver is defined

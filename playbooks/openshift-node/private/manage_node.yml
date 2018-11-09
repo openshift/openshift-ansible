@@ -11,3 +11,26 @@
   - name: Create group for deployment type
     group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
+
+- name: wait for sometime for agent pod to come up
+  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
+  tasks:
+  - name: wait for 180 seconds
+    wait_for: timeout=180
+    when: openshift_use_contrail | default(false) | bool
+
+- name: wait for pod check script
+  hosts: oo_first_master
+  tasks:
+  - name: Check Pods script to Master Node
+    command: /tmp/wait_for_pod.sh
+    register: command_result
+    failed_when: "'ERROR' in command_result.stdout"
+    when: openshift_use_contrail | default(false) | bool
+
+- name: Restarting dnsmasq service
+  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
+  tasks:
+  - name: Restart dnsmasq
+    service: name="dnsmasq" state=restarted enabled=yes
+    when: openshift_use_contrail | default(false) | bool
