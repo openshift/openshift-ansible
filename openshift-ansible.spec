@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.41
+Version:        3.11.42
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -187,6 +187,24 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Nov 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.42-1
+- sdn: tolerate all taints (vrutkovs@redhat.com)
+- sync: tolerate all taints (vrutkovs@redhat.com)
+- Update crio.conf.j2 template for registries (umohnani@redhat.com)
+- Mount /etc/pki into controller pod (mchappel@redhat.com)
+- Restart docker after openstack storage setup (tzumainn@redhat.com)
+- Add readiness + liveness probes for Service Catalog (jaboyd@redhat.com)
+- Run the init/main playbook properly (e.minguez@gmail.com)
+- openshift_ovirt: Add a task to create the VMs (rgolan@redhat.com)
+- Decalre the dns variable in the defaults (rgolan@redhat.com)
+- Fixing Typo (jparrill@redhat.com)
+- Added capability to add dns_search and dns_server even without static
+  configuration (jparrill@redhat.com)
+- Fixes #10415 maintains the name and host_name when vm count field are 1.
+  (jparrill@redhat.com)
+- Added capability to fix static addresses to openshift_ovirt provider vms
+  (jparrill@redhat.com)
+
 * Wed Nov 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.41-1
 - Don't attemp to install packages on atomic (sdodson@redhat.com)
 - Fix master paths check, while using Istio (faust64@gmail.com)
