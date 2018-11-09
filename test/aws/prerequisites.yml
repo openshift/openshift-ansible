@@ -1,0 +1,55 @@
+---
+- hosts: bootstrap:masters:workers
+  gather_facts: no
+  tasks:
+    - wait_for_connection: {}
+    - name: Update all packages
+      package:
+        name: '*'
+        state: latest
+      register: yum_update
+    - name: Reboot machines
+      shell: sleep 5 && systemctl reboot
+      async: 1
+      poll: 0
+      ignore_errors: true
+      when: yum_update is changed
+    - name: Wait for connection
+      wait_for_connection:
+        connect_timeout: 20
+        sleep: 5
+        delay: 5
+        timeout: 300
+    - setup: {}
+
+- import_playbook: ../../playbooks/init/main.yml
+  vars:
+    l_install_base_packages: True
+    l_repo_hosts: "bootstrap:masters:workers"
+
+# Setup openshift_additional_repos
+- hosts: bootstrap:masters:workers
+  tasks:
+  - name: initialize openshift repos
+    import_role:
+      name: openshift_repos
+  #FIXME openshift_node40/aws.yml skips hosts
+  - name: Configure AWS Cloud Provider Settings
+    lineinfile:
+      dest: /etc/kubernetes/kubelet-env
+      regexp: "{{ item.regex }}"
+      line: "{{ item.line }}"
+      create: true
+    with_items:
+      - regex: '^AWS_ACCESS_KEY_ID='
+        line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
+      - regex: '^AWS_SECRET_ACCESS_KEY='
+        line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
+    no_log: true
+
+# TODO: proper firewalld setup
+# 49500 on bootstrap; 2379, 6443, 10250 on masters, 10250 on workers
+
+- import_playbook: ../../playbooks/container-runtime/private/setup_storage.yml
+
+- import_playbook: ../../playbooks/container-runtime/private/config.yml

@@ -1,7 +1,8 @@
-* Copy `test/ci/vars.yml.sample` to `test/ci/vars.yml`
+* Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` env vars
+* Copy `test/aws/vars.yml.sample` to `test/aws/vars.yml`
 * Adjust it your liking - this would be the host configuration
-* Adjust `inventory/group_vars/OSEv3/vars.yml` - this would be Origin-specific config
-* Provision instances via `ansible-playbook -vv -i test/ci/inventory/ test/ci/launch.yml`
-  This would place inventory file in `test/ci/inventory/hosts` and run prerequisites and deploy.
-
-* Once the setup is complete run `ansible-playbook -vv -i test/ci/inventory/ test/ci/deprovision.yml`
+* Cleanup ec2 cache - `rm -rf ~/.ansible/tmp`
+* Provision instances via `ansible-playbook -vv -i test/aws/inventory/ test/aws/launch.yml`
+  This would create EC2 instances if necessary and setup cluster there.
+  Rerun the playbook to continue setup on existing nodes (identified by `kubernetes.io/cluster/{{ aws_cluster_id }}: true` tag)
+* Once the setup is complete run `ansible-playbook -vv -i test/aws/inventory/ test/aws/deprovision.yml`

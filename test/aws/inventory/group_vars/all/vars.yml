@@ -1,0 +1,20 @@
+---
+ansible_become: true
+ansible_become_sudo: true
+
+ansible_python_interpreter: "/usr/bin/python"
+ansible_user: "centos"
+openshift_cloudprovider_kind: aws
+openshift_cloudprovider_aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY') }}"
+openshift_cloudprovider_aws_secret_key: "{{ lookup('env','AWS_SECRET_KEY') }}"
+openshift_master_cluster_hostname: "{{ hostvars[groups['bootstrap'][0]]['inventory_hostname'] }}"
+
+openshift_deployment_type: origin
+openshift_repos_enable_testing: false
+
+openshift_additional_repos: [
+  {"name": "origin-pr", "baseurl": "https://rpms.svc.ci.openshift.org/openshift-origin-v4.0/", "enabled": 1, "gpgcheck": 0},
+  {"name": "origin-pr-dependencies", "baseurl": "https://cbs.centos.org/repos/paas7-openshift-origin311-testing/x86_64/os/", "enabled": 1, "gpgcheck": 0}
+  ]
+os_firewall_enabled: false
+mcd_port: 49500

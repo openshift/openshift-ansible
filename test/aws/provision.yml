@@ -1,0 +1,49 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - include_vars: "{{ item }}"
+      with_first_found:
+        - vars.yml
+        - vars.yaml
+    - name: list available AMIs
+      ec2_ami_facts:
+        region: "{{ aws_region }}"
+        filters: "{{ aws_ami_tags }}"
+      register: ami_facts
+      when: aws_image is not defined
+
+    - name: determine which AMI to use
+      set_fact:
+        aws_image: "{{ ami_facts.images[-1].image_id }}"
+      when: aws_image is not defined
+
+    - name: determine which AMI to use
+      set_fact:
+        aws_image: "{{ ami_facts.images[-1].image_id }}"
+      when: aws_image is not defined
+
+    - name: Create EC2 instance
+      ec2:
+        region: "{{ aws_region }}"
+        key_name: "{{ aws_key }}"
+        instance_type: "{{ item.aws_flavor }}"
+        image: "{{ item.aws_image | default(aws_image) }}"
+        wait: yes
+        group: "{{ item.aws_security_group }}"
+        count: 1
+        vpc_subnet_id: "{{ aws_subnet }}"
+        assign_public_ip: yes
+        instance_tags: "{{ aws_instance_tags }}"
+        volumes: "{{ item.aws_volumes | default(omit) }}"
+      register: ec2
+      with_items: "{{ aws_instances }}"
+      vars:
+        aws_instance_tags: |
+          {
+            "kubernetes.io/cluster/{{ aws_cluster_id }}": "true",
+            "Name": "{{ item.name }}",
+            "ansible-group": "{{ item.ansible_group }}",
+            "expirationDate": "{{ item.aws_expiration_date | default(aws_expiration_date) }}"
+          }

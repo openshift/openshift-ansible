@@ -1,0 +1,53 @@
+---
+# Setup a custom dnsmasq-based server on bootstrap
+- hosts: bootstrap
+  tasks:
+    - package:
+        name: dnsmasq, NetworkManager
+        state: latest
+    - copy:
+        content: |
+          {{ ansible_default_ipv4.address }} {{ aws_cluster_id }}-api.{{ aws_basedomain }}
+          {% for master in groups['masters'] %}
+          {{ hostvars[master]['ansible_default_ipv4']['address'] }} {{ aws_cluster_id }}-api.{{ aws_basedomain }}
+          {{ hostvars[master]['ansible_default_ipv4']['address'] }} {{ aws_cluster_id }}-etcd-{{ loop.index - 1 }}.{{ aws_basedomain }}
+          {% endfor %}
+        dest: /etc/hosts.openshift
+    - file:
+        path: /etc/NetworkManager/dnsmasq.d
+        state: directory
+    - name: Copy custom DNS config
+      copy:
+        content:  |
+          server=8.8.8.8
+          addn-hosts=/etc/hosts.openshift
+          cache-size=0
+          listen-address={{ hostvars[groups['bootstrap'][0]]['ansible_default_ipv4']['address'] }}
+          {% for master in groups['masters'] %}
+          srv-host="_etcd-server-ssl._tcp.{{ aws_cluster_id }}.{{ aws_basedomain }}",{{ aws_cluster_id }}-etcd-{{ loop.index - 1 }}.{{ aws_basedomain }},2380,0,0
+          {% endfor %}
+        dest: /etc/NetworkManager/dnsmasq.d/tectonic.conf
+    - ini_file:
+        dest: /etc/NetworkManager/NetworkManager.conf
+        section: main
+        option: dns
+        value: dnsmasq
+    - service:
+        name: NetworkManager
+        state: restarted
+
+- hosts: bootstrap:masters:workers
+  tasks:
+    - name: Replace nameserver
+      copy:
+        content:  |
+          search ec2.internal
+          nameserver {{ hostvars[groups['bootstrap'][0]]['ansible_default_ipv4']['address'] }}
+        dest: /etc/resolv.conf
+    - name: Prepend the new nameserver
+      copy:
+        content:  |
+          prepend domain-name-servers {{ hostvars[groups['bootstrap'][0]]['ansible_default_ipv4']['address'] }};
+          timeout 300;
+          retry 60;
+        dest: /etc/dhcp/dhclient.conf

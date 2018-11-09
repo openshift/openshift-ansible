@@ -1,0 +1,25 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - meta: refresh_inventory
+  - include_vars: "{{ item }}"
+    with_first_found:
+      - vars.yml
+      - vars.yaml
+  - name: Add instance to the group
+    add_host:
+      name: "{{ hostvars[item].ec2_dns_name }}"
+      groups: "{{ group }}"
+      ignition_file: "{{ (group == 'bootstrap') | ternary(openshift_aws_bootstrap_ignition_file, omit) }}"
+      aws_region: "{{ aws_region }}"
+      aws_basedomain: "{{ aws_basedomain }}"
+      aws_cluster_id: "{{ aws_cluster_id }}"
+      openshift_clusterid: "{{ aws_cluster_id }}"
+    with_items: "{{ groups['tag_kubernetes_io_cluster_' + aws_cluster_id + '_true'] }}"
+    vars:
+      group: "{{ hostvars[item].group_names |
+                 select('match', 'tag_ansible_group_(.*)') |
+                 list |
+                 first |
+                 regex_replace('tag_ansible_group_(.*)', '\\1') }}"
