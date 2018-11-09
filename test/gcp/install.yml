@@ -143,3 +143,8 @@
     delay: 5
     until: ansible_facts.services['bootkube.service'].state == 'stopped'
     ignore_errors: true
+  - name: Fetch kubeconfig for test container
+    fetch:
+      src: /opt/tectonic/auth/kubeconfig
+      dest: /tmp/artifacts/installer/auth/kubeconfig
+      flat: yes
