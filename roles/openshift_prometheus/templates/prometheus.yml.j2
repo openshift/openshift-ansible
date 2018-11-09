@@ -148,7 +148,7 @@ scrape_configs:
     # drop infrastructure components managed by other scrape targets
     - source_labels: [__meta_kubernetes_service_name]
       action: drop
-      regex: 'prometheus-node-exporter'
+      regex: 'router|prometheus-node-exporter'
     # only those that have requested scraping
     - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
       action: keep
