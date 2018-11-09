@@ -7,4 +7,4 @@
     group: root
     mode: 0664
   when:
-  - container_runtime_docker_storage_type == 'overlay2'
+    - docker_storage_setup_options.storage_driver is defined

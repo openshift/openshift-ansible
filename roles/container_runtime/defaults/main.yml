@@ -51,7 +51,6 @@ docker_storage_size: 40G
 docker_storage_setup_options:
   vg: docker_vg
   data_size: 99%VG
-  storage_driver: overlay2
   root_lv_name: docker-root-lv
   root_lv_size: 100%FREE
   root_lv_mount_path: "{{ docker_storage_path }}"
