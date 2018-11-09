@@ -454,13 +454,17 @@ class GitHubIdentityProvider(IdentityProviderOauthBase):
     def __init__(self, api_version, idp):
         IdentityProviderOauthBase.__init__(self, api_version, idp)
         self._optional += [['organizations'],
-                           ['teams']]
+                           ['teams'],
+                           ['ca'],
+                           ['hostname']]
 
     def validate(self):
         ''' validate this idp instance '''
         if self.challenge:
             raise errors.AnsibleFilterError("|failed provider {0} does not "
                                             "allow challenge authentication".format(self.__class__.__name__))
+
+        self._idp['ca'] = '/etc/origin/master/{}_github_ca.crt'.format(self.name)
 
 
 class FilterModule(object):
