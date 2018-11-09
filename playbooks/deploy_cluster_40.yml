@@ -1,0 +1,141 @@
+---
+- name: run the init
+  import_playbook: init/main.yml
+  vars:
+    l_init_fact_hosts: "bootstrap:masters:workers"
+    l_openshift_version_set_hosts: "bootstrap:masters:workers"
+    l_install_base_packages: True
+    l_repo_hosts: "all:!all"
+
+# TODO(michaelgugino): break up the rest of this file into reusable chunks.
+- name: Install nodes
+  hosts: bootstrap:masters:workers
+  roles:
+  - role: container_runtime
+  tasks:
+  - import_role:
+      name: container_runtime
+      tasks_from: docker_storage_setup_overlay.yml
+  - import_role:
+      name: container_runtime
+      tasks_from: extra_storage_setup.yml
+  - import_role:
+      name: container_runtime
+      tasks_from: package_crio.yml
+  - name: FIXME pause_image
+    ini_file:
+      dest: "/etc/crio/crio.conf"
+      section: crio.image
+      option: pause_image
+      value: '"docker.io/openshift/origin-pod:v4.0"'
+  - name: FIXME restart crio
+    service:
+      name: crio
+      state: restarted
+  - import_role:
+      name: openshift_node40
+      tasks_from: install.yml
+
+- name: Config bootstrap node
+  hosts: bootstrap
+  tasks:
+  - import_role:
+      name: openshift_node40
+      tasks_from: config.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: systemd.yml
+    vars:
+      excluded_services:
+      - progress.service
+
+- name: Start masters
+  hosts: masters
+  tasks:
+  # This is required for openshift_node40/config.yml
+  - set_fact:
+      openshift_bootstrap_endpoint: "https://{{ openshift_master_cluster_hostname }}:{{ mcd_port }}/config/master"
+  - name: Wait for bootstrap endpoint to show up
+    uri:
+      url: "{{ openshift_bootstrap_endpoint }}"
+      validate_certs: false
+    delay: 10
+    retries: 60
+    register: result
+    until:
+    - "'status' in result"
+    - result.status == 200
+  - import_role:
+      name: openshift_node40
+      tasks_from: config.yml
+  - name: Make sure etcd user exists
+    user:
+      name: etcd
+  - import_role:
+      name: openshift_node40
+      tasks_from: systemd.yml
+
+- name: Start workers
+  hosts: workers
+  tasks:
+  # This is required for openshift_node40/config.yml
+  - set_fact:
+      openshift_bootstrap_endpoint: "https://{{ openshift_master_cluster_hostname }}:{{ mcd_port }}/config/worker"
+  - name: Wait for bootstrap endpoint to show up
+    uri:
+      url: "{{ openshift_bootstrap_endpoint }}"
+      validate_certs: false
+    delay: 10
+    retries: 60
+    register: result
+    until:
+    - "'status' in result"
+    - result.status == 200
+  - import_role:
+      name: openshift_node40
+      tasks_from: config.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: systemd.yml
+
+- name: Wait for nodes to become ready
+  hosts: bootstrap
+  tasks:
+  - name: Wait for temporary control plane to show up
+    #TODO: Rework with k8s module
+    oc_obj:
+      state: list
+      kind: pod
+      namespace: kube-system
+      kubeconfig: /opt/tectonic/auth/kubeconfig
+    register: control_plane_pods
+    retries: 60
+    delay: 10
+    until:
+    - "'results' in control_plane_pods and 'results' in control_plane_pods.results"
+    - control_plane_pods.results.results[0]['items'] | length > 0
+  - name: Wait for master nodes to show up
+    #TODO: Rework with k8s module
+    oc_obj:
+      state: list
+      kind: node
+      selector: "node-role.kubernetes.io/master"
+      kubeconfig: /opt/tectonic/auth/kubeconfig
+    register: master_nodes
+    retries: 60
+    delay: 10
+    until:
+    - "'results' in master_nodes and 'results' in master_nodes.results"
+    - master_nodes.results.results[0]['items'] | length > 0
+  - name: Wait for bootkube service to finish
+    service_facts: {}
+    #10 mins to complete temp plane
+    retries: 120
+    delay: 5
+    until: ansible_facts.services['bootkube.service'].state == 'stopped'
+    ignore_errors: true
+  - name: Fetch kubeconfig for test container
+    fetch:
+      src: /opt/tectonic/auth/kubeconfig
+      dest: /tmp/artifacts/installer/auth/kubeconfig
+      flat: yes
