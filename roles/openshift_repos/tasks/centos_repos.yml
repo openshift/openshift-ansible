@@ -10,11 +10,10 @@
     dest: "/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS"
   notify: refresh cache
 
+# The version is hardcoded since we cannot use the openshift_version role
+# (it uses the installed packages to determine the version).
 - name: Configure correct origin release repository
   template:
-    src: "{{ item }}"
-    dest: "/etc/yum.repos.d/{{ (item | basename | splitext)[0] }}"
-  with_first_found:
-    - "CentOS-OpenShift-Origin{{ ((openshift_release | default('')).split('.')[0:2] | join('')) }}.repo.j2"
-    - "CentOS-OpenShift-Origin.repo.j2"
+    src: "CentOS-OpenShift-Origin311.repo.j2"
+    dest: "/etc/yum.repos.d/CentOS-OpenShift-Origin311.repo"
   notify: refresh cache
