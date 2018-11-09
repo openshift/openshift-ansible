@@ -193,6 +193,7 @@
     owner: "{{ item }}"
     group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
   with_items: "{{ client_users }}"
+  failed_when: false
 
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
@@ -203,6 +204,7 @@
     remote_src: yes
     force: "{{ openshift_certificates_redeploy | default(false) }}"
   with_items: "{{ client_users }}"
+  failed_when: false
 
 - name: Update the permissions on the admin client config(s)
   file:
@@ -212,6 +214,7 @@
     owner: "{{ item }}"
     group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
   with_items: "{{ client_users }}"
+  failed_when: false
 
 # Ensure ca-bundle exists for 3.2+ configuration
 - name: Check for ca-bundle.crt
