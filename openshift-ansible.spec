@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.42
+Version:        3.11.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -187,6 +187,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Nov 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.43-1
+- GitHubIdentityProvider catering for GitHub Enterprise and includes examples
+  on using the provider. Installation includes parameters for ca and hostname
+  (GH enterprise specific) (ckyriaki@redhat.com)
+- Update centos_repos.yml (camabeh@users.noreply.github.com)
+- Update centos_repos.yml (camabeh@users.noreply.github.com)
+
 * Fri Nov 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.42-1
 - sdn: tolerate all taints (vrutkovs@redhat.com)
 - sync: tolerate all taints (vrutkovs@redhat.com)
