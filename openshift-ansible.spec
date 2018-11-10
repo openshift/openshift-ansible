@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.52.0%{?dist}
+Release:        0.53.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Nov 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.53.0
+- GitHubIdentityProvider catering for GitHub Enterprise and includes examples
+  on using the provider. Installation includes parameters for ca and hostname
+  (GH enterprise specific) (ckyriaki@redhat.com)
+- Check both service catalog and install vars (ruju@itu.dk)
+
 * Thu Nov 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.52.0
 - Simplify PR template and add text to README.md (sdodson@redhat.com)
 - Pre-pull CLI image using openshift_container_cli (vrutkovs@redhat.com)
