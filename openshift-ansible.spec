@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.71
+Version:        3.10.72
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Nov 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.72-1
+- Update centos_repos.yml (camabeh@users.noreply.github.com)
+- Update centos_repos.yml (camabeh@users.noreply.github.com)
+- Mount /etc/pki into controller pod (mchappel@redhat.com)
+- Restart docker after openstack storage setup (tzumainn@redhat.com)
+
 * Thu Nov 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.71-1
 - Add readiness + liveness probes for Service Catalog (jaboyd@redhat.com)
 - Don't attemp to install packages on atomic (sdodson@redhat.com)
