@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.50
+Version:        3.9.51
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.51-1
+- openshift_prometheus: ignore router endpoint in kube service config
+  (pgier@redhat.com)
+- Removing openshift_disable_swap (rteague@redhat.com)
+- Add permissions for the Calico CNI plugin to access namespaces
+  (mleung975@gmail.com)
+- Updating clean up task to match become of creation task (ewolinet@redhat.com)
+- Walk the node_output for undefined (sdodson@redhat.com)
+
 * Sat Nov 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.50-1
 - 
 
