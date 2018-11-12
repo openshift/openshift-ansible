@@ -19,6 +19,7 @@ aws_cluster_id: "vrutkovs"
 #####
 openshift_aws_bootstrap_ignition_file: "/bootstrap.ign"
 
+aws_update_packages: false
 aws_expiration_date: "{{ lookup('pipe','date -d \"4 hours\" --iso=minutes --utc') }}"
 
 aws_ami_tags:
