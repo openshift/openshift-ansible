@@ -9,7 +9,7 @@
   shell: "dnf install kernel-modules-$(uname -r) -y"
   when:
   - ansible_distribution == "Fedora"
-  - not (openshift_is_atomic | bool)
+  - not (openshift_is_atomic | default(False) | bool)
 
 - name: load kernel modules
   systemd:
