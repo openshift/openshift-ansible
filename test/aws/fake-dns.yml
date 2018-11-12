@@ -18,7 +18,7 @@
         state: directory
     - name: Copy custom DNS config
       copy:
-        content:  |
+        content: |
           server=8.8.8.8
           addn-hosts=/etc/hosts.openshift
           cache-size=0
@@ -40,13 +40,13 @@
   tasks:
     - name: Replace nameserver
       copy:
-        content:  |
+        content: |
           search ec2.internal
           nameserver {{ hostvars[groups['bootstrap'][0]]['ansible_default_ipv4']['address'] }}
         dest: /etc/resolv.conf
     - name: Prepend the new nameserver
       copy:
-        content:  |
+        content: |
           prepend domain-name-servers {{ hostvars[groups['bootstrap'][0]]['ansible_default_ipv4']['address'] }};
           timeout 300;
           retry 60;

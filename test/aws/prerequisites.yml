@@ -30,22 +30,22 @@
 # Setup openshift_additional_repos
 - hosts: bootstrap:masters:workers
   tasks:
-  - name: initialize openshift repos
-    import_role:
-      name: openshift_repos
-  #FIXME openshift_node40/aws.yml skips hosts
-  - name: Configure AWS Cloud Provider Settings
-    lineinfile:
-      dest: /etc/kubernetes/kubelet-env
-      regexp: "{{ item.regex }}"
-      line: "{{ item.line }}"
-      create: true
-    with_items:
-      - regex: '^AWS_ACCESS_KEY_ID='
-        line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
-      - regex: '^AWS_SECRET_ACCESS_KEY='
-        line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
-    no_log: true
+    - name: initialize openshift repos
+      import_role:
+        name: openshift_repos
+    #FIXME openshift_node40/aws.yml skips hosts
+    - name: Configure AWS Cloud Provider Settings
+      lineinfile:
+        dest: /etc/kubernetes/kubelet-env
+        regexp: "{{ item.regex }}"
+        line: "{{ item.line }}"
+        create: true
+      with_items:
+        - regex: '^AWS_ACCESS_KEY_ID='
+          line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
+        - regex: '^AWS_SECRET_ACCESS_KEY='
+          line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
+      no_log: true
 
 # TODO: proper firewalld setup
 # 49500 on bootstrap; 2379, 6443, 10250 on masters, 10250 on workers

@@ -1,11 +1,12 @@
+---
 - hosts: localhost
   connection: local
   gather_facts: false
   tasks:
   - include_vars: "{{ item }}"
     with_first_found:
-      - vars.yml
-      - vars.yaml
+    - vars.yml
+    - vars.yaml
   - meta: refresh_inventory
 
   - name: Add instance to the group
