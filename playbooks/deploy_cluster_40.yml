@@ -132,7 +132,7 @@
     #10 mins to complete temp plane
     retries: 120
     delay: 5
-    until: ansible_facts.services['bootkube.service'].state == 'stopped'
+    until: "'bootkube.service' not in ansible_facts.services"
     ignore_errors: true
   - name: Fetch kubeconfig for test container
     fetch:
