@@ -16,7 +16,7 @@
       aws_basedomain: "{{ aws_basedomain }}"
       aws_cluster_id: "{{ aws_cluster_id }}"
       openshift_clusterid: "{{ aws_cluster_id }}"
-    with_items: "{{ groups['tag_kubernetes_io_cluster_' + aws_cluster_id + '_true'] }}"
+    with_items: "{{ groups['tag_kubernetes_io_cluster_' + aws_cluster_id + '_owned'] }}"
     vars:
       group: "{{ hostvars[item].group_names |
                  select('match', 'tag_ansible_group_(.*)') |

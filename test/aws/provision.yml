@@ -42,7 +42,7 @@
       vars:
         aws_instance_tags: |
           {
-            "kubernetes.io/cluster/{{ aws_cluster_id }}": "true",
+            "kubernetes.io/cluster/{{ aws_cluster_id }}": "owned",
             "Name": "{{ item.name }}",
             "ansible-group": "{{ item.ansible_group }}",
             "expirationDate": "{{ item.aws_expiration_date | default(aws_expiration_date) }}"

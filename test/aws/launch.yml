@@ -10,7 +10,7 @@
     - meta: refresh_inventory
 
 - import_playbook: provision.yml
-  when: '"tag_kubernetes_io_cluster_"+ aws_cluster_id + "_true" not in groups'
+  when: '"tag_kubernetes_io_cluster_"+ aws_cluster_id + "_owned" not in groups'
 - import_playbook: setup_group_facts.yml
 
 - import_playbook: prerequisites.yml
