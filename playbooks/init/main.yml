@@ -18,8 +18,6 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- import_playbook: evaluate_groups.yml
-
 - import_playbook: basic_facts.yml
 
 # NOTE: we must call init repos before installing base packages

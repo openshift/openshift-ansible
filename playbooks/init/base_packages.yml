@@ -3,7 +3,7 @@
 # and upgrade_control_plane.yml upgrade plays.
 
 - name: Install packages necessary for installer
-  hosts: "{{ l_base_packages_hosts | default('oo_all_hosts') }}"
+  hosts: "{{ l_base_packages_hosts | default('nodes') }}"
   any_errors_fatal: true
   tasks:
   - name: Determine if chrony is installed

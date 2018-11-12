@@ -1,6 +1,6 @@
 ---
 - name: Determine openshift_version to configure on first master
-  hosts: oo_nodes_to_config
+  hosts: nodes
   tasks:
   - include_role:
       name: openshift_version

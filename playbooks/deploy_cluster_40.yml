@@ -2,14 +2,14 @@
 - name: run the init
   import_playbook: init/main.yml
   vars:
-    l_init_fact_hosts: "bootstrap:masters:workers"
-    l_openshift_version_set_hosts: "bootstrap:masters:workers"
+    l_init_fact_hosts: "nodes"
+    l_openshift_version_set_hosts: "nodes"
     l_install_base_packages: True
     l_repo_hosts: "all:!all"
 
 # TODO(michaelgugino): break up the rest of this file into reusable chunks.
 - name: Install nodes
-  hosts: bootstrap:masters:workers
+  hosts: nodes
   roles:
   - role: container_runtime
   tasks:

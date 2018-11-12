@@ -1,13 +1,13 @@
 ---
 - name: Ensure that all non-node hosts are accessible
-  hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nfs_to_config
+  hosts: masters
   any_errors_fatal: true
   tasks:
 
 - name: Initialize basic host facts
   # l_init_fact_hosts is passed in via play during control-plane-only
   # upgrades and scale-up plays; otherwise oo_all_hosts is used.
-  hosts: "{{ l_init_fact_hosts | default('oo_all_hosts') }}"
+  hosts: "{{ l_init_fact_hosts | default('nodes') }}"
   roles:
   - role: openshift_facts
   tasks:

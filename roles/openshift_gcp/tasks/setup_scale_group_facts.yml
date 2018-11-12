@@ -17,3 +17,10 @@
     name: "{{ hostvars[item].gce_name }}"
     groups: workers
   with_items: "{{ groups['tag_ocp-worker'] | default([]) }}"
+
+- name: Add all nodes
+  add_host:
+    name: "{{ hostvars[item].gce_name }}"
+    groups: nodes
+    ignition_file: "{{ openshift_gcp_bootstrap_ignition_file }}"
+  with_items: "{{ groups['tag_ocp-node'] | default([]) }}"
