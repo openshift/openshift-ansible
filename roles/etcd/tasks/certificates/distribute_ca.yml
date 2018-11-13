@@ -31,17 +31,17 @@
 
 - name: Read current etcd CA
   slurp:
-    src: "{{ etcd_conf_dir }}/ca.crt"
+    src: "{{ etcd_ca_file }}"
   register: g_current_etcd_ca_output
 
 - name: Read new etcd CA
   slurp:
-    src: "{{ etcd_ca_dir }}/ca.crt"
+    src: "{{ etcd_ca_cert }}"
   register: g_new_etcd_ca_output
 
 - copy:
     content: "{{ (g_new_etcd_ca_output.content|b64decode) + (g_current_etcd_ca_output.content|b64decode) }}"
-    dest: "{{ item }}/ca.crt"
+    dest: "{{ item }}"
   with_items:
-  - "{{ etcd_conf_dir }}"
-  - "{{ etcd_ca_dir }}"
+  - "{{ etcd_ca_file }}"
+  - "{{ etcd_ca_cert }}"
