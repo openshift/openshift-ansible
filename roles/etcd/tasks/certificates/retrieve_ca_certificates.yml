@@ -1,7 +1,7 @@
 ---
 - name: Retrieve etcd CA certificate
   fetch:
-    src: "{{ etcd_conf_dir }}/ca.crt"
+    src: "{{ etcd_ca_file }}"
     dest: "{{ etcd_sync_cert_dir }}/"
     flat: yes
     fail_on_missing: yes
