@@ -115,6 +115,10 @@ openshift_aws_dns_records:
     type: "CNAME"
     private_zone: False
     value: "{{ l_openshift_aws_elb_facts[openshift_aws_elb_infra_name].dns_name }}"
+  'master':
+    type: "CNAME"
+    private_zone: False
+    value: "{{ l_openshift_aws_elb_facts[openshift_aws_elb_master_external_name].dns_name }}"
 
 # Allows users to add and recursively override
 # https://docs.ansible.com/ansible/2.5/user_guide/playbooks_filters.html#combining-hashes-dictionaries
