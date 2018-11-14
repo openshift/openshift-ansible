@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.43
+Version:        3.11.44
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -187,6 +187,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Nov 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.44-1
+- Properly prefix certificate paths (sdodson@redhat.com)
+- [release 3.11] Check if docker is running before attempting to restart it
+  (tzumainn@redhat.com)
+- Allow failure when copying kubeconfig to user home dir. (pdd@redhat.com)
+- move to liba mirror (mangirdas@judeikis.lt)
+- bye bye crio for now (mangirdas@judeikis.lt)
+- Start node image prepull after CRIO is restarted (vrutkovs@redhat.com)
+
 * Fri Nov 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.43-1
 - GitHubIdentityProvider catering for GitHub Enterprise and includes examples
   on using the provider. Installation includes parameters for ca and hostname
