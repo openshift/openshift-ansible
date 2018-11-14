@@ -11,7 +11,7 @@ spec:
     provisioners-infra: "{{name}}"
     name: "{{name}}"
   strategy:
-    type: Recreate 
+    type: Recreate
   template:
     metadata:
       name: "{{deploy_name}}"
@@ -48,7 +48,7 @@ spec:
               value: "{{openshift_provisioners_efs_name}}"
           volumeMounts:
             - name: pv-volume
-              mountPath: /persistentvolumes
+              mountPath: "{{openshift_provisioners_efs_path}}"
       securityContext:
         supplementalGroups:
           - {{openshift_provisioners_efs_supplementalgroup}}
