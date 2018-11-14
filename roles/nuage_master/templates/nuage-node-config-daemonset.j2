@@ -163,6 +163,10 @@ spec:
         # container on each worker node
         - name: install-nuage-vrs
           image: {{ nuage_vrs_image_name }}:{{ nuage_vrs_container_image_version }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/usr/share/openvswitch/scripts/openvswitch.init","stop"]
           securityContext:
             privileged: true
           env:
@@ -175,6 +179,8 @@ spec:
               value: '"kvm, k8s"'
             - name: NUAGE_K8S_SERVICE_IPV4_SUBNET
               value: '{{ svc_ipv4_subnet }}\/{{ svc_ipv4_subnet_mask }}'
+            - name: NUAGE_K8S_POD_NETWORK_CIDR
+              value: '{{ pod_network_subnet }}\/{{ pod_network_subnet_mask }}'
             - name: NUAGE_NETWORK_UPLINK_INTF
               value: "{{ nw_uplink_intf }}"
             - name: NUAGE_BRIDGE_MTU
