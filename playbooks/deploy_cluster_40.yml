@@ -50,7 +50,7 @@
       - progress.service
 
 - name: Start masters
-  hosts: masters
+  hosts: masters:!bootstrap
   tasks:
   # This is required for openshift_node40/config.yml
   - set_fact:

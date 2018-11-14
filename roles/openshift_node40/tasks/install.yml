@@ -8,3 +8,9 @@
     - "origin-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
     - "origin-clients{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
     - "origin-hyperkube{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+
+- name: copy over mcd
+  copy:
+    src: machine-config-daemon
+    dest: /usr/local/bin/machine-config-daemon
+    mode: 0755
