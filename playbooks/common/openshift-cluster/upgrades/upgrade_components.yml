@@ -14,11 +14,13 @@
       tasks_from: install.yml
     when:
     - openshift_enable_service_catalog | default(true) | bool
+    - ansible_service_broker_install | default(true) | bool
   - import_role:
       name: template_service_broker
       tasks_from: upgrade.yml
     when:
     - openshift_enable_service_catalog | default(true) | bool
+    - template_service_broker_install | default(true) | bool
 
 - import_playbook: ../../../openshift-monitoring/private/config.yml
   when: openshift_monitoring_deploy | default(false) | bool
