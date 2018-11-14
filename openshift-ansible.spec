@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.76
+Version:        3.10.77
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -180,6 +180,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Nov 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.77-1
+- Properly prefix certificate paths (sdodson@redhat.com)
+- Check both service catalog and install vars (ruju@itu.dk)
+- [release 3.10] Check if docker is running before attempting to restart it
+  (tzumainn@redhat.com)
+
 * Tue Nov 13 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.76-1
 - Allow failure when copying kubeconfig to user home dir. (pdd@redhat.com)
 
