@@ -11,5 +11,9 @@ working-dir = /{{ openshift_cloudprovider_vsphere_datacenter }}/vm/{{ openshift_
 {% else %}
 working-dir = /{{ openshift_cloudprovider_vsphere_datacenter }}/vm/
 {% endif %}
+
 [Disk]
 scsicontrollertype = pvscsi
+
+[Network]
+public-network = "{{ openshift_cloudprovider_vsphere_network  | default('VM Network')}}"
