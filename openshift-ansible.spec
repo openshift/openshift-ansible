@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.171
+Version:        3.4.172
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -255,6 +255,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Nov 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.4.172-1
+- 
+
 * Thu Nov 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.4.171-1
 - Fix undefined l_bind_docker_reg_auth (mgugino@redhat.com)
 
