@@ -90,6 +90,8 @@ spec:
           readOnly: true
         - mountPath: /etc/openvswitch
           name: host-config-openvswitch
+        - mountPath: /var/log/openvswitch
+          name: log-openvswitch
         resources:
           requests:
             cpu: 100m
@@ -111,3 +113,6 @@ spec:
       - name: host-config-openvswitch
         hostPath:
           path: /etc/origin/openvswitch
+      - name: log-openvswitch
+        hostPath:
+          path: /var/log/openvswitch
