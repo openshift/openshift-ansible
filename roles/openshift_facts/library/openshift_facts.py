@@ -554,8 +554,8 @@ def set_version_facts_if_unset(facts):
             # 'Latest' version is set to True, 'Next' versions set to False
             version_gte_3_6 = True
             version_gte_3_7 = True
-            version_gte_3_8 = False
-            version_gte_3_9 = False
+            version_gte_3_8 = True
+            version_gte_3_9 = True
             version_gte_3_10 = False
         facts['common']['version_gte_3_6'] = version_gte_3_6
         facts['common']['version_gte_3_7'] = version_gte_3_7
