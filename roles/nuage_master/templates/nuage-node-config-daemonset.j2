@@ -109,8 +109,6 @@ spec:
             - mountPath: /var/log
               name: cni-log-dir
             - mountPath: {{ nuage_node_config_dsets_mount_dir }}
-              name: var-usr-share-dir
-            - mountPath: /usr/share/
               name: usr-share-dir
       volumes:
         - name: cni-bin-dir
@@ -128,12 +126,9 @@ spec:
         - name: cni-log-dir
           hostPath:
             path: /var/log
-        - name: var-usr-share-dir
-          hostPath:
-            path: {{ nuage_node_config_dsets_mount_dir }}
         - name: usr-share-dir
           hostPath:
-            path: /usr/share/
+            path: {{ nuage_node_config_dsets_mount_dir }}
 
 ---
 
