@@ -46,6 +46,11 @@
       name: openshift_node40
       tasks_from: systemd.yml
     vars:
+      l_systemd_dict:
+        bootkube.service: True
+        tectonic.service: True
+        kubelet.service: True
+        progress.service: True
       excluded_services:
       - progress.service
 
@@ -74,6 +79,9 @@
   - import_role:
       name: openshift_node40
       tasks_from: systemd.yml
+    vars:
+      l_systemd_dict:
+        kubelet.service: True
 
 - name: Start workers
   hosts: workers

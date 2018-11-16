@@ -5,7 +5,12 @@
     dest: /root/openshift-ansible.ign
 
 - name: run mcd
-  command: "/usr/local/bin/machine-config-daemon start --once-from /root/openshift-ansible.ign"
+  shell: >
+    /usr/local/bin/machine-config-daemon start
+    --once-from /root/openshift-ansible.ign
+    --from-ign
+    --node-name $(hostname)
+    --root-mount /
 
 #### Disable SWAP #####
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory

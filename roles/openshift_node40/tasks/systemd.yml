@@ -11,5 +11,6 @@
     name: "{{ item.key }}"
     state: "{{ 'restarted' if (item.value | bool) else 'stopped' }}"
     enabled: "{{ item.value | bool }}"
-  with_dict: "{{ l_parse_ignition_res.systemd_dict }}"
+  #with_dict: "{{ l_parse_ignition_res.systemd_dict }}"
+  with_dict: "{{ l_systemd_dict }}"
   when: item.key not in excluded_services | default([])
