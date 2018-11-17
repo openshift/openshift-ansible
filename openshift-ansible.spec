@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.72
+Version:        3.7.73
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Nov 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.73-1
+- Allow openshift_install_examples to be false (rteague@redhat.com)
+- Fix yamllint (rteague@redhat.com)
+- Minor update to rhel_subscribe role (rteague@redhat.com)
+- Allow failure when copying kubeconfig to user home dir. (pdd@redhat.com)
+
 * Fri Nov 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.72-1
 - handler restart master api fix (chinacoolhacker@gmail.com)
 - Walk the node object to ensure everything is defined (sdodson@redhat.com)
