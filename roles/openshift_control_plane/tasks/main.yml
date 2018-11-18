@@ -44,6 +44,18 @@
     path: "/usr/libexec/kubernetes/kubelet-plugins/volume/exec/"
     mode: '0750'
 
+- name: Create openshift audit log directory
+  file:
+    state: directory
+    path: "{{ openshift.master.audit_config.auditFilePath | dirname }}"
+    mode: 0700
+  when:
+  - openshift.master.audit_config is defined
+  - openshift.master.audit_config.auditFilePath is defined
+  - not "/etc/origin/master" in openshift.master.audit_config.auditFilePath
+  - not "/var/lib/origin" in openshift.master.audit_config.auditFilePath
+  - not "/etc/origin/cloudprovider" in openshift.master.audit_config.auditFilePath
+
 - name: Create the policy file if it does not already exist
   command: >
     {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig

@@ -23,6 +23,7 @@ for you: {}"""
 
 ITEMS_TO_POP = (
     ('oauthConfig', 'identityProviders'),
+    ('auditConfig', 'auditFilePath'),
 )
 # Create csv string of dot-separated dictionary keys:
 # eg: 'oathConfig.identityProviders, something.else.here'
@@ -48,8 +49,10 @@ def pop_migrated_fields(mastercfg):
         field = mastercfg
         for sub_field in item:
             parent_field = field
+            if sub_field not in field:
+                continue
             field = field[sub_field]
-        parent_field.pop(item[len(item) - 1])
+        parent_field.pop(item[len(item) - 1], None)
 
 
 def do_item_check(val, strings_to_check):
