@@ -45,15 +45,15 @@ aws_instances:
   aws_flavor: t2.large
   aws_security_group: public
 - name: "{{ vm_prefix }}-worker-1"
-  ansible_groups: workers
+  ansible_group: workers
   aws_flavor: t2.large
   aws_security_group: public
 - name: "{{ vm_prefix }}-worker-2"
-  ansible_groups: workers
+  ansible_group: workers
   aws_flavor: t2.large
   aws_security_group: public
 - name: "{{ vm_prefix }}-worker-3"
-  ansible_groups: workers
+  ansible_group: workers
   aws_flavor: t2.large
   aws_security_group: public
   # Use custom AMI tags
