@@ -49,6 +49,13 @@
     dest: "{{ manifests_tmpdir.stdout }}/kuryrnet.yaml"
   when: openshift_kuryr_subnet_driver|default("default") == 'namespace'
 
+- name: Create kuryrnetpolicy CRD manifest
+  become: yes
+  template:
+    src: kuryrnetpolicy.yaml.j2
+    dest: "{{ manifests_tmpdir.stdout }}/kuryrnetpolicy.yaml"
+  when: openshift_kuryr_sg_driver|default("default") == 'policy'
+
 - name: Apply OpenShift node's ImageStreamTag manifest
   oc_obj:
     state: present
@@ -109,3 +116,13 @@
     - "{{ manifests_tmpdir.stdout }}/kuryrnet.yaml"
   run_once: true
   when: openshift_kuryr_subnet_driver|default("default") == 'namespace'
+
+- name: Apply kuryrnetpolicy CRD manifest
+  oc_obj:
+    state: present
+    kind: CustomResourceDefinition
+    name: "kuryrnetpolicies"
+    files:
+    - "{{ manifests_tmpdir.stdout }}/kuryrnetpolicy.yaml"
+  run_once: true
+  when: openshift_kuryr_sg_driver|default("default") == 'policy'

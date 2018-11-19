@@ -236,9 +236,17 @@ data:
     # The comma-separated handlers that should be registered for watching
     # in the pipeline. (list value)
 {% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
+{% if openshift_kuryr_sg_driver|default('default') == 'policy' %}
+    enabled_handlers = vif,lb,lbaasspec,namespace,policy
+{% else %}
     enabled_handlers = vif,lb,lbaasspec,namespace
+{% endif %}
+{% else %}
+{% if openshift_kuryr_sg_driver|default('default') == 'policy' %}
+    enabled_handlers = vif,lb,lbaasspec,policy
 {% else %}
     enabled_handlers = vif,lb,lbaasspec
+{% endif %}
 {% endif %}
 
     [neutron]
