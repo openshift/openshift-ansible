@@ -43,6 +43,7 @@ nw_uplink_intf: "{{ uplink_interface | default('eth0') }}"
 nuage_vsc_active_ip: "{{ vsc_active_ip | default('') }}"
 nuage_vsc_standby_ip: "{{ vsc_standby_ip | default('') }}"
 nuage_bgp_config: "{{ nuage_bgp | default('disable') }}"
+nuage_etcd_cert_prefix: "nuage-etcd"
 
 nuage_tasks:
 - resource_kind: cluster-role
