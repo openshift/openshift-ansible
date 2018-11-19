@@ -18,7 +18,6 @@ for c in $(runc list -q); do
         done
 done
 mount | grep overlay | awk '{print $3}' | xargs umount | true
-umount -R /var/lib/containers/storage/overlay
-umount -R /var/lib/containers/storage
+mount | grep '/var/lib/containers/storage/' | awk '{print $3}' | xargs umount | true
 rm -rf /var/run/containers/storage/*
 rm -rf /var/lib/containers/storage/*
