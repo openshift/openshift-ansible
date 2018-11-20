@@ -16,3 +16,4 @@ dependencies:
 - role: nuage_common
 - role: nuage_ca
 - role: lib_utils
+- role: openshift_facts
