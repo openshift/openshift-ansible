@@ -12,7 +12,7 @@ sslclientcert={{ "/var/lib/yum/custom_secret_" + (loop.index-1)|string + "_cert"
 {% if 'sslclientkey' in repo %}
 sslclientkey={{ "/var/lib/yum/custom_secret_" + (loop.index-1)|string + "_key" if repo.sslclientkey }}
 {% endif %}
-{% for key, value in repo.iteritems() %}
+{% for key, value in repo.items() %}
 {% if key not in ['id', 'name', 'baseurl', 'enabled', 'gpgcheck', 'sslclientkey', 'sslclientcert'] and value is defined %}
 {{ key }}={{ value }}
 {% endif %}
