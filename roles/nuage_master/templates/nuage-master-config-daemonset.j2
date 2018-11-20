@@ -48,9 +48,9 @@ data:
           serverKey: ""
       # etcd config required for HA
       etcdClientConfig:
-          ca: {{ nuage_master_crt_dir }}/nuageEtcd-ca.crt
-          certFile: {{ nuage_master_crt_dir }}/nuageEtcd-client.crt
-          keyFile: {{ nuage_master_crt_dir }}/nuageEtcd-client.key
+          ca: {{ nuage_master_crt_dir }}/{{ nuage_etcd_cert_prefix }}ca.crt
+          certFile: {{ nuage_master_crt_dir }}/{{ nuage_etcd_cert_prefix }}client.crt
+          keyFile: {{ nuage_master_crt_dir }}/{{ nuage_etcd_cert_prefix }}client.key
           urls:
       {% for etcd_url in openshift_master_etcd_urls %}
               - {{ etcd_url }}
