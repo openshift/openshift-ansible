@@ -117,3 +117,5 @@ spec:
       - name: log-openvswitch
         hostPath:
           path: /var/log/openvswitch
+      tolerations:
+      - operator: "Exists"
