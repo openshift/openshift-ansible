@@ -30,6 +30,7 @@ Requires:      libselinux-python
 Requires:      python-passlib
 Requires:      python2-crypto
 Requires:      patch
+Requires:      pyOpenSSL
 
 %description
 Openshift and Atomic Enterprise Ansible
