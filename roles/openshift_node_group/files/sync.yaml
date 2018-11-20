@@ -121,6 +121,7 @@ spec:
             md5sum /etc/origin/node/tmp/node-config.yaml > /tmp/.new
             if [[ "$( cat /tmp/.old )" != "$( cat /tmp/.new )" ]]; then
               mv /etc/origin/node/tmp/node-config.yaml /etc/origin/node/node-config.yaml
+              SYSTEMD_IGNORE_CHROOT=1 systemctl restart tuned || :
               echo "info: Configuration changed, restarting kubelet" 2>&1
               # TODO: kubelet doesn't relabel nodes, best effort for now
               # https://github.com/kubernetes/kubernetes/issues/59314
@@ -171,6 +172,12 @@ spec:
         - mountPath: /etc/sysconfig
           name: host-sysconfig-node
           readOnly: true
+        - mountPath: /var/run/dbus
+          name: var-run-dbus
+          readOnly: true
+        - mountPath: /run/systemd/system
+          name: run-systemd-system
+          readOnly: true
 
       volumes:
       # In bootstrap mode, the host config contains information not easily available
@@ -181,3 +188,9 @@ spec:
       - name: host-sysconfig-node
         hostPath:
           path: /etc/sysconfig
+      - name: var-run-dbus
+        hostPath:
+          path: /var/run/dbus
+      - name: run-systemd-system
+        hostPath:
+          path: /run/systemd/system
