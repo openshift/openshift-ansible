@@ -84,3 +84,4 @@ osm_older_priorities_no_zone:
 openshift_master_config_file: "/etc/origin/master/master-config.yaml"
 openshift_master_scheduler_conf: "/etc/origin/master/scheduler.json"
 openshift_master_session_secrets_file: "/etc/origin/master/session-secrets.yaml"
+openshift_encryption_config_file: "/etc/origin/master/encryption-config.yaml"
