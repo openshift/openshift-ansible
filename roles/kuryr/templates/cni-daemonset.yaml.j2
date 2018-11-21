@@ -92,6 +92,9 @@ spec:
           oc config --config=/tmp/kubeconfig set-context "$( oc config --config=/tmp/kubeconfig current-context )" --user=sa
 
           # Launch the SkyDNS
+          if which openshift-sdn; then
+            exec openshift-sdn --enable=dns --config=/etc/origin/node/node-config.yaml --kubeconfig=/tmp/kubeconfig --loglevel=${DEBUG_LOGLEVEL:-2}
+          fi
           exec openshift start network --enable=dns --config=/etc/origin/node/node-config.yaml --kubeconfig=/tmp/kubeconfig --loglevel=${DEBUG_LOGLEVEL:-2}
 
         securityContext:
