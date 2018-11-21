@@ -26,7 +26,7 @@
       'cloud_init':
       {
       {% if item.count == 1 -%}
-      'host_name': '{{ item.name }}.{{ openshift_ovirt_dns_zone }}',
+      'host_name': '{{  (item.empty_hostname | default(True)) | ternary('', item.name + '.' + openshift_ovirt_dns_zone) }}',
         {% if item.nic_mode is defined -%}
       'nic_boot_protocol': 'static',
       'nic_ip_address': '{{ item["nic_mode"][item["name"]]["nic_ip_address"] }}',
@@ -46,7 +46,7 @@
       'dns_search': '{{ item["dns_search"] }}',
         {% endif -%}
       {% elif item.count > 1 -%}
-      'host_name': '{{ item.name }}{{ iter }}.{{ openshift_ovirt_dns_zone }}',
+      'host_name': '{{  (item.empty_hostname | default(True)) | ternary('', item.name + iter | string + '.' + openshift_ovirt_dns_zone) }}',
         {% if item.nic_mode is defined -%}
       'nic_boot_protocol': 'static',
       'nic_ip_address': '{{ item["nic_mode"][item["name"] + iter | string ]["nic_ip_address"] }}',
