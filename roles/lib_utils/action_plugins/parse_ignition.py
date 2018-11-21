@@ -8,6 +8,24 @@ from ansible.plugins.action import ActionBase
 
 
 # pylint: disable=too-many-function-args
+def get_file_data(encoded_contents):
+    """Decode data URLs as specified in RFC 2397"""
+    # The following source is adapted from Python3 source
+    # License: https://github.com/python/cpython/blob/3.7/LICENSE
+    # retrieved from: https://github.com/python/cpython/blob/3.7/Lib/urllib/request.py
+    _, data = encoded_contents.split(":", 1)
+    mediatype, data = data.split(",", 1)
+
+    # even base64 encoded data URLs might be quoted so unquote in any case:
+    data = urllib.parse.unquote(data)
+    if mediatype.endswith(";base64"):
+        data = base64.b64decode(data).decode('utf-8')
+        mediatype = mediatype[:-7]
+    # End PSF software
+    return data
+
+
+# pylint: disable=too-many-function-args
 def get_files(files_dict, systemd_dict, dir_list, data):
     """parse data to populate file_dict"""
     files = data.get('storage', []).get('files', [])
@@ -15,11 +33,8 @@ def get_files(files_dict, systemd_dict, dir_list, data):
         path = item["path"]
         dir_list.add(os.path.dirname(path))
         # remove prefix "data:,"
-        encoding, contents = item['contents']['source'].split(',', 1)
-        if 'base64' in encoding:
-            contents = base64.b64decode(contents).decode('utf-8')
-        else:
-            contents = urllib.parse.unquote(contents)
+        encoded_contents = item['contents']['source']
+        contents = get_file_data(encoded_contents)
         # convert from int to octal, padding at least to 4 places.
         # eg, 420 becomes '0644'
         mode = str(format(int(item["mode"]), '04o'))
