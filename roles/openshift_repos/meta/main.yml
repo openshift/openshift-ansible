@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: OpenShift Development <dev@lists.openshift.redhat.com>
+  description: Enable additional repositories
+  company: Red Hat, Inc.
+  license: license (Apache)
+  min_ansible_version: 2.2
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  - name: Fedora
+    versions:
+    - all
+  categories:
+  - openshift
+dependencies:
+- role: openshift_version
