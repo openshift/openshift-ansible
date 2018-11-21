@@ -9,3 +9,10 @@
   file:
     dest: "/etc/origin/node/node-config.yaml"
     state: absent
+
+- name: Update bootstrap-node-config.yaml to use crio
+  yedit:
+    content:
+    src: "/etc/origin/node/bootstrap-node-config.yaml"
+    edits: "{{ openshift_node_group_edits_crio }}"
+  when: openshift_use_crio | bool

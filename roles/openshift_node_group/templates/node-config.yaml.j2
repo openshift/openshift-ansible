@@ -24,16 +24,6 @@ kubeletArguments:
   volume-plugin-dir:
   - "/etc/origin/kubelet-plugins/volume/exec"
 {% endif %}
-{% if openshift_use_crio | bool %}
-  container-runtime:
-  - remote
-  container-runtime-endpoint:
-  - {{ l_crio_var_sock }}
-  image-service-endpoint:
-  - {{ l_crio_var_sock }}
-  runtime-request-timeout:
-  - 10m
-{% endif %}
   pod-manifest-path:
   - /etc/origin/node/pods
   bootstrap-kubeconfig:
