@@ -1,7 +1,8 @@
 ---
 
 - name: daemon reload
-  command: "systemctl daemon-reload"
+  systemd:
+    daemon_reload: yes
 
 # dictionary of kv pairs, servicename: enabled, eg:
 # {'kubernetes': "true"}
@@ -11,3 +12,4 @@
     state: "{{ 'restarted' if (item.value | bool) else 'stopped' }}"
     enabled: "{{ item.value | bool }}"
   with_dict: "{{ l_parse_ignition_res.systemd_dict }}"
+  when: item.key not in excluded_services | default([])

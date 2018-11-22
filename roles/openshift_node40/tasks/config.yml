@@ -1,16 +1,24 @@
 ---
-
 - name: get worker ignition file
   command: >
     curl -k {{ openshift_bootstrap_endpoint }}
   register: l_worker_bootstrap
+  when: openshift_bootstrap_endpoint is defined
+
+- set_fact:
+    ign_contents: "{{ l_worker_bootstrap.stdout }}"
+  when: openshift_bootstrap_endpoint is defined
+
+- set_fact:
+    ign_contents: "{{ lookup('file', ignition_file) }}"
+  when: ignition_file is defined
 
 - debug:
-    var: l_worker_bootstrap.stdout
+    var: ign_contents
 
 - name: parse ignition file
   parse_ignition:
-    ign_file_contents: "{{ l_worker_bootstrap.stdout }}"
+    ign_file_contents: "{{ ign_contents }}"
   register: l_parse_ignition_res
 
 - import_tasks: create_files_from_ignition.yml

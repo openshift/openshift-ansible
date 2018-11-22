@@ -24,3 +24,9 @@
     name: haproxy
     state: started
     enabled: yes
+
+- name: allow haproxy to connect to any port
+  seboolean:
+    name: haproxy_connect_any
+    state: yes
+    persistent: yes
