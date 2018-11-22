@@ -1,0 +1,35 @@
+---
+ansible_become: yes
+
+openshift_deployment_type: origin
+osm_etcd_image: "{{ etcd_image_dict[openshift_deployment_type] }}"
+
+# Debugging settings
+debug_level: 2
+openshift_debug_level: "{{ debug_level }}"
+openshift_master_debug_level: "{{ master_debug_level | default(debug_level, true) }}"
+openshift_node_debug_level: "{{ node_debug_level | default(debug_level, true) }}"
+
+# External API settings
+console_port: 443
+internal_console_port: 8443
+openshift_master_api_port: "8443"
+openshift_master_console_port: "8443"
+openshift_master_cluster_public_hostname: "{{ hostvars[groups['bootstrap'][0]]['ansible_default_ipv4'] }}.xip.io"
+openshift_master_default_subdomain: "{{ wildcard_zone }}"
+
+openshift_master_access_token_max_seconds: 2419200
+openshift_master_identity_providers:
+
+# Networking settings
+openshift_node_port_range: 30000-32000
+openshift_node_open_ports: [{"service":"Router stats port", "port":"1936/tcp"}, {"service":"Allowed open host ports", "port":"9000-10000/tcp"}, {"service":"Allowed open host ports", "port":"9000-10000/udp"}]
+os_sdn_network_plugin_name: redhat/openshift-ovs-networkpolicy
+openshift_node_sdn_mtu: 1410
+osm_cluster_network_cidr: 172.16.0.0/16
+osm_host_subnet_length: 9
+openshift_portal_net: 172.30.0.0/16
+
+mcd_port: 49500
+mcd_endpoint: "{{ hostvars[groups['bootstrap'][0]]['inventory_hostname'] }}:{{ mcd_port }}"
+aws_tag: "tag_kubernetes_io_cluster_{{ aws_cluster_id | replace('-', '_') }}_owned"

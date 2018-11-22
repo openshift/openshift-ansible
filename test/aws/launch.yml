@@ -1,0 +1,10 @@
+---
+- import_playbook: provision.yml
+  when: 'aws_tag not in groups'
+
+- import_playbook: setup_group_facts.yml
+
+- import_playbook: prerequisites.yml
+
+- import_playbook: fake-dns.yml
+- import_playbook: ../../playbooks/deploy_cluster_40.yml

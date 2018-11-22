@@ -1,0 +1,86 @@
+---
+vm_prefix: "vrutkovs-new-installer"
+#aws_use_auto_terminator is set to True by default, as rh-dev account doesn't have permission
+# to terminate instances. These should be stopped and renamed to include 'terminate' instead
+#aws_use_auto_terminator: false
+
+type: aws
+
+aws_key: "libra"
+aws_region: "us-east-1"
+# us-east-1d
+aws_subnet: "subnet-cf57c596"
+aws_image: "ami-70e8fd66"
+
+#####
+#Make sure these match the installer settings
+aws_basedomain: "test.ose"
+aws_cluster_id: "vrutkovs"
+#####
+openshift_aws_bootstrap_ignition_file: "/bootstrap.ign"
+
+aws_update_packages: false
+aws_expiration_date: "{{ lookup('pipe','date -d \"4 hours\" --iso=minutes --utc') }}"
+
+aws_ami_tags:
+  "tag:operating_system": "rhel"
+  "tag:image_stage": "base"
+  "tag:ready": "yes"
+
+aws_instances:
+- name: "{{ vm_prefix }}-bootstrap"
+  ansible_groups:
+    - bootstrap
+    - nodes
+  aws_flavor: t2.large
+  aws_security_group: public
+- name: "{{ vm_prefix }}-master-1"
+  ansible_groups:
+    - masters
+    - nodes
+  aws_flavor: t2.large
+  aws_security_group: public
+- name: "{{ vm_prefix }}-master-2"
+  ansible_groups:
+    - masters
+    - nodes
+  aws_flavor: t2.large
+  aws_security_group: public
+- name: "{{ vm_prefix }}-master-3"
+  ansible_groups:
+    - masters
+    - nodes
+  aws_flavor: t2.large
+  aws_security_group: public
+- name: "{{ vm_prefix }}-worker-1"
+  ansible_groups:
+    - workers
+    - nodes
+  aws_flavor: t2.large
+  aws_security_group: public
+- name: "{{ vm_prefix }}-worker-2"
+  ansible_groups:
+    - workers
+    - nodes
+  aws_flavor: t2.large
+  aws_security_group: public
+- name: "{{ vm_prefix }}-worker-3"
+  ansible_groups:
+    - workers
+    - nodes
+  aws_flavor: t2.large
+  aws_security_group: public
+  # Use custom AMI tags
+  # aws_ami_tags:
+  #   operating_system: "rhel"
+  #   image_stage: "base"
+  #   ready: "yes"
+  # Use custom AMI
+  #aws_image: "ami-70e8fd66"
+  # Attach custom volumes
+  #aws_volumes:
+  # - device_name: /dev/sdb
+  #   volume_size: 50
+  #   delete_on_termination: yes
+  #Set expiration date for instances on CI namespace
+  #aws_expiration_date: "{{ lookup('pipe','date -d \"4 hours\" --iso=minutes --utc') }}"
