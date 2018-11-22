@@ -45,7 +45,7 @@ openshift_descheduler_strategy_low_node_utilization_dict:
 
 # descheduler cronjob setup
 openshift_descheduler_cronjob_name: descheduler-cronjob
-openshift_descheduler_cronjob_node_selector: {"type": "infra"}
+openshift_descheduler_cronjob_node_selector: {"node-role.kubernetes.io/infra": "true"}
 # by default (00:00) everyday
 openshift_descheduler_cronjob_schedule: "*/1 0 * * *"
 
