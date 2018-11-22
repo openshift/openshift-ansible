@@ -24,10 +24,6 @@
   connection: local
   gather_facts: no
   tasks:
-  - name: Set facts
-    set_fact:
-      openshift_master_unsupported_embedded_etcd: True
-
   - name: Create the image instance disk
     gce_pd:
       service_account_email: "{{ (lookup('file', openshift_gcp_iam_service_account_keyfile ) | from_json ).client_email }}"
@@ -79,16 +75,12 @@
 
 - name: Add custom repositories
   hosts: nodes
-  handlers:
-  - import_tasks: ../../roles/openshift_repos/handlers/main.yml
-  tasks:
-  - include_role:
-      name: openshift_gcp
-      tasks_from: add_custom_repositories.yml
+  roles:
+  - role: openshift_repos
 
-# This is the part that installs all of the software and configs for the instance
-# to become a node.
-- import_playbook: ../../openshift-node/private/image_prep.yml
+- import_playbook: ../../playbooks/init/base_packages.yml
+  vars:
+    l_base_packages_hosts: nodes
 
 # Add additional GCP specific behavior
 - hosts: nodes

@@ -1,0 +1,93 @@
+---
+- name: Get bootstrap instance group
+  gcp_compute_instance_group_manager_facts:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    zone: "{{ openshift_gcp_zone }}"
+    filters:
+    - name = "{{ openshift_gcp_prefix }}ig-b"
+  register: bootstrap_instance_group
+
+- name: Get bootstrap instance template
+  gcp_compute_instance_template_facts:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    filters:
+    - "name : {{ openshift_gcp_prefix }}instance-template-bootstrap"
+  register: bootstrap_instance_template
+
+- name: Collect a list of instances
+  gcp_compute_instance_facts:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    zone: "{{ openshift_gcp_zone }}"
+  register: all_instances
+
+- name: Filter instances to fetch masters
+  set_fact:
+    master_instances: "{{ master_instances | default([]) }} + [ {{ item }} ]"
+  with_items:
+  - "{{ all_instances['items'] }}"
+  when:
+  - "'tags' in item"
+  - "'items' in item['tags']"
+  - "cluster_tag in item['tags']['items']"
+  - "'ocp-master' in item['tags']['items']"
+  vars:
+    cluster_tag: "{{ openshift_gcp_prefix }}ocp"
+
+- set_fact:
+    master_external_ips: "{{ master_external_ips | default([]) }}  + [ '{{ master_ip }}' ]"
+  with_indexed_items: "{{ master_instances }}"
+  vars:
+    master_ip: "{{ item.1.networkInterfaces[0].accessConfigs[0].natIP }}"
+
+- name: Get a managed zone
+  gcp_dns_managed_zone:
+    auth_kind: serviceaccount
+    scopes:
+      - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    name: "{{ dns_managed_zone | default(openshift_gcp_prefix + 'managed-zone') }}"
+    state: present
+  register: managed_zone
+
+- name: Update public API hostname
+  gcp_dns_resource_record_set:
+    auth_kind: serviceaccount
+    scopes:
+      - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    name: "{{ openshift_master_cluster_public_hostname }}."
+    managed_zone: "{{ managed_zone }}"
+    type: A
+    ttl: 600
+    target: "{{ master_external_ips }}"
+    state: present
+
+- name: Delete bootstrap instance group
+  gcp_compute_instance_group_manager:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    zone: "{{ openshift_gcp_zone }}"
+    name: "{{ bootstrap_instance_group['items'][0]['name'] }}"
+    base_instance_name: "{{ bootstrap_instance_group['items'][0]['baseInstanceName'] }}"
+    instance_template: "{{ bootstrap_instance_template['items'][0] }}"
+    state: absent
+  when:
+  - bootstrap_instance_group['items'] | length > 0
+  - bootstrap_instance_template['items'] | length > 0
