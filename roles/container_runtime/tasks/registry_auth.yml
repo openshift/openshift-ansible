@@ -17,6 +17,7 @@
   register: crt_oreg_auth_credentials_create
   retries: 3
   delay: 5
+  no_log: true
   until: crt_oreg_auth_credentials_create is succeeded
 
 - name: Create for any additional registries
@@ -35,6 +36,7 @@
   register: crt_addl_credentials_create
   retries: 3
   delay: 5
+  no_log: true
   until: crt_addl_credentials_create is succeeded
   with_items:
     "{{ openshift_additional_registry_credentials }}"
