@@ -295,6 +295,7 @@ debug_level=2
 #openshift_cloudprovider_openstack_tenant_name=tenant_name
 #openshift_cloudprovider_openstack_region=region
 #openshift_cloudprovider_openstack_lb_subnet_id=subnet_id
+#openshift_cloudprovider_openstack_lb_floating_network_id=floating_network_id
 #
 # Note: If you're getting a "BS API version autodetection failed" when provisioning cinder volumes you may need this setting
 #openshift_cloudprovider_openstack_blockstorage_version=v2

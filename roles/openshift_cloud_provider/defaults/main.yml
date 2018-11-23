@@ -5,3 +5,7 @@ openshift_gcp_network_name: "{{ openshift_gcp_prefix }}network"
 openshift_gcp_multizone: False
 openshift_openstack_ca_file_path: '/etc/origin/cloudprovider/openstack.crt'
 openshift_cloudprovider_openstack_blockstorage_ignore_volume_az: false
+# When 'true' and an Octaiva LBaaS V2 entry can not be found, the provider will
+# fall back and attempt to find a Neutron LBaaS V2 endpoint instead (which is
+# the behaviour when this is set to 'false')
+openshift_cloudprovider_openstack_use_octavia: true
