@@ -27,7 +27,6 @@
       etcd_ip: ETCD_IP_REPLACE
       etcd_hostname: ETCD_HOSTNAME_REPLACE
       etcdctlv2: ETCD_CTL2_REPLACE
-      openshift_use_crio: False
 
   - name: add insights-client to package installs when on rhel
     set_fact:
