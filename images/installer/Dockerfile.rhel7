@@ -24,9 +24,6 @@ LABEL name="openshift3/ose-ansible" \
       io.openshift.expose-services="" \
       io.openshift.tags="openshift,install,upgrade,ansible" \
       com.redhat.component="aos3-installation-docker" \
-      version="v3.6.0" \
-      release="1" \
-      architecture="x86_64" \
       atomic.run="once"
 
 ENV USER_UID=1001 \
