@@ -102,7 +102,6 @@
   hosts: bootstrap
   tasks:
   - name: Wait for temporary control plane to show up
-    #TODO: Rework with k8s module
     oc_obj:
       state: list
       kind: pod
@@ -115,7 +114,6 @@
     - "'results' in control_plane_pods and 'results' in control_plane_pods.results"
     - control_plane_pods.results.results[0]['items'] | length > 0
   - name: Wait for master nodes to show up
-    #TODO: Rework with k8s module
     oc_obj:
       state: list
       kind: node
@@ -139,3 +137,35 @@
       src: /opt/tectonic/auth/kubeconfig
       dest: /tmp/artifacts/installer/auth/kubeconfig
       flat: yes
+
+  - name: Wait for router namespace to appear
+    oc_obj:
+      state: list
+      kind: namespace
+      name: openshift-ingress
+      kubeconfig: /opt/tectonic/auth/kubeconfig
+    register: ingress_namespace
+    retries: 60
+    delay: 10
+    until:
+    - "'results' in ingress_namespace"
+    - "'results' in ingress_namespace.results"
+    - ingress_namespace.results.results | length > 0
+
+  - name: Wait for router pods to be ready
+    oc_obj:
+      state: list
+      kind: daemonset
+      name: router-default
+      namespace: openshift-ingress
+      kubeconfig: /opt/tectonic/auth/kubeconfig
+    register: ingress_ds
+    retries: 60
+    delay: 10
+    until:
+    - "'results' in ingress_ds"
+    - "'results' in ingress_ds.results"
+    - ingress_ds.results.results | length > 0
+    - "'status' in ingress_ds.results.results[0]"
+    - "'numberReady' in ingress_ds.results.results[0]['status']"
+    - ingress_ds.results.results[0]['status']['numberReady'] == groups['workers'] | length
