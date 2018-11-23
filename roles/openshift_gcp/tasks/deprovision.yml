@@ -68,18 +68,6 @@
     type: A
     state: absent
 
-- name: Remove etcd discovery record
-  gcp_dns_resource_record_set:
-    auth_kind: serviceaccount
-    scopes:
-      - https://www.googleapis.com/auth/ndev.clouddns.readwrite
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    name: "_etcd-server-ssl._tcp.{{ lookup('env', 'INSTANCE_PREFIX') | mandatory }}.{{ public_hosted_zone }}."
-    managed_zone: "{{ managed_zone }}"
-    type: SRV
-    state: absent
-
 - name: Remove etcd records for masters
   gcp_dns_resource_record_set:
     auth_kind: serviceaccount
@@ -143,3 +131,11 @@
     project: "{{ openshift_gcp_project }}"
     name: "{{ openshift_gcp_network_name }}"
     state: absent
+
+- name: Templatize DNS script
+  template: src=remove.j2.sh dest=/tmp/remove.sh mode=u+rx
+
+- name: Run DNS cleanup script
+  command: /tmp/remove.sh
+  args:
+    chdir: "{{ files_dir }}"

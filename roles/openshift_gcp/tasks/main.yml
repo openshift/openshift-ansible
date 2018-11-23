@@ -238,6 +238,7 @@
     name: "{{ entry_name }}"
     managed_zone: "{{ managed_zone }}"
     type: A
+    ttl: 600
     target: "{{ master_ip }}"
     state: present
   with_indexed_items: "{{ master_instances }}"
@@ -245,16 +246,10 @@
     entry_name: "{{ openshift_gcp_prefix }}etcd-{{ item.0 }}.{{ public_hosted_zone }}."
     master_ip: "{{ item.1.networkInterfaces[0].networkIP }}"
 
-- name: Create etcd discovery entry
-  gcp_dns_resource_record_set:
-    auth_kind: serviceaccount
-    scopes:
-      - https://www.googleapis.com/auth/ndev.clouddns.readwrite
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    name: "_etcd-server-ssl._tcp.{{ lookup('env', 'INSTANCE_PREFIX') | mandatory }}.{{ public_hosted_zone }}."
-    managed_zone: "{{ managed_zone }}"
-    type: SRV
-    ttl: 600
-    target: "{{ etcd_discovery_targets }}"
-    state: present
+- name: Templatize DNS script
+  template: src=additional_settings.j2.sh dest=/tmp/additional_settings.sh mode=u+rx
+
+- name: Run addition provision GCP script
+  command: /tmp/additional_settings.sh
+  args:
+    chdir: "{{ files_dir }}"
