@@ -659,6 +659,18 @@ to the UUID of the public subnet in your OpenStack.
 **NOTE**: A lot of OpenStack deployments do not make the public subnet
 accessible to regular users.
 
+To customize the images used by kuryr pods, set the following variables:
+
+```
+# OKD
+openshift_openstack_kuryr_controller_image: kuryr/controller:latest
+openshift_openstack_kuryr_cni_image: kuryr/cni:latest
+
+# OCP
+#openshift_openstack_kuryr_cni_image:  registry.redhat.io/rhosp13/openstack-kuryr-cni:13.0
+#openshift_openstack_kuryr_controller_image: registry.redhat.io/rhosp13/openstack-kuryr-controller:13.0
+```
+
 Finally, you *must* set up an OpenStack cloud provider as specified in
  [OpenStack Cloud Provider Configuration](#openstack-cloud-provider-configuration).
 
@@ -759,6 +771,11 @@ enable_kuryr_controller_probes: True
 enable_kuryr_cni_probes: True
 ```
 
+**NOTE:** If using OSP13 container images for kuryr-cni (registry.redhat.io/rhosp13/openstack-kuryr-cni:13.0), it is required to disable the cni probes as:
+
+```yaml
+enable_kuryr_cni_probes: True
+```
 
 ## API and Router Load Balancing
 
