@@ -39,6 +39,6 @@
 - name: Ensure master facts are set
   hosts: oo_masters_to_config
   roles:
-  - openshift_master_facts
+  - ../../roles/openshift_master_facts
 
 - import_playbook: private/config.yml
