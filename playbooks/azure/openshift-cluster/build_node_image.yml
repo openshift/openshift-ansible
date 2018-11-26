@@ -24,8 +24,6 @@
       openshift_node_image_prep_packages:
       - strace
       - tcpdump
-      - skopeo
-      - crio
       etcd_ip: ETCD_IP_REPLACE
       etcd_hostname: ETCD_HOSTNAME_REPLACE
       etcdctlv2: ETCD_CTL2_REPLACE
@@ -34,6 +32,11 @@
     set_fact:
       openshift_node_image_prep_packages: "{{ openshift_node_image_prep_packages | union(['insights-client']) }}"
     when: openshift_deployment_type == 'openshift-enterprise'
+
+  - name: add skopeo and crio to package installs when crio enabled
+    set_fact:
+      openshift_node_image_prep_packages: "{{ openshift_node_image_prep_packages | union(['skopeo', 'crio']) }}"
+    when: openshift_use_crio
 
   - set_fact:
       openshift_additional_repos: "{{ openshift_additional_repos + [{'name': 'install_repo', 'baseurl': openshift_azure_install_repo, 'enabled': true, 'gpgcheck': false}] }}"
