@@ -49,7 +49,7 @@
   gcp_dns_managed_zone:
     auth_kind: serviceaccount
     scopes:
-      - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+    - https://www.googleapis.com/auth/ndev.clouddns.readwrite
     service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
     project: "{{ openshift_gcp_project }}"
     name: "{{ dns_managed_zone | default(openshift_gcp_prefix + 'managed-zone') }}"
@@ -60,7 +60,7 @@
   gcp_dns_resource_record_set:
     auth_kind: serviceaccount
     scopes:
-      - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+    - https://www.googleapis.com/auth/ndev.clouddns.readwrite
     service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
     project: "{{ openshift_gcp_project }}"
     name: "{{ openshift_master_cluster_public_hostname }}."
@@ -72,7 +72,7 @@
   gcp_dns_resource_record_set:
     auth_kind: serviceaccount
     scopes:
-      - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+    - https://www.googleapis.com/auth/ndev.clouddns.readwrite
     service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
     project: "{{ openshift_gcp_project }}"
     name: "{{ entry_name }}"
