@@ -10,30 +10,7 @@
 # COPY_TO_PATH: path to copy reports to in the masters (/etc/origin/certificate_expiration_report)
 ---
 - name: Generate certificate expiration reports
-  hosts: nodes:masters:etcd
-  vars:
-    openshift_certificate_expiry_save_json_results: yes
-    openshift_certificate_expiry_generate_html_report: yes
-    openshift_certificate_expiry_show_all: yes
-    openshift_certificate_expiry_warning_days: "{{ lookup('env', 'CERT_EXPIRY_WARN_DAYS') | default('45', true) }}"
-  roles:
-    - role: openshift_certificate_expiry
-
-- name: Upload reports to master
-  hosts: masters
-  gather_facts: no
-  vars:
-    destination_path: "{{ lookup('env', 'COPY_TO_PATH') | default('/etc/origin/certificate_expiration_report', true) }}"
-    timestamp: "{{ lookup('pipe', 'date +%Y%m%d') }}"
+  hosts: localhost
   tasks:
-    - name: Ensure that the target directory exists
-      file:
-        path: "{{ destination_path }}"
-        state: directory
-    - name: Copy the reports
-      copy:
-        dest: "{{ destination_path }}/{{ timestamp }}-{{ item }}"
-        src: "/tmp/{{ item }}"
-      with_items:
-        - "cert-expiry-report.html"
-        - "cert-expiry-report.json"
+  - fail:
+      msg: "This play has been removed in favor of easy-mode.yaml or default.yaml."
