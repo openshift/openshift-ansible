@@ -2,7 +2,7 @@
 #---------------------------------------------------------------------
 global
     maxconn     {{ openshift_loadbalancer_global_maxconn | default(20000) }}
-    log         /dev/log local0 info
+    log         127.0.0.1 local2
 {% if openshift_is_atomic | bool %}
     stats socket /var/lib/haproxy/run/haproxy.sock mode 600 level admin
 {% else %}
