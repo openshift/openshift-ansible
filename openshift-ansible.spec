@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.79
+Version:        3.10.80
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -181,6 +181,19 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Nov 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.80-1
+- Check for node-config.yaml file when comparing config changes. If node-
+  config.yaml does not exist, wipe contents of /tmp/.old. This copy the config
+  over if node-config.yaml was delete externally. (rhowe@redhat.com)
+- Use correct container CLI for docker or cri-o (rteague@redhat.com)
+- Add support for secret encryption (iacopo.rozzo@amadeus.com)
+- Update node config template for crio (rteague@redhat.com)
+- Add pyOpenSSL openshift-ansible dep (sdodson@redhat.com)
+- OVS: tolerate taints (roignac@gmail.com)
+- Reload tuned service when node-config.yaml has changed. (rteague@redhat.com)
+- Add network-project-id value for kubernetes config for GCP (tti@netzmarkt.de)
+- Add log persistency to ovs (farandac@redhat.com)
+
 * Thu Nov 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.79-1
 - 
 
