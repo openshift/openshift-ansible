@@ -4,6 +4,8 @@
 - name: Verify upgrade can proceed on first master
   hosts: oo_first_master
   gather_facts: no
+  roles:
+  - openshift_facts
   tasks:
 
   # Error out in situations where the user has older versions specified in their
@@ -40,6 +42,16 @@
     when:
     - openshift_release is defined
     - not (openshift_release is version_compare(openshift_upgrade_target ,'='))
+
+  # Need client package to check gluster health when upgrading from containerized.
+  - name: Install openshift clients on first master
+    package:
+      name: "{{ openshift_service_type }}-clients{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+      state: present
+    register: result
+    until: result is succeeded
+    retries: 3
+    when: not openshift_is_atomic | bool
 
   # Ensure glusterfs clusters are healthy before starting an upgrade.
   - import_role:
