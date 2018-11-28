@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.54
+Version:        3.9.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.55-1
+- Fixed wrong path to role in node scaleup playbook (felix.flohr@nttdata.com)
+- Add pyOpenSSL openshift-ansible dep (sdodson@redhat.com)
+- Add support for secret encryption (iacopo.rozzo@amadeus.com)
+
 * Sat Nov 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.54-1
 - Check both service catalog and install vars (ruju@itu.dk)
 - Update openshift_facts version logic for release-3.9 (rteague@redhat.com)
