@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.44
+Version:        3.11.45
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -188,6 +188,35 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Nov 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.45-1
+- Remove easy-mode-upload.yaml cert check. (mgugino@redhat.com)
+- Revert "Set no_log for registry login" (gugino.michael@yahoo.com)
+- make crio explicit (mangirdas@judeikis.lt)
+- Create the namespace only in the first master (farandac@redhat.com)
+- deploy: no need to have volumes for /dev in privileged containers
+  (ndevos@redhat.com)
+- add crio packages (mangirdas@judeikis.lt)
+- Add doc to use kuryr downstream images (e.minguez@gmail.com)
+- remove crio var to be passed from playbook (mangirdas@judeikis.lt)
+- Set no_log for registry login (lmadsen@redhat.com)
+- Use new node labels for descheduler (mail@jkroepke.de)
+- Add support for secret encryption (iacopo.rozzo@amadeus.com)
+- Added Capability to assign an empty hostname to the created VMs
+  (jparrill@redhat.com)
+- Check for node-config.yaml file when comparing config changes. If node-
+  config.yaml does not exist, wipe contents of /tmp/.old. This copy the config
+  over if node-config.yaml was delete externally. (rhowe@redhat.com)
+- Add pyOpenSSL openshift-ansible dep (sdodson@redhat.com)
+- OVS: tolerate taints (roignac@gmail.com)
+- #10718 Fixing compatibility of yum_repo.j2 template with py3
+  (jparrill@redhat.com)
+- Update node config template for crio (rteague@redhat.com)
+- Add log persistency to ovs (farandac@redhat.com)
+- Service Catalog - wait for rollout of SC API Server & SC Controller Mgr
+  (jaboyd@redhat.com)
+- Check both service catalog and install vars (ruju@itu.dk)
+- Add network-project-id value for kubernetes config for GCP (tti@netzmarkt.de)
+
 * Wed Nov 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.44-1
 - Properly prefix certificate paths (sdodson@redhat.com)
 - [release 3.11] Check if docker is running before attempting to restart it
