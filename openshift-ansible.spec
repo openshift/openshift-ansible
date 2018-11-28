@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.80
+Version:        3.10.81
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Nov 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.81-1
+- Add openssh-clients dependency (sdodson@redhat.com)
+- deploy: no need to have volumes for /dev in privileged containers
+  (ndevos@redhat.com)
+
 * Tue Nov 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.80-1
 - Check for node-config.yaml file when comparing config changes. If node-
   config.yaml does not exist, wipe contents of /tmp/.old. This copy the config
