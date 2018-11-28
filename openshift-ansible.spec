@@ -32,6 +32,7 @@ Requires:      python-passlib
 Requires:      python2-crypto
 Requires:      patch
 Requires:      pyOpenSSL
+Requires:      openssh-clients
 
 %description
 Openshift and Atomic Enterprise Ansible
