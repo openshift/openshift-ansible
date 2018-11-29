@@ -1,4 +1,9 @@
 ---
+- name: Create kube-proxy for Nuage installs
+  run_once: true
+  import_role:
+    name: kube_proxy_and_dns
+
 - name: Set the Nuage plugin openshift directory fact for Atomic hosts
   set_fact:
     vsp_openshift_dir: /var/usr/share/vsp-openshift
