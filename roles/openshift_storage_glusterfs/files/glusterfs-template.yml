@@ -61,6 +61,8 @@ objects:
             mountPath: "/var/log/glusterfs"
           - name: glusterfs-config
             mountPath: "/var/lib/glusterd"
+          - name: glusterfs-dev-disk
+            mountPath: "/dev/disk"
           - name: glusterfs-misc
             mountPath: "/var/lib/misc/glusterfsd"
           - name: glusterfs-cgroup
@@ -118,6 +120,9 @@ objects:
         - name: glusterfs-config
           hostPath:
             path: "/var/lib/glusterd"
+        - name: glusterfs-dev-disk
+          hostPath:
+            path: "/dev/disk"
         - name: glusterfs-misc
           hostPath:
             path: "/var/lib/misc/glusterfsd"
