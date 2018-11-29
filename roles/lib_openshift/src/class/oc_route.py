@@ -128,6 +128,7 @@ class OCRoute(OpenShiftCLI):
                               files['key']['value'],
                               params['host'],
                               params['tls_termination'],
+                              params['insecure_edge_termination_policy'],
                               params['service_name'],
                               params['wildcard_policy'],
                               params['weight'],

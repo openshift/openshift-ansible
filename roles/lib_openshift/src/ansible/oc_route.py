@@ -17,6 +17,7 @@ def main():
             name=dict(default=None, required=True, type='str'),
             namespace=dict(default=None, required=True, type='str'),
             tls_termination=dict(default=None, type='str'),
+            insecure_edge_termination_policy=dict(default=None, type='str'),
             dest_cacert_path=dict(default=None, type='str'),
             cacert_path=dict(default=None, type='str'),
             cert_path=dict(default=None, type='str'),

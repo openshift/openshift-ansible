@@ -18,6 +18,7 @@ class RouteConfig(object):
                  key=None,
                  host=None,
                  tls_termination=None,
+                 insecure_edge_termination_policy=None,
                  service_name=None,
                  wildcard_policy=None,
                  weight=None,
@@ -29,6 +30,7 @@ class RouteConfig(object):
         self.labels = labels
         self.host = host
         self.tls_termination = tls_termination
+        self.insecure_edge_termination_policy = insecure_edge_termination_policy
         self.destcacert = destcacert
         self.cacert = cacert
         self.cert = cert
@@ -62,6 +64,9 @@ class RouteConfig(object):
             self.data['spec']['tls'] = {}
 
             self.data['spec']['tls']['termination'] = self.tls_termination
+
+            if self.insecure_edge_termination_policy:
+                self.data['spec']['tls']['insecureEdgeTerminationPolicy'] = self.insecure_edge_termination_policy
 
             if self.tls_termination != 'passthrough':
                 self.data['spec']['tls']['key'] = self.key
