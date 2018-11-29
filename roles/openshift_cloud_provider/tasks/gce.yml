@@ -27,6 +27,7 @@
     value: "{{ item.value }}"
   with_items:
   - { key: 'project-id', value: '{{ openshift_gcp_project }}' }
+  - { key: 'network-project-id', value: '{{ openshift_gcp_network_project | default(openshift_gcp_project) }}' }
   - { key: 'network-name', value: '{{ openshift_gcp_network_name }}' }
   - { key: 'node-tags', value: '{{ openshift_gcp_prefix }}ocp' }
   - { key: 'node-instance-prefix', value: '{{ openshift_gcp_prefix }}' }

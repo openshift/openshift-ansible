@@ -14,6 +14,7 @@ openshift_gcp_region: us-central1
 openshift_gcp_zone: us-central1-a
 
 openshift_gcp_network_name: "{{ openshift_gcp_prefix }}network"
+openshift_gcp_network_project: ''
 
 openshift_gcp_iam_service_account: ''
 openshift_gcp_iam_service_account_keyfile: ''
