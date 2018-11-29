@@ -35,6 +35,7 @@ The `openshift_ovirt_vm_manifest` variable can contain following attributes
 |-----------|------|---------------|-----------------------------------------------------------------------------------------------------------------|
 | nic_mode  | Dict | UNDEF         | If you define this variable means that the interface on the VM will have static address instead of dynamic one. |
 | empty_hostname  | Bool | True   | If True, the VM's Hostname will remain empty in cloud-init, and will relays the VM's hostname on DHCP name. |
+| ovirt_admin  | Bool | True   | If False, the role will not try to add tags to the created vms and also avoid to get into affinity groups. This way the role could be executed without admin rights |
 
 Below `nic_mode` we can find this other parameters
 
