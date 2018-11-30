@@ -1,14 +1,4 @@
 ---
-- local_action: shell python -c 'import passlib' 2>/dev/null || echo not installed
-  register: passlib_result
-  become: false
-
-- name: Check that python-passlib is available on the control host
-  assert:
-    that:
-      - "'not installed' not in passlib_result.stdout"
-    msg: "python-passlib rpm must be installed on control host"
-
 - name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ item }}"
   with_first_found:
