@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.49
+Version:        3.11.50
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Nov 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.50-1
+- 
+
 * Fri Nov 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.49-1
 - Remove 80-openshift-network.conf during uninstallation
   (nakayamakenjiro@gmail.com)
