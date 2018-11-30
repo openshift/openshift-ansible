@@ -32,6 +32,7 @@ ALLOWED_DIRS = (
     '/dev/null',
     '/etc/origin/master/',
     '/var/lib/origin',
+    '/var/log/origin',
     '/etc/origin/cloudprovider',
     '/etc/origin/kubelet-plugins',
     '/usr/libexec/kubernetes/kubelet-plugins',
