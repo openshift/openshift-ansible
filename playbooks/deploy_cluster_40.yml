@@ -22,16 +22,6 @@
   - import_role:
       name: container_runtime
       tasks_from: package_crio.yml
-  - name: FIXME pause_image
-    ini_file:
-      dest: "/etc/crio/crio.conf"
-      section: crio.image
-      option: pause_image
-      value: '"docker.io/openshift/origin-pod:v4.0"'
-  - name: FIXME restart crio
-    service:
-      name: crio
-      state: restarted
   - import_role:
       name: openshift_node40
       tasks_from: install.yml
