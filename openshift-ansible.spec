@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.47
+Version:        3.11.49
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Nov 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.49-1
+- Remove 80-openshift-network.conf during uninstallation
+  (nakayamakenjiro@gmail.com)
+- [KIECLOUD-56] - Update PAM DM templates on OpenShift for 7.1.1
+  (fspolti@redhat.com)
+
 * Thu Nov 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.47-1
 - glusterfs: bind-mount /dev/disk into the glusterfs-server container
   (ndevos@redhat.com)
