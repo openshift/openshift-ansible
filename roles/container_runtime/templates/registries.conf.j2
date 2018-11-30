@@ -10,13 +10,13 @@
 # and 'registries.block'.
 
 [registries.search]
-registries = [{{ l_additional_crio_registries|default("") }}]
+registries = {{ l_crio_registries | to_json }}
 
 
 # If you need to access insecure registries, add the registry's fully-qualified name.
 # An insecure registry is one that does not have a valid SSL certificate or only does HTTP.
 [registries.insecure]
-registries = [{{ l_insecure_crio_registries|default("") }}]
+registries = {{ l2_docker_insecure_registries | to_json }}
 
 
 # If you need to block pull access from a registry, uncomment the section below
