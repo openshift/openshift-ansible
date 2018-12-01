@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.82
+Version:        3.10.83
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Dec 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.83-1
+- glusterfs: bind-mount /dev/disk into the glusterfs-server container
+  (ndevos@redhat.com)
+
 * Thu Nov 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.82-1
 - Install client package on first master for gluster (mgugino@redhat.com)
 
