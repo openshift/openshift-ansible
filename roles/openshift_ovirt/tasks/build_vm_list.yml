@@ -21,7 +21,9 @@
       {% elif item.count > 1 -%}
       'name': '{{ item.name }}{{ iter }}.{{ openshift_ovirt_dns_zone }}',
       {% endif -%}
-      'tag': 'openshift_{{ item.profile }}',
+      {% if ovirt_admin | default(True) -%}
+      'tag': "openshift_{{ item.profile }}",
+      {% endif -%}
       'description': '{{ item.description | default("") }}',
       'cloud_init':
       {
@@ -75,21 +77,25 @@
       {% endfor -%}
       ]
     affinity_groups: >-
+      {% if ovirt_admin | default(True) -%}
       {{ affinity_groups|default([]) }} + [
-      {% if item.count > 1 -%}
-      {
+        {% if item.count > 1 -%}
+        {
       'name': '{{ item.name }}_ag',
       'cluster': '{{ openshift_ovirt_cluster }}',
       'vm_enforcing': 'false',
       'vm_rule': 'negative',
       'vms': [
-      {% for iter in range(item.count) -%}
+        {% for iter in range(item.count) -%}
       '{{ item.name }}{{ iter }}.{{ openshift_ovirt_dns_zone }}',
-      {% endfor -%}
+        {% endfor -%}
       ]
-      }
+        }
+        {% endif -%}
+      ]
+      {% else -%}
+      []
       {% endif -%}
-      ]
   with_items: "{{ openshift_ovirt_vm_manifest }}"
   tags:
   - openshift_ovirt
