@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.56
+Version:        3.9.57
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Dec 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.57-1
+- 
+
 * Fri Nov 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.56-1
 - Remove unnecessary passlib check (sdodson@redhat.com)
 - Supply namespace when generating hawkular role binding (jmartisk@redhat.com)
