@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.55
+Version:        3.9.56
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.56-1
+- Remove unnecessary passlib check (sdodson@redhat.com)
+- Supply namespace when generating hawkular role binding (jmartisk@redhat.com)
+- Add network-project-id value for kubernetes config for GCP (tti@netzmarkt.de)
+- Add proper liveness and readiness checks for Calico 3.2 (mleung975@gmail.com)
+
 * Wed Nov 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.55-1
 - Fixed wrong path to role in node scaleup playbook (felix.flohr@nttdata.com)
 - Add pyOpenSSL openshift-ansible dep (sdodson@redhat.com)
