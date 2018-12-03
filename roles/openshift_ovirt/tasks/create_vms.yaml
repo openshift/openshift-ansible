@@ -19,6 +19,7 @@
 
 - import_role:
     name: oVirt.vm-infra
+
 - name: print all created vms that are in the inventory
   debug:
     var: hostvars

@@ -3,8 +3,10 @@
 compatibility_version: 4.2
 data_center_name: Default
 wait_for_ip: true
+openshift_ovirt_data_store: data
 openshift_ovirt_cluster: Default
 template_name: openshift_node
+openshift_ovirt_all_in_one: false
 
 # User must provide those vars:
 openshift_ovirt_dns_zone:

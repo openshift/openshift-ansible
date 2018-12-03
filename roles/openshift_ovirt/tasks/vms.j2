@@ -1,0 +1,44 @@
+[{% for item in openshift_ovirt_vm_manifest -%}
+  {% for iter in range(item.count) -%}
+    {
+      'name':         '{{ [item.name, iter, ".", openshift_ovirt_dns_zone] | join }}',
+      'host_name':    '{{ (item.empty_hostname | default(True)) | ternary('', [item.name, iter, ".", openshift_ovirt_dns_zone] | join) }}',
+      'description':  '{{ item.description | default('') }}',
+      'tag':          '{{ ["openshift_", item.profile] | join }}',
+      'profile':      {{ openshift_ovirt_vm_profile[ item.profile ] }},
+      {%- set cloud_init = {} -%}
+      {%- do cloud_init.update(
+        {
+          'nic_boot_protocol': 'static',
+          'nic_ip_address': item.nic_mode[item["name"] + iter | string ]["nic_ip_address"],
+          'nic_netmask':    item.nic_mode[item["name"] + iter | string ]["nic_netmask"],
+          'nic_gateway':    item.nic_mode[item["name"] + iter | string ]["nic_gateway"],
+          'nic_on_boot':    item.nic_mode[item["name"] + iter | string ]["nic_on_boot"] | default(true) | bool,
+          'nic_name':       item.nic_mode[item["name"] + iter | string ]["nic_name"] | default("eth0"),
+        }) if item.nic_mode is defined -%}
+      
+      {%- do cloud_init.update(
+        {
+          'dns_servers': item.nic_mode[item["name"] + iter | string ]["dns_servers"],
+        }
+      ) if item.nic_mode is defined and item.nic_mode[item["name"] + iter | string ]["dns_servers"] is defined -%}
+      {%- do cloud_init.update(
+        {
+          'dns_search': item.nic_mode[item["name"] + iter | string ]["dns_search"],
+        }
+      ) if item.nic_mode is defined and item.nic_mode[item["name"] + iter | string ]["dns_search"] is defined -%}
+      {%- do cloud_init.update(
+        {
+          'dns_servers': item["dns_servers"] 
+        }
+      ) if item.dns_servers is defined -%}
+      {%- do cloud_init.update(
+        {
+          'dns_search': item["dns_searc"] 
+        }
+      ) if item.dns_search is defined -%}
+      'cloud_init': {{ cloud_init | combine(openshift_ovirt_vm_profile[item.profile]["cloud_init"], recursive=True) }},
+      },
+  {% endfor -%}
+{% endfor -%}
+]
