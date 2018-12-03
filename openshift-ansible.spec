@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.50
+Version:        3.11.51
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Dec 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.51-1
+- Added ovirt_admin variable to avoid use admin rights on RHV platform
+  (jparrill@redhat.com)
+
 * Fri Nov 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.50-1
 - 
 
