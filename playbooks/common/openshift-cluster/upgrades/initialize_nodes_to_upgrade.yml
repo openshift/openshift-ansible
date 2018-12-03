@@ -31,7 +31,7 @@
       with_items: " {{ groups['oo_nodes_to_config'] }}"
       when:
       - hostvars[item].openshift is defined
-      - hostvars[item].openshift.common.hostname | lower in nodes_to_upgrade.results.results[0]['items'] | map(attribute='metadata.name') | list
+      - hostvars[item].openshift.node.nodename | lower in nodes_to_upgrade.results.results[0]['items'] | map(attribute='metadata.name') | list
       changed_when: false
 
   # Build up the oo_nodes_to_upgrade group, use the list filtered by label if
