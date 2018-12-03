@@ -31,6 +31,13 @@
     register: node_unschedulable
     until: node_unschedulable is succeeded
 
+  # Run the pre-upgrade hook if defined:
+  - debug: msg="Running node pre-drain-upgrade hook {{ openshift_node_upgrade_pre_drain_hook }}"
+    when: openshift_node_upgrade_pre_drain_hook is defined
+
+  - include_tasks: "{{ openshift_node_upgrade_pre_drain_hook }}"
+    when: openshift_node_upgrade_pre_drain_hook is defined
+
   - name: Drain Node for Kubelet upgrade
     command: >
       {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ l_kubelet_node_name | lower }}
