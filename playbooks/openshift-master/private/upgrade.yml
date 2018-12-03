@@ -266,8 +266,8 @@
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
     - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
     until: l_pb_upgrade_control_plane_post_upgrade_storage.rc == 0
-    delay: 6
-    retries: 30
+    retries: 6
+    delay: 30
 
   - set_fact:
       reconcile_complete: True
