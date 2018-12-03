@@ -31,6 +31,7 @@ openshift_master_upgrade_pre_hook=/usr/share/custom/pre_master.yml
 openshift_master_upgrade_hook=/usr/share/custom/master.yml
 openshift_master_upgrade_post_hook=/usr/share/custom/post_master.yml
 
+openshift_node_upgrade_pre_drain_hook=/usr/share/custom/pre_drain_node.yml
 openshift_node_upgrade_pre_hook=/usr/share/custom/pre_node.yml
 openshift_node_upgrade_hook=/usr/share/custom/node.yml
 openshift_node_upgrade_post_hook=/usr/share/custom/post_node.yml
@@ -73,6 +74,11 @@ The file may **not** be a playbook.
 - This hook runs against **each master** in serial.
 - If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
 
+### openshift_node_upgrade_pre_drain_hook
+- Runs **before** each node is drained during upgraded.
+- This hook runs against **each node** in serial.
+- If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
+
 ### openshift_node_upgrade_pre_hook
 - Runs **before** each node is upgraded.
 - This hook runs against **each node** in serial.
@@ -87,4 +93,3 @@ The file may **not** be a playbook.
 - Runs **after** each node is upgraded; it's the last node upgrade action.
 - This hook runs against **each node** in serial.
 - If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
-
