@@ -70,7 +70,8 @@
       'dns_search': '{{ item["dns_search"] }}',
         {% endif -%}
       {% endif -%}
-      'authorized_ssh_keys': '{{ openshift_ovirt_ssh_key }}'
+      'authorized_ssh_keys': '{{ openshift_ovirt_ssh_key }}',
+      'root_password': '{{ nodes_root_password | default(omit) }}'
       },
       'profile':  {{ openshift_ovirt_vm_profile[ item.profile ] }} ,
       }
