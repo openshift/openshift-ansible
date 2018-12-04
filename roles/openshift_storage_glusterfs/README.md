@@ -66,7 +66,7 @@ their configuration as GlusterFS nodes:
 | glusterfs_hostname | l_kubelet_node_name  | A hostname (or IP address) that will be used for internal GlusterFS communication
 | glusterfs_ip       | openshift.common.ip       | An IP address that will be used by pods to communicate with the GlusterFS node. **NOTE:** Required for external GlusterFS nodes
 | glusterfs_zone     | 1                         | A zone number for the node. Zones are used within the cluster for determining how to distribute the bricks of GlusterFS volumes. heketi will try to spread each volumes' bricks as evenly as possible across all zones
-| glusterfs_nodetags | Undefined                 | A a JSON array representing the tags to be applied to GlusterFS nodes, i.e. '{ "arbiter": "required" }'. By default, no tags are defined.
+| glusterfs_nodetags | Undefined                 | A JSON array representing the tags to be applied to GlusterFS nodes, i.e. '{ "arbiter": "required" }'. By default, no tags are defined.
 
 Role Variables
 --------------
