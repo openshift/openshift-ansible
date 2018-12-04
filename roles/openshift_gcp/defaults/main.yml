@@ -91,11 +91,15 @@ openshift_gcp_firewall_rules:
           - '2379'
           - '2380'
           - '4001'
+          #kube-system/kubelet:cadvisor
+          - '4193'
           - "{{ openshift_gcp_kubernetes_api_port }}"
           - "{{ internal_console_port }}"
           - '8053'
           - '8444'
           - "{{ openshift_gcp_master_healthcheck_port }}"
+          # openshift-cluster-version/cluster-version-operator:metrics
+          - '9090'
           - '10250'
           - '10255'
           - '24224'
