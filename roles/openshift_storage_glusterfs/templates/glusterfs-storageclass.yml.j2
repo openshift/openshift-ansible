@@ -14,4 +14,16 @@ parameters:
 {% if glusterfs_heketi_admin_key is defined %}
   secretNamespace: "{{ glusterfs_namespace }}"
   secretName: "heketi-{{ glusterfs_name }}-admin-secret"
-{%- endif -%}
+{% endif %}
+{% if openshift_storage_glusterfs_storageclass_volumeoptions is defined %}
+  volumeoptions: "{{ openshift_storage_glusterfs_storageclass_volumeoptions }}"
+{% endif %}
+{% if openshift_storage_glusterfs_storageclass_volumenameprefix is defined %}
+  volumenameprefix: "{{ openshift_storage_glusterfs_storageclass_volumenameprefix }}"
+{% endif %}
+{% if openshift_storage_glusterfs_storageclass_volumetype is defined %}
+  volumetype: "{{ openshift_storage_glusterfs_storageclass_volumetype }}"
+{% endif %}
+{% if openshift_storage_glusterfs_storageclass_allowvolumeexpansion is defined %}
+allowVolumeExpansion: {{ openshift_storage_glusterfs_storageclass_allowvolumeexpansion | bool}}
+{% endif %}
