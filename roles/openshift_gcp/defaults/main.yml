@@ -143,8 +143,6 @@ openshift_gcp_firewall_rules:
     allowed:
       - ip_protocol: 'tcp'
         ports:
-          - '80'
-          - '443'
           - "{{ openshift_node_port_range }}"
       - ip_protocol: 'udp'
         ports:
