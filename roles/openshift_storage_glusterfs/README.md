@@ -66,7 +66,7 @@ their configuration as GlusterFS nodes:
 | glusterfs_hostname | l_kubelet_node_name  | A hostname (or IP address) that will be used for internal GlusterFS communication
 | glusterfs_ip       | openshift.common.ip       | An IP address that will be used by pods to communicate with the GlusterFS node. **NOTE:** Required for external GlusterFS nodes
 | glusterfs_zone     | 1                         | A zone number for the node. Zones are used within the cluster for determining how to distribute the bricks of GlusterFS volumes. heketi will try to spread each volumes' bricks as evenly as possible across all zones
-| glusterfs_nodetags | Undefined                 | A json string representing the tags to be applied to GlusterFS nodes, i.e. '{ "arbiter": "required" }'. By default, no tags are defined.
+| glusterfs_nodetags | Undefined                 | A a JSON array representing the tags to be applied to GlusterFS nodes, i.e. '{ "arbiter": "required" }'. By default, no tags are defined.
 
 Role Variables
 --------------
@@ -84,7 +84,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_use_default_selector       | False                   | Whether to use a default node selector for the GlusterFS namespace/project. If False, the namespace/project will have no restricting node selector. If True, uses pre-existing or default (e.g. osm_default_node_selector) node selectors. **NOTE:** If True, nodes which will host GlusterFS pods must already have the additional labels.
 | openshift_storage_glusterfs_storageclass               | True                    | Automatically create a GlusterFS StorageClass for this group
 | openshift_storage_glusterfs_storageclass_default       | False                   | Sets the GlusterFS StorageClass for this group as cluster-wide default
-| openshift_storage_glusterfs_storageclass_volumetype    | Undefined               | Sets the volumetype parameter in the StorageClass, default is "replicate:3" which is the only supported value. Other may be "disperse:2:1" or "none".
+| openshift_storage_glusterfs_storageclass_volumetype    | Undefined               | Sets the volumetype parameter in the StorageClass, default is "replicate:3" which is the only supported value. Other possible values include "disperse:2:1" or "none".
 | openshift_storage_glusterfs_storageclass_volumeoptions | Undefined               | Sets the volumeoptions parameter in the StorageClass to be used by heketi-cli when creating new volumes with the --gluster-volume-options parameter.
 | openshift_storage_glusterfs_storageclass_volumenameprefix | Undefined            | Sets the volumenameprefix parameter in the StorageClass, default prefix for new volumes is "vol_".
 | openshift_storage_glusterfs_storageclass_allowvolumeexpansion | False            | Sets the allowVolumeExpansion parameter in the StorageClass, default is "false".  Set it to "true" to be able to expand PVCs by editing their size. Only enlarging is allowed.
