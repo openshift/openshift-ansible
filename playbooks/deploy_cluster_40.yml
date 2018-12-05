@@ -145,7 +145,7 @@
   - name: Wait for router pods to be ready
     oc_obj:
       state: list
-      kind: daemonset
+      kind: deployment
       name: router-default
       namespace: openshift-ingress
       kubeconfig: /opt/tectonic/auth/kubeconfig
@@ -157,5 +157,5 @@
     - "'results' in ingress_ds.results"
     - ingress_ds.results.results | length > 0
     - "'status' in ingress_ds.results.results[0]"
-    - "'numberReady' in ingress_ds.results.results[0]['status']"
-    - ingress_ds.results.results[0]['status']['numberReady'] == groups['workers'] | length
+    - "'readyReplicas' in ingress_ds.results.results[0]['status']"
+    - ingress_ds.results.results[0]['status']['replicas'] == ingress_ds.results.results[0]['status']['readyReplicas']
