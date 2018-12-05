@@ -34,7 +34,7 @@ openshift_master_identity_providers:
 openshift_node_port_range: 30000-32000
 openshift_node_open_ports: [{"service":"Router stats port", "port":"1936/tcp"}, {"service":"Allowed open host ports", "port":"9000-10000/tcp"}, {"service":"Allowed open host ports", "port":"9000-10000/udp"}]
 os_sdn_network_plugin_name: redhat/openshift-ovs-networkpolicy
-openshift_node_sdn_mtu: 1410
+openshift_node_sdn_mtu: 1500
 osm_cluster_network_cidr: 172.16.0.0/16
 osm_host_subnet_length: 9
 openshift_portal_net: 172.30.0.0/16

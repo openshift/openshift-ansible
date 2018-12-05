@@ -91,6 +91,16 @@
   - include_role:
       name: openshift_gcp
       tasks_from: frequent_log_rotation.yml
+  - name: Install networkmanager-glib to reset MTU
+    package:
+      name: NetworkManager-glib
+      state: present
+  - name: Set MTU
+    nmcli:
+      conn_name: "System eth0"
+      mtu: "{{ openshift_node_sdn_mtu }}"
+      type: ethernet
+      state: present
 
 - name: Commit image
   hosts: localhost
