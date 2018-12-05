@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.51
+Version:        3.11.52
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Dec 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.52-1
+- Install python-docker-py instead of python-docker (sgaikwad@redhat.com)
+- Install boto3 from pip (roignac@gmail.com)
+- glusterfs: bind-mount /dev/mapper into the glusterfs-server container
+  (ndevos@redhat.com)
+- Also set etcd_cert_config_dir for calico (sdodson@redhat.com)
+
 * Mon Dec 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.51-1
 - Added ovirt_admin variable to avoid use admin rights on RHV platform
   (jparrill@redhat.com)
