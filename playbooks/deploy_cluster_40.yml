@@ -127,3 +127,48 @@
       src: /opt/openshift/auth/kubeconfig
       dest: /tmp/artifacts/installer/auth/kubeconfig
       flat: yes
+
+  - name: Wait for core operators to appear and complete
+    oc_obj:
+      state: list
+      kind: ClusterOperator
+      name: "{{ item }}"
+      kubeconfig: /opt/openshift/auth/kubeconfig
+    register: operator
+    #Give each operator 5 mins to come up
+    retries: 60
+    delay: 5
+    until:
+    - "'results' in operator"
+    - "'results' in operator.results"
+    - operator.results.results | length > 0
+    - "'status' in operator.results.results[0]"
+    - "'conditions' in operator.results.results[0]['status']"
+    - operator.results.results[0].status.conditions | selectattr('type', 'match', '^Available$') | map(attribute='status') | join | bool == True
+    - operator.results.results[0].status.conditions | selectattr('type', 'match', '^Progressing$') | map(attribute='status') | join | bool == False
+    - operator.results.results[0].status.conditions | selectattr('type', 'match', '^Failing$') | map(attribute='status') | join | bool == False
+    with_items:
+    - machine-config-operator
+    # Fails often with 'x of y nodes are not at revision n'
+    #- openshift-cluster-kube-apiserver-operator
+    # Failing with 'ConfigObservationFailing: configmap/cluster-config-v1.kube-system: no recognized cloud provider platform found' - https://github.com/openshift/cluster-kube-controller-manager-operator/issues/100
+    #- openshift-cluster-kube-controller-manager-operator
+    # Fails often with 'x of y nodes are not at revision n'
+    #- openshift-cluster-kube-scheduler-operator
+    - openshift-cluster-openshift-apiserver-operator
+    - openshift-cluster-openshift-controller-manager-operator
+    - openshift-ingress-operator
+    ignore_errors: true
+
+  - block:
+    - name: Output the operators status
+      oc_obj:
+        state: list
+        kind: ClusterOperator
+        selector: ""
+        kubeconfig: /opt/openshift/auth/kubeconfig
+    - fail:
+        msg: Required operators didn't complete the install
+    when: operator.failed
+
+  - pause: {}
