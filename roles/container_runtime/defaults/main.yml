@@ -80,3 +80,5 @@ l_required_docker_version: '1.13'
 l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l2_docker_insecure_registries)) }}"
 l_crio_registries: "{{ l2_docker_additional_registries + ['docker.io'] }}"
 l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registries)) }}"
+
+docker_version: "1.13.1-75.git8633870.el7.centos"
