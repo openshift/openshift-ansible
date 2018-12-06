@@ -35,7 +35,6 @@
     pkg_list:
       - cri-o
       - cri-tools
-      - atomic
       - skopeo
       - podman
 
