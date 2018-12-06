@@ -101,6 +101,11 @@
       mtu: "{{ openshift_node_sdn_mtu }}"
       type: ethernet
       state: present
+  #Required for storage tests to mount NFS shares
+  - name: Install packages for tests
+    package:
+      name: "nfs-utils"
+      state: present
 
 - name: Commit image
   hosts: localhost
