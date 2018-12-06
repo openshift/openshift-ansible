@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.83
+Version:        3.10.84
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Dec 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.84-1
+- Also set etcd_cert_config_dir for calico (sdodson@redhat.com)
+- glusterfs: bind-mount /dev/mapper into the glusterfs-server container
+  (ndevos@redhat.com)
+- Install python-docker-py instead of python-docker (sgaikwad@redhat.com)
+- Install boto3 from pip (roignac@gmail.com)
+
 * Sat Dec 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.83-1
 - glusterfs: bind-mount /dev/disk into the glusterfs-server container
   (ndevos@redhat.com)
