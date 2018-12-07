@@ -98,7 +98,10 @@ openshift_gcp_firewall_rules:
           - '8053'
           - '8444'
           - "{{ openshift_gcp_master_healthcheck_port }}"
+          #cadvisor port
           - '9100'
+          # CVO port
+          - '9099'
           - '10250'
           - '10255'
           - '24224'
