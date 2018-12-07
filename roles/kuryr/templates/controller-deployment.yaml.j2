@@ -3,8 +3,6 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  labels:
-    name: kuryr-controller
   name: kuryr-controller
   namespace: {{ kuryr_namespace }}
 spec:
@@ -12,22 +10,24 @@ spec:
   template:
     metadata:
       labels:
-        name: kuryr-controller
+        app: kuryr
+        component: network
+        type: infra
+        openshift.io/component: network
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
       name: kuryr-controller
     spec:
       serviceAccountName: kuryr-controller
-      automountServiceAccountToken: true
       hostNetwork: true
       containers:
       - image: {{ openshift_openstack_kuryr_controller_image }}
-        imagePullPolicy: IfNotPresent
         name: controller
 {% if enable_kuryr_controller_probes|default(true)|bool %}
         readinessProbe:
           httpGet:
             path: /ready
             port: {{ kuryr_controller_healthcheck_port }}
-            scheme: HTTP
           timeoutSeconds: 5
         livenessProbe:
           httpGet:
@@ -35,7 +35,6 @@ spec:
             port: {{ kuryr_controller_healthcheck_port }}
           initialDelaySeconds: 15
 {% endif %}
-        terminationMessagePath: "/dev/termination-log"
         # FIXME(dulek): This shouldn't be required, but without it selinux is
         #               complaining about access to kuryr.conf.
         securityContext:
@@ -59,4 +58,3 @@ spec:
           secretName: kuryr-certificates
       nodeSelector:
         node-role.kubernetes.io/infra: "true"
-      restartPolicy: Always
