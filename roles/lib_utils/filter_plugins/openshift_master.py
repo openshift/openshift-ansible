@@ -159,7 +159,8 @@ class LDAPPasswordIdentityProvider(IdentityProviderBase):
             self._idp['attributes']['preferredUsername'] = pref_user
 
         if not self._idp['insecure']:
-            self._idp['ca'] = '/etc/origin/master/{}_ldap_ca.crt'.format(self.name)
+            if "/" not in self._idp['ca']:
+                self._idp['ca'] = '/etc/origin/master/{}'.format(self.ca)
 
     def validate(self):
         ''' validate this idp instance '''
