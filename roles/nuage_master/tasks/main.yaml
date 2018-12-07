@@ -76,6 +76,7 @@
     - nuage.crt
     - nuage.key
     - nuage.kubeconfig
+  delegate_to: "{{ nuage_ca_master }}"
 
 - name: Copy the certificates and keys
   become: yes
