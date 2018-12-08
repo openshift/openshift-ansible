@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.84
+Version:        3.10.85
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Dec 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.85-1
+- Ensure OSE vars are not overwritten at the dynamic inventory
+  (ltomasbo@redhat.com)
+
 * Wed Dec 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.84-1
 - Also set etcd_cert_config_dir for calico (sdodson@redhat.com)
 - glusterfs: bind-mount /dev/mapper into the glusterfs-server container
