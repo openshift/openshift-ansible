@@ -47,7 +47,7 @@
     command: >
       {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ l_kubelet_node_name | lower }}
       --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      --force --grace-period=0 --delete-local-data --ignore-daemonsets
+      --force --grace-period=30 --delete-local-data --ignore-daemonsets
       --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_nodes_drain_result
