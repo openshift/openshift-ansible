@@ -732,7 +732,8 @@ def lib_utils_mutate_providers_with_ca(idps):
             idp_p = idp['provider']
             for provider in providers:
                 if idp_p['kind'] == provider['kind']:
-                    if not idp_p.get('insecure'):
+                    # only rewrite ca_field if it is already defined
+                    if not idp_p.get('insecure') and provider['ca_field'] in idp_p:
                         idp_p[provider['ca_field']] = '/etc/origin/master/{0}_{1}_ca.crt'.format(
                             idp['name'], provider['ca_postfix'])
     return idps
