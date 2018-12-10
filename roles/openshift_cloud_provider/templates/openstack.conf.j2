@@ -18,9 +18,15 @@ region = {{ openshift_cloudprovider_openstack_region }}
 {% if openshift_cloudprovider_openstack_ca_file is defined %}
 ca-file = {{ openshift_openstack_ca_file_path }}
 {% endif %}
-{% if openshift_cloudprovider_openstack_lb_subnet_id is defined %}
+{% if (openshift_cloudprovider_openstack_lb_subnet_id is defined) or (openshift_cloudprovider_openstack_lb_floating_network_id is defined) %}
 [LoadBalancer]
+use-octavia = {{ openshift_cloudprovider_openstack_use_octavia }}
+{% if openshift_cloudprovider_openstack_lb_subnet_id is defined %}
 subnet-id = {{ openshift_cloudprovider_openstack_lb_subnet_id }}
+{% endif %}
+{% if openshift_cloudprovider_openstack_lb_floating_network_id is defined %}
+floating-network-id = {{ openshift_cloudprovider_openstack_lb_floating_network_id }}
+{% endif %}
 {% endif %}
 [BlockStorage]
 ignore-volume-az = {{ openshift_cloudprovider_openstack_blockstorage_ignore_volume_az | bool | ternary('yes', 'no') }}
