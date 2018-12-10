@@ -1,3 +1,9 @@
 ---
 - name: restart etcd
   command: "{{ l_etcd_restart_command }}"
+  when: not containerized|default(false)|bool
+
+# containerized installation from a 3.9 upgrade
+- name: restart etcd
+  command: "docker restart etcd_container"
+  when: containerized|default(false)|bool
