@@ -107,10 +107,6 @@ parameters:
 - name: IMAGE_NAME
   displayName: glusterblock provisioner container image name
   required: True
-- name: CLUSTER_NAME
-  displayName: GlusterFS cluster name
-  description: A unique name to identify which heketi service manages this cluster, useful for running multiple heketi instances
-  value: storage
 - name: S3_ACCOUNT
   displayName: S3 Account Name
   description: S3 storage account which will provide storage on GlusterFS volumes
