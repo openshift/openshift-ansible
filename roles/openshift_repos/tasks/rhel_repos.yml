@@ -26,7 +26,7 @@
   command: subscription-manager repos \
                --enable="rhel-7-server-rpms" \
                --enable="rhel-7-server-extras-rpms" \
-               --enable="rhel-7-server-ose-{{ ( openshift_version ).split('.')[0:2] | join('.') }}-rpms"
+               --enable="rhel-7-server-ose-{{ ( openshift_release ).split('.')[0:2] | join('.') }}-rpms"
   register: subscribe_repos
   until: subscribe_repos is succeeded
   when: repo_rhel.changed
