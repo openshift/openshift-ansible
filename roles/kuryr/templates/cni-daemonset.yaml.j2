@@ -5,9 +5,6 @@ kind: DaemonSet
 metadata:
   name: kuryr-cni-ds
   namespace: {{ kuryr_namespace }}
-  labels:
-    tier: node
-    app: kuryr
   annotations:
     image.openshift.io/triggers: |
       [
@@ -18,8 +15,12 @@ spec:
   template:
     metadata:
       labels:
-        tier: node
         app: kuryr
+        component: network
+        type: infra
+        openshfit.io/component: network
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       hostNetwork: true
       tolerations:
@@ -111,8 +112,6 @@ spec:
           name: host-var-run
       - name: kuryr-cni
         image: {{ openshift_openstack_kuryr_cni_image }}
-        imagePullPolicy: IfNotPresent
-        command: [ "cni_ds_init" ]
         env:
         - name: CNI_DAEMON
           value: "True"
@@ -143,7 +142,6 @@ spec:
           httpGet:
             path: /ready
             port: {{ kuryr_cni_healthcheck_port }}
-            scheme: HTTP
           initialDelaySeconds: 15
           timeoutSeconds: 5
         livenessProbe:
