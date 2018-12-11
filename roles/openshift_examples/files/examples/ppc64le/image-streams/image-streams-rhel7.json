@@ -317,7 +317,7 @@
         "tags": [
           {
             "annotations": {
-              "description": "Build and run Node.js 8 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/sclorg/s2i-nodejs-container.\n\nWARNING: By selecting this tag, your application will automatically update to use the latest version of Node.js available on OpenShift, including major versions updates.",
+              "description": "Build and run Node.js 10 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/sclorg/s2i-nodejs-container.\n\nWARNING: By selecting this tag, your application will automatically update to use the latest version of Node.js available on OpenShift, including major versions updates.",
               "iconClass": "icon-nodejs",
               "openshift.io/display-name": "Node.js (Latest)",
               "openshift.io/provider-display-name": "Red Hat, Inc.",
@@ -327,7 +327,7 @@
             },
             "from": {
               "kind": "ImageStreamTag",
-              "name": "8"
+              "name": "10"
             },
             "name": "latest",
             "referencePolicy": {
@@ -369,6 +369,44 @@
               "name": "registry.redhat.io/rhscl/nodejs-8-rhel7:latest"
             },
             "name": "8",
+            "referencePolicy": {
+              "type": "Local"
+            }
+          },
+          {
+            "annotations": {
+              "description": "Build and run Node.js 8 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/bucharest-gold/centos7-s2i-nodejs.",
+              "iconClass": "icon-nodejs",
+              "openshift.io/display-name": "OpenShift Application Runtimes Node.js 8",
+              "openshift.io/provider-display-name": "Red Hat, Inc.",
+              "sampleRepo": "https://github.com/openshift/nodejs-ex.git",
+              "tags": "builder,nodejs,ppc64le",
+              "version": "8"
+            },
+            "from": {
+              "kind": "DockerImage",
+              "name": "registry.redhat.io/rhoar-nodejs/nodejs-8"
+            },
+            "name": "8-RHOAR",
+            "referencePolicy": {
+              "type": "Local"
+            }
+          },
+          {
+            "annotations": {
+              "description": "Build and run Node.js 10 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/bucharest-gold/centos7-s2i-nodejs.",
+              "iconClass": "icon-nodejs",
+              "openshift.io/display-name": "OpenShift Application Runtimes Node.js 10",
+              "openshift.io/provider-display-name": "Red Hat, Inc.",
+              "sampleRepo": "https://github.com/openshift/nodejs-ex.git",
+              "tags": "builder,nodejs,ppc64le",
+              "version": "10"
+            },
+            "from": {
+              "kind": "DockerImage",
+              "name": "registry.redhat.io/rhoar-nodejs/nodejs-10"
+            },
+            "name": "10",
             "referencePolicy": {
               "type": "Local"
             }
