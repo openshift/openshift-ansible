@@ -77,7 +77,7 @@
     - __status_of_sync_ds.results.results[0].status.numberAvailable is defined
     - __status_of_sync_ds.results.results[0].status.desiredNumberScheduled is defined
     - __status_of_sync_ds.results.results[0].status.numberAvailable == __status_of_sync_ds.results.results[0].status.desiredNumberScheduled
-  retries: 60
+  retries: 80
   delay: 10
 
 - name: Wait for sync DS to set annotations on master nodes
