@@ -47,6 +47,7 @@ mv jboss-datagrid-7-openshift-image-${DG_72_VERSION}/templates/datagrid72-image-
 mv application-templates-GA/fis-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
 mv application-templates-GA/quickstarts/* ${EXAMPLES_BASE}/xpaas-templates/
 mv application-templates-GA/fis-console-namespace-template.json application-templates-GA/fis-console-cluster-template.json ${EXAMPLES_BASE}/xpaas-templates/
+mv application-templates-GA/fuse-apicurito.yml ${EXAMPLES_BASE}/xpaas-templates/
 find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' ! -wholename '*demo*' ! -wholename '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
 find application-templates-${XPAAS_VERSION}/ -name '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-streams/ \;
 find rhdm-7-openshift-image-${RHDM70_VERSION}/templates -name '*.yaml' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
