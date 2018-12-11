@@ -36,6 +36,7 @@
 - name: Calico Master | Parse node version
   set_fact:
     node_version: "{{ calico_node_image | regex_replace('^.*node:v?(.*)$', '\\1') }}"
+    cnx: "{{ calico_node_image | regex_replace('^.*/(.*)-node:.*$', '\\1') }}"
 
 - name: Calico Master | Set the correct liveness and readiness checks
   set_fact:
@@ -45,13 +46,15 @@
   template:
     dest: "{{ mktemp.stdout }}/calico.yml"
     src: calico.yml.j2
-  when: node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version < '3.0.0'
+  when:
+    - node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version < '3.0.0'
+    - cnx != "cnx"
 
 - name: Calico Master | Write Calico v3
   template:
     dest: "{{ mktemp.stdout }}/calico.yml"
     src: calicov3.yml.j2
-  when: (node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version >= '3.0.0') or node_version == 'master'
+  when: (node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version >= '3.0.0') or (node_version == 'master') or (cnx == "cnx" and node_version >= '2.0.0')
 
 - name: Calico Master | Launch Calico
   command: >
