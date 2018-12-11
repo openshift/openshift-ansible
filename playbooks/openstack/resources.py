@@ -168,7 +168,7 @@ def build_inventory():
             stout.get('public_router_ip')
 
         try:
-            inventory['OSEv3']['vars'] = _get_kuryr_vars(cloud, stout)
+            inventory['OSEv3']['vars'].update(_get_kuryr_vars(cloud, stout))
         except KeyError:
             pass  # Not a kuryr deployment
     return inventory
