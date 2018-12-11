@@ -178,6 +178,7 @@
   local_action: file path="/tmp/{{ inventory_hostname }}" state=absent
   changed_when: False
   when: etcd_server_certs_missing | bool
+  become: false
 
 - name: Validate permissions on certificate files
   file:
