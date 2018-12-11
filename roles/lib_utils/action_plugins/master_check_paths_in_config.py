@@ -35,6 +35,7 @@ ALLOWED_DIRS = (
     '/etc/origin/cloudprovider',
     '/etc/origin/kubelet-plugins',
     '/usr/libexec/kubernetes/kubelet-plugins',
+    '/var/log/origin',
 )
 
 ALLOWED_DIRS_STRING = ', '.join(ALLOWED_DIRS)

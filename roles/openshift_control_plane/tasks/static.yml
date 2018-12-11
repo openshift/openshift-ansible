@@ -45,6 +45,33 @@
     - key: spec.containers[0].readinessProbe.httpGet.port
       value: "{{ openshift_master_api_port }}"
 
+- name: Add audit volume to master static pod (api)
+  yedit:
+    src: "{{ mktemp.stdout }}/apiserver.yaml"
+    append: true
+    key: spec.volumes
+    value:
+      name: audit-logs
+      hostPath:
+        path: "/var/log/origin"
+  when:
+  - openshift.master.audit_config is defined
+  - openshift.master.audit_config.auditFilePath is defined
+  - '"/var/log/origin" in openshift.master.audit_config.auditFilePath'
+
+- name: Add audit volumeMounts to master static pod (api)
+  yedit:
+    src: "{{ mktemp.stdout }}/apiserver.yaml"
+    append: true
+    key: spec.containers[0].volumeMounts
+    value:
+      mountPath: "/var/log/origin"
+      name: audit-logs
+  when:
+  - openshift.master.audit_config is defined
+  - openshift.master.audit_config.auditFilePath is defined
+  - '"/var/log/origin" in openshift.master.audit_config.auditFilePath'
+
 - name: ensure pod location exists
   file:
     path: "{{ openshift_control_plane_static_pod_location }}"
