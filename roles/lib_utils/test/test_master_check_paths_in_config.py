@@ -24,6 +24,8 @@ def loaded_config():
         'oauthConfig':
         {'identityProviders':
             ['1', '2', '/this/will/fail']},
+        'auditConfig':
+        {'auditFilePath': "/var/log/origin/audit-ocp.log"},
         'fake_top_item':
         {'fake_item':
             {'fake_item2':

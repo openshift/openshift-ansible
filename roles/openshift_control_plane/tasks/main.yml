@@ -52,6 +52,16 @@
     mode: '0750'
   when: not openshift_is_atomic | bool
 
+- name: Create openshift audit log directory
+  file:
+    state: directory
+    path: "/var/log/origin"
+    mode: 0700
+  when:
+  - openshift.master.audit_config is defined
+  - openshift.master.audit_config.auditFilePath is defined
+  - '"/var/log/origin" in openshift.master.audit_config.auditFilePath'
+
 - name: Create the policy file if it does not already exist
   command: >
     {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
