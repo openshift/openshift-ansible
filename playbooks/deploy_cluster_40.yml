@@ -155,7 +155,7 @@
     #- openshift-cluster-kube-controller-manager-operator
     # Fails often with 'x of y nodes are not at revision n'
     #- openshift-cluster-kube-scheduler-operator
-    - openshift-cluster-openshift-apiserver-operator
+    #- openshift-cluster-openshift-apiserver-operator
     - openshift-cluster-openshift-controller-manager-operator
     - openshift-ingress-operator
     ignore_errors: true
