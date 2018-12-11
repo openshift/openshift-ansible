@@ -1,4 +1,10 @@
 ---
-- include_tasks: build_vm_list.yaml
+- include_tasks: build_vm_list.yml
 
 - include_tasks: create_vms.yaml
+
+- include_tasks: create_inventory_from_vms.yaml
+  when: not openshift_ovirt_all_in_one
+
+- include_tasks: create_all_in_one_inventory_from_vms.yaml
+  when: openshift_ovirt_all_in_one

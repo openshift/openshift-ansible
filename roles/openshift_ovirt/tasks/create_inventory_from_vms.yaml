@@ -1,0 +1,42 @@
+---
+- name: Add master Vms to the master inventory group
+  add_host:
+    groups: masters
+    hostname: '{{ [item.name, item.count - 1, ".", openshift_ovirt_dns_zone] | join }}'
+    openshift_node_group_name: node-config-master
+    openshift_schedulable: true
+  with_items: "{{ openshift_ovirt_vm_manifest }}"
+  when: item.count > 0 and item.name == 'master'
+
+- name: Add compute Vms to the nodes inventory group
+  add_host:
+    groups: nodes
+    hostname: '{{ [item.name, item.count - 1, ".", openshift_ovirt_dns_zone] | join }}'
+    openshift_node_group_name: node-config-compute
+    openshift_schedulable: true
+  with_items: "{{ openshift_ovirt_vm_manifest }}"
+  when: item.count > 0 and item.name == 'compute'
+
+- name: Add infra Vms to the nodes inventory group
+  add_host:
+    groups: nodes
+    hostname: '{{ [item.name, item.count - 1, ".", openshift_ovirt_dns_zone] | join }}'
+    openshift_node_group_name: node-config-infra
+    openshift_schedulable: true
+  with_items: "{{ openshift_ovirt_vm_manifest }}"
+  when: item.count > 0 and item.name == 'infra'
+
+- name: Add etcd Vms to the etcd inventory group
+  add_host:
+    hostname: '{{ [item.name, item.count - 1, ".", openshift_ovirt_dns_zone] | join }}'
+    groups: 'etcd'
+  with_items: "{{ openshift_ovirt_vm_manifest }}"
+  when: item.count > 0 and item.name == 'etcd'
+
+- name: Add load balancers Vms to the lb inventory group
+  add_host:
+    groups: 'lb'
+    hostname: '{{ [item.name, item.count - 1, ".", openshift_ovirt_dns_zone] | join }}'
+  with_items: "{{ openshift_ovirt_vm_manifest }}"
+  when: item.count > 0 and item.name == 'lb'
+...

@@ -1,0 +1,9 @@
+---
+- name: Add master Vms to the master inventory group
+  add_host:
+    hostname: '{{ [item.name, "0.", openshift_ovirt_dns_zone] | join }}'
+    groups: [masters, nodes, etcd]
+    openshift_node_group_name: node-config-all-in-one
+    openshift_schedulable: true
+  with_items: '{{ openshift_ovirt_vm_manifest }}'
+  when: openshift_ovirt_all_in_one and item.name == 'master'
