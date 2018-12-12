@@ -13,3 +13,4 @@
   delay: 10
   register: glusterfs_check_containerized_res
   until: glusterfs_check_containerized_res is succeeded
+  when: not skip_glusterfs_health_check|default(false)
