@@ -24,3 +24,6 @@ multi_ec2.yaml
 *.egg-info
 .eggs
 cover/
+test/libvirt/install-config.yml
+test/libvirt/terraform/terraform.tfvars
+test/libvirt/terraform/.terraform
