@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.55
+Version:        3.11.56
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Dec 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.56-1
+- 
+
 * Tue Dec 11 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.55-1
 - Handle audit log path in /var/log/origin (rsevilla@redhat.com)
 - Remove duplicated parameter CLUSTER_NAME on template gluster-s3-template.yml
