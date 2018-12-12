@@ -26,7 +26,8 @@ COPY images/installer/origin-extra-root /
 # Install openshift-ansible RPMs
 RUN yum install -y epel-release && \
     yum-config-manager --enable built > /dev/null && \
-    yum install --setopt=tsflags=nodocs -y openshift-ansible-test && \
+    yum install --setopt=tsflags=nodocs -y python2-pip openshift-ansible-test && \
+    pip install 'apache-libcloud~=2.2.1' && \
     yum clean all
 
 RUN /usr/local/bin/user_setup \
