@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.95.0%{?dist}
+Release:        0.96.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,37 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Dec 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.96.0
+- Revert "Devel 4.0: CI test" (sdodson@redhat.com)
+- DEBUG: skip openshift-apiserver operator (roignac@gmail.com)
+- Add retries when installing openshift packages (roignac@gmail.com)
+- Wait for core operators to come up (roignac@gmail.com)
+- GCP: open ports on masters for cadvisor and CVO (roignac@gmail.com)
+- GCP: open port on masters to collect cadvisor metrics (roignac@gmail.com)
+- Don't install atomic - we don't use it (roignac@gmail.com)
+- Install nfs-utils on nodes to pass storage tests (roignac@gmail.com)
+- GCP: use YAML output (roignac@gmail.com)
+- bootstrap kubeconfig location is now /opt/openshift (roignac@gmail.com)
+- GCP: set MTU to 1500 (1450 on veth + 50) (roignac@gmail.com)
+- Router is now a deployment (roignac@gmail.com)
+- Open ports for cadvisor and CVO metrics - this is master-internal
+  (roignac@gmail.com)
+- GCP firewall: nodes don't expose 80/443 (roignac@gmail.com)
+- Install boto3 from pip (roignac@gmail.com)
+- base: install python-docker-py (roignac@gmail.com)
+- Remove crio pause_image hack (roignac@gmail.com)
+- GCP: include all etcd discovery records in one line (roignac@gmail.com)
+- HACK CRIO: set docker.io as a source for unqualified images
+  (roignac@gmail.com)
+- Fix ident errors in new playbooks (roignac@gmail.com)
+- Wait for ingress to appear (roignac@gmail.com)
+- HACK GCP: create and remove etcd discovery entries via a script
+  (roignac@gmail.com)
+- Rework playbooks to setup 4.0 on GCP (roignac@gmail.com)
+- Enhance parse_ignition file content decoding (mgugino@redhat.com)
+- Add additional parse_igintion options and support (mgugino@redhat.com)
+- WIP: Scale node to new-installer cluster (mgugino@redhat.com)
+
 * Tue Dec 11 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.95.0
 - Dockerfile.rhel7: remove superfluous labels (lmeyer@redhat.com)
 
