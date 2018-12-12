@@ -1643,7 +1643,7 @@ class OCStorageClass(OpenShiftCLI):
                 return True
 
         # check if mount options have updated
-        if set(self.storage_class.get_mount_options()) != set(self.config.mount_options):
+        if set(self.storage_class.get_mount_options()) != set(self.config.mount_options or []):
             return True
 
         # check if reclaim policy has been updated
