@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.54
+Version:        3.11.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,24 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Dec 11 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.55-1
+- Handle audit log path in /var/log/origin (rsevilla@redhat.com)
+- Remove duplicated parameter CLUSTER_NAME on template gluster-s3-template.yml
+  (marcosmamorim@gmail.com)
+- Cleanup kuryr role (mdulko@redhat.com)
+- Install cifs-utils and samba required by Azure (jchaloup@redhat.com)
+- retries count increased on task (bilalccaliskan@gmail.com)
+- Use ansible 2.7.4 (roignac@gmail.com)
+- Update RBAC for Calico (mleung975@gmail.com)
+- Ensure OSE vars are not overwritten at the dynamic inventory
+  (ltomasbo@redhat.com)
+- add openshift_version dependency to openshift_repos role
+  (tzumainn@redhat.com)
+- openshift_ovirt: add vms into inventory groups (rgolan@redhat.com)
+- add nodejs rhoar and openjdk imagestreams for ppc64le (jeyoung@redhat.com)
+- Ensure openshift_upgrade_nodes_label works (mgugino@redhat.com)
+- Extend Openstack cloud provider LB parameters (yossi.boaron.1234@gmail.com)
+
 * Sun Dec 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.54-1
 - 
 
