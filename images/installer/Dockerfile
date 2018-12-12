@@ -15,7 +15,7 @@ LABEL name="openshift/origin-ansible" \
       atomic.run="once"
 
 ENV USER_UID=1001 \
-    HOME=/opt/app-root/src \
+    HOME=/tmp \
     WORK_DIR=/usr/share/ansible/openshift-ansible \
     OPTS="-v"
 
