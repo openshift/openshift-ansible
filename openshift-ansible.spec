@@ -25,7 +25,6 @@ Requires:      %{name}-docs = %{version}-%{release}
 Requires:      %{name}-playbooks = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
 Obsoletes:     atomic-openshift-utils <= 3.10
-Requires:      httpd-tools
 Requires:      libselinux-python
 Requires:      python2-crypto
 Requires:      patch
