@@ -25,7 +25,6 @@ Requires:      %{name}-docs = %{version}-%{release}
 Requires:      %{name}-playbooks = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
 Obsoletes:     atomic-openshift-utils <= 3.10
-Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
 Requires:      python-passlib
