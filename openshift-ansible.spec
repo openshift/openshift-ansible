@@ -175,6 +175,9 @@ Requires:      %{name} = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
 Requires:      %{name}-playbooks = %{version}-%{release}
 Requires:      python-boto3
+Requires:      openssh
+Requires:      google-cloud-sdk
+Requires:      azure-cli == 2.0.46
 BuildArch:     noarch
 
 %description test
