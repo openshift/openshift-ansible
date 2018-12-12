@@ -60,9 +60,9 @@ defaults
 #---------------------------------------------------------------------
 # main frontend which proxys to the backends
 #---------------------------------------------------------------------
-frontend  http-proxy *:8080
+frontend  http-proxy *:{{ openshift_gcp_master_healthcheck_port }}
     acl          url_healthz  path_beg  -i /healthz
     use_backend  ocp          if url_healthz
 
 backend ocp
-    server       ocp localhost:{{ internal_console_port }} ssl verify none
+    server       ocp localhost:{{ openshift_gcp_kubernetes_api_port }} ssl verify none

@@ -1,0 +1,174 @@
+---
+- name: run the init
+  import_playbook: init/main.yml
+  vars:
+    l_init_fact_hosts: "nodes"
+    l_openshift_version_set_hosts: "nodes"
+    l_install_base_packages: True
+    l_repo_hosts: "all:!all"
+
+# TODO(michaelgugino): break up the rest of this file into reusable chunks.
+- name: Install nodes
+  hosts: nodes
+  roles:
+  - role: container_runtime
+  tasks:
+  - import_role:
+      name: container_runtime
+      tasks_from: docker_storage_setup_overlay.yml
+  - import_role:
+      name: container_runtime
+      tasks_from: extra_storage_setup.yml
+  - import_role:
+      name: container_runtime
+      tasks_from: package_crio.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: install.yml
+
+- name: Config bootstrap node
+  hosts: bootstrap
+  tasks:
+  - import_role:
+      name: openshift_node40
+      tasks_from: config.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: systemd.yml
+    vars:
+      excluded_services:
+      - progress.service
+
+- name: Start masters
+  hosts: masters
+  tasks:
+  # This is required for openshift_node40/config.yml
+  - set_fact:
+      openshift_bootstrap_endpoint: "https://{{ mcd_endpoint }}/config/master"
+  - name: Wait for bootstrap endpoint to show up
+    uri:
+      url: "{{ openshift_bootstrap_endpoint }}"
+      validate_certs: false
+    delay: 10
+    retries: 60
+    register: result
+    until:
+    - "'status' in result"
+    - result.status == 200
+  - import_role:
+      name: openshift_node40
+      tasks_from: config.yml
+  - name: Make sure etcd user exists
+    user:
+      name: etcd
+  - import_role:
+      name: openshift_node40
+      tasks_from: systemd.yml
+
+- name: Start workers
+  hosts: workers
+  tasks:
+  # This is required for openshift_node40/config.yml
+  - set_fact:
+      openshift_bootstrap_endpoint: "https://{{ mcd_endpoint }}/config/worker"
+  - name: Wait for bootstrap endpoint to show up
+    uri:
+      url: "{{ openshift_bootstrap_endpoint }}"
+      validate_certs: false
+    delay: 10
+    retries: 60
+    register: result
+    until:
+    - "'status' in result"
+    - result.status == 200
+  - import_role:
+      name: openshift_node40
+      tasks_from: config.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: systemd.yml
+
+- name: Wait for nodes to become ready
+  hosts: bootstrap
+  tasks:
+  - name: Wait for temporary control plane to show up
+    oc_obj:
+      state: list
+      kind: pod
+      namespace: kube-system
+      kubeconfig: /opt/openshift/auth/kubeconfig
+    register: control_plane_pods
+    retries: 60
+    delay: 10
+    until:
+    - "'results' in control_plane_pods and 'results' in control_plane_pods.results"
+    - control_plane_pods.results.results[0]['items'] | length > 0
+  - name: Wait for master nodes to show up
+    oc_obj:
+      state: list
+      kind: node
+      selector: "node-role.kubernetes.io/master"
+      kubeconfig: /opt/openshift/auth/kubeconfig
+    register: master_nodes
+    retries: 60
+    delay: 10
+    until:
+    - "'results' in master_nodes and 'results' in master_nodes.results"
+    - master_nodes.results.results[0]['items'] | length > 0
+  - name: Wait for bootkube service to finish
+    service_facts: {}
+    #10 mins to complete temp plane
+    retries: 120
+    delay: 5
+    until: "'bootkube.service' not in ansible_facts.services"
+    ignore_errors: true
+  - name: Fetch kubeconfig for test container
+    fetch:
+      src: /opt/openshift/auth/kubeconfig
+      dest: /tmp/artifacts/installer/auth/kubeconfig
+      flat: yes
+
+  - name: Wait for core operators to appear and complete
+    oc_obj:
+      state: list
+      kind: ClusterOperator
+      name: "{{ item }}"
+      kubeconfig: /opt/openshift/auth/kubeconfig
+    register: operator
+    #Give each operator 5 mins to come up
+    retries: 60
+    delay: 5
+    until:
+    - "'results' in operator"
+    - "'results' in operator.results"
+    - operator.results.results | length > 0
+    - "'status' in operator.results.results[0]"
+    - "'conditions' in operator.results.results[0]['status']"
+    - operator.results.results[0].status.conditions | selectattr('type', 'match', '^Available$') | map(attribute='status') | join | bool == True
+    - operator.results.results[0].status.conditions | selectattr('type', 'match', '^Progressing$') | map(attribute='status') | join | bool == False
+    - operator.results.results[0].status.conditions | selectattr('type', 'match', '^Failing$') | map(attribute='status') | join | bool == False
+    with_items:
+    - machine-config-operator
+    # Fails often with 'x of y nodes are not at revision n'
+    #- openshift-cluster-kube-apiserver-operator
+    # Failing with 'ConfigObservationFailing: configmap/cluster-config-v1.kube-system: no recognized cloud provider platform found' - https://github.com/openshift/cluster-kube-controller-manager-operator/issues/100
+    #- openshift-cluster-kube-controller-manager-operator
+    # Fails often with 'x of y nodes are not at revision n'
+    #- openshift-cluster-kube-scheduler-operator
+    #- openshift-cluster-openshift-apiserver-operator
+    - openshift-cluster-openshift-controller-manager-operator
+    - openshift-ingress-operator
+    ignore_errors: true
+
+  - block:
+    - name: Output the operators status
+      oc_obj:
+        state: list
+        kind: ClusterOperator
+        selector: ""
+        kubeconfig: /opt/openshift/auth/kubeconfig
+    - fail:
+        msg: Required operators didn't complete the install
+    when: operator.failed
+
+  - pause: {}
