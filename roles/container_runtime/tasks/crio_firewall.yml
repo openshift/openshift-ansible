@@ -1,11 +1,6 @@
 ---
 - when: r_crio_firewall_enabled | bool and not r_crio_use_firewalld | bool
   block:
-  - name: Make sure iptables-services is installed
-    package:
-      name: iptables-services
-      state: present
-
   - name: Add iptables allow rules
     os_firewall_manage_iptables:
       name: "{{ item.service }}"

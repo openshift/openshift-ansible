@@ -1,5 +1,15 @@
 ---
-# Determine the openshift_version
+# Determine the openshift_version to configure if none has been specified or set previously.
+
+# Protect the installed version by default unless explicitly told not to, or given an
+# openshift_version already.
+- name: Use openshift_current_version fact as version to configure if already installed
+  set_fact:
+    openshift_version: "{{ openshift_current_version }}"
+  when:
+  - openshift_current_version is defined
+  - openshift_version is not defined or openshift_version == ""
+  - openshift_protect_installed_version | bool
 
 - name: Set openshift_version to openshift_release if undefined
   set_fact:

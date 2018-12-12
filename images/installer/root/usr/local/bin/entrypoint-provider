@@ -45,7 +45,7 @@ if [[ -f "${FILES}/ssh-privatekey" ]]; then
   else
     keyfile="${HOME}/.ssh/id_rsa"
   fi
-  mkdir -p "${HOME}/.ssh"
+  mkdir "${HOME}/.ssh"
   rm -f "${keyfile}"
   cat "${FILES}/ssh-privatekey" > "${keyfile}"
   chmod 0600 "${keyfile}"

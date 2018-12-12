@@ -31,21 +31,21 @@ openshift_gcp_registry_bucket_name: "{{ openshift_gcp_prefix }}-docker-registry"
 openshift_gcp_master_dns_ttl: 300
 
 openshift_gcp_node_group_config:
-  - name: bootstrap
-    suffix: b
-    tags: ocp-bootstrap ocp-node
-    machine_type: n1-standard-2
-    boot_disk_size: 150
-    scale: 1
   - name: master
     suffix: m
-    tags: ocp-master ocp-node
+    tags: ocp-master
     machine_type: n1-standard-2
     boot_disk_size: 150
     scale: 1
-  - name: worker
+  - name: infra
+    suffix: i
+    tags: ocp-infra-node ocp-node
+    machine_type: n1-standard-2
+    boot_disk_size: 150
+    scale: 1
+  - name: node
     suffix: n
-    tags: ocp-worker ocp-node
+    tags: ocp-node
     machine_type: n1-standard-2
     boot_disk_size: 150
     scale: 3
@@ -61,97 +61,7 @@ openshift_gcp_user_data_file: ''
 
 openshift_gcp_multizone: False
 
-provision_custom_repositories: []
-
-mcd_port: 49500
-openshift_gcp_kubernetes_api_port: 6443
-openshift_gcp_master_healthcheck_port: 8080
-
-openshift_gcp_firewall_rules:
-  - rule: icmp
-    allowed:
-      - ip_protocol: 'icmp'
-  - rule: ssh-external
-    allowed:
-      - ip_protocol: 'tcp'
-        ports:
-          - '22'
-  - rule: ssh-internal
-    allowed:
-      - ip_protocol: 'tcp'
-        ports:
-          - '22'
-    source_tags:
-      - ssh-bastion
-  - rule: master-internal
-    allowed:
-      - ip_protocol: 'tcp'
-        ports:
-          - '2224'
-          - '2379'
-          - '2380'
-          - '4001'
-          #kube-system/kubelet:cadvisor
-          - '4193'
-          - "{{ openshift_gcp_kubernetes_api_port }}"
-          - "{{ internal_console_port }}"
-          - '8053'
-          - '8444'
-          - "{{ openshift_gcp_master_healthcheck_port }}"
-          #cadvisor port
-          - '9100'
-          # CVO port
-          - '9099'
-          - '10250'
-          - '10255'
-          - '24224'
-          - "{{ mcd_port }}"
-      - ip_protocol: 'udp'
-        ports:
-          - '4789'
-          - '5404'
-          - '5405'
-          - '10255'
-          - '24224'
-    source_tags:
-      - ocp
-    target_tags:
-      - ocp-master
-      - ocp-bootstrap
-  - rule: master-external
-    allowed:
-      - ip_protocol: 'tcp'
-        ports:
-          - "{{ openshift_gcp_master_healthcheck_port }}"
-          - "{{ openshift_gcp_kubernetes_api_port }}"
-          - "{{ openshift_master_api_port }}"
-          - "{{ mcd_port }}"
-    target_tags:
-      - ocp-master
-      - ocp-bootstrap
-  - rule: node-internal
-    allowed:
-      - ip_protocol: 'tcp'
-        ports:
-          - '1936'
-          - '10250'
-          - '10255'
-          - '9000-10000'
-      - ip_protocol: 'udp'
-        ports:
-          - '4789'
-          - '10255'
-    source_tags:
-      - ocp
-    target_tags:
-      - ocp-worker
-  - rule: node-external
-    allowed:
-      - ip_protocol: 'tcp'
-        ports:
-          - "{{ openshift_node_port_range }}"
-      - ip_protocol: 'udp'
-        ports:
-          - "{{ openshift_node_port_range }}"
-    target_tags:
-      - ocp-worker
+openshift_gcp_node_group_mapping:
+  masters: 'node-config-master'
+  infra: 'node-config-infra'
+  compute: 'node-config-compute'
