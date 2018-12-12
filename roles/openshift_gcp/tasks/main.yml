@@ -1,255 +1,45 @@
+#
+# This role relies on gcloud invoked via templated bash in order to
+# provide a high performance deployment option. The next logical step
+# is to transition to a deployment manager template which is then instantiated.
+# TODO: use a formal set of role parameters consistent with openshift_aws
+#
 ---
-- name: Create GCP network
-  gcp_compute_network:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    name: "{{ openshift_gcp_network_name }}"
-    state: present
-  register: network
+- name: Templatize DNS script
+  template: src=dns.j2.sh dest=/tmp/openshift_gcp_provision_dns.sh mode=u+rx
+- name: Templatize provision script
+  template: src=provision.j2.sh dest=/tmp/openshift_gcp_provision.sh mode=u+rx
+- name: Templatize de-provision script
+  template: src=remove.j2.sh dest=/tmp/openshift_gcp_provision_remove.sh mode=u+rx
+  when:
+  - state | default('present') == 'absent'
 
-- name: Create GCP firewall
-  gcp_compute_firewall:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    name: "{{ openshift_gcp_prefix }}{{ item.rule }}"
-    allowed: "{{ item.allowed }}"
-    network: "{{ network.selfLink }}"
-    target_tags: "{{ item.target_tags | default(omit) }}"
-    source_tags: "{{ item.source_tags | default(omit) }}"
-    state: present
-  with_items: "{{ openshift_gcp_firewall_rules }}"
+- name: Provision GCP DNS domain
+  command: /tmp/openshift_gcp_provision_dns.sh
+  args:
+    chdir: "{{ files_dir }}"
+  register: dns_provision
+  when:
+  - state | default('present') == 'present'
+
+- name: Ensure that DNS resolves to the hosted zone
+  assert:
+    that:
+    - "lookup('dig', public_hosted_zone, 'qtype=NS', wantlist=True) | sort | join(',') == dns_provision.stdout"
+    msg: "The DNS domain {{ public_hosted_zone }} defined in 'public_hosted_zone' must have NS records pointing to the Google nameservers: '{{ dns_provision.stdout }}' instead of '{{ lookup('dig', public_hosted_zone, 'qtype=NS') }}'."
+  when:
+  - state | default('present') == 'present'
 
 - import_tasks: provision_ssh_keys.yml
 
-- name: Find GCP image
-  gcp_compute_image_facts:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    filters:
-    - "family = {{ openshift_gcp_image }}"
-  register: gcp_node_image
-
-- fail:
-    msg: "No images for family '{{ openshift_gcp_image }}' found"
-  when: gcp_node_image['items'] | length == 0
-
-- name: Provision GCP instance templates
-  gcp_compute_instance_template:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    name: "{{ openshift_gcp_prefix }}instance-template-{{ item.name }}"
-    properties:
-      machine_type: "{{ item.machine_type }}"
-      network_interfaces:
-      - network: "{{ network }}"
-        access_configs:
-        - name: "{{ openshift_gcp_prefix }}instance-template-{{ item.name }}-config"
-          type: 'ONE_TO_ONE_NAT'
-      disks:
-      - auto_delete: true
-        boot: true
-        initialize_params:
-          disk_size_gb: "{{ item.boot_disk_size }}"
-          source_image: "{{ gcp_node_image['items'][0].selfLink }}"
-      metadata:
-        "cluster-id": "{{ openshift_gcp_prefix + openshift_gcp_clusterid }}"
-        "node-group": "{{ item.name }}"
-      tags:
-        items:
-        - "ocp"
-        - "{{ openshift_gcp_prefix }}ocp"
-        - "{{ item.tags }}"
-    state: present
-  with_items: "{{ openshift_gcp_node_group_config }}"
-  register: instance_template
-
-- name: Create GCP Instance Groups
-  gcp_compute_instance_group_manager:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    zone: "{{ openshift_gcp_zone }}"
-    name: "{{ openshift_gcp_prefix }}ig-{{ item.item.suffix }}"
-    base_instance_name: "{{ openshift_gcp_prefix }}ig-{{ item.item.suffix }}"
-    instance_template: "{{ item }}"
-    target_size: "{{ item.item.scale | int}}"
-    named_ports:
-    - name: "{{ openshift_gcp_prefix }}port-kube-api"
-      port: "{{ openshift_gcp_kubernetes_api_port }}"
-    - name: "{{ openshift_gcp_prefix }}port-openshift-api"
-      port: "{{ openshift_master_api_port }}"
-    state: present
-  with_items: "{{ instance_template.results }}"
-  register: instance_groups
-
-- name: Get bootstrap instance group
-  gcp_compute_instance_group_facts:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    zone: "{{ openshift_gcp_zone }}"
-    filters:
-    - name = "{{ openshift_gcp_prefix }}ig-b"
-  register: bootstrap_instance_group
-
-- name: Get master instance group
-  gcp_compute_instance_group_facts:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    zone: "{{ openshift_gcp_zone }}"
-    filters:
-    - name = "{{ openshift_gcp_prefix }}ig-m"
-  register: master_instance_group
-
-- set_fact:
-    bootstrap_instance_group: "{{ bootstrap_instance_group['items'][0] }}"
-    master_instance_group: "{{ master_instance_group['items'][0] }}"
-
-- name: Wait for bootstrap instance group to start all instances
-  gcp_compute_instance_group_manager_facts:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    zone: "{{ openshift_gcp_zone }}"
-    filters: "name = {{ bootstrap_instance_group['name'] }}"
-  register: bootstrap_group_result
-  # Wait for 3 minutes
-  retries: 36
-  delay: 5
-  until:
-  - "bootstrap_group_result['items'][0]['currentActions']['none'] == bootstrap_group_result['items'][0]['targetSize']"
-
-- name: Wait for master instance group to start all instances
-  gcp_compute_instance_group_manager_facts:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    zone: "{{ openshift_gcp_zone }}"
-    filters: "name = {{ master_instance_group['name'] }}"
-  register: master_group_result
-  # Wait for 3 minutes
-  retries: 36
-  delay: 5
-  until:
-  - "master_group_result['items'][0]['currentActions']['none'] == master_group_result['items'][0]['targetSize']"
-
-- name: Collect a list of instances
-  gcp_compute_instance_facts:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    zone: "{{ openshift_gcp_zone }}"
-  register: all_instances
-
-- name: Filter instances to fetch bootstrap
-  set_fact:
-    bootstrap_instances: "{{ item }}"
-  with_items:
-  - "{{ all_instances['items'] }}"
-  when:
-  - "'tags' in item"
-  - "'items' in item['tags']"
-  - "cluster_tag in item['tags']['items']"
-  - "'ocp-bootstrap' in item['tags']['items']"
-  vars:
-    cluster_tag: "{{ openshift_gcp_prefix }}ocp"
-
-- name: Filter instances to fetch masters
-  set_fact:
-    master_instances: "{{ master_instances | default([]) }} + [ {{ item }} ]"
-  with_items:
-  - "{{ all_instances['items'] }}"
-  when:
-  - "'tags' in item"
-  - "'items' in item['tags']"
-  - "cluster_tag in item['tags']['items']"
-  - "'ocp-master' in item['tags']['items']"
-  vars:
-    cluster_tag: "{{ openshift_gcp_prefix }}ocp"
-
-- set_fact:
-    etcd_discovery_targets: "{{ etcd_discovery_targets | default([]) }} + ['0 0 2380 {{ entry_name }}']"
-    master_external_ips: "{{ master_external_ips | default([]) }} + ['{{ master_ip }}']"
-  with_indexed_items: "{{ master_instances }}"
-  vars:
-    entry_name: "{{ openshift_gcp_prefix }}etcd-{{ item.0 }}.{{ public_hosted_zone }}."
-    master_ip: "{{ item.1.networkInterfaces[0].accessConfigs[0].natIP }}"
-
-- set_fact:
-    bootstrap_and_masters: "{{ master_external_ips | list }} + ['{{ bootstrap_instances.networkInterfaces[0].accessConfigs[0].natIP }}']"
-
-- name: Get managed zone
-  gcp_dns_managed_zone:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/ndev.clouddns.readwrite
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    name: "{{ dns_managed_zone | default(openshift_gcp_prefix + 'managed-zone') }}"
-    state: present
-  register: managed_zone
-
-- name: Create public API hostname
-  gcp_dns_resource_record_set:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/ndev.clouddns.readwrite
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    name: "{{ openshift_master_cluster_public_hostname }}."
-    managed_zone: "{{ managed_zone }}"
-    type: A
-    ttl: 600
-    target: "{{ bootstrap_and_masters }}"
-    state: present
-
-- name: Create etcd records for masters
-  gcp_dns_resource_record_set:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/ndev.clouddns.readwrite
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    name: "{{ entry_name }}"
-    managed_zone: "{{ managed_zone }}"
-    type: A
-    ttl: 600
-    target: "{{ master_ip }}"
-    state: present
-  with_indexed_items: "{{ master_instances }}"
-  vars:
-    entry_name: "{{ openshift_gcp_prefix }}etcd-{{ item.0 }}.{{ public_hosted_zone }}."
-    master_ip: "{{ item.1.networkInterfaces[0].networkIP }}"
-
-- name: Templatize DNS script
-  template: src=additional_settings.j2.sh dest=/tmp/additional_settings.sh mode=u+rx
-
-- name: Run addition provision GCP script
-  command: /tmp/additional_settings.sh
+- name: Provision GCP resources
+  command: /tmp/openshift_gcp_provision.sh
   args:
     chdir: "{{ files_dir }}"
+  when:
+  - state | default('present') == 'present'
+
+- name: De-provision GCP resources
+  command: /tmp/openshift_gcp_provision_remove.sh
+  when:
+  - state | default('present') == 'absent'

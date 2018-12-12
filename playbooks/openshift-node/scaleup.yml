@@ -31,15 +31,11 @@
     l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_config"
     l_sanity_check_hosts: "{{ groups['oo_nodes_to_config'] | union(groups['oo_masters_to_config']) }}"
 
-- name: install nodes
-  hosts: oo_nodes_to_config
-  tasks:
-  - import_role:
-      name: openshift_node40
-      tasks_from: install.yml
-  - import_role:
-      name: openshift_node40
-      tasks_from: config.yml
-  - import_role:
-      name: openshift_node40
-      tasks_from: systemd.yml
+- import_playbook: ../init/version.yml
+  vars:
+    l_openshift_version_set_hosts: "oo_nodes_to_config:!oo_first_master"
+
+- import_playbook: private/bootstrap.yml
+- import_playbook: private/join.yml
+
+- import_playbook: ../openshift-glusterfs/private/add_hosts.yml
