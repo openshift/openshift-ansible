@@ -25,7 +25,6 @@ COPY images/installer/root /
 COPY images/installer/origin-extra-root /
 # Install openshift-ansible RPMs
 RUN yum install -y epel-release && \
-    rm -rf /etc/yum.repos.d/centos-openshift-origin.repo && \
     yum-config-manager --enable built > /dev/null && \
     yum install --setopt=tsflags=nodocs -y openshift-ansible-test && \
     yum clean all
