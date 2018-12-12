@@ -14,6 +14,17 @@ openshift_deployment_type=origin
 #openshift_deployment_type=openshift-enterprise
 openshift_enable_service_catalog=False
 
+# Ansible Broker - add quay.io/rgolangh registry - works with latest ansible broker v3.11
+ansible_service_broker_registry_type=quay
+ansible_service_broker_registry_name=quay.io
+ansible_service_broker_registry_url=https://quay.io
+ansible_service_broker_registry_user=
+ansible_service_broker_registry_password=
+ansible_service_broker_registry_organization=rgolangh
+ansible_service_broker_registry_tag=latest
+ansible_service_broker_registry_whitelist=[.*-apb$]
+ansible_service_broker_registry_blacklist=[.*automation-broker-apb$]
+
 # Hostnames
 load_balancer_hostname=lb0.{{openshift_ovirt_dns_zone}}
 openshift_master_cluster_hostname="{{ load_balancer_hostname }}"
@@ -33,29 +44,18 @@ container_runtime_extra_storage=[{'device': '/dev/vdc', 'path': '/var/lib/origin
 container_runtime_extra_storage=[{'device': '/dev/vdc', 'path': '/var/lib/origin/openshift.local.volumes', 'options': 'gquota', 'filesystem': 'xfs', 'format': 'True'}]
 
 [masters]
-master0.example.com
-master1.example.com
-master2.example.com
-
-[etcd]
-master0.example.com
-master1.example.com
-master2.example.com
-
-[infras]
-infra0.example.com
-infra1.example.com
-infra2.example.com
-
-[lb]
-lb0.example.com
+# will be filled automatically by openshift_ovirt role
 
 [nodes]
-master0.example.com openshift_node_group_name=node-config-master
-master1.example.com openshift_node_group_name=node-config-master
-master2.example.com openshift_node_group_name=node-config-master
-infra0.example.com openshift_node_group_name=node-config-infra
-infra1.example.com openshift_node_group_name=node-config-infra
-infra2.example.com openshift_node_group_name=node-config-infra
-compute0.example.com openshift_node_group_name=node-config-compute
+# will be filled automatically by openshift_ovirt role
+
+[etcd]
+# will be filled automatically by openshift_ovirt role
+
+[infras]
+# will be filled automatically by openshift_ovirt role
+
+[lb]
+# will be filled automatically by openshift_ovirt role
+
 # vim: set syntax=dosini

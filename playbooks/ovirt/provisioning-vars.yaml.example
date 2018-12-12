@@ -12,8 +12,8 @@ engine_password:                # secret
 engine_cafile:                  # ../ca.pem
 
 data_center_name:               # Default
-openshift_ovirt_cluster:          # Default
-openshift_ovirt_data_store:       # vmstore
+openshift_ovirt_cluster:        # Default
+openshift_ovirt_data_store:     # vmstore
 openshift_ovirt_ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
 ##########################
