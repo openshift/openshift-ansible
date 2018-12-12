@@ -1,0 +1,16 @@
+[nodes:children]
+bootstrap
+masters
+workers
+
+[nodes:vars]
+openshift_install_config_path="${OCP_INSTALL_CONFIG_PATH}"
+
+[bootstrap]
+${OCP_CLUSTER_NAME}-bootstrap.${OCP_BASE_DOMAIN}
+
+[masters]
+${MASTERS_LIST}
+
+[workers]
+${WORKERS_LIST}

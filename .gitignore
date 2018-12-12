@@ -27,3 +27,5 @@ cover/
 test/libvirt/install-config.yml
 test/libvirt/terraform/terraform.tfvars
 test/libvirt/terraform/.terraform
+*.tfstate
+test/libvirt/inventory.txt
