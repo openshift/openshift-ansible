@@ -27,7 +27,6 @@ Requires:      %{name}-roles = %{version}-%{release}
 Obsoletes:     atomic-openshift-utils <= 3.10
 Requires:      httpd-tools
 Requires:      libselinux-python
-Requires:      python-passlib
 Requires:      python2-crypto
 Requires:      patch
 Requires:      pyOpenSSL
