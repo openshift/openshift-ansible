@@ -1,3 +1,4 @@
+---
 openshift_additional_repos:
   - name: "origin-pr"
     baseurl: "https://rpms.svc.ci.openshift.org/openshift-origin-v4.0/"
