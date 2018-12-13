@@ -1,0 +1,28 @@
+---
+openshift_gcp_infra_network_instance_group: ig-n
+openshift_gcp_node_group_config:
+  - name: bootstrap
+    suffix: b
+    tags: ocp-bootstrap
+    machine_type: n1-standard-2
+    boot_disk_size: 150
+    scale: 1
+    wait_for_stable: true
+  - name: master
+    suffix: m
+    tags: ocp-master
+    machine_type: n1-standard-2
+    boot_disk_size: 150
+    scale: 3
+    wait_for_stable: true
+  - name: node
+    suffix: n
+    tags: ocp-worker
+    machine_type: n1-standard-2
+    boot_disk_size: 150
+    scale: 3
+    wait_for_stable: true
+
+openshift_gcp_project: openshift-gce-devel
+public_hosted_zone: origin-gce.dev.openshift.com
+dns_managed_zone: origin-gce

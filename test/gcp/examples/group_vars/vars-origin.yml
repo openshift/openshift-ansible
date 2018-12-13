@@ -1,0 +1,59 @@
+---
+deployment_type: origin
+ansible_pkg_mgr: yum
+inventory_ip_type: external
+
+os_firewall_enabled: false
+
+openshift_gcp_prefix: "{{ lookup('env', 'INSTANCE_PREFIX') | mandatory }}-"
+
+openshift_gcp_region: us-east1
+openshift_gcp_zone: us-east1-c
+
+openshift_gcp_network_name: "{{ openshift_gcp_prefix }}network"
+
+openshift_gcp_iam_service_account_keyfile: "{{ files_dir }}/gce.json"
+
+openshift_gcp_ssh_private_key: "{{ files_dir + '/ssh-privatekey' }}"
+
+openshift_gcp_infra_network_instance_group: ig-i
+
+# Instructs the launch job to build an AMI prior to cluster provisioning and then use that image
+openshift_gcp_build_image: true
+openshift_gcp_image: '{{ openshift_gcp_prefix }}images'
+
+openshift_gcp_base_image: 'centos-7'
+openshift_gcp_root_image: 'centos-7'
+
+
+# Additional settings for GCE from defaults
+
+ansible_become: yes
+
+# External API settings
+console_port: 8443
+internal_console_port: 8443
+openshift_master_api_port: "8443"
+openshift_master_console_port: "8443"
+openshift_master_default_subdomain: "{{ wildcard_zone }}"
+
+mcd_port: 49500
+
+# Cloud specific settings
+openshift_cloudprovider_kind: gce
+openshift_hosted_registry_storage_provider: gcs
+openshift_additional_repos: [
+  {"name": "origin-pr", "baseurl": "https://rpms.svc.ci.openshift.org/openshift-origin-v4.0/", "enabled": 1, "gpgcheck": 0},
+  {"name": "origin-pr-dependencies", "baseurl": "http://mirror.centos.org/centos/7/paas/x86_64/openshift-origin/", "enabled": 1, "gpgcheck": 0}
+]
+
+openshift_bootstrap_ignition_file: "{{ files_dir }}/bootstrap.ign"
+openshift_gcp_master_healthcheck_port: 8080
+
+openshift_master_cluster_public_hostname: "{{ openshift_gcp_prefix }}api.{{ public_hosted_zone }}"
+openshift_master_cluster_hostname: "{{ openshift_gcp_prefix }}api.{{ public_hosted_zone }}"
+wildcard_zone: "apps.{{ lookup('env', 'INSTANCE_PREFIX') | mandatory }}.{{ public_hosted_zone }}"
+openshift_master_public_api_url: "https://{{ openshift_gcp_prefix }}api.{{ public_hosted_zone }}"
+openshift_master_public_console_hostname: "console.{{ wildcard_zone }}"
+
+openshift_install_config_path: "{{ files_dir }}/install-config.ansible.yaml"
