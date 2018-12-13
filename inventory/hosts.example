@@ -11,9 +11,11 @@ ose3-master[1:3].test.example.com
 ose3-master[1:3].test.example.com
 
 [nodes]
-ose3-master[1:3].test.example.com
-ose3-infra[1:2].test.example.com
-ose3-node[1:2].test.example.com
+# openshift_node_group_name must be provided for each node
+# See 'Node Group Definition and Mapping' in the project README for more details
+ose3-master[1:3].test.example.com openshift_node_group_name="node-config-master"
+ose3-infra[1:2].test.example.com openshift_node_group_name="node-config-infra"
+ose3-node[1:2].test.example.com openshift_node_group_name="node-config-compute"
 
 [nfs]
 ose3-master1.test.example.com
