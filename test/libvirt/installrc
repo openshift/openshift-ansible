@@ -15,4 +15,7 @@ export OCP_NETCIDR="192.168.126.0/24"
 export OCP_MASTER_IPS=\"192.168.126.11\"
 export OCP_BOOTSTRAP_IP="192.168.126.10"
 export OCP_LIBVIRT_URI='qemu+tcp://192.168.124.1/system'
-export OCP_INSTALL_CONFIG_PATH="$PWD/install-config.yml"
+export OCP_INSTALL_CONFIG_PATH="$PWD/install-config-ansible.yml"
+export OCP_IGNITION_PATH="$PWD/bootstrap.ign"
+
+export ANSIBLE_HOST_KEY_CHECKING=False

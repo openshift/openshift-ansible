@@ -25,7 +25,9 @@ multi_ec2.yaml
 .eggs
 cover/
 test/libvirt/install-config.yml
+test/libvirt/install-config-ansible.yml
 test/libvirt/terraform/terraform.tfvars
 test/libvirt/terraform/.terraform
 *.tfstate
+*.tfstate.backup
 test/libvirt/inventory.txt

@@ -10,8 +10,8 @@
   when: openshift_bootstrap_endpoint is defined
 
 - set_fact:
-    ign_contents: "{{ lookup('file', ignition_file) }}"
-  when: ignition_file is defined
+    ign_contents: "{{ lookup('file', openshift_ignition_file_path) }}"
+  when: openshift_ignition_file_path is defined
 
 - debug:
     var: ign_contents

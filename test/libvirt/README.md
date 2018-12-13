@@ -7,4 +7,9 @@ for supported installation methods.
 ## How to use
 Don't use it.
 
+cd to this directory.
 source installrc; export variables you want to override.
+./deploy.sh
+This will generate install assets (inventory, install-config.yml, tfvars),
+provision instances via terraform and start installation of
+openshift-ansible.
