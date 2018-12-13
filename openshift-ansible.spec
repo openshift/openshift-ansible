@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.86
+Version:        3.10.87
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Dec 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.87-1
+- Ensure openshift_upgrade_nodes_label works (mgugino@redhat.com)
+- Update Fuse templates with 7.2 release (antonin@stefanutti.fr)
+- Fix Calico liveness and readiness checks to include Calico 3.2
+  (mleung975@gmail.com)
+- hostname is configured as local-ipv4 (bysnupy@hotmail.com)
+
 * Mon Dec 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.86-1
 - Update Calico RBAC (mleung975@gmail.com)
 
