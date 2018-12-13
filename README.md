@@ -10,7 +10,6 @@ Changes for 3.x should be made directly to the latest release branch they're
 relevant to and backported from there.
 
 
-
 # OpenShift Ansible
 
 This repository contains [Ansible](https://www.ansible.com/) roles and
