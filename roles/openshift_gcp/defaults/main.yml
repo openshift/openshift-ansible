@@ -122,6 +122,9 @@ openshift_gcp_firewall_rules:
     allowed:
       - ip_protocol: 'tcp'
         ports:
+          - '80'
+          - '443'
+          - '1936'
           - "{{ openshift_gcp_master_healthcheck_port }}"
           - "{{ openshift_gcp_kubernetes_api_port }}"
           - "{{ openshift_master_api_port }}"

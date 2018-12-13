@@ -44,7 +44,7 @@
   tasks:
   # This is required for openshift_node40/config.yml
   - set_fact:
-      openshift_bootstrap_endpoint: "https://{{ mcd_endpoint }}/config/master"
+      openshift_bootstrap_endpoint: "https://{{ openshift_master_cluster_hostname }}:{{ mcd_port }}/config/master"
   - name: Wait for bootstrap endpoint to show up
     uri:
       url: "{{ openshift_bootstrap_endpoint }}"
@@ -70,7 +70,7 @@
   tasks:
   # This is required for openshift_node40/config.yml
   - set_fact:
-      openshift_bootstrap_endpoint: "https://{{ mcd_endpoint }}/config/worker"
+      openshift_bootstrap_endpoint: "https://{{ openshift_master_cluster_hostname }}:{{ mcd_port }}/config/worker"
   - name: Wait for bootstrap endpoint to show up
     uri:
       url: "{{ openshift_bootstrap_endpoint }}"
@@ -170,5 +170,3 @@
     - fail:
         msg: Required operators didn't complete the install
     when: operator.failed
-
-  - pause: {}

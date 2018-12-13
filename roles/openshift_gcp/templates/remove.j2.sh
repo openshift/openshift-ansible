@@ -14,14 +14,12 @@ if gcloud --project "{{ openshift_gcp_project }}" dns managed-zones describe "${
         # export all dns records that match into a zone format, and turn each line into a set of args for
         # record-sets transaction.
         gcloud dns record-sets export --project "{{ openshift_gcp_project }}" -z "${dns_zone}" --zone-file-format "${dns}"
-
         # Write the header
         ETCD_DNS_NAME="_etcd-server-ssl._tcp.{{ lookup('env', 'INSTANCE_PREFIX') | mandatory }}.{{ public_hosted_zone }}."
         grep -F -e "${ETCD_DNS_NAME}" "${dns}" | awk '{ print "--name", $1, "--ttl", $2, "--type", $4 }' | head -n1 | xargs echo -n > "${dns}.input"
         # Append all etcd records
         grep -F -e "${ETCD_DNS_NAME}" "${dns}" | awk '{ print " \x27"$5" "$6" "$7" "$8"\x27"; }' | tr -d '\n\r' >> "${dns}.input" || true
         echo >> "${dns}.input"
-
 
         if [ -s "${dns}.input" ]; then
             rm -f "${dns}"
