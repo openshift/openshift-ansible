@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.96.0%{?dist}
+Release:        0.97.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Dec 13 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.97.0
+- Use ansible 2.7.4 (roignac@gmail.com)
+- Install python-docker-py instead of python-docker (sgaikwad@redhat.com)
+- Install boto3 from pip (roignac@gmail.com)
+
 * Wed Dec 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.96.0
 - Revert "Devel 4.0: CI test" (sdodson@redhat.com)
 - DEBUG: skip openshift-apiserver operator (roignac@gmail.com)
