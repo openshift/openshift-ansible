@@ -76,6 +76,13 @@
     - set_fact:
         openshift_logging_elasticsearch_hosts: "{{ ( openshift_logging_es_hosts.stdout.split(' ') | default([]) + (openshift_logging_es_ops_hosts.stdout.split(' ') if openshift_logging_es_ops_hosts.stdout is defined else []) ) | unique }}"
 
+    #- name: Debug groups
+    #  debug:
+    #    var: groups
+    #- name: Debug hostvars
+    #  debug:
+    #    var: hostvars
+
     # Check to see if the collected ip from the openshift facts above matches our node back to a
     # group entry in our inventory so we can maintain our group variables when updating the sysctl
     # files for specific nodes based on <node>.status.addresses[@.type==InternalIP].address
@@ -85,12 +92,12 @@
         groups: oo_elasticsearch_nodes
         ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
         ansible_become: "{{ g_sudo | default(omit) }}"
-      with_items: "{{ groups['oo_nodes_to_config'] }}"
+      with_items: "{{ groups.get('oo_nodes_to_config', groups['all']) }}"
       changed_when: no
       run_once: true
       delegate_to: localhost
       connection: local
-      when: hostvars[item]['openshift']['common']['ip'] in openshift_logging_elasticsearch_hosts
+      when: hostvars[item].get('openshift',{}).get('common',{}).get('ip', None) in openshift_logging_elasticsearch_hosts
 
 - name: Update vm.max_map_count for ES 5.x
   hosts: oo_elasticsearch_nodes

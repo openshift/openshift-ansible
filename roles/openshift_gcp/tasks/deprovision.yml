@@ -22,6 +22,68 @@
     - "name : {{ openshift_gcp_prefix }}instance-template*"
   register: instance_templates
 
+- name: Collect a list of instances
+  gcp_compute_instance_facts:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    zone: "{{ openshift_gcp_zone }}"
+  register: all_instances
+
+- name: Filter instances to fetch masters
+  set_fact:
+    master_instances: "{{ master_instances | default([]) }} + [ {{ item }} ]"
+  with_items:
+  - "{{ all_instances['items'] }}"
+  when:
+  - "'tags' in item"
+  - "'items' in item['tags']"
+  - "cluster_tag in item['tags']['items']"
+  - "'ocp-master' in item['tags']['items']"
+  vars:
+    cluster_tag: "{{ openshift_gcp_prefix }}ocp"
+
+- name: Get managed zone
+  gcp_dns_managed_zone:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    name: "{{ dns_managed_zone | default(openshift_gcp_prefix + 'managed-zone') }}"
+    state: present
+  register: managed_zone
+
+- name: Remove public API hostname
+  gcp_dns_resource_record_set:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    name: "{{ openshift_master_cluster_public_hostname }}."
+    managed_zone: "{{ managed_zone }}"
+    type: A
+    state: absent
+
+- name: Remove etcd records for masters
+  gcp_dns_resource_record_set:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    name: "{{ entry_name }}"
+    managed_zone: "{{ managed_zone }}"
+    type: A
+    state: absent
+  with_indexed_items: "{{ master_instances }}"
+  when: master_instances is defined
+  vars:
+    entry_name: "{{ openshift_gcp_prefix }}etcd-{{ item.0 }}.{{ public_hosted_zone }}."
+
 - name: Remove GCP Instance Groups
   gcp_compute_instance_group_manager:
     auth_kind: serviceaccount

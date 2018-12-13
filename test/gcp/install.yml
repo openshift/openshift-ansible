@@ -9,5 +9,21 @@
       name: openshift_gcp
       tasks_from: setup_scale_group_facts.yml
 
+- hosts: nodes
+  tasks:
+  - name: Disable google hostname updater
+    file:
+      path: /etc/dhcp/dhclient.d/google_hostname.sh
+      mode: 0644
+
 - name: run the deploy_cluster_40
   import_playbook: ../../playbooks/deploy_cluster_40.yml
+
+- name: destroy bootstrap node
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: Scale down bootstrap node and update public API DNS record
+    include_role:
+      name: openshift_gcp
+      tasks_from: remove_bootstrap.yml

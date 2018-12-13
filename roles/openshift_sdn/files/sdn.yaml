@@ -38,7 +38,7 @@ spec:
       # It relies on an up to date node-config.yaml being present.
       - name: sdn
         image: " "
-        command: 
+        command:
         - /bin/bash
         - -c
         - |
@@ -204,3 +204,5 @@ spec:
       - name: host-var-lib-cni-networks-openshift-sdn
         hostPath:
           path: /var/lib/cni/networks/openshift-sdn
+      tolerations:
+      - operator: "Exists"

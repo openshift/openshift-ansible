@@ -2,18 +2,24 @@
 - name: Add bootstrap instances
   add_host:
     name: "{{ hostvars[item].gce_name }}"
-    groups: bootstrap
-    ignition_file: "{{ openshift_gcp_bootstrap_ignition_file }}"
+    groups:
+    - bootstrap
+    - nodes
+    ignition_file: "{{ openshift_bootstrap_ignition_file }}"
   with_items: "{{ groups['tag_ocp-bootstrap'] | default([]) }}"
 
 - name: Add master instances
   add_host:
     name: "{{ hostvars[item].gce_name }}"
-    groups: masters
+    groups:
+    - masters
+    - nodes
   with_items: "{{ groups['tag_ocp-master'] | default([]) }}"
 
 - name: Add worker instances
   add_host:
     name: "{{ hostvars[item].gce_name }}"
-    groups: workers
+    groups:
+    - workers
+    - nodes
   with_items: "{{ groups['tag_ocp-worker'] | default([]) }}"

@@ -6,11 +6,15 @@
   register: result
   until: result is succeeded
 
-- block:
-  - name: Pull CLI Image
-    docker_image:
-      name: "{{ openshift_cli_image }}"
-    when: not openshift_use_crio_only | bool
+- name: Check that CLI image is present
+  command: "{{ openshift_container_cli }} images -q {{ openshift_cli_image }}"
+  register: cli_image
+
+- name: Pre-pull cli image
+  command: "{{ openshift_container_cli }} pull {{ openshift_cli_image }}"
+  environment:
+    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+  when: cli_image.stdout_lines == []
 
 - name: Install bash completion for oc tools
   package:

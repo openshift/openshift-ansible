@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        4.0.0
-Release:        0.42.0%{?dist}
+Release:        0.96.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -189,6 +189,216 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Dec 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.96.0
+- Revert "Devel 4.0: CI test" (sdodson@redhat.com)
+- DEBUG: skip openshift-apiserver operator (roignac@gmail.com)
+- Add retries when installing openshift packages (roignac@gmail.com)
+- Wait for core operators to come up (roignac@gmail.com)
+- GCP: open ports on masters for cadvisor and CVO (roignac@gmail.com)
+- GCP: open port on masters to collect cadvisor metrics (roignac@gmail.com)
+- Don't install atomic - we don't use it (roignac@gmail.com)
+- Install nfs-utils on nodes to pass storage tests (roignac@gmail.com)
+- GCP: use YAML output (roignac@gmail.com)
+- bootstrap kubeconfig location is now /opt/openshift (roignac@gmail.com)
+- GCP: set MTU to 1500 (1450 on veth + 50) (roignac@gmail.com)
+- Router is now a deployment (roignac@gmail.com)
+- Open ports for cadvisor and CVO metrics - this is master-internal
+  (roignac@gmail.com)
+- GCP firewall: nodes don't expose 80/443 (roignac@gmail.com)
+- Install boto3 from pip (roignac@gmail.com)
+- base: install python-docker-py (roignac@gmail.com)
+- Remove crio pause_image hack (roignac@gmail.com)
+- GCP: include all etcd discovery records in one line (roignac@gmail.com)
+- HACK CRIO: set docker.io as a source for unqualified images
+  (roignac@gmail.com)
+- Fix ident errors in new playbooks (roignac@gmail.com)
+- Wait for ingress to appear (roignac@gmail.com)
+- HACK GCP: create and remove etcd discovery entries via a script
+  (roignac@gmail.com)
+- Rework playbooks to setup 4.0 on GCP (roignac@gmail.com)
+- Enhance parse_ignition file content decoding (mgugino@redhat.com)
+- Add additional parse_igintion options and support (mgugino@redhat.com)
+- WIP: Scale node to new-installer cluster (mgugino@redhat.com)
+
+* Tue Dec 11 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.95.0
+- Dockerfile.rhel7: remove superfluous labels (lmeyer@redhat.com)
+
+* Mon Dec 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.94.0
+- 
+
+* Sun Dec 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.93.0
+- 
+
+* Sat Dec 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.92.0
+- 
+
+* Sat Dec 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.91.0
+- 
+
+* Fri Dec 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.90.0
+- 
+
+* Fri Dec 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.89.0
+- 
+
+* Thu Dec 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.88.0
+- 
+
+* Thu Dec 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.87.0
+- 
+
+* Thu Dec 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.86.0
+- 
+
+* Thu Dec 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.85.0
+- 
+
+* Wed Dec 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.84.0
+- 
+
+* Tue Dec 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.83.0
+- 
+
+* Mon Dec 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.82.0
+- 
+
+* Sun Dec 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.81.0
+- 
+
+* Sat Dec 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.80.0
+- 
+
+* Sat Dec 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.79.0
+- 
+
+* Thu Nov 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.78.0
+- 
+
+* Wed Nov 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.77.0
+- 
+
+* Tue Nov 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.76.0
+- 
+
+* Tue Nov 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.75.0
+- 
+
+* Sun Nov 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.74.0
+- 
+
+* Sun Nov 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.73.0
+- 
+
+* Sat Nov 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.72.0
+- 
+
+* Sat Nov 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.71.0
+- 
+
+* Fri Nov 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.70.0
+- 
+
+* Fri Nov 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.69.0
+- 
+
+* Thu Nov 22 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.68.0
+- 
+
+* Wed Nov 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.67.0
+- 
+
+* Tue Nov 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.66.0
+- 
+
+* Tue Nov 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.65.0
+- 
+
+* Tue Nov 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.64.0
+- 
+
+* Mon Nov 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.63.0
+- 
+
+* Sun Nov 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.62.0
+- 
+
+* Sat Nov 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.61.0
+- 
+
+* Fri Nov 16 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.60.0
+- 
+
+* Thu Nov 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.59.0
+- 
+
+* Wed Nov 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.58.0
+- 
+
+* Tue Nov 13 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.57.0
+- 
+
+* Mon Nov 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.56.0
+- 
+
+* Mon Nov 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.55.0
+- 
+
+* Sat Nov 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.54.0
+- 
+
+* Sat Nov 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.53.0
+- GitHubIdentityProvider catering for GitHub Enterprise and includes examples
+  on using the provider. Installation includes parameters for ca and hostname
+  (GH enterprise specific) (ckyriaki@redhat.com)
+- Check both service catalog and install vars (ruju@itu.dk)
+
+* Thu Nov 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.52.0
+- Simplify PR template and add text to README.md (sdodson@redhat.com)
+- Pre-pull CLI image using openshift_container_cli (vrutkovs@redhat.com)
+- Start node image prepull after CRIO is restarted (vrutkovs@redhat.com)
+- sdn: tolerate all taints (vrutkovs@redhat.com)
+- sync: tolerate all taints (vrutkovs@redhat.com)
+- Update centos_repos.yml (camabeh@users.noreply.github.com)
+- Update centos_repos.yml (camabeh@users.noreply.github.com)
+- Update .github/PULL_REQUEST_TEMPLATE.md (roignac@gmail.com)
+- Add notice about MASTER branch (sdodson@redhat.com)
+
+* Thu Nov 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.51.0
+- Mount /etc/pki into controller pod (mchappel@redhat.com)
+
+* Wed Nov 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.50.0
+- Restart docker after openstack storage setup (tzumainn@redhat.com)
+- Update crio.conf.j2 template for registries (umohnani@redhat.com)
+- Fix master paths check, while using Istio (faust64@gmail.com)
+
+* Tue Nov 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.49.0
+- Add instructions to use cri-o in openstack (e.minguez@gmail.com)
+- Fix broken link in README.md (artheus@users.noreply.github.com)
+- openshift_prometheus: cleanup unused variables (pgier@redhat.com)
+- fix gce-logging problem (rmeggins@redhat.com)
+- Run the init/main playbook properly (e.minguez@gmail.com)
+
+* Mon Nov 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.48.0
+- 
+
+* Mon Nov 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.47.0
+- 
+
+* Sun Nov 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.46.0
+- 
+
+* Sat Nov 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.45.0
+- added needed space in error message as stated in bug# 1645718
+  (pruan@redhat.com)
+
+* Fri Nov 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.44.0
+- glusterfs: Fix a typo in the README (obnox@redhat.com)
+
+* Thu Nov 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.43.0
+- Update playbooks/azure/openshift-cluster/build_node_image.yml
+  (roignac@gmail.com)
+- add oreg_url check (mangirdas@judeikis.lt)
+
 * Wed Oct 31 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.42.0
 - Adding configuration documentation for etcd (bedin@redhat.com)
 - Fixing provisioning of separate etcd (bedin@redhat.com)

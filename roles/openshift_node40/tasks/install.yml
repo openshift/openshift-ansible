@@ -3,6 +3,11 @@
 - name: Install openshift packages
   package:
     name: "{{ l_node_packages | join(',') }}"
+    update_cache: true
+  register: install_openshift
+  until: install_openshift.rc == 0
+  retries: 3
+  delay: 1
   vars:
     l_node_packages:
     - "origin-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"

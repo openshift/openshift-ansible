@@ -19,6 +19,6 @@
     src: "{{ item }}"
     dest: "/etc/yum.repos.d/{{ (item | basename | splitext)[0] }}"
   with_first_found:
-    - "CentOS-OpenShift-Origin{{ ((openshift_version | default('')).split('.') | join(''))[0:2] }}.repo.j2"
+    - "CentOS-OpenShift-Origin{{ ((openshift_version | default('')).split('.')[0:2] | join('')) }}.repo.j2"
     - "CentOS-OpenShift-Origin.repo.j2"
   notify: refresh cache

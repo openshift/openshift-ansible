@@ -55,10 +55,7 @@ RELEASE_REGEX = {'re': '(^v?\\d+(\\.\\d+(\\.\\d+)?)?$)',
 STORAGE_KIND_TUPLE = (
     'openshift_loggingops_storage_kind',
     'openshift_logging_storage_kind',
-    'openshift_metrics_storage_kind',
-    'openshift_prometheus_alertbuffer_storage_kind',
-    'openshift_prometheus_alertmanager_storage_kind',
-    'openshift_prometheus_storage_kind')
+    'openshift_metrics_storage_kind')
 
 IMAGE_POLICY_CONFIG_VAR = "openshift_master_image_policy_config"
 ALLOWED_REGISTRIES_VAR = "openshift_master_image_policy_allowed_registries_for_import"
@@ -386,7 +383,7 @@ class ActionModule(ActionBase):
             if kind == 'nfs':
                 raise errors.AnsibleModuleError(
                     'nfs is an unsupported type for {}. '
-                    'openshift_enable_unsupported_configurations=True must'
+                    'openshift_enable_unsupported_configurations=True must '
                     'be specified to continue with this configuration.'
                     ''.format(storage))
         return None

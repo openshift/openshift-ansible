@@ -2,14 +2,14 @@
 - name: run the init
   import_playbook: init/main.yml
   vars:
-    l_init_fact_hosts: "bootstrap:masters:workers"
-    l_openshift_version_set_hosts: "bootstrap:masters:workers"
+    l_init_fact_hosts: "nodes"
+    l_openshift_version_set_hosts: "nodes"
     l_install_base_packages: True
     l_repo_hosts: "all:!all"
 
 # TODO(michaelgugino): break up the rest of this file into reusable chunks.
 - name: Install nodes
-  hosts: bootstrap:masters:workers
+  hosts: nodes
   roles:
   - role: container_runtime
   tasks:
@@ -22,16 +22,6 @@
   - import_role:
       name: container_runtime
       tasks_from: package_crio.yml
-  - name: FIXME pause_image
-    ini_file:
-      dest: "/etc/crio/crio.conf"
-      section: crio.image
-      option: pause_image
-      value: '"docker.io/openshift/origin-pod:v4.0"'
-  - name: FIXME restart crio
-    service:
-      name: crio
-      state: restarted
   - import_role:
       name: openshift_node40
       tasks_from: install.yml
@@ -102,12 +92,11 @@
   hosts: bootstrap
   tasks:
   - name: Wait for temporary control plane to show up
-    #TODO: Rework with k8s module
     oc_obj:
       state: list
       kind: pod
       namespace: kube-system
-      kubeconfig: /opt/tectonic/auth/kubeconfig
+      kubeconfig: /opt/openshift/auth/kubeconfig
     register: control_plane_pods
     retries: 60
     delay: 10
@@ -115,12 +104,11 @@
     - "'results' in control_plane_pods and 'results' in control_plane_pods.results"
     - control_plane_pods.results.results[0]['items'] | length > 0
   - name: Wait for master nodes to show up
-    #TODO: Rework with k8s module
     oc_obj:
       state: list
       kind: node
       selector: "node-role.kubernetes.io/master"
-      kubeconfig: /opt/tectonic/auth/kubeconfig
+      kubeconfig: /opt/openshift/auth/kubeconfig
     register: master_nodes
     retries: 60
     delay: 10
@@ -132,10 +120,53 @@
     #10 mins to complete temp plane
     retries: 120
     delay: 5
-    until: ansible_facts.services['bootkube.service'].state == 'stopped'
+    until: "'bootkube.service' not in ansible_facts.services"
     ignore_errors: true
   - name: Fetch kubeconfig for test container
     fetch:
-      src: /opt/tectonic/auth/kubeconfig
+      src: /opt/openshift/auth/kubeconfig
       dest: /tmp/artifacts/installer/auth/kubeconfig
       flat: yes
+
+  - name: Wait for core operators to appear and complete
+    oc_obj:
+      state: list
+      kind: ClusterOperator
+      name: "{{ item }}"
+      kubeconfig: /opt/openshift/auth/kubeconfig
+    register: operator
+    #Give each operator 5 mins to come up
+    retries: 60
+    delay: 5
+    until:
+    - "'results' in operator"
+    - "'results' in operator.results"
+    - operator.results.results | length > 0
+    - "'status' in operator.results.results[0]"
+    - "'conditions' in operator.results.results[0]['status']"
+    - operator.results.results[0].status.conditions | selectattr('type', 'match', '^Available$') | map(attribute='status') | join | bool == True
+    - operator.results.results[0].status.conditions | selectattr('type', 'match', '^Progressing$') | map(attribute='status') | join | bool == False
+    - operator.results.results[0].status.conditions | selectattr('type', 'match', '^Failing$') | map(attribute='status') | join | bool == False
+    with_items:
+    - machine-config-operator
+    # Fails often with 'x of y nodes are not at revision n'
+    #- openshift-cluster-kube-apiserver-operator
+    # Failing with 'ConfigObservationFailing: configmap/cluster-config-v1.kube-system: no recognized cloud provider platform found' - https://github.com/openshift/cluster-kube-controller-manager-operator/issues/100
+    #- openshift-cluster-kube-controller-manager-operator
+    # Fails often with 'x of y nodes are not at revision n'
+    #- openshift-cluster-kube-scheduler-operator
+    #- openshift-cluster-openshift-apiserver-operator
+    - openshift-cluster-openshift-controller-manager-operator
+    - openshift-ingress-operator
+    ignore_errors: true
+
+  - block:
+    - name: Output the operators status
+      oc_obj:
+        state: list
+        kind: ClusterOperator
+        selector: ""
+        kubeconfig: /opt/openshift/auth/kubeconfig
+    - fail:
+        msg: Required operators didn't complete the install
+    when: operator.failed

@@ -91,11 +91,17 @@ openshift_gcp_firewall_rules:
           - '2379'
           - '2380'
           - '4001'
+          #kube-system/kubelet:cadvisor
+          - '4193'
           - "{{ openshift_gcp_kubernetes_api_port }}"
           - "{{ internal_console_port }}"
           - '8053'
           - '8444'
           - "{{ openshift_gcp_master_healthcheck_port }}"
+          #cadvisor port
+          - '9100'
+          # CVO port
+          - '9099'
           - '10250'
           - '10255'
           - '24224'
@@ -123,10 +129,6 @@ openshift_gcp_firewall_rules:
           - "{{ openshift_gcp_kubernetes_api_port }}"
           - "{{ openshift_master_api_port }}"
           - "{{ mcd_port }}"
-          - "{{ openshift_node_port_range }}"
-      - ip_protocol: 'udp'
-        ports:
-          - "{{ openshift_node_port_range }}"
     target_tags:
       - ocp-master
       - ocp-bootstrap
@@ -134,6 +136,7 @@ openshift_gcp_firewall_rules:
     allowed:
       - ip_protocol: 'tcp'
         ports:
+          - '1936'
           - '10250'
           - '10255'
           - '9000-10000'
@@ -144,4 +147,14 @@ openshift_gcp_firewall_rules:
     source_tags:
       - ocp
     target_tags:
-      - ocp-node
+      - ocp-worker
+  - rule: node-external
+    allowed:
+      - ip_protocol: 'tcp'
+        ports:
+          - "{{ openshift_node_port_range }}"
+      - ip_protocol: 'udp'
+        ports:
+          - "{{ openshift_node_port_range }}"
+    target_tags:
+      - ocp-worker

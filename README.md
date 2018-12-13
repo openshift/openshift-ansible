@@ -2,6 +2,14 @@
 [![Build Status](https://travis-ci.org/openshift/openshift-ansible.svg?branch=master)](https://travis-ci.org/openshift/openshift-ansible)
 [![Coverage Status](https://coveralls.io/repos/github/openshift/openshift-ansible/badge.svg?branch=master)](https://coveralls.io/github/openshift/openshift-ansible?branch=master)
 
+NOTICE
+======
+
+Master branch is closed! A major refactor is ongoing in devel-40.
+Changes for 3.x should be made directly to the latest release branch they're
+relevant to and backported from there.
+
+
 # OpenShift Ansible
 
 This repository contains [Ansible](https://www.ansible.com/) roles and
@@ -153,7 +161,7 @@ created for you automatically.
 
 ## Complete Production Installation Documentation:
 
-- [OpenShift Container Platform](https://docs.openshift.com/container-platform/latest/install_config/install/advanced_install.html)
+- [OpenShift Container Platform](https://docs.openshift.com/container-platform/3.11/install/running_install.html)
 - [OpenShift Origin](https://docs.okd.io/latest/install/index.html)
 
 ## Containerized OpenShift Ansible

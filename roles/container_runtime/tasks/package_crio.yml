@@ -35,7 +35,6 @@
     pkg_list:
       - cri-o
       - cri-tools
-      - atomic
       - skopeo
       - podman
 
@@ -77,6 +76,11 @@
   template:
     dest: /etc/sysconfig/crio-network
     src: crio-network.j2
+
+- name: Place registries.conf in /etc/containers/registries.conf
+  template:
+    dest: "{{ containers_registries_conf_path }}"
+    src: registries.conf.j2
 
 - name: Start the CRI-O service
   systemd:
