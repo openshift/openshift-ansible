@@ -21,7 +21,7 @@ openshift_master_cluster_public_hostname: "openshift-master.{{ public_hosted_zon
 openshift_master_default_subdomain: "{{ wildcard_zone }}"
 
 mcd_port: 49500
-mcd_endpoint: "{{ openshift_master_cluster_public_hostname }}:{{ mcd_port }}"
+mcd_endpoint: "https://{{ openshift_master_cluster_public_hostname }}:{{ mcd_port }}"
 
 # Cloud specific settings
 openshift_cloudprovider_kind: gce
