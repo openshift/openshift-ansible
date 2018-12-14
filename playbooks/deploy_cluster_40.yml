@@ -38,6 +38,27 @@
     vars:
       excluded_services:
       - progress.service
+  - name: Wait for MCS endpoint to show up
+    uri:
+      url: "{{ mcd_endpoint }}/config/master"
+      validate_certs: false
+    delay: 10
+    retries: 60
+    register: mcs
+    until:
+    - "'status' in mcs"
+    - mcs.status == 200
+    ignore_errors: true
+  - when: mcs is failed
+    block:
+    - name: Get node logs
+      command: journalctl --no-pager -u bootkube
+      register: bootkube_logs
+      ignore_errors: true
+    - debug:
+        msg: "{{ bootkube_logs.stdout_lines }}"
+    - fail:
+        msg: MCS start failed.
 
 - name: Start masters
   hosts: masters
