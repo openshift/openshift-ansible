@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.56
+Version:        3.11.57
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Dec 13 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.57-1
+- Add openshift_node_group_name to hosts.example (rteague@redhat.com)
+- Set maxSurge in kuryr-controller Deployment (mdulko@redhat.com)
+- Update Fuse templates with 7.2 release (antonin@stefanutti.fr)
+
 * Wed Dec 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.56-1
 - 
 
