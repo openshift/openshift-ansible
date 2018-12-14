@@ -17,6 +17,8 @@ spec:
     logging-infra: "{{logging_component}}"
   strategy:
     type: Recreate
+    recreateParams:
+      timeoutSeconds: 1800
   triggers: []
   template:
     metadata:
