@@ -25,5 +25,5 @@ parameters:
   volumetype: "{{ openshift_storage_glusterfs_storageclass_volumetype }}"
 {% endif %}
 {% if openshift_storage_glusterfs_storageclass_allowvolumeexpansion is defined %}
-allowVolumeExpansion: {{ openshift_storage_glusterfs_storageclass_allowvolumeexpansion | bool}}
+allowVolumeExpansion: {{ openshift_storage_glusterfs_storageclass_allowvolumeexpansion | bool }}
 {% endif %}
