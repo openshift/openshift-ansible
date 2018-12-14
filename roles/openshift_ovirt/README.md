@@ -13,6 +13,8 @@ The generated inventory can be merged into and openshift inventory(see examples 
     + [Playbook](#playbook)
   * [License](#license)
 
+**Important note**: To make this role work you need to set this option on your _ansible.cfg_ file `jinja2_extensions = jinja2.ext.do`
+
 ## Role Tasks
 
 - `main.yaml`: The entrypoint to the role. It invokes the following tasks below.
