@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.87
+Version:        3.10.88
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Dec 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.88-1
+- Handle audit log path in /var/log/origin (rsevilla@redhat.com)
+
 * Wed Dec 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.87-1
 - Ensure openshift_upgrade_nodes_label works (mgugino@redhat.com)
 - Update Fuse templates with 7.2 release (antonin@stefanutti.fr)
