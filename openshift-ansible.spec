@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.58
+Version:        3.9.59
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Dec 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.59-1
+- Update Calico RBAC (mleung975@gmail.com)
+- Add better handling for Calico versions (mleung975@gmail.com)
+
 * Sat Dec 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.58-1
 - Install boto3 from pip (roignac@gmail.com)
 - fix of https://bugzilla.redhat.com/show_bug.cgi\?id\=1655643
