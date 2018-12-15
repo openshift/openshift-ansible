@@ -11,6 +11,14 @@
   roles:
   - role: openshift_facts
   tasks:
+  - name: Fail if hostname includes uppercase characters
+    fail:
+      msg: >
+        The Hostname {{ ansible_fqdn }} includes uppercase characters, which could
+        lead further deployment tasks to create resources whose names would be invalid.
+        Please make sure both hostname and hostname -f return with lowercase names, then
+        edit your Ansible inventory accordingly.
+    when: ansible_fqdn | regex_search('[A-Z]')
   # TODO: Should this role be refactored into health_checks??
   - name: Run openshift_sanitize_inventory to set variables
     import_role:
