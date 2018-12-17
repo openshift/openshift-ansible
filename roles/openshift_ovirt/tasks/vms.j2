@@ -4,7 +4,9 @@
       'name':         '{{ [item.name, iter, ".", openshift_ovirt_dns_zone] | join }}',
       'host_name':    '{{ (item.empty_hostname | default(True)) | ternary('', [item.name, iter, ".", openshift_ovirt_dns_zone] | join) }}',
       'description':  '{{ item.description | default('') }}',
+      {%- if ovirt_admin | default(True) -%}
       'tag':          '{{ ["openshift_", item.profile] | join }}',
+      {%- endif -%}
       'profile':      {{ openshift_ovirt_vm_profile[ item.profile ] }},
       {%- set cloud_init = {} -%}
       {%- do cloud_init.update(
@@ -34,7 +36,7 @@
       ) if item.dns_servers is defined -%}
       {%- do cloud_init.update(
         {
-          'dns_search': item["dns_searc"] 
+          'dns_search': item["dns_search"] 
         }
       ) if item.dns_search is defined -%}
       'cloud_init': {{ cloud_init | combine(openshift_ovirt_vm_profile[item.profile]["cloud_init"], recursive=True) }},
