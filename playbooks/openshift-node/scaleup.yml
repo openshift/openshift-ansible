@@ -24,19 +24,49 @@
 # if g_new_node_hosts is not empty, oo_nodes_to_config will be set to
 # g_new_node_hosts via evaluate_groups.yml
 
-- import_playbook: ../prerequisites.yml
+- name: run the init
+  import_playbook: ../init/main.yml
   vars:
-    l_scale_up_hosts: "oo_nodes_to_config"
-    l_base_packages_hosts: "oo_nodes_to_config"
-    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_config"
-    l_sanity_check_hosts: "{{ groups['oo_nodes_to_config'] | union(groups['oo_masters_to_config']) }}"
+    l_init_fact_hosts: "masters:new_nodes"
+    l_openshift_version_set_hosts: "new_nodes"
+    l_install_base_packages: True
+    l_repo_hosts: "new_nodes"
 
 - name: install nodes
-  hosts: oo_nodes_to_config
+  hosts: new_nodes
+  vars:
+    openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/worker"
+  roles:
+  - role: container_runtime
   tasks:
+  - import_role:
+      name: container_runtime
+      tasks_from: docker_storage_setup_overlay.yml
+  - import_role:
+      name: container_runtime
+      tasks_from: extra_storage_setup.yml
+  - import_role:
+      name: container_runtime
+      tasks_from: package_crio.yml
   - import_role:
       name: openshift_node40
       tasks_from: install.yml
+
+- name: Start workers
+  hosts: new_nodes
+  vars:
+    openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/worker"
+  tasks:
+  - name: Wait for bootstrap endpoint to show up
+    uri:
+      url: "{{ openshift_bootstrap_endpoint }}"
+      validate_certs: false
+    delay: 10
+    retries: 60
+    register: result
+    until:
+    - "'status' in result"
+    - result.status == 200
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
