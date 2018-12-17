@@ -4,7 +4,7 @@ masters
 workers
 
 [nodes:vars]
-ansible_ssh_user=cloud-user
+ansible_ssh_user=${OCP_SSH_USER}
 ansible_become=True
 
 openshift_install_config_path="${OCP_INSTALL_CONFIG_PATH}"
