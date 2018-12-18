@@ -14,23 +14,23 @@
       src: /etc/etcd/server.crt
     register: etcd_serving_cert
   - set_fact:
-      __etcd_cert_lacks_hostname: "{{ (openshift.common.hostname not in (etcd_serving_cert.content | b64decode | lib_utils_oo_parse_certificate_san)) | bool }}"
+      etcd_cert_lacks_hostname: "{{ (openshift.common.hostname not in (etcd_serving_cert.content | b64decode | lib_utils_oo_parse_certificate_san)) | bool }}"
 
 # Redeploy etcd certificates when hostnames were missing from etcd
 # serving certificate SANs.
 - import_playbook: redeploy-certificates.yml
   when:
-  - true in hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config']) | lib_utils_oo_collect('__etcd_cert_lacks_hostname') | default([false])
+  - true in hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config']) | lib_utils_oo_collect('etcd_cert_lacks_hostname') | default([false])
 
 - import_playbook: restart.yml
   vars:
     g_etcd_certificates_expired: "{{ ('expired' in (hostvars | lib_utils_oo_select_keys(groups['etcd']) | lib_utils_oo_collect('check_results.check_results.etcd') | lib_utils_oo_collect('health'))) | bool }}"
   when:
-  - true in hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config']) | lib_utils_oo_collect('__etcd_cert_lacks_hostname') | default([false])
+  - true in hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config']) | lib_utils_oo_collect('etcd_cert_lacks_hostname') | default([false])
 
 - import_playbook: ../../openshift-master/private/restart.yml
   when:
-  - true in hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config']) | lib_utils_oo_collect('__etcd_cert_lacks_hostname') | default([false])
+  - true in hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config']) | lib_utils_oo_collect('etcd_cert_lacks_hostname') | default([false])
 
 # For 1.4/3.4 we want to upgrade everyone to etcd-3.0. etcd docs say to
 # upgrade from 2.0.x to 2.1.x to 2.2.x to 2.3.x to 3.0.x. While this is a tedius
