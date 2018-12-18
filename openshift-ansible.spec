@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.59
+Version:        3.9.60
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Dec 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.60-1
+- 
+
 * Sat Dec 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.59-1
 - Update Calico RBAC (mleung975@gmail.com)
 - Add better handling for Calico versions (mleung975@gmail.com)
