@@ -1,0 +1,15 @@
+---
+- hosts: nodes
+  tasks:
+    - command: "dnf -y update"
+    - command: "dnf install NetworkManager -y"
+    - name: Start NetworkManager
+      command: systemctl start NetworkManager
+    - name: Enable NetworkManager
+      command: systemctl enable NetworkManager
+    - name: Install docker
+      command: "dnf install docker -y"
+    - name: Start Docker
+      command: systemctl start docker
+    - name: Enable docker
+      command: systemctl enable docker

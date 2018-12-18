@@ -5,7 +5,25 @@
     l_init_fact_hosts: "nodes"
     l_openshift_version_set_hosts: "nodes"
     l_install_base_packages: True
-    l_repo_hosts: "all:!all"
+    l_repo_hosts: "nodes"
+
+- name: Read in openshift-install
+  hosts: masters[0]
+  tasks:
+  - slurp:
+      src: "{{ openshift_install_config_path }}"
+    register: openshift_install_config_reg
+    delegate_to: localhost
+    run_once: True
+  - set_fact:
+      openshift_install_config: "{{ openshift_install_config_reg['content'] | b64decode | from_yaml }}"
+
+# We might need to access these values on each host later.
+- name: set_fact openshift_install_config across all nodes
+  hosts: nodes
+  tasks:
+  - set_fact:
+      openshift_install_config: "{{ hostvars[groups['masters'][0]].openshift_install_config }}"
 
 # TODO(michaelgugino): break up the rest of this file into reusable chunks.
 - name: Install nodes
@@ -72,10 +90,9 @@
 
 - name: Start masters
   hosts: masters
+  vars:
+    openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/master"
   tasks:
-  # This is required for openshift_node40/config.yml
-  - set_fact:
-      openshift_bootstrap_endpoint: "{{ mcd_endpoint }}/config/master"
   - name: Wait for bootstrap endpoint to show up
     uri:
       url: "{{ openshift_bootstrap_endpoint }}"
@@ -98,10 +115,9 @@
 
 - name: Start workers
   hosts: workers
+  vars:
+    openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/worker"
   tasks:
-  # This is required for openshift_node40/config.yml
-  - set_fact:
-      openshift_bootstrap_endpoint: "{{ mcd_endpoint }}/config/worker"
   - name: Wait for bootstrap endpoint to show up
     uri:
       url: "{{ openshift_bootstrap_endpoint }}"
