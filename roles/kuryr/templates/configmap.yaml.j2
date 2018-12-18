@@ -241,6 +241,17 @@ data:
     enabled_handlers = vif,lb,lbaasspec
 {% endif %}
 
+{% if (kuryr_controller_replicas|default(1)|int > 1) %}
+    # Enable kuryr-controller active/passive HA. Only supported in containerized
+    # deployments on Kubernetes or OpenShift. (boolean value)
+    controller_ha = true
+
+    # Port on which leader-elector pod is listening to. (port value)
+    # Minimum value: 0
+    # Maximum value: 65535
+    controller_ha_elector_port = {{ kuryr_controller_leader_elector_port }}
+{% endif %}
+
     [neutron]
     # Configuration options for OpenStack Neutron
 

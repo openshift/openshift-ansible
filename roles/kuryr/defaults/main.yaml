@@ -18,6 +18,19 @@ kuryr_cni_link_interface: eth0
 openshift_openstack_kuryr_controller_image: kuryr/controller:latest
 openshift_openstack_kuryr_cni_image: kuryr/cni:latest
 
+# Number of kuryr-controller replicas, more than 1 only supported since
+# OpenStack Rocky release.
+kuryr_controller_replicas: 1
+
+# Image to be used as leader-elector in deployments with kuryr-controller in HA
+# mode.
+openshift_openstack_kuryr_elector_image: gcr.io/google_containers/leader-elector:0.5
+
+# Port to be used by leader-elector pods when running in HA mode
+# (i.e. kuryr_controller_replicas > 1). Note that kuryr-controller uses host
+# networking, so this port should be unused by anything on OpenShift nodes.
+kuryr_controller_leader_elector_port: 16401
+
 # Enable kuryr ports pool by default
 kuryr_openstack_pool_driver: nested
 
@@ -69,6 +82,14 @@ kuryr_clusterrole:
         - namespaces
         - services
         - services/status
+    # Leader elector container
+    - apiGroups:
+        - ""
+      verbs:
+        - create
+        - delete
+      resources:
+        - endpoints
     # CRD's for healthchecks
     - apiGroups:
         - apiextensions.k8s.io/v1beta1
