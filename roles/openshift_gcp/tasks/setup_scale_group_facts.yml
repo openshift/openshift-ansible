@@ -5,7 +5,7 @@
     groups:
     - bootstrap
     - nodes
-    ignition_file: "{{ openshift_bootstrap_ignition_file }}"
+    openshift_ignition_file_path: "{{ openshift_bootstrap_ignition_file }}"
   with_items: "{{ groups['tag_ocp-bootstrap'] | default([]) }}"
 
 - name: Add master instances
