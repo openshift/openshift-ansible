@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.58
+Version:        3.11.59
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Dec 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.59-1
+- hostname is configured as local-ipv4 (bysnupy@hotmail.com)
+- Recovering missing features that disappear with PR 10805
+  (jparrill@redhat.com)
+
 * Mon Dec 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.58-1
 - bug 1655675. Extend DC recreate param to avoid premature rolebacks
   (jcantril@redhat.com)
