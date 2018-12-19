@@ -26,7 +26,7 @@
 
 - name: Check for apiservices/v1beta1.metrics.k8s.io registration
   command: >
-    {{ openshift_client_binary }} get apiservices/v1beta1.metrics.k8s.io
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get apiservices/v1beta1.metrics.k8s.io
   register: metrics_service_registration
   failed_when: metrics_service_registration.rc != 0 and 'NotFound' not in metrics_service_registration.stderr
   retries: 30
@@ -35,7 +35,7 @@
 
 - name: Wait for /apis/metrics.k8s.io/v1beta1 when registered
   command: >
-    {{ openshift_client_binary }} get --raw /apis/metrics.k8s.io/v1beta1
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get --raw /apis/metrics.k8s.io/v1beta1
   register: metrics_api
   until: metrics_api is succeeded
   retries: 30
@@ -44,7 +44,7 @@
 
 - name: Check for apiservices/v1beta1.servicecatalog.k8s.io registration
   command: >
-    {{ openshift_client_binary }} get apiservices/v1beta1.servicecatalog.k8s.io
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get apiservices/v1beta1.servicecatalog.k8s.io
   register: servicecatalog_service_registration
   failed_when: servicecatalog_service_registration.rc != 0 and 'NotFound' not in servicecatalog_service_registration.stderr
   retries: 30
@@ -54,7 +54,7 @@
 
 - name: Wait for /apis/servicecatalog.k8s.io/v1beta1 when registered
   command: >
-    {{ openshift_client_binary }} get --raw /apis/servicecatalog.k8s.io/v1beta1
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get --raw /apis/servicecatalog.k8s.io/v1beta1
   register: servicecatalog_api
   until: servicecatalog_api is succeeded
   retries: 30
