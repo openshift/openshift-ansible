@@ -1,0 +1,4 @@
+#!/bin/bash
+# source installrc first.
+export OCP_IMAGE=~/images/CentOS-7-x86_64-GenericCloud-1809.qcow2
+export OCP_SSH_USER="centos"
