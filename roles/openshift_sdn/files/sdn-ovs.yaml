@@ -74,7 +74,16 @@ spec:
               ovs-vsctl --no-wait set Open_vSwitch . other_config:n-handler-threads=10
           fi
           /usr/share/openvswitch/scripts/ovs-ctl start --no-ovsdb-server --system-id=random
-          while true; do sleep 5; done
+          
+          tail --follow=name /var/log/openvswitch/ovs-vswitchd.log /var/log/openvswitch/ovsdb-server.log &
+          sleep 20
+          while true; do
+            if ! /usr/share/openvswitch/scripts/ovs-ctl status &>/dev/null; then
+              echo "OVS seems to have crashed, exiting"
+              quit
+            fi
+            sleep 15
+          done
         securityContext:
           runAsUser: 0
           privileged: true
