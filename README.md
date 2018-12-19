@@ -97,6 +97,22 @@ Install the new installer from https://www.github.com/openshift/installer
 Construct a proper install-config.yml, and make a copy called
 install-config-ansible.yml.
 
+## Hosts
+You will need the following hosts
+
+### Boostrap host
+This is a special host that is not part of the cluster but is required to be
+available to help the cluster bootstrap itself.  This is not a bastion host,
+it will initially be part of the cluster and should be able to communicate with
+the masters in the cluster.
+
+### Masters
+You need 1 or 3 masters.
+
+### Workers
+You need 0 or more workers.  Note, by default, masters are unschedulable so
+you will need one or more workers if you want to schedule workloads.
+
 ## DNS
 4.x installs require specific dns records to be in place, and there is no way
 to complete an install without working DNS.  You are in charge of ensuring the
@@ -113,6 +129,7 @@ install-config.yml value of 'baseDomain' must be a working domain.
 <clustername>-api.<baseDomain> # ex: mycluster-api.example.com
 <clustername>-master-0.<baseDomain> # ex: mycluster-master-0.example.com
 <clustername>-etcd-0.<baseDomain> # ex: mycluster-etcd-0.example.com
+<clustername>-bootstrap.<baseDomain> # ex: mycluster-bootstrap.example.com
 ```
 
 Note: There should be a master/etcd record for each master host in your cluster
