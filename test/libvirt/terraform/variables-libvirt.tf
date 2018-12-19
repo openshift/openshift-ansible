@@ -53,3 +53,24 @@ variable "ssh_key" {
   type        = "string"
   description = "ssh public key"
 }
+
+variable "libvirt_worker_ips" {
+  type        = "list"
+  description = "the list of desired master ips. Must match worker_count"
+}
+
+# It's definitely recommended to bump this if you can.
+variable "libvirt_worker_memory" {
+  type        = "string"
+  description = "RAM in MiB allocated to masters"
+  default     = "2048"
+}
+
+# At some point this one is likely to default to the number
+# of physical cores you have.  See also
+# https://pagure.io/standard-test-roles/pull-request/223
+variable "libvirt_worker_vcpu" {
+  type        = "string"
+  description = "CPUs allocated to workers"
+  default     = "1"
+}

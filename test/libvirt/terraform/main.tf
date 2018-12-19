@@ -25,6 +25,12 @@ resource "libvirt_volume" "master" {
   base_volume_id = "${module.volume.coreos_base_volume_id}"
 }
 
+resource "libvirt_volume" "worker" {
+  count          = "${var.worker_count}"
+  name           = "${var.cluster_name}-worker-${count.index}"
+  base_volume_id = "${module.volume.coreos_base_volume_id}"
+}
+
 resource "libvirt_network" "net" {
   name = "${var.cluster_name}"
 
@@ -88,6 +94,31 @@ resource "libvirt_domain" "master" {
     network_id = "${libvirt_network.net.id}"
     hostname   = "${var.cluster_name}-master-${count.index}"
     addresses  = ["${var.libvirt_master_ips[count.index]}"]
+  }
+}
+
+resource "libvirt_domain" "worker" {
+  count = "${var.worker_count}"
+
+  name = "${var.cluster_name}-worker-${count.index}"
+
+  memory = "${var.libvirt_worker_memory}"
+  vcpu   = "${var.libvirt_worker_vcpu}"
+
+  cloudinit = "${libvirt_cloudinit_disk.commoninit.id}"
+  disk {
+    volume_id = "${element(libvirt_volume.worker.*.id, count.index)}"
+  }
+
+  console {
+    type        = "pty"
+    target_port = 0
+  }
+
+  network_interface {
+    network_id = "${libvirt_network.net.id}"
+    hostname   = "${var.cluster_name}-worker-${count.index}"
+    addresses  = ["${var.libvirt_worker_ips[count.index]}"]
   }
 }
 

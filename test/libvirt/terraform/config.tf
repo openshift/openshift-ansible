@@ -12,6 +12,16 @@ This applies only to cloud platforms.
 EOF
 }
 
+variable "worker_count" {
+  type    = "string"
+  default = "0"
+
+  description = <<EOF
+The number of master nodes to be created.
+This applies only to cloud platforms.
+EOF
+}
+
 variable "base_domain" {
   type = "string"
 

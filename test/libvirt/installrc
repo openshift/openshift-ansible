@@ -3,7 +3,7 @@
 export OCP_BASE_DOMAIN="tt.testing"
 export OCP_CLUSTER_ID=$(uuidgen --random)
 export OCP_MASTERS=1
-export OCP_WORKERS=0
+export OCP_WORKERS=1
 export OCP_CLUSTER_NAME="byo-dev"
 export OCP_PULL_SECRET=$(cat ~/try.openshift.com.json)
 export OCP_SSH_PUB_KEY=$(cat ~/.ssh/id_rsa.pub)
@@ -17,5 +17,7 @@ export OCP_BOOTSTRAP_IP="192.168.126.10"
 export OCP_LIBVIRT_URI='qemu+tcp://192.168.124.1/system'
 export OCP_INSTALL_CONFIG_PATH="$PWD/install-config-ansible.yml"
 export OCP_IGNITION_PATH="$PWD/bootstrap.ign"
+
+export OCP_WORKER_IPS=\"192.168.126.21\"
 
 export ANSIBLE_HOST_KEY_CHECKING=False

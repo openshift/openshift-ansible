@@ -29,3 +29,21 @@
     when:
     - openshift_deployment_type is undefined
     - deployment_type is defined
+
+- name: Read in openshift-install
+  hosts: masters[0]
+  tasks:
+  - slurp:
+      src: "{{ openshift_install_config_path }}"
+    register: openshift_install_config_reg
+    delegate_to: localhost
+    run_once: True
+  - set_fact:
+      openshift_install_config: "{{ openshift_install_config_reg['content'] | b64decode | from_yaml }}"
+
+# We might need to access these values on each host later.
+- name: set_fact openshift_install_config across all nodes
+  hosts: "{{ l_init_fact_hosts | default('nodes') }}"
+  tasks:
+  - set_fact:
+      openshift_install_config: "{{ hostvars[groups['masters'][0]].openshift_install_config }}"
