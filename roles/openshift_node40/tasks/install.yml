@@ -10,9 +10,6 @@
   delay: 1
   vars:
     l_node_packages:
-    #- "atomic-openshift-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-    #- "atomic-openshift-clients{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-    #- "atomic-openshift-hyperkube{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-    - "origin-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-    - "origin-clients{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-    - "origin-hyperkube{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+    - "{{ openshift_service_type }}-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+    - "{{ openshift_service_type }}-clients{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+    - "{{ openshift_service_type }}-hyperkube{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
