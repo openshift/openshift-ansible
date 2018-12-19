@@ -373,7 +373,10 @@ data:
     ports_pool_update_frequency = {{ kuryr_openstack_pool_update_frequency | default(20) }}
 
     # Pod VIF drivers vs Pool Drivers mapping allowed
+    # pools_vif_drivers = nested:nested-vlan,neutron:neutron-vif
+{% if kuryr_openstack_pool_driver == 'multi' %}
     pools_vif_drivers = nested:nested-vlan,neutron:neutron-vif
+{% endif %}
 
     [health_server]
     port = {{ kuryr_controller_healthcheck_port }}
