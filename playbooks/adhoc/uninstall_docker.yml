@@ -47,3 +47,6 @@
     - /etc/docker*
     - /etc/sysconfig/docker*
     - /etc/systemd/system/docker*
+
+  - name: Erase docker package
+    command: "yum -y erase docker"
