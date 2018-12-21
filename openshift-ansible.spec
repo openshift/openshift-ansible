@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.59
+Version:        3.11.60
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Dec 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.60-1
+- [3.11] Fix CentOS repo version (mgugino@redhat.com)
+- Ensure multi pool driver can be disabled (ltomasbo@redhat.com)
+- sdn: exit when OVS crashes, tail logs (cdc@redhat.com)
+- Add possiblity to run kuryr-controller in HA (mdulko@redhat.com)
+- Erase docker during docker uninstall (mgugino@redhat.com)
+
 * Tue Dec 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.59-1
 - hostname is configured as local-ipv4 (bysnupy@hotmail.com)
 - Recovering missing features that disappear with PR 10805
