@@ -35,12 +35,15 @@ api_server_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url 
 nuage_vport_mtu: "{{ nuage_interface_mtu | default('1460') }}"
 master_host_type: "{{ master_base_host_type | default('is_rhel_server') }}"
 slave_host_type: "{{ slave_base_host_type | default('is_rhel_server') }}"
-svc_ipv4_subnet: "{{ nuage_svc_ipv4_subnet | default('172.30.0.0') }}"
-svc_ipv4_subnet_mask: "{{ nuage_svc_ipv4_subnet_mask | default('16') }}"
+svc_ipv4_subnet: "{{ openshift_portal_net.split('/')[0] | default('172.30.0.0') }}"
+svc_ipv4_subnet_mask: "{{ openshift_portal_net.split('/')[1] | default('16') }}"
+pod_network_subnet: "{{ osm_cluster_network_cidr.split('/')[0] | default('70.70.0.0') }}"
+pod_network_subnet_mask: "{{ osm_cluster_network_cidr.split('/')[1] | default('16') }}"
 nw_uplink_intf: "{{ uplink_interface | default('eth0') }}"
 nuage_vsc_active_ip: "{{ vsc_active_ip | default('') }}"
 nuage_vsc_standby_ip: "{{ vsc_standby_ip | default('') }}"
 nuage_bgp_config: "{{ nuage_bgp | default('disable') }}"
+nuage_etcd_cert_prefix: "nuage-etcd-"
 
 nuage_tasks:
 - resource_kind: cluster-role

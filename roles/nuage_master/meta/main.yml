@@ -13,5 +13,7 @@ galaxy_info:
   - cloud
   - system
 dependencies:
+- role: nuage_common
+- role: nuage_ca
 - role: lib_openshift
 - role: lib_utils

@@ -5,9 +5,10 @@
     name: etcd
     tasks_from: client_certificates.yml
   vars:
-    etcd_cert_prefix: nuageEtcd-
+    etcd_cert_prefix: "{{ nuage_etcd_cert_prefix }}"
     etcd_cert_config_dir: "{{ cert_output_dir }}"
     etcd_cert_subdir: "openshift-nuage-{{ openshift.common.hostname }}"
+    etcd_certificates_redeploy: true
 
 
 - name: Error if etcd certs are not copied
@@ -17,6 +18,6 @@
     get_attributes: false
     get_mime: false
   with_items:
-  - "{{ cert_output_dir }}/nuageEtcd-ca.crt"
-  - "{{ cert_output_dir }}/nuageEtcd-client.crt"
-  - "{{ cert_output_dir }}/nuageEtcd-client.key"
+  - "{{ cert_output_dir }}/{{ nuage_etcd_cert_prefix }}-ca.crt"
+  - "{{ cert_output_dir }}/{{ nuage_etcd_cert_prefix }}-client.crt"
+  - "{{ cert_output_dir }}/{{ nuage_etcd_cert_prefix }}-client.key"
