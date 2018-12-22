@@ -22,17 +22,17 @@
 - name: Kube-router | Write Kube-router v3
   template:
     dest: "{{ mktemp.stdout }}/kube-router.yml"
-    src: kube-router.yml.j2
+    src: kube_router.yml.j2
 
 - name: Kube-router | Launch Kube-router
   run_once: true
   command: >
     {{ openshift_client_binary }} apply
-    -f {{ mktemp.stdout }}/kube-router.yml
+    -f {{ mktemp.stdout }}/kube_router.yml
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-  register: kube-router_create_output
-  failed_when: "kube-router_create_output.rc != 0"
-  changed_when: "('created' in kube-router_create_output.stdout) or ('configured' in kube-router_create_output.stdout)"
+  register: kube_router_create_output
+  failed_when: "kube_router_create_output.rc != 0"
+  changed_when: "('created' in kube_router_create_output.stdout) or ('configured' in kube_router_create_output.stdout)"
 
 - name: Kube-router | Delete temp directory
   file:
