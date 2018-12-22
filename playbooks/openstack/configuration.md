@@ -30,6 +30,7 @@ Environment variables may also be used.
 * [Scaling The OpenShift Cluster](#scaling-the-openshift-cluster)
 * [Deploying At Scale](#deploying-at-scale)
 * [Using A Static Inventory](#using-a-static-inventory)
+* [Using CRI-O](#using-cri-o)
 
 
 ## OpenStack Configuration
@@ -1090,4 +1091,176 @@ $ ansible-playbook --user openshift \
   -i hosts \
   -i inventory \
   openshift-ansible/playbooks/openstack/openshift-cluster/install.yml
+```
+
+## Using CRI-O
+There are some different scenarios to customize the container runtime in the
+instances:
+
+### All hosts use docker
+
+This is the default scenario, no changes required
+
+### All hosts using cri-o
+
+Modify the OSEv3.yml file and add the following variables:
+
+```
+openshift_use_crio_only: true
+openshift_use_crio: true
+```
+
+Modify the all.yml file and add the following variables:
+
+```
+openshift_openstack_master_group_name: node-config-master-crio
+openshift_openstack_infra_group_name: node-config-infra-crio
+openshift_openstack_compute_group_name: node-config-compute-crio  
+```
+
+NOTE: Currently, OpenShift builds require docker.
+
+### Masters/app/infra_nodes use cri-o
+
+Add the proper variables to the `~/inventory/group_vars/` files in the ansible host such as:
+
+* `~/inventory/group_vars/[masters|openstack_infra_nodes|openstack_compute_nodes].yml`
+
+```
+openshift_use_crio_only: true/false
+openshift_use_crio: true/false
+```
+
+And the proper groups to the `~/inventory/group_vars/all.yml` file:
+```
+...
+openshift_openstack_[master|infra|compute]_group_name: node-config-[master|infra|compute]-crio
+```
+
+Example: Masters using cri-o:
+
+* `~/inventory/group_vars/masters.yml`
+
+```
+openshift_use_crio_only: true
+openshift_use_crio: true
+```
+
+* `~/inventory/group_vars/all.yml`
+
+```
+openshift_openstack_master_group_name: node-config-master-crio
+```
+
+### Some nodes using cri-o, some others docker
+
+This scenario requires the following steps:
+
+ * Create the `~/inventory/host_vars/<hostname>.yml` depending on the hostname
+of the instance you want to customize:
+
+  * For cri-o only:
+
+```
+openshift_use_crio_only: true
+openshift_use_crio: true
+openshift_node_group_name: node-config-[master|infra|compute]-crio
+```
+
+  * For docker only (optionally, by default it will install docker):
+
+```
+openshift_use_crio: false
+```
+
+  * For both cri-o and docker (and want to use cri-o as container runtime)
+
+```
+openshift_use_crio_only: false
+openshift_use_crio: true
+openshift_node_group_name: node-config-[master|infra|compute]-crio
+```
+
+Also, it is required to configure the `openshift_builddefaults_nodeselectors` variable to the proper node selector for the builds to be executed in hosts
+where docker is running as container runtime.
+
+Run the playbooks to provision and install the environment.
+
+Example:
+
+All hosts using docker as container runtime except:
+* app-node-0 using cri-o
+* app-node-1 using docker (explicitely)
+* app-node-2 using cri-o and docker
+
+In this particular case, those are variable files:
+
+* `~/inventory/host_vars/app-node-0.${DOMAIN}.yml`
+
+```
+# CRI-O only
+openshift_use_crio_only: true
+openshift_use_crio: true
+openshift_node_group_name: node-config-compute-crio
+```
+
+* `~/inventory/host_vars/app-node-1.${DOMAIN}.yml`
+
+```
+# Explicit docker
+openshift_use_crio: false
+# openshift_node_group_name: node-config-compute
+```
+
+* `~/inventory/host_vars/app-node-2.${DOMAIN}.yml`
+
+```
+# CRI-O and Docker side by side
+openshift_use_crio_only: false
+openshift_use_crio: true
+# As we didn't modified the node_group, it will use docker
+```
+
+After a successful installation, the containerRuntimeVersion field says the CR
+it uses:
+
+```
+$ oc get nodes -o=custom-columns=NAME:.metadata.name,CR:.status.nodeInfo.containerRuntimeVersion --selector='node-role.kubernetes.io/compute=true'                                                                   
+NAME                                  CR
+app-node-0.shiftstack.automated.lan   cri-o://1.11.5
+app-node-1.shiftstack.automated.lan   docker://1.13.1
+app-node-2.shiftstack.automated.lan   docker://1.13.1
+```
+
+Also, notice the host running cri-o has a label added automatically such as
+`runtime=cri-o`:
+
+```
+$ oc get nodes app-node-0.shiftstack.automated.lan --show-labels
+NAME                                  STATUS    ROLES     AGE       VERSION           LABELS
+app-node-0.shiftstack.automated.lan   Ready     compute   37m       v1.11.0+d4cacc0   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=1470ffe1-aea0-4806-a1be-e24c83c08e5f,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=nova,kubernetes.io/hostname=app-node-0.shiftstack.automated.lan,node-role.kubernetes.io/compute=true,runtime=cri-o
+```
+
+And there are some pods running:
+
+```
+$ kubectl get pods --all-namespaces --field-selector spec.nodeName=app-node-0.shiftstack.automated.lan -o wide
+NAMESPACE              NAME                  READY     STATUS    RESTARTS   AGE       IP            NODE                                  NOMINATED NODE
+openshift-monitoring   node-exporter-d4bq9   2/2       Running   0          24m       10.240.0.19   app-node-0.shiftstack.automated.lan   <none>
+openshift-node         sync-rsgrp            1/1       Running   0          40m       10.240.0.19   app-node-0.shiftstack.automated.lan   <none>
+openshift-sdn          ovs-t54s9             1/1       Running   0          40m       10.240.0.19   app-node-0.shiftstack.automated.lan   <none>
+openshift-sdn          sdn-64tz4             1/1       Running   0          40m       10.240.0.19   app-node-0.shiftstack.automated.lan   <none>
+```
+
+```
+[openshift@app-node-0 ~]$ sudo crictl ps
+W1025 04:45:04.056296   13242 util_unix.go:75] Using "/var/run/crio/crio.sock" as endpoint is deprecated, please consider using full url format "unix:///var/run/crio/crio.sock".
+CONTAINER ID        IMAGE                                                                                                                            CREATED             STATE               NAME                ATTEMPT
+ddfd64fdfb6a3       registry.redhat.io/openshift3/ose-kube-rbac-proxy@sha256:16daf6802d5e88393c271f78037f7c002ff774cd52161c1c1a71f2a84df71868        26 minutes ago      Running             kube-rbac-proxy     0
+3463217a35030       registry.redhat.io/openshift3/prometheus-node-exporter@sha256:e9b47d1705eb027735d528342e0457e597e28e36f6e38a0262b65802156bfe9b   26 minutes ago      Running             node-exporter       0
+02652966e1180       074bf04571e220389b5f3afa7669ea07ddd53d281668820ebf537f054487191f                                                                 41 minutes ago      Running             openvswitch         0
+acf2afc99b950       registry.redhat.io/openshift3/ose-node@sha256:3da731d733cd4d67897d22bfdcb027b009494de667bd7a3c870557102ce10bf5                   41 minutes ago      Running             sync                0
+6814b5f7a05d7       registry.redhat.io/openshift3/ose-node@sha256:3da731d733cd4d67897d22bfdcb027b009494de667bd7a3c870557102ce10bf5                   41 minutes ago      Running             sdn                 0
+[openshift@app-node-0 ~]$ sudo docker ps
+sudo: docker: command not found
 ```
