@@ -21,6 +21,7 @@ NET_PLUGIN_LIST = (('openshift_use_openshift_sdn', True),
                    ('openshift_use_nuage', False),
                    ('openshift_use_contiv', False),
                    ('openshift_use_calico', False),
+                   ('openshift_use_kube_router', False),
                    ('openshift_use_kuryr', False),
                    ('openshift_use_nsx', False))
 

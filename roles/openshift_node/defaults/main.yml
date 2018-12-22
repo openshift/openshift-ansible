@@ -131,6 +131,9 @@ openshift_node_use_openshift_sdn: "{{ openshift_node_use_openshift_sdn_default }
 openshift_node_sdn_network_plugin_name_default: "{{ os_sdn_network_plugin_name }}"
 openshift_node_sdn_network_plugin_name: "{{ openshift_node_sdn_network_plugin_name_default }}"
 
+openshift_node_use_kube_router_default: "{{ openshift_use_kube_router | default(False) }}"
+openshift_node_use_kube_router: "{{ openshift_node_use_kube_router_default }}"
+
 openshift_node_use_calico_default: "{{ openshift_use_calico | default(False) }}"
 openshift_node_use_calico: "{{ openshift_node_use_calico_default }}"
 

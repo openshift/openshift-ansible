@@ -1,0 +1,12 @@
+---
+cni_conf_dir: "/etc/cni/net.d/"
+cni_bin_dir: "/opt/cni/bin/"
+
+kube_router_cluster_cidr: "{{ osm_cluster_network_cidr }}"
+kube_router_apiserver: "{{ openshift_master_cluster_hostname }}"
+kube_router_node_image: "cloudnativelabs/kube-router"
+kube_router_cni_image: "quay.io/kube_router/cni:v3.1.3"
+kube_router_upgrade_image: "quay.io/kube_router/upgrade:v1.0.5"
+kube_router_ipv4pool_ipip: "always"
+use_kube_router_etcd: False
+
