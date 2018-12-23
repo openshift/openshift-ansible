@@ -96,6 +96,8 @@ spec:
       - name: install-cni
         image: busybox
         imagePullPolicy: Always
+        securityContext:
+          privileged: true        
         command:
         - /bin/sh
         - -c
@@ -110,13 +112,20 @@ spec:
             cp /etc/kube-router/kubeconfig ${TMP};
             mv ${TMP} /var/lib/kube-router/kubeconfig;
           fi
+          if [ ! -f /opt/cni/bin/bridge ]; then
+            wget "{{ cni_plugins_url }}";
+            tar zxf "{{ cni_plugins_file }}";
+            mv bridge /opt/cni/bin/bridge;
+          fi          
         volumeMounts:
         - mountPath: /etc/cni/net.d
           name: cni-conf-dir
         - mountPath: /etc/kube-router
           name: kube-router-cfg
         - name: kubeconfig
-          mountPath: /var/lib/kube-router          
+          mountPath: /var/lib/kube-router    
+        - name: cni-bin
+          mountPath: /opt/cni/bin      
       hostNetwork: true
       tolerations:
       - key: CriticalAddonsOnly
@@ -128,6 +137,9 @@ spec:
         key: node.kubernetes.io/not-ready
         operator: Exists
       volumes:
+      - name: cni-bin
+        hostPath:
+          path: /opt/cni/bin
       - name: lib-modules
         hostPath:
           path: /lib/modules

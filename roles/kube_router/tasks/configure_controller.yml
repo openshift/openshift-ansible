@@ -1,0 +1,15 @@
+---
+- name: modify controller args
+  yedit:
+    src: /etc/origin/master/master-config.yaml
+    edits:
+    - key: kubernetesMasterConfig.controllerArguments.allocate-node-cidrs
+      value:
+      - "true"
+    - key: kubernetesMasterConfig.controllerArguments.cluster-cidr
+      value:
+      - "{{ kube_router_cluster_cidr }}"
+    - key: kubernetesMasterConfig.controllerArguments.node-cidr-mask-size
+      value:
+      - "{{ kube_router_cidr_mask_size }}"
+  notify: restart master

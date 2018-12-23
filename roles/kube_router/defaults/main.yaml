@@ -2,9 +2,12 @@
 cni_conf_dir: "/etc/cni/net.d/"
 cni_bin_dir: "/opt/cni/bin/"
 
+kube_router_cidr_mask_size: "{{ 32 - (openshift_host_subnet_length | int) }}"
 kube_router_cluster_cidr: "{{ openshift_cluster_network_cidr }}"
 kube_router_apiserver: "https://{{ openshift_master_cluster_hostname }}:openshift_master_api_port"
 kube_router_node_image: "cloudnativelabs/kube-router"
+cni_plugins_file: cni-plugins-amd64-v0.7.4.tgz
+cni_plugins_url: "https://github.com/containernetworking/plugins/releases/download/v0.7.4/{{ cni_plugins_file }}"
 kube_router_ipv4pool_ipip: "always"
 use_kube_router_etcd: False
 
