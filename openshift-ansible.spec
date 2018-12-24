@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.60
+Version:        3.11.61
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,23 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Dec 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.61-1
+- Added proper crio doc (e.minguez@gmail.com)
+- fix ha install. delegating tasks to ca master (siva_teja.areti@nokia.com)
+- Add openshift_node_upgrade_pre_drain_hook (mgugino@redhat.com)
+- create kube proxy pods for nuage install (siva_teja.areti@nokia.com)
+- remove the hardcoded cert prefix in monitor config file
+  (siva_teja.areti@nokia.com)
+- fix openshift_service_type error in nuage_node role
+  (siva_teja.areti@nokia.com)
+- include nuage_node role when doing additional node config
+  (siva_teja.areti@nokia.com)
+- reploy etcd certificates whenever ansible is re-run
+  (siva_teja.areti@nokia.com)
+- remove the duplicate mounts in cni daemonset (siva_teja.areti@nokia.com)
+- remove the extra spaces before colon (siva_teja.areti@nokia.com)
+- include nuage masters in loadbalancer config (siva_teja.areti@nokia.com)
+
 * Fri Dec 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.60-1
 - [3.11] Fix CentOS repo version (mgugino@redhat.com)
 - Ensure multi pool driver can be disabled (ltomasbo@redhat.com)
