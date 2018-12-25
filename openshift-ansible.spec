@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.91
+Version:        3.10.92
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Dec 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.92-1
+- 
+
 * Fri Dec 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.91-1
 - Add openshift_node_upgrade_pre_drain_hook (mgugino@redhat.com)
 - Erase docker during docker uninstall (mgugino@redhat.com)
