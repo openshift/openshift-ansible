@@ -170,3 +170,6 @@
   with_items: "{{ glusterfs_nodes | default([]) }}"
   failed_when: False
   when: glusterfs_wipe
+  
+ - name: Erase glusterfs packages
+   command: "yum -y erase glusterfs-fuse glusterfs glusterfs-client-xlators glusterfs-libs" 
