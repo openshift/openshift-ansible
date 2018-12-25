@@ -1,18 +1,28 @@
 ---
 
-- name: Kube-router | oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:kube-router-node
+- name: Kube-router | oc adm policy add-scc-to-user privileged system:serviceaccount:kube-router-infra:kube-router-node
   oc_adm_policy_user:
-    user: system:serviceaccount:kube-system:kube-router
+    user: system:serviceaccount:kube-router-infra:kube-router
     resource_kind: scc
     resource_name: privileged
     state: present
 
-- name: Kube-router | Set default selector for kube-system
+- name: Kube Router ns | Create kube-router-infra-ns from template
+  template:
+    src: kube-router-infra-ns.yaml.j2
+    dest: "{{ mktemp.stdout }}/kube-router-infra-ns.yml"
+  delegate_to: "{{ groups.oo_masters_to_config.0 }}"
   run_once: true
-  command: >
-    {{ openshift_client_binary }}
-    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    annotate  ns kube-system openshift.io/node-selector="" --overwrite
+
+- name: Kube Router ns | Add namespace
+  oc_obj:
+    state: present
+    kind: namespace
+    name: kube-router-infra
+    files:
+      - "{{ mktemp.stdout }}/kube-router-infra-ns.yml"
+  delegate_to: "{{ groups.oo_masters_to_config.0 }}"
+  run_once: true 
 
 - name: Kube-router | Create temp directory
   command: mktemp -d /tmp/openshift-ansible-XXXXXXX

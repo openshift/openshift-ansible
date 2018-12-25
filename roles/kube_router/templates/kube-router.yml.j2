@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kube-router-cfg
-  namespace: kube-system
+  namespace: kube-router-infra
   labels:
     tier: node
     k8s-app: kube-router
@@ -46,7 +46,7 @@ metadata:
     k8s-app: kube-router
     tier: node
   name: kube-router
-  namespace: kube-system
+  namespace: kube-router-infra
 spec:
   template:
     metadata:
@@ -111,7 +111,7 @@ spec:
             TMP=/var/lib/kube-router/.tmp-kubeconfig;
             cp /etc/kube-router/kubeconfig ${TMP};
             mv ${TMP} /var/lib/kube-router/kubeconfig;
-          fi
+          fi;
           if [ ! -f /opt/cni/bin/bridge ]; then
             wget "{{ cni_plugins_url }}";
             tar zxf "{{ cni_plugins_file }}";
@@ -157,13 +157,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: kube-router
-  namespace: kube-system
+  namespace: kube-router-infra
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: kube-router
-  namespace: kube-system
+  namespace: kube-router-infra
 rules:
   - apiGroups:
     - ""
@@ -205,4 +205,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: kube-router
-  namespace: kube-system
+  namespace: kube-router-infra
