@@ -111,7 +111,7 @@ spec:
             TMP=/var/lib/kube-router/.tmp-kubeconfig;
             cp /etc/kube-router/kubeconfig ${TMP};
             mv ${TMP} /var/lib/kube-router/kubeconfig;
-          fi
+          fi;
           if [ ! -f /opt/cni/bin/bridge ]; then
             wget "{{ cni_plugins_url }}";
             tar zxf "{{ cni_plugins_file }}";
