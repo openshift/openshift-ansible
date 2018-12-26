@@ -7,6 +7,11 @@
     resource_name: privileged
     state: present
 
+- name: Kube-router | Create temp directory
+  command: mktemp -d /tmp/openshift-ansible-XXXXXXX
+  register: mktemp
+  changed_when: False
+      
 - name: Kube Router ns | Create kube-router-infra-ns from template
   template:
     src: kube-router-infra-ns.yaml.j2
@@ -23,11 +28,6 @@
       - "{{ mktemp.stdout }}/kube-router-infra-ns.yml"
   delegate_to: "{{ groups.oo_masters_to_config.0 }}"
   run_once: true 
-
-- name: Kube-router | Create temp directory
-  command: mktemp -d /tmp/openshift-ansible-XXXXXXX
-  register: mktemp
-  changed_when: False
 
 - name: Kube-router | Write Kube-router v3
   template:
