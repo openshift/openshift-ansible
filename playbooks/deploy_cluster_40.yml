@@ -73,7 +73,7 @@
 - name: Start masters
   hosts: masters
   vars:
-    openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/master"
+    openshift_bootstrap_endpoint: "{{ mcd_endpoint }}/config/master"
   tasks:
   - name: Wait for bootstrap endpoint to show up
     uri:
@@ -98,7 +98,7 @@
 - name: Start workers
   hosts: workers
   vars:
-    openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/worker"
+    openshift_bootstrap_endpoint: "{{ mcd_endpoint }}/config/worker"
   tasks:
   - name: Wait for bootstrap endpoint to show up
     uri:
