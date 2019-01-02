@@ -1,1 +1,3 @@
 ---
+openshift_release_image: "registry.svc.ci.openshift.org/openshift/origin-release:v4.0"
+ign_file: "/tmp/bootstrap.ign"
