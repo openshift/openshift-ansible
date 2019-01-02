@@ -8,8 +8,8 @@
     l_repo_hosts: "nodes"
 
 # TODO(michaelgugino): break up the rest of this file into reusable chunks.
-- name: Install nodes
-  hosts: nodes
+- name: Install precondition packages on masters
+  hosts: bootstrap:masters
   roles:
   - role: container_runtime
   tasks:
@@ -40,7 +40,7 @@
       - progress.service
   - name: Wait for MCS endpoint to show up
     uri:
-      url: "{{ mcd_endpoint }}/config/master"
+      url: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/master"
       validate_certs: false
     delay: 10
     retries: 60
@@ -95,21 +95,25 @@
       name: openshift_node40
       tasks_from: systemd.yml
 
-- name: Start workers
+- name: Setup workers
   hosts: workers
   vars:
     openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/worker"
+  roles:
+  - role: container_runtime
   tasks:
-  - name: Wait for bootstrap endpoint to show up
-    uri:
-      url: "{{ openshift_bootstrap_endpoint }}"
-      validate_certs: false
-    delay: 10
-    retries: 60
-    register: result
-    until:
-    - "'status' in result"
-    - result.status == 200
+  - import_role:
+      name: container_runtime
+      tasks_from: docker_storage_setup_overlay.yml
+  - import_role:
+      name: container_runtime
+      tasks_from: extra_storage_setup.yml
+  - import_role:
+      name: container_runtime
+      tasks_from: package_crio.yml
+  - import_role:
+      name: openshift_node40
+      tasks_from: install.yml
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
@@ -117,46 +121,17 @@
       name: openshift_node40
       tasks_from: systemd.yml
 
-- name: Wait for nodes to become ready
+- name: Wait for core operators to appear and complete
   hosts: bootstrap
   tasks:
-  - name: Wait for temporary control plane to show up
-    oc_obj:
-      state: list
-      kind: pod
-      namespace: kube-system
-      kubeconfig: /opt/openshift/auth/kubeconfig
-    register: control_plane_pods
-    retries: 60
-    delay: 10
-    until:
-    - "'results' in control_plane_pods and 'results' in control_plane_pods.results"
-    - control_plane_pods.results.results[0]['items'] | length > 0
-  - name: Wait for master nodes to show up
-    oc_obj:
-      state: list
-      kind: node
-      selector: "node-role.kubernetes.io/master"
-      kubeconfig: /opt/openshift/auth/kubeconfig
-    register: master_nodes
-    retries: 60
-    delay: 10
-    until:
-    - "'results' in master_nodes and 'results' in master_nodes.results"
-    - master_nodes.results.results[0]['items'] | length > 0
   - name: Wait for bootkube service to finish
     service_facts: {}
     #10 mins to complete temp plane
+    ignore_errors: true
+    register: bootstrap_status
     retries: 120
     delay: 5
     until: "'bootkube.service' not in ansible_facts.services"
-    ignore_errors: true
-  - name: Fetch kubeconfig for test container
-    fetch:
-      src: /opt/openshift/auth/kubeconfig
-      dest: /tmp/artifacts/installer/auth/kubeconfig
-      flat: yes
-
   - name: Wait for core operators to appear and complete
     oc_obj:
       state: list
@@ -177,7 +152,6 @@
     - cvo.results.results[0].status.conditions | selectattr('type', 'match', '^Failing$') | map(attribute='status') | join | bool == False
     - cvo.results.results[0].status.conditions | selectattr('type', 'match', '^Progressing$') | map(attribute='status') | join | bool == False
     ignore_errors: true
-
   - block:
     - name: Output CVO status
       oc_obj:
@@ -194,3 +168,8 @@
     - fail:
         msg: CVO didn't complete the install
     when: cvo.failed
+  - name: Fetch kubeconfig for test container
+    fetch:
+      src: /opt/openshift/auth/kubeconfig
+      dest: /tmp/artifacts/installer/auth/kubeconfig
+      flat: yes

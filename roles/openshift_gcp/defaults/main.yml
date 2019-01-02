@@ -63,7 +63,6 @@ openshift_gcp_multizone: False
 
 provision_custom_repositories: []
 
-mcd_port: 49500
 openshift_gcp_kubernetes_api_port: 6443
 openshift_gcp_master_healthcheck_port: 8080
 
