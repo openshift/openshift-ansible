@@ -4,7 +4,7 @@ machines:
 - name: master
   replicas: ${OCP_MASTERS}
 - name: worker
-  replicas: 0
+  replicas: 1
 metadata:
   name: ${OCP_CLUSTER_NAME}
 networking:
