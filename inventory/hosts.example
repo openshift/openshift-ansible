@@ -328,7 +328,7 @@ debug_level=2
 #openshift_cloudprovider_vsphere_datacenter=datacenter
 #openshift_cloudprovider_vsphere_datastore=datastore
 #openshift_cloudprovider_vsphere_folder=optional_folder_name
-
+#openshift_cloudprovider_vsphere_network="public network portgroup"
 
 # Project Configuration
 #osm_project_request_message=''
