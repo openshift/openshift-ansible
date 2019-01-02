@@ -38,6 +38,8 @@ objects:
           image: ${IMAGE_NAME}
           imagePullPolicy: IfNotPresent
           env:
+          - name: HOST_DEV_DIR
+            value: "${HOST_DEV_DIR}"
           - name: GLUSTER_BLOCKD_STATUS_PROBE_ENABLE
             value: "${GLUSTER_BLOCKD_STATUS_PROBE_ENABLE}"
           - name: GB_GLFS_LRU_COUNT
@@ -63,12 +65,14 @@ objects:
             mountPath: "/var/log/glusterfs"
           - name: glusterfs-config
             mountPath: "/var/lib/glusterd"
-          - name: glusterfs-dev-disk
-            mountPath: "/dev/disk"
-          - name: glusterfs-dev-mapper
-            mountPath: "/dev/mapper"
+          - name: glusterfs-dev
+            mountPath: "${HOST_DEV_DIR}"
           - name: glusterfs-misc
             mountPath: "/var/lib/misc/glusterfsd"
+          - name: glusterfs-block-sys-class
+            mountPath: "/sys/class"
+          - name: glusterfs-block-sys-module
+            mountPath: "/sys/module"
           - name: glusterfs-cgroup
             mountPath: "/sys/fs/cgroup"
             readOnly: true
@@ -105,7 +109,7 @@ objects:
             periodSeconds: 25
             successThreshold: 1
             failureThreshold: 50
-          terminationMessagePath: "/dev/termination-log"
+          terminationMessagePath: "/var/log/termination.log"
         volumes:
         - name: glusterfs-heketi
           hostPath:
@@ -124,15 +128,18 @@ objects:
         - name: glusterfs-config
           hostPath:
             path: "/var/lib/glusterd"
-        - name: glusterfs-dev-disk
+        - name: glusterfs-dev
           hostPath:
-            path: "/dev/disk"
-        - name: glusterfs-dev-mapper
-          hostPath:
-            path: "/dev/mapper"
+            path: "/dev"
         - name: glusterfs-misc
           hostPath:
             path: "/var/lib/misc/glusterfsd"
+        - name: glusterfs-block-sys-class
+          hostPath:
+            path: "/sys/class"
+        - name: glusterfs-block-sys-module
+          hostPath:
+            path: "/sys/module"
         - name: glusterfs-cgroup
           hostPath:
             path: "/sys/fs/cgroup"
@@ -175,4 +182,9 @@ parameters:
   displayName: Tcmu runner log directory
   description: This value is to set tcmu runner log directory
   value: "/var/log/glusterfs/gluster-block"
+  required: true
+- name: HOST_DEV_DIR
+  displayName: Alternative path to /dev in the container
+  description: Volume mount point of /dev from the host so that the container can access all devices.
+  value: "/mnt/host-dev"
   required: true
