@@ -158,3 +158,6 @@ openshift_node_image_config_latest: "{{ openshift_node_image_config_latest_defau
 openshift_node_use_instance_profiles: False
 
 openshift_node_use_persistentlocalvolumes: "{{ openshift_persistentlocalstorage_enabled | default(False) | bool }}"
+
+openshift_release_image: "registry.svc.ci.openshift.org/openshift/origin-release:v4.0"
+ign_file: "/tmp/bootstrap.ign"

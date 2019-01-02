@@ -33,9 +33,6 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
-  - import_role:
-      name: openshift_node40
-      tasks_from: systemd.yml
 
 - name: Start masters
   hosts: masters
@@ -56,15 +53,12 @@
     until:
     - "'status' in result"
     - result.status == 200
-  - import_role:
-      name: openshift_node40
-      tasks_from: config.yml
   - name: Make sure etcd user exists
     user:
       name: etcd
   - import_role:
       name: openshift_node40
-      tasks_from: systemd.yml
+      tasks_from: config.yml
 
 - name: Start workers
   hosts: workers
@@ -87,6 +81,3 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
-  - import_role:
-      name: openshift_node40
-      tasks_from: systemd.yml

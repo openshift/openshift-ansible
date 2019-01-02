@@ -1,30 +1,4 @@
 ---
-- name: get worker ignition file
-  command: >
-    curl -k {{ openshift_bootstrap_endpoint }}
-  register: l_worker_bootstrap
-  when: openshift_bootstrap_endpoint is defined
-
-- set_fact:
-    ign_contents: "{{ l_worker_bootstrap.stdout }}"
-  when: openshift_bootstrap_endpoint is defined
-
-- set_fact:
-    ign_contents: "{{ lookup('file', openshift_ignition_file_path) }}"
-  when: openshift_ignition_file_path is defined
-
-- debug:
-    var: ign_contents
-
-- name: parse ignition file
-  parse_ignition:
-    ign_file_contents: "{{ ign_contents }}"
-  register: l_parse_ignition_res
-
-- import_tasks: create_files_from_ignition.yml
-  vars:
-    l_parse_ignition_dict: "{{ l_parse_ignition_res }}"
-
 #### Disable SWAP #####
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
 # swapoff is a custom module in lib_utils that comments out swap entries in
@@ -47,3 +21,43 @@
     name: container_manage_cgroup
     state: yes
     persistent: yes
+
+- name: Get machine controller daemon image from release image
+  command: "podman run --rm {{ openshift_release_image }} image machine-config-daemon"
+  register: release_image_mcd
+
+- name: Copy bootstrap ignition file locally
+  copy:
+    src: "{{ openshift_ignition_file_path }}"
+    dest: "{{ ign_file }}"
+  when: openshift_ignition_file_path is defined
+
+- name: Fetch bootstrap ignition file locally
+  uri:
+    url: "{{ openshift_bootstrap_endpoint }}"
+    dest: "{{ ign_file }}"
+    validate_certs: false
+  when: openshift_bootstrap_endpoint is defined
+
+- block:
+  - name: Apply ignition manifest
+    command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
+    vars:
+      podman_flags: "--privileged --rm -ti {{ release_image_mcd.stdout }}"
+      podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
+      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ ign_file }}"
+    # MCD reboots the machine, so the task would run async and ignore errors
+    async: 1
+    poll: 0
+    # Ignore errors here instead of ignore_unreachable
+    # so that hosts won't show as unreachable in summary
+    ignore_unreachable: true
+    register: mcd_apply
+  # MCD would reboot the host so we need to wait for it to come back and reset 'unreachable' status
+  - wait_for_connection: {}
+  # Clear unreachable status
+  - name: clear any host unreachable error messages.
+    meta: clear_host_errors
+  rescue:
+    - fail:
+        msg: "Ignition apply failed, {{ mcd_apply.stdout }}"
