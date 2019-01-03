@@ -472,7 +472,7 @@
     component: "{{ es_component }}"
     logging_component: elasticsearch
     deploy_name: "{{ es_deploy_name }}"
-    image: "{{ openshift_logging_elasticsearch_image_prefix }}logging-elasticsearch:{{ openshift_logging_elasticsearch_image_version }}"
+    image: "{{ openshift_logging_elasticsearch_image }}"
     proxy_image: "{{ openshift_logging_elasticsearch_proxy_image_prefix }}oauth-proxy:{{ openshift_logging_elasticsearch_proxy_image_version }}"
     es_cpu_limit: "{{ openshift_logging_elasticsearch_cpu_limit | default('') }}"
     es_cpu_request: "{{ openshift_logging_elasticsearch_cpu_request | min_cpu(openshift_logging_elasticsearch_cpu_limit | default(none)) }}"
