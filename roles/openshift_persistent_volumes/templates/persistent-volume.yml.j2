@@ -7,6 +7,12 @@ items:
   kind: PersistentVolume
   metadata:
     name: "{{ volume.name }}"
+{% if volume.annotations %}
+    annotations:
+{% for annotation in volume.annotations %}
+      {{ annotation }}
+{% endfor %}
+{% endif %}
 {% if volume.labels is defined and volume.labels is mapping %}
     labels:
 {% for key,value in volume.labels.items() %}
