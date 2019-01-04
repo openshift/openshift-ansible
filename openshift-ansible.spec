@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.65
+Version:        3.11.66
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,14 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jan 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.66-1
+- Switch subjectAltName type to bytes when checking certs using pyOpenSSL.
+  (pdd@redhat.com)
+- gluster: add volume mounts for /sys/class and /sys/module (ndevos@redhat.com)
+- glusterfs: re-add /dev bind-mount (ndevos@redhat.com)
+- sdn: upgrade SDN after all nodes are upgraded. (cdc@redhat.com)
+- add vsphere public network to 3.11 release (davis.phillips@gmail.com)
+
 * Tue Jan 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.65-1
 - 
 
