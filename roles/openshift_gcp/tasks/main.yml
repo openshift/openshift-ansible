@@ -1,4 +1,19 @@
 ---
+- name: Find GCP image
+  gcp_compute_image_facts:
+    auth_kind: serviceaccount
+    scopes:
+    - https://www.googleapis.com/auth/compute
+    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
+    project: "{{ openshift_gcp_project }}"
+    filters:
+    - "family = {{ openshift_gcp_image }}"
+  register: gcp_node_image
+
+- fail:
+    msg: "No images for family '{{ openshift_gcp_image }}' found"
+  when: gcp_node_image['items'] | length == 0
+
 - name: Create GCP network
   gcp_compute_network:
     auth_kind: serviceaccount
@@ -26,21 +41,6 @@
   with_items: "{{ openshift_gcp_firewall_rules }}"
 
 - import_tasks: provision_ssh_keys.yml
-
-- name: Find GCP image
-  gcp_compute_image_facts:
-    auth_kind: serviceaccount
-    scopes:
-    - https://www.googleapis.com/auth/compute
-    service_account_file: "{{ openshift_gcp_iam_service_account_keyfile }}"
-    project: "{{ openshift_gcp_project }}"
-    filters:
-    - "family = {{ openshift_gcp_image }}"
-  register: gcp_node_image
-
-- fail:
-    msg: "No images for family '{{ openshift_gcp_image }}' found"
-  when: gcp_node_image['items'] | length == 0
 
 - name: Provision GCP instance templates
   gcp_compute_instance_template:
