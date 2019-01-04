@@ -24,6 +24,9 @@
     source_tags: "{{ item.source_tags | default(omit) }}"
     state: present
   with_items: "{{ openshift_gcp_firewall_rules }}"
+  async: 600
+  poll: 0
+  register: gcp_firewall
 
 - import_tasks: provision_ssh_keys.yml
 
@@ -94,7 +97,19 @@
       port: "{{ openshift_master_api_port }}"
     state: present
   with_items: "{{ instance_template.results }}"
+  async: 600
+  poll: 0
   register: instance_groups
+
+- name: Check instance groups job status
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  with_items: "{{ instance_groups.results }}"
+  retries: 20
+  delay: 5
+  failed_when: false
 
 - name: Get bootstrap instance group
   gcp_compute_instance_group_facts:
@@ -227,6 +242,9 @@
     ttl: 600
     target: "{{ bootstrap_and_masters }}"
     state: present
+  async: 600
+  poll: 0
+  register: dns_public_api
 
 - name: Create etcd records for masters
   gcp_dns_resource_record_set:
@@ -245,6 +263,9 @@
   vars:
     entry_name: "{{ openshift_gcp_prefix }}etcd-{{ item.0 }}.{{ public_hosted_zone }}."
     master_ip: "{{ item.1.networkInterfaces[0].networkIP }}"
+  async: 600
+  poll: 0
+  register: dns_etcd_records
 
 - name: Templatize DNS script
   template: src=additional_settings.j2.sh dest=/tmp/additional_settings.sh mode=u+rx
@@ -253,3 +274,32 @@
   command: /tmp/additional_settings.sh
   args:
     chdir: "{{ files_dir }}"
+
+- name: Check status firewall job status
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  with_items: "{{ gcp_firewall.results }}"
+  retries: 20
+  delay: 5
+  failed_when: false
+
+- name: Check public API DNS job status
+  async_status:
+    jid: "{{ dns_public_api.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 20
+  delay: 5
+  failed_when: false
+
+- name: Check etcd discovery DNS job status
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  with_items: "{{ dns_etcd_records.results }}"
+  retries: 20
+  delay: 5
+  failed_when: false
