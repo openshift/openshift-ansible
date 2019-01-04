@@ -140,6 +140,9 @@ networkConfig:
 {% if openshift_master_ingress_ip_network_cidr is defined %}
   ingressIPNetworkCIDR: {{ openshift_master_ingress_ip_network_cidr }}
 {% endif %}
+{% if openshift_sdn_vxlan_port != '4789' %}
+  vxlanPort: {{ openshift_sdn_vxlan_port }}
+{% endif %}
 oauthConfig:
 {% if openshift_master_oauth_always_show_provider_selection is defined %}
   alwaysShowProviderSelection: {{ openshift_master_oauth_always_show_provider_selection }}

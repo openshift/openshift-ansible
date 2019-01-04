@@ -139,6 +139,7 @@ openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_typ
 openshift_master_api_port: "8443"
 openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 openshift_use_openshift_sdn: true
+openshift_sdn_vxlan_port: "4789"
 os_sdn_network_plugin_name: "redhat/openshift-ovs-subnet"
 
 openshift_node_groups:
