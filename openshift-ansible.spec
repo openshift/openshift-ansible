@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.96
+Version:        3.10.97
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Jan 04 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.97-1
+- Use Calico v3.4.0 (neil@ossau.homelinux.net)
+- Switch subjectAltName type to bytes when checking certs using pyOpenSSL.
+  (pdd@redhat.com)
+
 * Wed Jan 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.96-1
 - 
 
