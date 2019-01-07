@@ -1,0 +1,116 @@
+---
+- name: NSX | Download CNI rpm
+  get_url:
+    url: "{{ nsx_cni_url }}"
+    dest: /tmp/cni.rpm
+  tags: nsx_node
+
+- name: NSX | Install CNI
+  yum:
+    name: /tmp/cni.rpm
+    state: present
+  tags: nsx_node
+
+- name: NSX | Download OVS
+  get_url:
+    url: "{{ nsx_ovs_url }}"
+    dest: /tmp/ovs.rpm
+  when: nsx_node_type != 'BAREMETAL'
+  tags: nsx_node
+
+- name: NSX | Download OVS kmod
+  get_url:
+    url: "{{ nsx_kmod_ovs_url }}"
+    dest: /tmp/kmod_ovs.rpm
+  when: nsx_node_type != 'BAREMETAL'
+  tags: nsx_node
+
+- name: NSX | Install OVS
+  yum:
+    name: /tmp/ovs.rpm
+    state: present
+  when: nsx_node_type != 'BAREMETAL'
+  tags: nsx_node
+
+- name: NSX | Install OVS Kernel Module
+  yum:
+    name: /tmp/kmod_ovs.rpm
+    state: present
+  when: nsx_node_type != 'BAREMETAL'
+  tags: nsx_node
+
+- name: NSX | Fix Openvswitch wrong SELinux label
+  command: /usr/sbin/restorecon -R -v /run/openvswitch/
+  tags: nsx_node
+
+- name: NSX | Restart OVS Kernel Module
+  command: /etc/init.d/openvswitch force-reload-kmod
+  tags: nsx_node
+
+- name: NSX | Start OVS service
+  systemd:
+    name: openvswitch
+    state: started
+  tags: nsx_node
+
+- name: NSX | Create OVS bridge
+  openvswitch_bridge: bridge=br-int state=present fail_mode=standalone
+  args:
+    external_ids:
+        bridge-id: "br-int"
+  when: nsx_node_type != 'BAREMETAL'
+  tags: nsx_node
+
+- name: NSX | Add the Uplink Port to OVS
+  openvswitch_port:
+    bridge: br-int
+    port: "{{ nsx_ovs_uplink_port }}"
+    state: present
+    set: Interface {{ nsx_ovs_uplink_port }} ofport_request=1
+  when: nsx_node_type != 'BAREMETAL'
+  tags: nsx_node
+
+- name: NSX | Bring up br-int
+  command: "ip link set br-int up"
+  when: nsx_node_type != 'BAREMETAL'
+  tags: nsx_node
+
+- name: NSX | Bring up node-if
+  command: "ip link set {{ nsx_ovs_uplink_port }} up"
+  when: nsx_node_type != 'BAREMETAL'
+  tags: nsx_node
+
+- name: NSX | Iptables allow nodePort
+  iptables:
+    action: insert
+    chain: FORWARD
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+    comment: NSX
+  tags: nsx_node
+
+- name: NSX | Iptables allow DNS tcp
+  iptables:
+    action: insert
+    chain: OS_FIREWALL_ALLOW
+    protocol: tcp
+    destination_port: 53
+    ctstate: NEW,ESTABLISHED,RELATED
+    jump: ACCEPT
+    comment: NSX
+  tags: nsx_node
+
+- name: NSX | Iptables allow DNS udp
+  iptables:
+    action: insert
+    chain: OS_FIREWALL_ALLOW
+    protocol: udp
+    destination_port: 53
+    ctstate: NEW
+    jump: ACCEPT
+    comment: NSX
+  tags: nsx_node
+
+- name: NSX | Save iptables rules
+  command: service iptables save
+  tags: nsx_node

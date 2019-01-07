@@ -140,6 +140,9 @@ openshift_node_use_nuage: "{{ openshift_node_use_nuage_default }}"
 openshift_node_use_contiv_default: "{{ openshift_use_contiv | default(False) }}"
 openshift_node_use_contiv: "{{ openshift_node_use_contiv_default }}"
 
+openshift_node_use_nsx_default: "{{ openshift_use_nsx | default(False) }}"
+openshift_node_use_nsx: "{{ openshift_node_use_nsx_default }}"
+
 openshift_node_use_kuryr_default: "{{ openshift_use_kuryr | default(False) }}"
 openshift_node_use_kuryr: "{{ openshift_node_use_kuryr_default }}"
 
