@@ -25,14 +25,8 @@ Requires:      %{name}-docs = %{version}-%{release}
 Requires:      %{name}-playbooks = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
 Obsoletes:     atomic-openshift-utils <= 3.10
-Requires:      java-1.8.0-openjdk-headless
-Requires:      httpd-tools
 Requires:      libselinux-python
-Requires:      python-passlib
-Requires:      python2-crypto
-Requires:      patch
 Requires:      pyOpenSSL
-Requires:      iproute
 Requires:      python2-openshift
 
 %description
@@ -175,6 +169,7 @@ Requires:      %{name} = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
 Requires:      %{name}-playbooks = %{version}-%{release}
 Requires:      python-boto3
+Requires:      openssh-clients
 BuildArch:     noarch
 
 %description test
@@ -219,127 +214,127 @@ BuildArch:     noarch
 - Dockerfile.rhel7: remove superfluous labels (lmeyer@redhat.com)
 
 * Mon Dec 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.94.0
-- 
+-
 
 * Sun Dec 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.93.0
-- 
+-
 
 * Sat Dec 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.92.0
-- 
+-
 
 * Sat Dec 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.91.0
-- 
+-
 
 * Fri Dec 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.90.0
-- 
+-
 
 * Fri Dec 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.89.0
-- 
+-
 
 * Thu Dec 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.88.0
-- 
+-
 
 * Thu Dec 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.87.0
-- 
+-
 
 * Thu Dec 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.86.0
-- 
+-
 
 * Thu Dec 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.85.0
-- 
+-
 
 * Wed Dec 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.84.0
-- 
+-
 
 * Tue Dec 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.83.0
-- 
+-
 
 * Mon Dec 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.82.0
-- 
+-
 
 * Sun Dec 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.81.0
-- 
+-
 
 * Sat Dec 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.80.0
-- 
+-
 
 * Sat Dec 01 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.79.0
-- 
+-
 
 * Thu Nov 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.78.0
-- 
+-
 
 * Wed Nov 28 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.77.0
-- 
+-
 
 * Tue Nov 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.76.0
-- 
+-
 
 * Tue Nov 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.75.0
-- 
+-
 
 * Sun Nov 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.74.0
-- 
+-
 
 * Sun Nov 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.73.0
-- 
+-
 
 * Sat Nov 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.72.0
-- 
+-
 
 * Sat Nov 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.71.0
-- 
+-
 
 * Fri Nov 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.70.0
-- 
+-
 
 * Fri Nov 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.69.0
-- 
+-
 
 * Thu Nov 22 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.68.0
-- 
+-
 
 * Wed Nov 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.67.0
-- 
+-
 
 * Tue Nov 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.66.0
-- 
+-
 
 * Tue Nov 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.65.0
-- 
+-
 
 * Tue Nov 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.64.0
-- 
+-
 
 * Mon Nov 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.63.0
-- 
+-
 
 * Sun Nov 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.62.0
-- 
+-
 
 * Sat Nov 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.61.0
-- 
+-
 
 * Fri Nov 16 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.60.0
-- 
+-
 
 * Thu Nov 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.59.0
-- 
+-
 
 * Wed Nov 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.58.0
-- 
+-
 
 * Tue Nov 13 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.57.0
-- 
+-
 
 * Mon Nov 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.56.0
-- 
+-
 
 * Mon Nov 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.55.0
-- 
+-
 
 * Sat Nov 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.54.0
-- 
+-
 
 * Sat Nov 10 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.53.0
 - GitHubIdentityProvider catering for GitHub Enterprise and includes examples
@@ -374,13 +369,13 @@ BuildArch:     noarch
 - Run the init/main playbook properly (e.minguez@gmail.com)
 
 * Mon Nov 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.48.0
-- 
+-
 
 * Mon Nov 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.47.0
-- 
+-
 
 * Sun Nov 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.46.0
-- 
+-
 
 * Sat Nov 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.45.0
 - added needed space in error message as stated in bug# 1645718
@@ -410,7 +405,7 @@ BuildArch:     noarch
 - Updating clean up task to match become of creation task (ewolinet@redhat.com)
 
 * Mon Oct 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.40.0
-- 
+-
 
 * Mon Oct 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.39.0
 - Increase Octavia OpenShift API loadbalancer timeouts (ltomasbo@redhat.com)
@@ -479,13 +474,13 @@ BuildArch:     noarch
   (sdodson@redhat.com)
 
 * Sun Oct 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.31.0
-- 
+-
 
 * Sat Oct 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.30.0
-- 
+-
 
 * Fri Oct 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.29.0
-- 
+-
 
 * Thu Oct 18 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.28.0
 - Fix scaleup failure for hostname override (mgugino@redhat.com)
@@ -497,22 +492,22 @@ BuildArch:     noarch
   (akalugwu@redhat.com)
 
 * Wed Oct 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.26.0
-- 
+-
 
 * Wed Oct 17 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.25.0
-- 
+-
 
 * Tue Oct 16 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.24.0
-- 
+-
 
 * Mon Oct 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.23.0
 - Add ansible 2.6 repo (vrutkovs@redhat.com)
 
 * Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.22.0
-- 
+-
 
 * Sun Oct 14 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.21.0
-- 
+-
 
 * Fri Oct 12 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.20.0
 - Require ansible 2.6.5 (vrutkovs@redhat.com)
@@ -546,16 +541,16 @@ BuildArch:     noarch
   (mgugino@redhat.com)
 
 * Sun Oct 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.15.0
-- 
+-
 
 * Sun Oct 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.14.0
-- 
+-
 
 * Sat Oct 06 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.13.0
 - unmount just before removing (rmeggins@redhat.com)
 
 * Fri Oct 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.12.0
-- 
+-
 
 * Fri Oct 05 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.11.0
 - prelim/partial update to jenkins imagestream to enable tests (while we wait
@@ -567,7 +562,7 @@ BuildArch:     noarch
   (jmulligan@redhat.com)
 
 * Thu Oct 04 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.9.0
-- 
+-
 
 * Wed Oct 03 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.8.0
 - roles/cluster_monitoring: minor wording improvement (pgier@redhat.com)
@@ -621,7 +616,7 @@ BuildArch:     noarch
   (tzumainn@redhat.com)
 
 * Fri Sep 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.2.0
-- 
+-
 
 * Fri Sep 21 2018 AOS Automation Release Team <aos-team-art@redhat.com> 4.0.0-0.1.0
 - Don't re-deploy node system containers when deploying auth credentials
@@ -752,7 +747,7 @@ BuildArch:     noarch
 - SDN check: Ignore errors from `oc version` (miciah.masters@gmail.com)
 
 * Sun Sep 09 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.34.0
-- 
+-
 
 * Sat Sep 08 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.33.0
 - Install rh-operators catalog (cordell.evan@gmail.com)
@@ -769,10 +764,10 @@ BuildArch:     noarch
 - add main.yaml for olm task (cordell.evan@gmail.com)
 
 * Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.32.0
-- 
+-
 
 * Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.31.0
-- 
+-
 
 * Fri Sep 07 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.30.0
 - Remove configmap check during upgrades (rteague@redhat.com)
@@ -987,7 +982,7 @@ BuildArch:     noarch
 - Add kuryr namespace isolation support (ltomasbo@redhat.com)
 
 * Mon Aug 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.19.0
-- 
+-
 
 * Sun Aug 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.18.0
 - Require Ansible 2.6.2 (rteague@redhat.com)
@@ -1711,7 +1706,7 @@ BuildArch:     noarch
 - Add option to pass OpenStack CA cert to Kuryr (mdulko@redhat.com)
 
 * Tue Jun 05 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.60.0
-- 
+-
 
 * Tue Jun 05 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.59.0
 - Don't verify java-1.8.0-openjdk (sdodson@redhat.com)
@@ -1866,7 +1861,7 @@ BuildArch:     noarch
 - Add openshift_openstack_heat_template_version option (tzumainn@redhat.com)
 
 * Mon May 21 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.50.0
-- 
+-
 
 * Mon May 21 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.49.0
 - Adding strace and insights-client (kwoodson@redhat.com)
@@ -1962,7 +1957,7 @@ BuildArch:     noarch
 - Kuryr: Copy CNI plugins as DaemonSet initContainer (mdulko@redhat.com)
 
 * Fri May 11 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.41.0
-- 
+-
 
 * Fri May 11 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.40.0
 - Readd crio registry variables (mgugino@redhat.com)
@@ -2051,7 +2046,7 @@ BuildArch:     noarch
 - Remove non-bootstrap code (mgugino@redhat.com)
 
 * Sun May 06 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.35.0
-- 
+-
 
 * Fri May 04 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.34.0
 - Remove outdated api/controllers settings in - /etc/sysconfig
@@ -2521,7 +2516,7 @@ BuildArch:     noarch
 - Bump pyOpenSSL to 17.5.0 (rteague@redhat.com)
 
 * Sat Mar 17 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.11.0
-- 
+-
 
 * Fri Mar 16 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.10.0
 - Bug 1553576 - Change the self_hostname to ${hostname} in openshift-ansible
@@ -2648,7 +2643,7 @@ BuildArch:     noarch
 - During master upgrade reset loopback config (sdodson@redhat.com)
 
 * Wed Mar 07 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.3.0
-- 
+-
 
 * Wed Mar 07 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.2.0
 - Add wait_for_pods to upgrade for hosted components (mgugino@redhat.com)
@@ -2767,7 +2762,7 @@ BuildArch:     noarch
   (tzumainn@redhat.com)
 
 * Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.53.0
-- 
+-
 
 * Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.52.0
 - Move journald setup to node tasks from master (nakayamakenjiro@gmail.com)
@@ -2800,7 +2795,7 @@ BuildArch:     noarch
 - Remove NoVolumeNodeConflict from 3.9+ (sdodson@redhat.com)
 
 * Fri Feb 23 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.51.0
-- 
+-
 
 * Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.50.0
 - Fix upgrade verify_upgrade_targets (mgugino@redhat.com)
