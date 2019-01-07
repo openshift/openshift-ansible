@@ -25,6 +25,28 @@
         aws_image: "{{ ami_facts.images[-1].image_id }}"
       when: aws_image is not defined
 
+    - name: Create AWS security group
+      ec2_group:
+        name: "{{ item.aws_security_group }}"
+        description: "Openshift Ansible SG for {{ vm_prefix }}"
+        vpc_id: "{{ aws_vpc_id }}"
+        region: "{{ aws_region }}"
+        rules:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+        tags: "{{ aws_sg_tags }}"
+      with_items: "{{ aws_instances }}"
+      when: not aws_use_auto_terminator | default(true)
+      vars:
+        aws_sg_tags: |
+          {
+            "kubernetes.io/cluster/{{ aws_cluster_id }}": "true",
+            "expirationDate": "{{ item.aws_expiration_date | default(aws_expiration_date) }}"
+          }
+
     - name: Create EC2 instance
       ec2:
         region: "{{ aws_region }}"
