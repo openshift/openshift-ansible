@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.66
+Version:        3.11.67
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Jan 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.67-1
+- 
+
 * Thu Jan 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.66-1
 - Switch subjectAltName type to bytes when checking certs using pyOpenSSL.
   (pdd@redhat.com)
