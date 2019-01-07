@@ -1,0 +1,121 @@
+# yaml template for nsx-node-agent and nsx-kube-proxy DaemonSet
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: nsx-node-agent
+  namespace: nsx-system
+  labels:
+    tier: nsx-networking
+    component: nsx-node-agent
+    version: v1
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        #container.apparmor.security.beta.kubernetes.io/nsx-node-agent: localhost/node-agent-apparmor
+      labels:
+        tier: nsx-networking
+        component: nsx-node-agent
+        version: v1
+    spec:
+      hostNetwork: true
+      serviceAccountName: nsx-node-agent-svc-account
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+        - name: nsx-node-agent
+          image: nsx-ncp
+          imagePullPolicy: IfNotPresent
+          command: ["start_node_agent"]
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - check_pod_liveness nsx-node-agent
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            periodSeconds: 10
+            failureThreshold: 5
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+                - SYS_PTRACE
+                - DAC_READ_SEARCH
+                - DAC_OVERRIDE
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nsx-ujo/ncp.ini
+            subPath: ncp.ini
+            readOnly: true
+          # mount openvswitch dir
+          - name: openvswitch
+            mountPath: /var/run/openvswitch
+          # mount CNI socket path
+          - name: cni-sock
+            mountPath: /var/run/nsx-ujo
+          # mount container namespace
+          - name: netns
+            mountPath: /var/run/netns
+          # mount host proc
+          - name: proc
+            mountPath: /host/proc
+            readOnly: true
+        - name: nsx-kube-proxy
+          image: nsx-ncp
+          imagePullPolicy: IfNotPresent
+          command: ["start_kube_proxy"]
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - check_pod_liveness nsx-kube-proxy
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+                - SYS_PTRACE
+                - DAC_READ_SEARCH
+                - DAC_OVERRIDE
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nsx-ujo/ncp.ini
+            subPath: ncp.ini
+            readOnly: true
+          - name: openvswitch
+            mountPath: /var/run/openvswitch
+{% if nsx_node_type == 'BAREMETAL' %}
+          - name: nestdb-sock
+            mountPath: /var/run/vmware/nestdb/nestdb-server.sock
+{% endif %}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nsx-node-agent-config
+        - name: cni-sock
+          hostPath:
+            path: /var/run/nsx-ujo
+        - name: netns
+          hostPath:
+            path: /var/run/netns
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: openvswitch
+          hostPath:
+            path: /var/run/openvswitch
+{% if nsx_node_type == 'BAREMETAL' %}
+        - name: nestdb-sock
+          hostPath:
+            path: /var/run/vmware/nestdb/nestdb-server.sock
+            type: Socket
+{% endif %}

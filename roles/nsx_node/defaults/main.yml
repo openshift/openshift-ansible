@@ -1,0 +1,7 @@
+---
+nsx_node_type: 'HOSTVM'
+nsx_insecure_ssl: true
+nsx_subnet_prefix: 24
+nsx_use_loadbalancer: true
+nsx_lb_service_size: 'SMALL'
+nsx_ovs_uplink_port: 'ens224'
