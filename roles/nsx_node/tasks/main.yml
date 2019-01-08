@@ -54,7 +54,10 @@
   tags: nsx_node
 
 - name: NSX | Create OVS bridge
-  openvswitch_bridge: bridge=br-int state=present fail_mode=standalone
+  openvswitch_bridge: 
+    bridge: br-int 
+    state: present
+    fail_mode: standalone
   args:
     external_ids:
       bridge-id: "br-int"
