@@ -57,7 +57,7 @@
   openvswitch_bridge: bridge=br-int state=present fail_mode=standalone
   args:
     external_ids:
-        bridge-id: "br-int"
+      bridge-id: "br-int"
   when: nsx_node_type != 'BAREMETAL'
   tags: nsx_node
 
