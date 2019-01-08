@@ -11,7 +11,7 @@
     state: present
   tags: nsx_node
 
-- when: nsx_node_agent_type != 'BAREMETAL'
+- when: nsx_node_type != 'BAREMETAL'
   tags: nsx_node
   block:
   - name: NSX | Download NSX rpms
@@ -24,11 +24,8 @@
 
   - name: NSX | Install OVS
     yum:
-      name: "{{ item }}"
+      name: ['/tmp/ovs.rpm', '/tmp/kmod_ovs.rpm']
       state: present
-    with_items:
-    - '/tmp/ovs.rpm'
-    - '/tmp/kmod_ovs.rpm'
 
   - name: NSX | Fix Openvswitch wrong SELinux label
     command: /usr/sbin/restorecon -R -v /run/openvswitch/
@@ -96,6 +93,8 @@
 
   - name: NSX | Save iptables rules
     command: service iptables save
+    args:
+      warn: False
 
 - when: os_firewall_use_firewalld | default(False) | bool
   tags: nsx_node
