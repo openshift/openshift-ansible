@@ -135,7 +135,7 @@ data:
 
     # The OVS bridge to configure container interface.
 {% if nsx_node_type == 'BAREMETAL' %}
-    ovs_bridge = nsx-managed
+    ovs_bridge = {{ (nsx_node_type == 'BAREMETAL') | ternary('nsx-managed', 'br-int') }}
 {% else %}
     ovs_bridge = br-int
 {% endif %}
