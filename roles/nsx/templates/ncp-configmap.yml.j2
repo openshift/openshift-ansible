@@ -82,7 +82,7 @@ data:
 {% if nsx_k8s_api_ip is defined %}
     apiserver_host_ip = "{{ nsx_k8s_api_ip }}"
 {% else %}
-    apiserver_host_ip = "{{ nsx_k8s_svc.results.clusterip }}"
+    apiserver_host_ip = "{{  nsx_k8s_api_ip | default(nsx_k8s_svc.results.clusterip) }}"
 {% endif %}
 
     # Port of the Kubernetes API Server.
