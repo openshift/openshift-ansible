@@ -86,11 +86,7 @@ data:
     # KUBERNETES_SERVICE_HOST.
     #apiserver_host_ip = <ip_address>
 
-{% if nsx_k8s_api_ip is defined %}
-    apiserver_host_ip = "{{ nsx_k8s_api_ip }}"
-{% else %}
-    apiserver_host_ip = "{{ nsx_k8s_svc.results.clusterip }}"
-{% endif %}
+    apiserver_host_ip = "{{ nsx_k8s_api_ip | default(nsx_k8s_svc.results.clusterip) }}"
 
     # Port of the Kubernetes API Server.
     # Set to 6443 for https. If not set, will try to
@@ -134,11 +130,8 @@ data:
     #proc_mount_path_prefix = /host
 
     # The OVS bridge to configure container interface.
-{% if nsx_node_type == 'BAREMETAL' %}
     ovs_bridge = {{ (nsx_node_type == 'BAREMETAL') | ternary('nsx-managed', 'br-int') }}
-{% else %}
-    ovs_bridge = br-int
-{% endif %}
+
     [nsx_kube_proxy]
     #
     # Configuration for nsx_kube_proxy
