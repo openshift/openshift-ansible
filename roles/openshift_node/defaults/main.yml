@@ -81,7 +81,7 @@ default_r_openshift_node_os_firewall_allow:
 - service: https
   port: 443/tcp
 - service: OpenShift OVS sdn
-  port: 4789/udp
+  port: "{{ openshift_sdn_vxlan_port | default('4789') }}/udp"
   cond: openshift_use_openshift_sdn | bool
 - service: Calico BGP Port
   port: 179/tcp
