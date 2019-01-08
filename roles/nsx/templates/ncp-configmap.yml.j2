@@ -79,11 +79,8 @@ data:
     # IP address of the Kubernetes API Server. If not set, will try to
     # read and use the Kubernetes Service IP from environment variable
     # KUBERNETES_SERVICE_HOST.
-{% if nsx_k8s_api_ip is defined %}
-    apiserver_host_ip = "{{ nsx_k8s_api_ip }}"
-{% else %}
-    apiserver_host_ip = "{{  nsx_k8s_api_ip | default(nsx_k8s_svc.results.clusterip) }}"
-{% endif %}
+
+    apiserver_host_ip = "{{ nsx_k8s_api_ip | default(nsx_k8s_svc.results.clusterip) }}"
 
     # Port of the Kubernetes API Server.
     # Set to 6443 for https. If not set, will try to
