@@ -8,7 +8,9 @@ USER root
 COPY images/installer/origin-extra-root /
 
 # install ansible and deps
-RUN INSTALL_PKGS="python-lxml python-dns pyOpenSSL python2-cryptography openssl python2-passlib httpd-tools openssh-clients origin-clients iproute patch" \
+RUN REPO_PKGS="http://resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm" \
+ && yum install -y --setopt=tsflags=nodocs $REPO_PKGS \
+ && INSTALL_PKGS="python-lxml python-dns pyOpenSSL python2-cryptography openssl python2-passlib httpd-tools openssh-clients origin-clients iproute patch python-ovirt-engine-sdk4 ovirt-ansible-roles" \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
  && EPEL_PKGS="ansible-2.7.4 python2-boto python2-crypto which python2-pip.noarch python2-scandir python2-packaging azure-cli-2.0.46" \
  && yum install -y epel-release \
