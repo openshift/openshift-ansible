@@ -19,16 +19,16 @@
       url: "{{ item.src }}"
       dest: "{{ item.dest }}"
     with_items:
-      - {src: "{{ nsx_ovs_url }}", dest: '/tmp/ovs.rpm'}
-      - {src: "{{ nsx_kmod_ovs_url }}", dest: '/tmp/kmod_ovs.rpm'}
+    - {src: "{{ nsx_ovs_url }}", dest: '/tmp/ovs.rpm'}
+    - {src: "{{ nsx_kmod_ovs_url }}", dest: '/tmp/kmod_ovs.rpm'}
 
   - name: NSX | Install OVS
     yum:
       name: "{{ item }}"
       state: present
     with_items:
-      - '/tmp/ovs.rpm'
-      - '/tmp/kmod_ovs.rpm'
+    - '/tmp/ovs.rpm'
+    - '/tmp/kmod_ovs.rpm'
 
   - name: NSX | Fix Openvswitch wrong SELinux label
     command: /usr/sbin/restorecon -R -v /run/openvswitch/
