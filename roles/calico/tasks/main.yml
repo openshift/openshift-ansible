@@ -4,7 +4,7 @@
 - name: Calico | Run kube proxy
   import_role:
     name: kube_proxy_and_dns
-  when: "ansible_hostname == groups.oo_first_master.0"
+  when: "inventory_hostname == groups.oo_first_master.0"
 
 - include_tasks: certs.yml
 
