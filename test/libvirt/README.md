@@ -51,5 +51,12 @@ Be sure to save that to ~/images/ and xz -d.
 
 ./deploy_centos.sh
 
+## Console Access / Ingress
+The console relies on a route exposed via the ingress operator which installs by
+default assuming cloud provider support for service type loadbalancers. Reconfigure
+and redeploy it so that it uses host networking.
+
+`oc patch clusteringresses/default -n openshift-ingress-operator -p '{"spec":{"highAvailability":{"type":"UserDefined"}}}' --type merge && oc delete all --all -n openshift-ingress`
+
 ## Cleanup
 Afterwards, you can cleanup with ./cleanup.sh
