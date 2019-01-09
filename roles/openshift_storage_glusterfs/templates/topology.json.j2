@@ -34,6 +34,15 @@
               ]
             },
             "zone": {{ hostvars[node].glusterfs_zone | default(1) }}
+{%- if 'glusterfs_nodetags' in hostvars[node] -%},
+            "tags": {
+  {% for k,v in hostvars[node].glusterfs_nodetags.iteritems() %}
+            "{{ k }}": "{{ v }}"{%- if not loop.last %},{% endif %}
+
+  {% endfor %}
+            }
+{%- endif %}
+
           },
           "devices": [
 {%- for device in hostvars[node].glusterfs_devices -%}
