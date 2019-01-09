@@ -80,7 +80,7 @@ def get_valid_nodes(module, oc_exec, exclude_node):
         fields = line.split()
         if not fields:
             continue
-        if fields[0] != exclude_node and fields[1] == "Ready":
+        if fields[0] != exclude_node and "Ready" in fields[1].split(','):
             valid_nodes.append(fields[0])
     if not valid_nodes:
         fail(module,
