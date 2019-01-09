@@ -62,8 +62,8 @@
     state: present
     name: "aggregated-logging-elasticsearch"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
-    image_pull_secrets: "{{ openshift_logging_image_pull_secret }}"
-  when: openshift_logging_image_pull_secret != ''
+    image_pull_secrets: "{{ openshift_logging_elasticsearch_image_pull_secret }}"
+  when: openshift_logging_elasticsearch_image_pull_secret != ''
 
 - name: Create ES service account
   oc_serviceaccount:
@@ -71,7 +71,7 @@
     name: "aggregated-logging-elasticsearch"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
   when:
-  - openshift_logging_image_pull_secret == ''
+  - openshift_logging_elasticsearch_image_pull_secret == ''
 
 # rolebinding reader
 - name: Create rolebinding-reader role
