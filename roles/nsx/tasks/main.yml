@@ -3,7 +3,6 @@
   run_once: true
   import_role:
     name: kube_proxy_and_dns
-  tags: nsx
 
 - name: NSX | Ensure nsx-system project exists
   oc_project:

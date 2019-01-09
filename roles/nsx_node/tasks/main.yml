@@ -3,7 +3,6 @@
   get_url:
     url: "{{ nsx_cni_url }}"
     dest: /tmp/cni.rpm
-  tags: nsx_node
 
 - name: NSX | Install CNI
   yum:
