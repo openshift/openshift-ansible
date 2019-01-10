@@ -1,0 +1,57 @@
+---
+- name: List existing workers
+  oc_obj:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: list
+    kind: node
+    selector: "node-role.kubernetes.io/worker"
+  delegate_to: localhost
+  register: pre_scaleup_workers
+  until:
+  - pre_scaleup_workers.results is defined
+  - pre_scaleup_workers.results.returncode is defined
+  - pre_scaleup_workers.results.results is defined
+  - pre_scaleup_workers.results.returncode == 0
+  - pre_scaleup_workers.results.results[0]['items'] | length > 0
+  retries: 36
+  delay: 5
+
+- set_fact:
+    pre_scaleup_workers_name: "{{ pre_scaleup_workers.results.results[0]['items'] |map(attribute='metadata.name') | list }}"
+
+- name: create temp directory
+  command: mktemp -d /tmp/openshift-ansible-XXXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: get existing worker machinesets
+  oc_obj:
+    state: list
+    kind: machinesets
+    namespace: openshift-cluster-api
+    selector: ""
+    kubeconfig: "{{ kubeconfig_path }}"
+  register: machineset
+
+- set_fact:
+    pre_scaleup_machineset_names: "{{ machineset.results.results[0]['items'] |map(attribute='metadata.name') | list }}"
+
+- name: List existing masters
+  oc_obj:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: list
+    kind: node
+    selector: "node-role.kubernetes.io/master"
+  delegate_to: localhost
+  register: masters
+  until:
+  - masters.results is defined
+  - masters.results.returncode is defined
+  - masters.results.results is defined
+  - masters.results.returncode == 0
+  retries: 36
+  delay: 5
+
+- name: save first master external DNS name
+  set_fact:
+    master_external_dns: "{{ masters.results.results[0]['items'][0].status.addresses | selectattr('type', 'match', '^ExternalDNS$') | map(attribute='address') | first }}"

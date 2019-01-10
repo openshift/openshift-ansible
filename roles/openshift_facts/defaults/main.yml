@@ -49,7 +49,7 @@ openshift_use_crio: True
 openshift_use_crio_only: True
 openshift_crio_enable_docker_gc: False
 openshift_crio_var_sock: "/var/run/crio/crio.sock"
-openshift_crio_pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
+openshift_crio_pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') | regex_replace('${version}' | regex_escape, 'v4.0') }}"
 openshift_container_cli: "{{ openshift_use_crio | bool | ternary('crictl', 'docker') }}"
 openshift_crio_docker_gc_node_selector:
   runtime: 'cri-o'

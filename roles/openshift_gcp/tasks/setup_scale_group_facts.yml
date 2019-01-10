@@ -23,3 +23,11 @@
     - workers
     - nodes
   with_items: "{{ groups['tag_ocp-worker'] | default([]) }}"
+
+- name: Add new worker instances
+  add_host:
+    name: "{{ hostvars[item].gce_name }}"
+    groups:
+    - new_workers
+    - nodes
+  with_items: "{{ groups['tag_ocp-new-worker'] | default([]) }}"
