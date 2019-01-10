@@ -71,6 +71,10 @@ objects:
             value: ${HEKETI_USER_KEY}
           - name: HEKETI_ADMIN_KEY
             value: ${HEKETI_ADMIN_KEY}
+          - name: HEKETI_CLI_USER
+            value: 'admin'
+          - name: HEKETI_CLI_KEY
+            value: ${HEKETI_ADMIN_KEY}
           - name: HEKETI_EXECUTOR
             value: ${HEKETI_EXECUTOR}
           - name: HEKETI_FSTAB
