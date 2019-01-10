@@ -194,3 +194,23 @@
     - fail:
         msg: CVO didn't complete the install
     when: cvo.failed
+
+  - when: openshift_kubeadmin_password is defined
+    block:
+    - name: Delete existing kube-admin secret
+      oc_secret:
+        kubeconfig: /opt/openshift/auth/kubeconfig
+        name: kube-admin
+        namespace: default
+        state: absent
+      run_once: true
+
+    - name: Create kube-admin secret
+      oc_secret:
+        kubeconfig: /opt/openshift/auth/kubeconfig
+        name: kube-admin
+        namespace: default
+        state: present
+        contents:
+          - path: kubeadmin
+            data: "{{ openshift_kubeadmin_password }}"
