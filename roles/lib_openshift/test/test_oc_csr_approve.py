@@ -119,6 +119,12 @@ def test_get_ready_nodes_server():
         ready_nodes_server = approver.get_ready_nodes_server(nodes_list)
     assert ready_nodes_server == ['fedora1.openshift.io']
 
+    with patch(RUN_CMD_MOCK) as call_mock:
+        call_mock.return_value = (1, 'stdout fail', 'stderr fail')
+        ready_nodes_server = approver.get_ready_nodes_server(nodes_list)
+    raw_fails = ('fedora1.openshift.io', 1, 'stdout fail', 'stderr fail')
+    assert approver.result['raw_failures'][0] == raw_fails
+
 
 def test_get_csrs_server():
     module = DummyModule({})

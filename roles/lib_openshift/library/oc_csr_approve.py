@@ -91,7 +91,8 @@ class CSRapprove(object):
                        'all_subjects_found': self.all_subjects_found,
                        'client_approve_results': [],
                        'server_approve_results': [],
-                       'unwanted_csrs': self.unwanted_csrs}
+                       'unwanted_csrs': self.unwanted_csrs,
+                       'raw_failures': []}
 
     def run_command(self, command, rc_opts=None):
         '''Run a command using AnsibleModule.run_command, or fail'''
@@ -209,11 +210,13 @@ class CSRapprove(object):
         for node in nodes_list:
             # need this to look like /api/v1/nodes/<node>/proxy/healthz
             command = base_command.format(self.oc_bin, self.oc_conf, node)
-            rtnc, _, _ = self.module.run_command(command)
+            rtnc, stdout, stderr = self.module.run_command(command)
             if not rtnc:
                 # if we can hit that api endpoint, the node has a valid server
                 # cert.
                 ready_nodes_server.append(node)
+            else:
+                self.result['raw_failures'].append((node, rtnc, stdout, stderr))
         return ready_nodes_server
 
     def verify_server_csrs(self):
