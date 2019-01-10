@@ -1,0 +1,16 @@
+---
+nsx_node_type: 'HOSTVM'
+nsx_insecure_ssl: true
+nsx_subnet_prefix: 24
+nsx_use_loadbalancer: true
+nsx_lb_service_size: 'SMALL'
+nsx_ovs_uplink_port: 'ens224'
+nsx_k8s_api_port: '443'
+nsx_ingress_mode: nat
+nsx_log_dropped_traffic: true
+nsx_l4_lb_auto_scaling: true
+nsx_default_ingress_class: true
+nsx_lb_pool_algorithm: 'ROUND_ROBIN'
+nsx_enable_snat: true
+nsx_lb_default_cert: '/etc/nsx-ujo/lb-default.crt'
+nsx_lb_default_key: '/etc/nsx-ujo/lb-default.key'

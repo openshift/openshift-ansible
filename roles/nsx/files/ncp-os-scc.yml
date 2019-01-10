@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: SecurityContextConstraints
+metadata:
+  annotations:
+    kubernetes.io/description: scc-ncp provides the SCC for NCP and NSX Node Agent
+  creationTimestamp: null
+  name: ncp-scc
+
+allowHostDirVolumePlugin: true
+allowHostIPC: false
+allowHostNetwork: true
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegedContainer: false
+allowedCapabilities:
+- SYS_ADMIN
+- NET_ADMIN
+- SYS_PTRACE
+- DAC_READ_SEARCH
+# For BMC usecase
+- DAC_OVERRIDE
+defaultAddCapabilities: null
+fsGroup:
+  type: MustRunAs
+groups:
+- system:authenticated
+priority: null
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+- KILL
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  seLinuxOptions:
+    type: spc_t
+    level: s0:c0.c1023
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- persistentVolumeClaim
+- secret

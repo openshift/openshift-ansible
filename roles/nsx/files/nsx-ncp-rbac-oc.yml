@@ -1,0 +1,139 @@
+---
+# Create a ServiceAccount for NCP namespace
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+ name: ncp-svc-account
+ namespace: nsx-system
+
+---
+
+# Create ClusterRole for NCP
+kind: ClusterRole
+apiVersion: v1
+metadata:
+ name: ncp-cluster-role
+rules:
+ - apiGroups:
+   - ""
+   - extensions
+   - networking.k8s.io
+   resources:
+     - deployments
+     - endpoints
+     - pods
+     - pods/log
+     - networkpolicies
+     - nodes
+     - replicationcontrollers
+     - routes
+   verbs:
+     - get
+     - watch
+     - list
+
+---
+
+# Create ClusterRole for NCP to edit resources
+kind: ClusterRole
+apiVersion: v1
+metadata:
+ name: ncp-patch-role
+rules:
+ - apiGroups:
+   - ""
+   - extensions
+   resources:
+     # NCP needs to annotate the SNAT errors on namespaces
+     - namespaces
+     - ingresses
+     - services
+     - routes
+   verbs:
+     - get
+     - watch
+     - list
+     - update
+     - patch
+ - apiGroups:
+   - ""
+   - extensions
+   resources:
+     - ingresses/status
+     - services/status
+     - routes/status
+   verbs:
+     - replace
+     - update
+     - patch
+---
+
+# Bind ServiceAccount created for NCP to its ClusterRole
+kind: ClusterRoleBinding
+apiVersion: v1
+metadata:
+ name: ncp-cluster-role-binding
+roleRef:
+ kind: ClusterRole
+ name: ncp-cluster-role
+subjects:
+ - kind: ServiceAccount
+   name: ncp-svc-account
+   namespace: nsx-system
+
+---
+
+# Bind ServiceAccount created for NCP to the patch ClusterRole
+kind: ClusterRoleBinding
+apiVersion: v1
+metadata:
+ name: ncp-patch-role-binding
+roleRef:
+ kind: ClusterRole
+ name: ncp-patch-role
+subjects:
+ - kind: ServiceAccount
+   name: ncp-svc-account
+   namespace: nsx-system
+
+---
+
+# Create a ServiceAccount for nsx-node-agent
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+ name: nsx-node-agent-svc-account
+ namespace: nsx-system
+
+---
+
+# Create ClusterRole for nsx-node-agent
+kind: ClusterRole
+apiVersion: v1
+metadata:
+ name: nsx-node-agent-cluster-role
+rules:
+ - apiGroups:
+   - ""
+   resources:
+     - endpoints
+     - services
+   verbs:
+     - get
+     - watch
+     - list
+
+---
+
+# Bind ServiceAccount created for nsx-node-agent to its ClusterRole
+kind: ClusterRoleBinding
+apiVersion: v1
+metadata:
+ name: nsx-node-agent-cluster-role-binding
+roleRef:
+ kind: ClusterRole
+ name: nsx-node-agent-cluster-role
+subjects:
+ - kind: ServiceAccount
+   name: nsx-node-agent-svc-account
+   namespace: nsx-system

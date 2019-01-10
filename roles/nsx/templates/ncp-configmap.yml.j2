@@ -1,0 +1,287 @@
+# ConfigMap for ncp.ini
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nsx-ncp-config
+  labels:
+    version: v1
+data:
+  ncp.ini: |
+    [DEFAULT]
+
+    # Set to True to enable logging to stderr
+    #use_stderr = True
+    # Set to True to send logs to the syslog daemon
+    #use_syslog = False
+    # Enabler debug-level logging for the root logger. If set to True, the
+    # root logger debug level will be DEBUG, otherwise it will be INFO.
+    #debug = True
+{% if nsx_debug is defined %}
+    debug = True
+{% endif %}
+    # The log file path must be set to something like '/var/log/nsx-ujo/'. By
+    # default, logging to file is disabled.
+    #log_dir = None
+
+    # Name of log file to send logging output to. If log_dir is set but log_file is
+    # not, the binary name will be used, i.e., ncp.log, nsx_node_agent.log and
+    # nsx_kube_proxy.log.
+    #log_file = None
+
+    # max MB for each compressed file. Defaults to 100 MB
+    #log_rotation_file_max_mb = 100
+
+    # Total number of compressed backup files to store. Defaults to 5.
+    #log_rotation_backup_count = 5
+    [coe]
+    #
+    # Common options for Container Orchestrators
+    #
+
+    # Container orchestrator adaptor to plug in
+    # Options: kubernetes (default), openshift, pcf.
+    adaptor = openshift
+
+    # Specify cluster for adaptor. It is a prefix of NSX resources name to
+    # distinguish multiple clusters who are using the same NSX.
+    # This is also used as the tag of IP blocks for cluster to allocate
+    # IP addresses. Different clusters should have different IP blocks.
+    cluster = "{{ nsx_openshift_cluster_name }}"
+
+    # Log level for the NCP operations. If set, overrides the level specified
+    # for the root logger. Possible values are NOTSET, DEBUG, INFO, WARNING,
+    # ERROR, CRITICAL
+    loglevel=INFO
+
+    # Log level for the NSX API client operations. If set, overrides the level
+    # specified for the root logger. Possible values are NOTSET, DEBUG, INFO,
+    # WARNING, ERROR, CRITICAL
+    nsxlib_loglevel=INFO
+
+    # Once enabled, all projects in this cluster will be mapped to a NAT
+    # topology in NSX backend
+    enable_snat = "{{ nsx_enable_snat }}"
+
+    # The type of container node. Possible values are HOSTVM, BAREMETAL.
+    node_type = "{{ nsx_node_type }}"
+
+    [ha]
+    #
+    # NCP High Availability configuration options are 
+    # supported only with Pivotal Container Service PKS
+    #
+
+    [k8s]
+    #
+    # From kubernetes
+    #
+
+    # IP address of the Kubernetes API Server. If not set, will try to
+    # read and use the Kubernetes Service IP from environment variable
+    # KUBERNETES_SERVICE_HOST.
+
+    apiserver_host_ip = "{{ nsx_k8s_api_ip | default(nsx_k8s_svc.results.clusterip) }}"
+
+    # Port of the Kubernetes API Server.
+    # Set to 6443 for https. If not set, will try to
+    # read and use the Kubernetes Service port from environment
+    # variable KUBERNETES_SERVICE_PORT.
+    apiserver_host_port = "{{ nsx_k8s_api_port }}"
+
+
+    # Specify a CA bundle file to use in verifying the Kubernetes API server
+    # certificate. (string value)
+    #ca_file = <None>
+    ca_file = /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+    # Full path of the Token file to use for authenticating with the k8s API server.
+    #client_token_file = <None>
+    client_token_file = /var/run/secrets/kubernetes.io/serviceaccount/token
+
+    # Full path of the client certificate file to use for authenticating
+    # with the k8s API server. It must be specified together with
+    # "client_private_key_file"
+    #client_cert_file = <None>
+
+    # Full path of the client certificate file to use for authenticating
+    # with the k8s API server. It must be specified together with
+    # "client_cert_file"
+    #client_private_key_file = <None>
+
+    # Log level for the kubernetes adaptor. If set, overrides the level specified
+    # for the root logger. Possible values are NOTSET, DEBUG, INFO, WARNING,
+    # ERROR, CRITICAL
+    loglevel=INFO
+
+    # Specify how ingress controllers are expected to be deployed. Possible values:
+    # hostnetwork or nat. NSX will create NAT rules only in the second case.
+    ingress_mode = "{{ nsx_ingress_mode }}"
+
+    [nsx_v3]
+    #
+    # From nsx
+    #
+
+    # IP address of one or more NSX managers separated by commas. The IP address
+    # should be of the form (list value):
+    # <ip_address1>[:<port1>],<ip_address2>[:<port2>],...
+    # HTTPS will be used for communication with NSX. If port is not provided,
+    # port 443 will be used.
+    nsx_api_managers = "{{ nsx_api_managers }}"
+{% if nsx_api_user is defined %}
+    nsx_api_user = "{{ nsx_api_user }}"
+{% endif %}
+{% if nsx_api_password is defined %}
+    nsx_api_password = "{{ nsx_api_password }}"
+{% endif %}
+
+    # If true, the NSX Manager server certificate is not verified. If false the CA
+    # bundle specified via "ca_file" will be used or if unsest the default system
+    # root CAs will be used. (boolean value)
+    insecure = "{{ nsx_insecure_ssl }}"
+
+    # Specify one or a list of CA bundle files to use in verifying the NSX Manager
+    # server certificate. This option is ignored if "insecure" is set to True. If
+    # "insecure" is set to False and ca_file is unset, the system root CAs will be
+    # used to verify the server certificate. (list value)
+    #ca_file = <None>
+
+    # Path to NSX client certificate file. If specified, the nsx_api_user and
+    # nsx_api_passsword options will be ignored. This option must be specified
+    # along with "nsx_api_private_key_file" option.
+{% if nsx_api_cert is defined %}
+    nsx_api_cert_file = "/etc/nsx-auth-cert/nsx-auth.crt"
+{% endif %}
+
+    # Path to NSX client private key file. If specified, the nsx_api_user and
+    # nsx_api_passsword options will be ignored. This option must be specified
+    # along with "nsx_api_cert_file" option.
+{% if nsx_api_private_key is defined %}
+    nsx_api_private_key_file = "/etc/nsx-auth-cert/nsx-auth.key"
+{% endif %}
+
+    # The time in seconds before aborting a HTTP connection to a NSX manager.
+    # (integer value)
+    #http_timeout = 10
+
+    # The time in seconds before aborting a HTTP read response from a NSX manager.
+    # (integer value)
+    #http_read_timeout = 180
+
+    # Maximum number of times to retry a HTTP connection. (integer value)
+    #http_retries = 3
+
+    # Maximum concurrent connections to each NSX manager. (integer value)
+    #concurrent_connections = 10
+
+    # The amount of time in seconds to wait before ensuring connectivity to the NSX
+    # manager if no manager connection has been used. (integer value)
+    #conn_idle_timeout = 10
+
+    # Number of times a HTTP redirect should be followed. (integer value)
+    #redirects = 2
+
+    # Maximum number of times to retry API requests upon stale revision errors.
+    # (integer value)
+    #retries = 10
+
+    # Subnet prefix of IP block. IP block will be retrieved from NSX API and
+    # recognised by tag 'cluster'.
+    # Prefix should be less than 31, as two addresses(the first and last addresses)
+    # need to be network address and broadcast address.
+    # The prefix is fixed after the first subnet is created. It can be changed only
+    # if there is no subnets in IP block.
+    subnet_prefix = "{{ nsx_subnet_prefix }}"
+
+    # Indicates whether distributed firewall DENY rules are logged.
+    log_dropped_traffic = "{{ nsx_log_dropped_traffic }}"
+
+    # Option to use native loadbalancer support.
+    use_native_loadbalancer = "{{ nsx_use_loadbalancer }}"
+
+    # Option to auto scale layer 4 load balancer or not. If set to True, NCP
+    # will create additional LB when necessary upon K8s Service of type LB
+    # creation/update.
+    l4_lb_auto_scaling = "{{ nsx_l4_lb_auto_scaling }}"
+
+    # Used when ingress class annotation is missing
+    # if set to true, the ingress will be handled by nsx lbs
+    # otherwise will be handled by 3rd party ingress controller (e.g. nginx)
+    default_ingress_class_nsx = "{{ nsx_default_ingress_class }}"
+
+    # Path to the default certificate file for HTTPS load balancing
+    lb_default_cert_path = /etc/nsx-cert/lb-cert.crt
+
+    # Path to the private key file for default certificate for HTTPS load balancing
+    lb_priv_key_path = /etc/nsx-cert/lb-key.key
+
+    # Option to set load balancing algorithm in load balancer pool object.
+    # Available choices are
+    # ROUND_ROBIN/LEAST_CONNECTION/IP_HASH/WEIGHTED_ROUND_ROBIN
+    pool_algorithm = "{{ nsx_lb_pool_algorithm }}"
+
+    # Option to set load balancer service size. Available choices are
+    # SMALL/MEDIUM/LARGE.
+    # MEDIUM Edge VM (4 vCPU, 8GB) only supports SMALL LB.
+    # LARGE Edge VM (8 vCPU, 16GB) only supports MEDIUM and SMALL LB.
+    # Bare Metal Edge (IvyBridge, 2 socket, 128GB) supports LARGE, MEDIUM and
+    # SMALL LB
+    service_size = "{{ nsx_lb_service_size }}"
+
+    # Choice of persistence type for ingress traffic through L7 Loadbalancer.
+    # Accepted values:
+    # 'cookie'
+    # 'source_ip'
+    #l7_persistence = <None>
+{% if nsx_lb_l7_persistence is defined %}
+    l7_persistence = "{{ nsx_lb_l7_persistence }}"
+{% endif %}
+    # Choice of persistence type for ingress traffic through L4 Loadbalancer.
+    # Accepted values:
+    # 'source_ip'
+    #l4_persistence = <None>
+{% if nsx_lb_l4_persistence is defined %}
+    l4_persistence = "{{ nsx_lb_l4_persistence }}"
+{% endif %}
+
+    # Name or UUID of the tier0 router that project tier1 routers connect to
+    tier0_router = "{{ nsx_tier0_router }}"
+
+    # Name or UUID of the NSX overlay transport zone that will be used for creating
+    # logical switches for container networking. It must refer to an existing
+    # transport zone on NSX and every hypervisor that hosts the Kubernetes
+    # node VMs must join this transport zone
+    overlay_tz = "{{ nsx_overlay_transport_zone }}"
+
+    # Name or UUID of the NSX lb service that can be attached by virtual servers
+    #lb_service = <None>
+{% if nsx_lb_service is defined %}
+    lb_service = "{{ nsx_lb_service }}"
+{% endif %}
+    # Name or UUID of the container ip blocks that will be used for creating
+    # subnets. If name, it must be unique
+    container_ip_blocks = "{{ nsx_container_ip_block }}"
+
+    # Name or UUID of the container ip blocks that will be used for creating
+    # subnets for no-SNAT projects. If specified, no-SNAT projects will use these
+    # ip blocks ONLY. Otherwise they will use container_ip_blocks
+{% if nsx_no_snat_ip_block is defined %}
+    no_snat_ip_blocks = "{{ nsx_no_snat_ip_block }}"
+{% endif %}
+    # Name or UUID of the external ip pools that will be used for allocating IP
+    # addresses which will be used for translating container IPs via SNAT rules
+    external_ip_pools = "{{ nsx_external_ip_pool }}"
+
+    # Name or UUID of the external ip pools that will be used for allocating IP
+    # addresses for exposing LoadBalancer type service and ingress controller
+{% if nsx_external_ip_pool_lb is defined %}
+    external_ip_pools_lb = "{{ nsx_external_ip_pool_lb }}"
+{% endif %}
+    # Firewall sections for this cluster will be created below this mark section
+{% if nsx_top_fw_section is defined %}
+    top_firewall_section_marker = "{{ nsx_top_fw_section }}"
+{% endif %}
+    # Firewall sections for this cluster will be created above this mark section
+{% if nsx_bottom_fw_section is defined %}
+    bottom_firewall_section_marker = "{{ nsx_bottom_fw_section }}"
+{% endif %}

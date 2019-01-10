@@ -78,6 +78,12 @@
   - role: calico_node
     when: openshift_use_calico | default(false) | bool
 
+- name: NSX Node Configuration
+  hosts: all
+  roles:
+  - role: nsx_node
+    when: openshift_use_nsx | default(false) | bool
+
 - name: Node Join Checkpoint End
   hosts: all
   gather_facts: false
