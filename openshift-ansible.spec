@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.98
+Version:        3.10.99
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,22 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jan 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.99-1
+- added enviroment values for easier heketi-cli usage (fcarrus@redhat.com)
+- unsquished parameter words (fcarrus@redhat.com)
+- better and clearer indentation in template (fcarrus@redhat.com)
+- Added missing trailing space (f.carrus@gmail.com)
+- Update README.md (f.carrus@gmail.com)
+- Update README.md (f.carrus@gmail.com)
+- fixed indentation (fcarrus@redhat.com)
+- Added GlusterFS advanced options (fcarrus@redhat.com)
+- Use namespace variable instead of default namespace value, glusterfs
+  (sarumuga@redhat.com)
+- Fix BZ1663306 when gluster nodes are SchedulingDisabled
+  (mrafcollins@gmail.com)
+- Override of logging ES image pull secret (haeusler.christian@mac.com)
+- test/aws: create necessary security groups (vrutkovs@redhat.com)
+
 * Mon Jan 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.98-1
 - Add openshift_node_group_name to hosts.example (rteague@redhat.com)
 
