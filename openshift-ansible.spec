@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.67
+Version:        3.11.68
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,36 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jan 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.68-1
+- added enviroment values for easier heketi-cli usage (fcarrus@redhat.com)
+- Fix BZ1663306 when gluster nodes are SchedulingDisabled
+  (mrafcollins@gmail.com)
+- Fix install of kube_proxy_and_dns, with Calico (neil@tigera.io)
+- unsquished parameter words (fcarrus@redhat.com)
+- better and clearer indentation in template (fcarrus@redhat.com)
+- Fix README and remove tags (yasensim@gmail.com)
+- Do not disable ingressClass if nsx-lb is not used (yasensim@gmail.com)
+- Fix couple of obsolete warnings (yasensim@gmail.com)
+- Fix indentation (yasensim@gmail.com)
+- Contains all requested changes (simeonovy@simeonovy-a02.vmware.com)
+- Update roles/nsx_node/tasks/main.yml (roignac@gmail.com)
+- Update roles/nsx/templates/nsx-node-agent-configmap.yml.j2
+  (roignac@gmail.com)
+- Update roles/nsx/templates/ncp-configmap.yml.j2 (roignac@gmail.com)
+- Fix spaces and indentations (simeonovy@simeonovy-a02.vmware.com)
+- Update README.md (yasensim@gmail.com)
+- Add NSX-T support (yasensim@gmail.com)
+- test/aws: create necessary security groups (vrutkovs@redhat.com)
+- Use namespace variable instead of default namespace value, glusterfs
+  (sarumuga@redhat.com)
+- Use Calico v3.4.0 (neil@ossau.homelinux.net)
+- Add openshift_sdn_vxlan_port to change the vxlanPort (bysnupy@hotmail.com)
+- Added missing trailing space (f.carrus@gmail.com)
+- Update README.md (f.carrus@gmail.com)
+- Update README.md (f.carrus@gmail.com)
+- fixed indentation (fcarrus@redhat.com)
+- Added GlusterFS advanced options (fcarrus@redhat.com)
+
 * Sun Jan 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.67-1
 - 
 
