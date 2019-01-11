@@ -101,6 +101,8 @@
     when: openshift_use_nuage | default(false) | bool
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
+  - role: nsx
+    when: openshift_use_nsx | default(false) | bool
   tasks:
   - import_role:
       name: kuryr

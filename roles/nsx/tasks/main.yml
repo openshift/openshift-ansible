@@ -1,0 +1,159 @@
+---
+- name: NSX | Run kube proxy
+  run_once: true
+  import_role:
+    name: kube_proxy_and_dns
+
+- name: NSX | Ensure nsx-system project exists
+  oc_project:
+    name: nsx-system
+    state: present
+    node_selector:
+      - ""
+  tags: nsx
+
+- name: NSX | Make directory for nsx yaml
+  file:
+    path: /etc/nsx-ujo
+    state: directory
+    mode: 0755
+  tags: nsx
+
+- name: NSX | Copy files to nsx-ujo directory
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/nsx-ujo/{{ item | basename }}"
+  with_fileglob:
+    - "files/*.yml"
+  tags: nsx
+
+- name: NSX | Get kubernetes service
+  oc_service:
+    namespace: default
+    name: kubernetes
+    state: list
+  register: nsx_k8s_svc
+  tags: nsx
+
+- name: NSX | Write NSX templates to nsx-ujo directory
+  template:
+    src: "{{ item.src }}"
+    dest: "/etc/nsx-ujo/{{ item.dest }}"
+    mode: 0555
+  with_items:
+    - {src: 'ncp-configmap.yml.j2', dest: 'ncp-configmap.yml'}
+    - {src: 'nsx-node-agent-configmap.yml.j2', dest: 'nsx-node-agent-configmap.yml'}
+    - {src: 'nsx-node-agent-ds.yml.j2', dest: 'nsx-node-agent-ds.yml'}
+    - {src: 'ncp-rc.yml.j2', dest: 'ncp-rc.yml'}
+  tags: nsx
+
+- name: NSX | Set rbac
+  command: >
+    {{ openshift_client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    apply -f /etc/nsx-ujo/nsx-ncp-rbac-oc.yml -n nsx-system
+  tags: nsx
+
+- name: NSX | Set SecurityContextConstraints
+  command: >
+    {{ openshift_client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    apply -f /etc/nsx-ujo/ncp-os-scc.yml -n nsx-system
+  tags: nsx
+
+- name: NSX | Add ncp-svc-account to ncp-scc
+  oc_adm_policy_user:
+    user: system:serviceaccount:nsx-system:ncp-svc-account
+    resource_kind: scc
+    resource_name: ncp-scc
+    state: present
+  tags: nsx
+
+- name: NSX | Add nsx-node-agent-svc-account to ncp-scc
+  oc_adm_policy_user:
+    user: system:serviceaccount:nsx-system:nsx-node-agent-svc-account
+    resource_kind: scc
+    resource_name: ncp-scc
+    state: present
+  tags: nsx
+
+- name: NSX | Generate default LB CA key
+  command: openssl genrsa -out /etc/nsx-ujo/ca.key 4096
+  tags: nsx
+
+- name: NSX | Request default LB CA cert
+  command: openssl req -key /etc/nsx-ujo/ca.key -new -x509 -days 365 -sha256 -extensions v3_ca -out /etc/nsx-ujo/ca.crt -subj "/C=US/ST=CA/L=Palo Alto/O=OS3/OU=Eng/CN=nsx.default.corp.local"
+  tags: nsx
+
+- name: NSX | Request default LB csr
+  command: openssl req -out /etc/nsx-ujo/lb-default.csr -new -newkey rsa:2048 -nodes -keyout /etc/nsx-ujo/lb-default.key -subj "/C=US/ST=CA/L=Palo Alto/O=OS3/OU=Eng/CN=nsx.default.corp.local"
+  tags: nsx
+
+- name: NSX | Request default LB cert
+  command: openssl x509 -req -days 360 -in /etc/nsx-ujo/lb-default.csr -CA /etc/nsx-ujo/ca.crt -CAkey /etc/nsx-ujo/ca.key -CAcreateserial -out /etc/nsx-ujo/lb-default.crt -sha256
+  tags: nsx
+
+- name: NSX | Create LB secret from cert
+  oc_secret:
+    state: present
+    namespace: nsx-system
+    name: nsx-lb-cert
+    files:
+      - name: lb-cert.crt
+        path: "{{ nsx_lb_default_cert }}"
+      - name: lb-key.key
+        path: "{{ nsx_lb_default_key }}"
+  run_once: true
+  tags: nsx
+
+- name: NSX | Create auth secret from cert
+  oc_secret:
+    state: present
+    namespace: nsx-system
+    name: nsx-auth-cert
+    files:
+      - name: nsx-auth.crt
+        path: "{{ nsx_api_cert }}"
+      - name: nsx-auth.key
+        path: "{{ nsx_api_private_key }}"
+  when: nsx_api_cert is defined
+  run_once: true
+  tags: nsx
+
+- name: NSX | disable OCP ingressIP management on svc type LB
+  yedit:
+    src: /etc/origin/master/master-config.yaml
+    edits:
+      - key: networkConfig.ingressIPNetworkCIDR
+        value: "0.0.0.0/32"
+  notify: restart master
+  when: nsx_use_loadbalancer | bool
+  tags: nsx
+
+- name: NSX | Apply NCP configmap
+  command: >
+    {{ openshift_client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    apply -f /etc/nsx-ujo/ncp-configmap.yml -n nsx-system
+  tags: nsx
+
+- name: NSX | Apply nsx-node-agent configmap
+  command: >
+    {{ openshift_client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    apply -f /etc/nsx-ujo/nsx-node-agent-configmap.yml -n nsx-system
+  tags: nsx
+
+- name: NSX | Deploy NCP pod
+  command: >
+    {{ openshift_client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    apply -f /etc/nsx-ujo/ncp-rc.yml -n nsx-system
+  tags: nsx
+
+- name: NSX | Deploy nsx-node-agent pod
+  command: >
+    {{ openshift_client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    apply -f /etc/nsx-ujo/nsx-node-agent-ds.yml -n nsx-system
+  tags: nsx

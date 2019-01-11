@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Yasen Simeonov
+  description: NSX-T networking
+  company: VMware
+  license: Apache License, Version 2.0
+  min_ansible_version: 2.4
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - cloud
+  - system
+dependencies:
+- role: openshift_facts

@@ -1,0 +1,113 @@
+---
+- name: NSX | Download CNI rpm
+  get_url:
+    url: "{{ nsx_cni_url }}"
+    dest: /tmp/cni.rpm
+
+- name: NSX | Install CNI
+  yum:
+    name: /tmp/cni.rpm
+    state: present
+  tags: nsx_node
+
+- when: nsx_node_type != 'BAREMETAL'
+  tags: nsx_node
+  block:
+  - name: NSX | Download NSX rpms
+    get_url:
+      url: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+    with_items:
+    - {src: "{{ nsx_ovs_url }}", dest: '/tmp/ovs.rpm'}
+    - {src: "{{ nsx_kmod_ovs_url }}", dest: '/tmp/kmod_ovs.rpm'}
+
+  - name: NSX | Install OVS
+    yum:
+      name: ['/tmp/ovs.rpm', '/tmp/kmod_ovs.rpm']
+      state: present
+
+  - name: NSX | Fix Openvswitch wrong SELinux label
+    command: /usr/sbin/restorecon -R -v /run/openvswitch/
+
+  - name: NSX | Restart OVS Kernel Module
+    command: /etc/init.d/openvswitch force-reload-kmod
+
+  - name: NSX | Start OVS service
+    systemd:
+      name: openvswitch
+      state: started
+
+  - name: NSX | Create OVS bridge
+    openvswitch_bridge:
+      bridge: br-int
+      state: present
+      fail_mode: standalone
+    args:
+      external_ids:
+        bridge-id: "br-int"
+
+  - name: NSX | Add the Uplink Port to OVS
+    openvswitch_port:
+      bridge: br-int
+      port: "{{ nsx_ovs_uplink_port }}"
+      state: present
+      set: Interface {{ nsx_ovs_uplink_port }} ofport_request=1
+
+  - name: NSX | Bring up br-int
+    command: "ip link set br-int up"
+
+  - name: NSX | Bring up node-if
+    command: "ip link set {{ nsx_ovs_uplink_port }} up"
+
+- when: not os_firewall_use_firewalld | default(False) | bool
+  tags: nsx_node
+  block:
+  - name: NSX | Iptables allow nodePort
+    iptables:
+      action: insert
+      chain: FORWARD
+      ctstate: ESTABLISHED,RELATED
+      jump: ACCEPT
+      comment: NSX
+
+  - name: NSX | Iptables allow DNS tcp
+    iptables:
+      action: insert
+      chain: OS_FIREWALL_ALLOW
+      protocol: tcp
+      destination_port: 53
+      ctstate: NEW,ESTABLISHED,RELATED
+      jump: ACCEPT
+      comment: NSX
+
+  - name: NSX | Iptables allow DNS udp
+    iptables:
+      action: insert
+      chain: OS_FIREWALL_ALLOW
+      protocol: udp
+      destination_port: 53
+      ctstate: NEW
+      jump: ACCEPT
+      comment: NSX
+
+  - name: NSX | Save iptables rules
+    command: service iptables save
+    args:
+      warn: False
+
+- when: os_firewall_use_firewalld | default(False) | bool
+  tags: nsx_node
+  block:
+  - name: NSX | Firewalld allow DNS tcp
+    firewalld:
+      port: 53/tcp
+      permanent: true
+      immediate: true
+      state: enabled
+
+  - name: NSX | Firewalld allow DNS udp
+    firewalld:
+      port: 53/udp
+      permanent: true
+      immediate: true
+      state: enabled

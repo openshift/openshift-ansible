@@ -1,0 +1,144 @@
+# yaml template for nsx-node-agent and nsx-kube-proxy DaemonSet
+# Right kubernetes API parameters and NCP Docker image must be
+# specified.
+
+# ConfigMap for ncp.ini
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nsx-node-agent-config
+  labels:
+    version: v1
+data:
+  ncp.ini: |
+    [DEFAULT]
+
+    # Set to True to enable logging to stderr
+    #use_stderr = True
+    # Set to True to send logs to the syslog daemon
+    #use_syslog = False
+    # Enabler debug-level logging for the root logger. If set to True, the
+    # root logger debug level will be DEBUG, otherwise it will be INFO.
+    #debug = True
+{% if nsx_debug is defined %}
+    debug = True
+{% endif %}
+    # The log file path must be set to something like '/var/log/nsx-ujo/'. By
+    # default, logging to file is disabled.
+    #log_dir = None
+
+    # Name of log file to send logging output to. If log_dir is set but log_file is
+    # not, the binary name will be used, i.e., ncp.log, nsx_node_agent.log and
+    # nsx_kube_proxy.log.
+    #log_file = None
+
+    # max MB for each compressed file. Defaults to 100 MB
+    #log_rotation_file_max_mb = 100
+
+    # Total number of compressed backup files to store. Defaults to 5.
+    #log_rotation_backup_count = 5
+    [coe]
+    #
+    # Common options for Container Orchestrators
+    #
+
+    # Container orchestrator adaptor to plug in
+    # Options: kubernetes (default), openshift, pcf.
+    adaptor = openshift
+
+    # Specify cluster for adaptor. It is a prefix of NSX resources name to
+    # distinguish multiple clusters who are using the same NSX.
+    # This is also used as the tag of IP blocks for cluster to allocate
+    # IP addresses. Different clusters should have different IP blocks.
+    #cluster = k8scluster
+    cluster = "{{ nsx_openshift_cluster_name }}"
+    # Log level for the NCP operations. If set, overrides the level specified
+    # for the root logger. Possible values are NOTSET, DEBUG, INFO, WARNING,
+    # ERROR, CRITICAL
+    loglevel=INFO
+
+    # Log level for the NSX API client operations. If set, overrides the level
+    # specified for the root logger. Possible values are NOTSET, DEBUG, INFO,
+    # WARNING, ERROR, CRITICAL
+    nsxlib_loglevel=INFO
+
+    # Once enabled, all projects in this cluster will be mapped to a NAT
+    # topology in NSX backend
+    enable_snat = True
+
+    # The type of container node. Possible values are HOSTVM, BAREMETAL.
+    #node_type = HOSTVM
+    node_type = "{{ nsx_node_type }}"
+
+    [ha]
+    #
+    # NCP High Availability configuration options
+    # are supported only with Pivotal Container Service PKS
+    #
+
+    [k8s]
+    #
+    # From kubernetes
+    #
+
+    # IP address of the Kubernetes API Server. If not set, will try to
+    # read and use the Kubernetes Service IP from environment variable
+    # KUBERNETES_SERVICE_HOST.
+    #apiserver_host_ip = <ip_address>
+
+    apiserver_host_ip = "{{ nsx_k8s_api_ip | default(nsx_k8s_svc.results.clusterip) }}"
+
+    # Port of the Kubernetes API Server.
+    # Set to 6443 for https. If not set, will try to
+    # read and use the Kubernetes Service port from environment
+    # variable KUBERNETES_SERVICE_PORT.
+    apiserver_host_port = "{{ nsx_k8s_api_port }}"
+
+    # Specify a CA bundle file to use in verifying the Kubernetes API server
+    # certificate. (string value)
+    #ca_file = <None>
+    ca_file = /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+    # Full path of the Token file to use for authenticating with the k8s API server.
+    #client_token_file = <None>
+    client_token_file = /var/run/secrets/kubernetes.io/serviceaccount/token
+
+    # Full path of the client certificate file to use for authenticating
+    # with the k8s API server. It must be specified together with
+    # "client_private_key_file"
+    #client_cert_file = <None>
+
+    # Full path of the client certificate file to use for authenticating
+    # with the k8s API server. It must be specified together with
+    # "client_cert_file"
+    #client_private_key_file = <None>
+
+    # Log level for the kubernetes adaptor. If set, overrides the level specified
+    # for the root logger. Possible values are NOTSET, DEBUG, INFO, WARNING,
+    # ERROR, CRITICAL
+    loglevel=INFO
+
+    [nsx_node_agent]
+    #
+    # Configuration for nsx_node_agent
+    #
+
+    # Needs to mount node /proc to container if nsx_node_agent runs in a container.
+    # By default node /proc will be mounted to /host/proc, the prefix is /host.
+    # It should be the same setting with mounted path in the daemonset yaml file.
+    # Set the path to '' if nsx_node_agent is running as a process in minion node.
+    #proc_mount_path_prefix = /host
+
+    # The OVS bridge to configure container interface.
+    ovs_bridge = {{ (nsx_node_type == 'BAREMETAL') | ternary('nsx-managed', 'br-int') }}
+
+    [nsx_kube_proxy]
+    #
+    # Configuration for nsx_kube_proxy
+    #
+
+    # The OVS uplink OpenFlow port where to apply the NAT rules to.
+    # If not specified, the port that gets assigned ofport=1 is used.
+{% if nsx_node_type != 'BAREMETAL' %}
+    ovs_uplink_port = "{{ nsx_ovs_uplink_port }}"
+{% endif %}
