@@ -7,7 +7,7 @@
     opts: "{{ item.mkfs_opts|default(None) }} -L {{ item.label }}"
   with_items: "{{ container_runtime_extra_storage }}"
   when:
-    - 'container_runtime_extra_storage is defined'
+    - 'item.label|length<=12'
     - 'item.path not in "{{ ansible_mounts }}"'
 
 
@@ -20,6 +20,6 @@
     state: mounted
   with_items: "{{ container_runtime_extra_storage }}"
   when:
-    - 'container_runtime_extra_storage is defined'
+    - 'item.label|length<=12'
     - 'item.path not in "{{ ansible_mounts }}"'
 
