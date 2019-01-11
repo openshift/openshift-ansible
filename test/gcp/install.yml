@@ -15,6 +15,10 @@
     file:
       path: /etc/dhcp/dhclient.d/google_hostname.sh
       mode: 0644
+  - name: Install packages, necessary for tests
+    package:
+      name: nfs-utils
+      state: present
 
 - name: run the deploy_cluster_40
   import_playbook: ../../playbooks/deploy_cluster_40.yml
