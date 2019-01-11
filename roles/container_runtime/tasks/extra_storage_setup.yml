@@ -4,15 +4,22 @@
     fstype: "{{ item.filesystem }}"
     dev: "{{ item.device }}"
     force: "{{ item.force|default(omit) }}"
-    opts: "{{ item.mkfs_opts|default(omit) }}"
+    opts: "{{ item.mkfs_opts|default(None) }} -L {{ item.label }}"
   with_items: "{{ container_runtime_extra_storage }}"
+  when:
+    - 'container_runtime_extra_storage is defined'
+    - 'item.path not in "{{ ansible_mounts }}"'
 
 
 - name: Create mount entry for extra volume
   mount:
     path: "{{ item.path }}"
-    src: "{{ item.device }}"
+    src: "LABEL={{ item.label }}"
     fstype: "{{ item.filesystem }}"
     opts: "{{ item.options|default(omit) }}"
     state: mounted
   with_items: "{{ container_runtime_extra_storage }}"
+  when:
+    - 'container_runtime_extra_storage is defined'
+    - 'item.path not in "{{ ansible_mounts }}"'
+
