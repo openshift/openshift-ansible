@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.99
+Version:        3.10.100
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,20 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Jan 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.100-1
+- Fix README and remove tags (yasensim@gmail.com)
+- Do not disable ingressClass if nsx-lb is not used (yasensim@gmail.com)
+- Fix couple of obsolete warnings (yasensim@gmail.com)
+- Fix indentation (yasensim@gmail.com)
+- Contains all requested changes (simeonovy@simeonovy-a02.vmware.com)
+- Update roles/nsx_node/tasks/main.yml (roignac@gmail.com)
+- Update roles/nsx/templates/nsx-node-agent-configmap.yml.j2
+  (roignac@gmail.com)
+- Update roles/nsx/templates/ncp-configmap.yml.j2 (roignac@gmail.com)
+- Fix spaces and indentations (simeonovy@simeonovy-a02.vmware.com)
+- Update README.md (yasensim@gmail.com)
+- Add NSX-T support (yasensim@gmail.com)
+
 * Thu Jan 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.99-1
 - added enviroment values for easier heketi-cli usage (fcarrus@redhat.com)
 - unsquished parameter words (fcarrus@redhat.com)
