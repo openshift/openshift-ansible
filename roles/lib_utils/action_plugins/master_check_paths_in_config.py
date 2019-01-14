@@ -22,6 +22,7 @@ for you: {}"""
 
 
 ITEMS_TO_POP = (
+    ('auditConfig', 'policyConfiguration'),
     ('oauthConfig', 'identityProviders'),
 )
 # Create csv string of dot-separated dictionary keys:
