@@ -7,6 +7,7 @@
     name: "{{ item.name | default(omit) }}"
     selector: "{{ item.selector | default(omit) }}"
     state: absent
+    force: yes
   with_items:
   - kind: "template,route,service,dc,jobs,secret"
     selector: "deploy-heketi"
