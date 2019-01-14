@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.68
+Version:        3.11.69
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Jan 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.69-1
+- Add debug info for oc get --raw step csr module (mgugino@redhat.com)
+- Remove vendored ansible-profile callback (rteague@redhat.com)
+
 * Thu Jan 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.68-1
 - added enviroment values for easier heketi-cli usage (fcarrus@redhat.com)
 - Fix BZ1663306 when gluster nodes are SchedulingDisabled
