@@ -45,9 +45,9 @@
       set_stats:
         data:
           installer_phase_logging:
-            message: "Cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
+            message: "Elasticsearch cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} restart of cluster logging."
 
-    - debug: msg="Cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
+    - debug: msg="Elasticsearch cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} restart of cluster logging."
 
 - when: _pod_status.stdout is undefined or ( (_pod_status.stdout | from_json)['status'] in ['green'] and (_pod_status.stdout | from_json)['number_of_nodes'] == _cluster_pods.stdout.split(' ') | count )
   block:
@@ -69,7 +69,7 @@
         - full_restart_cluster | bool
 
     ## restart the node if it's dc is in the list of nodes to restart
-    - name: "Performing rolling cluster restart for {{ _cluster_component }} cluster"
+    - name: "Performing rolling restart for Elasticsearch cluster {{ _cluster_component }} cluster"
       include_tasks: rolling_cluster_restart.yml
       vars:
         logging_restart_cluster_dcs: "{{ _restart_logging_nodes | intersect(_cluster_dcs.stdout) }}"
