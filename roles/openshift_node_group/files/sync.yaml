@@ -155,8 +155,13 @@ spec:
               fi
             fi
             # annotate node with md5sum of the config
-            oc annotate --config=/etc/origin/node/node.kubeconfig "node/${NODE_NAME}" \
-              node.openshift.io/md5sum="$( cat /tmp/.new | cut -d' ' -f1 )" --overwrite
+            echo "info: Applying node annotation" 2>&1
+            if ! oc annotate --config=/etc/origin/node/node.kubeconfig "node/${NODE_NAME}" node.openshift.io/md5sum="$( cat /tmp/.new | cut -d' ' -f1 )" --overwrite; then
+              echo "error: Unable to annotate node, will retry in 10" 2>&1
+              sleep 10 &
+              wait $!
+              continue
+            fi
             cp -f /tmp/.new /tmp/.old
             sleep 180 &
             wait $!
