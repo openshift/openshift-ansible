@@ -226,6 +226,38 @@ resources:
 {% endif %}
 
 {% if not openshift_openstack_provider_network_name %}
+
+{% if not openshift_openstack_node_subnet_name %}
+  net:
+    type: OS::Neutron::Net
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-net
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+
+  subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-subnet
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      network: { get_resource: net }
+      cidr: {{ openshift_openstack_subnet_cidr }}
+      allocation_pools:
+        - start: {{ openshift_openstack_pool_start }}
+          end: {{ openshift_openstack_pool_end }}
+      dns_nameservers:
+{% for nameserver in openshift_openstack_dns_nameservers %}
+        - {{ nameserver }}
+{% endfor %}
+{% endif %}
+
+{% endif %}
+
 {% if openshift_use_kuryr|default(false)|bool %}
   pod_net:
     type: OS::Neutron::Net
@@ -344,37 +376,6 @@ resources:
 
 {% endif %}
 
-{% if not openshift_openstack_node_subnet_name %}
-  net:
-    type: OS::Neutron::Net
-    properties:
-      name:
-        str_replace:
-          template: openshift-ansible-cluster_id-net
-          params:
-            cluster_id: {{ openshift_openstack_full_dns_domain }}
-{% endif %}
-
-{% if not openshift_openstack_node_subnet_name %}
-  subnet:
-    type: OS::Neutron::Subnet
-    properties:
-      name:
-        str_replace:
-          template: openshift-ansible-cluster_id-subnet
-          params:
-            cluster_id: {{ openshift_openstack_full_dns_domain }}
-      network: { get_resource: net }
-      cidr: {{ openshift_openstack_subnet_cidr }}
-      allocation_pools:
-        - start: {{ openshift_openstack_pool_start }}
-          end: {{ openshift_openstack_pool_end }}
-      dns_nameservers:
-{% for nameserver in openshift_openstack_dns_nameservers %}
-        - {{ nameserver }}
-{% endfor %}
-{% endif %}
-
 {% if openshift_use_flannel|default(False)|bool %}
   data_net:
     type: OS::Neutron::Net
@@ -443,8 +444,6 @@ resources:
       router_id: {{ openshift_openstack_router_id }}
 {% endif %}
       port: { get_resource: service_router_port }
-{% endif %}
-
 {% endif %}
 
 #  keypair:
