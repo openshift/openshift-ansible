@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.100
+Version:        3.10.101
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Jan 14 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.101-1
+- glusterfs: Force delete heketi pod and avoid waiting for unmount, given that
+  we will be deleting glusterfs pod as well. (sarumuga@redhat.com)
+- Add debug info for oc get --raw step csr module (mgugino@redhat.com)
+
 * Sun Jan 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.100-1
 - Fix README and remove tags (yasensim@gmail.com)
 - Do not disable ingressClass if nsx-lb is not used (yasensim@gmail.com)
