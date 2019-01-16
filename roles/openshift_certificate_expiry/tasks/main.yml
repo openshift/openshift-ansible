@@ -1,4 +1,16 @@
 ---
+- name: Detecting Operating System from ostree_booted
+  stat:
+    path: /run/ostree-booted
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
+  register: ostree_booted
+
+- name: initialize_facts set fact openshift_is_atomic
+  set_fact:
+    openshift_is_atomic: "{{ ostree_booted.stat.exists }}"
+
 - name: Ensure python dateutil library is present
   package:
     name: "{{ 'python3-dateutil' if ansible_distribution == 'Fedora' else 'python-dateutil' }}"
