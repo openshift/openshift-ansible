@@ -87,6 +87,22 @@
     dest: "{{ containers_registries_conf_path }}"
     src: registries.conf.j2
 
+- name: Check if /etc/containers/storage.conf exists
+  stat:
+    path: /etc/containers/storage.conf
+    get_checksum: false
+    get_mime: false
+  register: storage_conf_check
+
+- name: Set storage size restriction
+  ini_file:
+    path: /etc/containers/storage.conf
+    section: storage.options
+    option: size
+    value: '"3G"'
+    backup: yes
+  when: storage_conf_check.stat.exists == True
+
 - name: Start the CRI-O service
   systemd:
     name: "cri-o"
