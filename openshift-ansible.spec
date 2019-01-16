@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.69
+Version:        3.11.70
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jan 15 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.70-1
+- fix 1665235. Specify logging cluster is requires restart
+  (jcantril@redhat.com)
+- [release 3.11] fix OpenStack heat template conditional (tzumainn@redhat.com)
+- glusterfs: Force delete heketi pod and avoid waiting for unmount, given that
+  we will be deleting glusterfs pod as well. (sarumuga@redhat.com)
+- [release 3.11] fix openstack facts when ec2 var is empty
+  (tzumainn@redhat.com)
+
 * Sun Jan 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.69-1
 - Add debug info for oc get --raw step csr module (mgugino@redhat.com)
 - Remove vendored ansible-profile callback (rteague@redhat.com)
