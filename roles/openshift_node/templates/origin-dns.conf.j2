@@ -1,5 +1,7 @@
 no-resolv
 domain-needed
+server=/cluster.local/172.30.0.1
+server=/30.172.in-addr.arpa/172.30.0.1
 {% if openshift_node_dnsmasq_no_negcache %}
 no-negcache
 {% else %}
