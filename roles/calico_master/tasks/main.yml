@@ -1,8 +1,10 @@
 ---
+# kube_proxy_and_dns should be called only once, and run_once is not honored with import_role
+# using a when statement to control this
 - name: Calico | Run kube proxy
-  run_once: true
   import_role:
     name: kube_proxy_and_dns
+  when: "inventory_hostname == groups.oo_first_master.0"
 
 - include_tasks: certs.yml
 
