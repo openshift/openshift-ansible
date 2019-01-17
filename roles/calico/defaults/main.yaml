@@ -2,9 +2,28 @@
 cni_conf_dir: "/etc/cni/net.d/"
 cni_bin_dir: "/opt/cni/bin/"
 
-calico_url_policy_controller: "quay.io/calico/kube-controllers:v3.4.0"
-calico_node_image: "quay.io/calico/node:v3.4.0"
-calico_cni_image: "quay.io/calico/cni:v3.4.0"
+calico_url_policy_controller: "quay.io/calico/kube-controllers:v3.5.0"
+calico_node_image: "quay.io/calico/node:v3.5.0"
+calico_cni_image: "quay.io/calico/cni:v3.5.0"
+calicoctl_image: "quay.io/calico/ctl:v3.5.0"
 calico_upgrade_image: "quay.io/calico/upgrade:v1.0.5"
-calico_ipv4pool_ipip: "always"
 use_calico_etcd: False
+
+# Configure the IP Pool(s) from which Pod IPs will be chosen.
+ip_pools:
+  apiVersion: projectcalico.org/v3
+  kind: IPPoolList
+  items:
+  - apiVersion: projectcalico.org/v3
+    kind: IPPool
+    metadata:
+      name: default-ipv4-ippool
+    spec:
+      cidr: "{{ openshift_cluster_network_cidr }}"
+      ipipMode: Always
+      natOutgoing: true
+      nodeSelector: "all()"
+
+# Options below are only valid for legacy Calico v2 installations,
+# and have been superceded by options above for Calico v3.
+calico_ipv4pool_ipip: "always"
