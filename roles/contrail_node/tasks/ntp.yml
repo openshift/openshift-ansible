@@ -1,0 +1,26 @@
+---
+- name: install ntp packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - ntp
+
+- name: stop ntp service
+  service: name="ntpd" state=stopped enabled=yes
+
+- name: set ntp conf file
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+  when:
+  - is_ntp_server is not defined
+
+- name: start ntp service
+  service: name="ntpd" state=started enabled=yes
+
+- name: disable service chronyd
+  systemd:
+    name: chronyd
+    enabled: no
+  ignore_errors: yes

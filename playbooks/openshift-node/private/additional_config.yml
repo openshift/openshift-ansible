@@ -23,6 +23,10 @@
   - group_by:
       key: oo_nodes_use_{{ (openshift_use_kuryr | default(False)) | ternary('kuryr','nothing') }}
     changed_when: False
+  # Create group for contrail nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_use_contrail | default(False)) | ternary('contrail','nothing') }}
+    changed_when: False
 
 - import_playbook: etcd_client_config.yml
   vars:
@@ -67,3 +71,27 @@
       name: kuryr
       tasks_from: node
     when: openshift_use_kuryr | default(false) | bool
+
+- name: Additional node config
+  hosts: oo_nodes_use_contrail
+  roles:
+  - role: contrail_node
+    when: openshift_use_contrail | default(false) | bool
+
+- name: Install Contrail
+  hosts: oo_first_master
+  roles:
+  - role: contrail_controller
+    when: openshift_use_contrail | default(false) | bool
+
+- name: Configure Contrail ST
+  hosts: oo_nodes_use_contrail
+  roles:
+  - role: contrail_st
+    when: openshift_use_contrail | default(false) | bool
+
+- name: Install Contrail Customized Web Console
+  hosts: oo_first_master
+  roles:
+  - role: contrail_web_console
+    when: openshift_use_contrail | default(false) | bool

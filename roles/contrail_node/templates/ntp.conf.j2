@@ -1,0 +1,18 @@
+tinker panic 0
+
+disable monitor
+restrict default kod nomodify notrap nopeer noquery
+restrict -6 default kod nomodify notrap nopeer noquery
+restrict 127.0.0.1
+restrict -6 ::1
+
+{% if ntpserver is not defined %}
+{% for master in groups.masters %}
+server {{ master | ipaddr }} iburst
+{% endfor %}
+{% else %}
+server {{ ntpserver | ipaddr }} iburst
+{% endif %}
+
+# Driftfile.
+driftfile /var/lib/ntp/drift

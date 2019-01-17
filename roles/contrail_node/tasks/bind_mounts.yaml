@@ -1,0 +1,9 @@
+---
+- name: copy the bind mounts of contrail into openshift system config
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift_service_type }}-node
+    line: "{{ contrail_containerized_bind_mounts }}"
+    create: true
+
+- name: restart node
+  systemd: name={{ openshift_service_type }}-node daemon-reload=yes state=restarted

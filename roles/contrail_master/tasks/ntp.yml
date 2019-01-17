@@ -1,0 +1,33 @@
+---
+- name: install ntp packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - ntp
+
+- name: open ntp port 123 on masters
+  command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 123
+  when:
+  - not r_openshift_node_use_firewalld | default(false) | bool
+
+- name: stop ntp service
+  service: name="ntpd" state=stopped enabled=yes
+
+- name: set ntp server
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+
+- name: start ntp service
+  service: name="ntpd" state=started enabled=yes
+
+- name: set fact that this master is an ntp server
+  set_fact:
+    is_ntp_server: true
+
+- name: disable service chronyd
+  systemd:
+    name: chronyd
+    enabled: no
+  ignore_errors: yes
