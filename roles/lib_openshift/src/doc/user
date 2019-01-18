@@ -11,9 +11,9 @@ options:
   state:
     description:
     - State controls the action that will be taken with resource
-    - 'present' will create or update a user to the desired state
-    - 'absent' will ensure user is removed
-    - 'list' will read and return a list of users
+    - present - will create or update a user to the desired state
+    - absent - will ensure user is removed
+    - list - will read and return a list of users
     default: present
     choices: ["present", "absent", "list"]
     aliases: []

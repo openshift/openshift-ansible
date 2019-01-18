@@ -63,7 +63,7 @@ description:
 options:
   state:
     description:
-    - Supported states, present, absent, list
+    - State controls the action that will be taken with resource
     - present - will ensure object is created or updated to the value specified
     - list - will return a clusterrole
     - absent - will remove a clusterrole
