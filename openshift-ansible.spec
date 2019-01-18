@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.70
+Version:        3.11.71
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Jan 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.71-1
+- 
+
 * Tue Jan 15 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.70-1
 - fix 1665235. Specify logging cluster is requires restart
   (jcantril@redhat.com)
