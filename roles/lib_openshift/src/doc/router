@@ -10,15 +10,13 @@ description:
 options:
   state:
     description:
-    - Whether to create or delete the router
+    - State controls the action that will be taken with resource
     - present - create the router
     - absent - remove the router
     - list - return the current representation of a router
     required: false
     default: present
-    choices:
-    - present
-    - absent
+    choices: ["present", "absent", "list"]
     aliases: []
   kubeconfig:
     description:

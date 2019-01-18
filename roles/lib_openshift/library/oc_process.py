@@ -64,10 +64,10 @@ options:
   state:
     description:
     - State has a few different meanings when it comes to process.
-    - state: present - This state runs an `oc process <template>`.  When used in
+    - present - This state runs an `oc process <template>`.  When used in
     - conjunction with 'create: True' the process will be piped to | oc create -f
-    - state: absent - will remove a template
-    - state: list - will perform an `oc get template <template_name>`
+    - absent - will remove a template
+    - list - will perform an `oc get template <template_name>`
     default: present
     choices: ["present", "absent", "list"]
     aliases: []

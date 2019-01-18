@@ -11,10 +11,10 @@ options:
   state:
     description:
     - State controls the action that will be taken with resource
-    - 'present' will create or update and object to the desired state
-    - 'absent' will ensure certain labels are removed
-    - 'list' will read the labels
-    - 'add' will insert labels to the already existing labels
+    - present - will create or update and object to the desired state
+    - absent - will ensure certain labels are removed
+    - list - will read the labels
+    - add - will insert labels to the already existing labels
     default: present
     choices: ["present", "absent", "list", "add"]
     aliases: []

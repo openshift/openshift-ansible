@@ -64,9 +64,9 @@ options:
   state:
     description:
     - State controls the action that will be taken with resource
-    - 'present' will create or update and object to the desired state
-    - 'absent' will ensure volumes are removed
-    - 'list' will read the volumes
+    - present - create the volume
+    - absent - remove the volume
+    - list - return the current representation of a volume
     default: present
     choices: ["present", "absent", "list"]
     aliases: []

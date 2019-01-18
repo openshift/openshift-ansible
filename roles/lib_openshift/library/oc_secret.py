@@ -63,7 +63,10 @@ description:
 options:
   state:
     description:
-    - If present, the secret will be created if it doesn't exist or updated if different. If absent, the secret will be removed if present. If list, information about the secret will be gathered and returned as part of the Ansible call results.
+    - State controls the action that will be taken with resource
+    - present - the secret will be created if it doesn't exist or updated if different.
+    - absent - the secret will be removed if present.
+    - list - information about the secret will be gathered and returned as part of the Ansible call results.
     required: false
     default: present
     choices: ["present", "absent", "list"]
