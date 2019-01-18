@@ -1,0 +1,47 @@
+---
+
+- name: ppc64le Import RHEL streams
+  command: >
+    {{ openshift_client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ item }}
+  when:
+  - openshift_examples_load_rhel | bool
+  with_items:
+  - "{{ rhel_image_streams }}"
+  register: oex_import_rhel_streams
+  failed_when: "'already exists' not in oex_import_rhel_streams.stderr and oex_import_rhel_streams.rc != 0"
+  changed_when: false
+  retries: 3
+  until: oex_import_rhel_streams is succeeded
+
+- name: Import ppc64le db templates
+  command: >
+    {{ openshift_client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ db_templates_base }}
+  when: openshift_examples_load_db_templates | bool
+  register: oex_import_db_templates
+  failed_when: "'already exists' not in oex_import_db_templates.stderr and oex_import_db_templates.rc != 0"
+  changed_when: false
+  retries: 3
+  until: oex_import_db_templates is succeeded
+
+
+- name: Import ppc64le  quickstart-templates
+  command: >
+    {{ openshift_client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ quickstarts_base }}
+  when: openshift_examples_load_quickstarts | bool
+  register: oex_import_quickstarts
+  failed_when: "'already exists' not in oex_import_quickstarts.stderr and oex_import_quickstarts.rc != 0"
+  changed_when: false
+  retries: 3
+  until: oex_import_quickstarts is succeeded
+
+
+- name: Import ppc64le xPaas image streams
+  command: >
+    {{ openshift_client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ xpaas_image_streams }}
+  when:
+  - openshift_examples_load_xpaas | bool
+  register: oex_import_xpaas_streams
+  failed_when: "'already exists' not in oex_import_xpaas_streams.stderr and oex_import_xpaas_streams.rc != 0"
+  changed_when: false
+  retries: 3
+  until: oex_import_xpaas_streams is succeeded

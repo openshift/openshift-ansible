@@ -1,0 +1,47 @@
+---
+######################################################################
+# Copying Examples
+#
+# We used to use the copy module to transfer the openshift examples to
+# the remote. Then it started taking more than a minute to transfer
+# the files. As noted in the module:
+#
+#   "The 'copy' module recursively copy facility does not scale to
+#   lots (>hundreds) of files."
+#
+# The `synchronize` module is suggested as an alternative, we can't
+# use it either due to changes introduced in Ansible 2.x.
+
+- name: Create local temp dir for OpenShift examples copy
+  local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+  register: copy_examples_mktemp
+  run_once: True
+
+- name: Chmod local temp dir for OpenShift examples copy
+  local_action: file path="{{ copy_examples_mktemp.stdout }}" mode=0777
+  run_once: True
+
+- name: Create tar of OpenShift examples
+  local_action: command tar -C "{{ role_path }}/files/examples/{{ ansible_architecture }}/" -cvf "{{ copy_examples_mktemp.stdout }}/openshift-examples.tar" .
+  args:
+    # Disables the following warning:
+    # Consider using unarchive module rather than running tar
+    warn: no
+
+- name: Chmod local temp dir for OpenShift examples copy
+  local_action: file path="{{ copy_examples_mktemp.stdout }}/openshift-examples.tar" mode=0744
+  run_once: True
+
+- name: Create the remote OpenShift examples directory
+  file:
+    dest: "{{ examples_base }}"
+    state: directory
+    mode: 0755
+
+- name: Unarchive the OpenShift examples on the remote
+  unarchive:
+    src: "{{ copy_examples_mktemp.stdout }}/openshift-examples.tar"
+    dest: "{{ examples_base }}/"
+
+- name: Cleanup the OpenShift Examples temp dir
+  local_action: file dest="{{ copy_examples_mktemp.stdout }}" state=absent
