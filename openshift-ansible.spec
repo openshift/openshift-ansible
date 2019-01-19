@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.102
+Version:        3.10.103
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Jan 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.103-1
+- 
+
 * Thu Jan 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.102-1
 - Port #10740 and #10981 to release-3.10 (neil@ossau.homelinux.net)
 
