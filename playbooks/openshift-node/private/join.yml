@@ -79,7 +79,7 @@
     when: openshift_use_calico | default(false) | bool
 
 - name: NSX Node Configuration
-  hosts: all
+  hosts: oo_nodes_to_config
   roles:
   - role: nsx_node
     when: openshift_use_nsx | default(false) | bool
