@@ -22,8 +22,6 @@
 
 - name: install nodes
   hosts: new_workers
-  vars:
-    openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/worker"
   roles:
   - role: container_runtime
   tasks:

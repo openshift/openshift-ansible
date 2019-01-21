@@ -31,19 +31,32 @@
     - deployment_type is defined
 
 - name: Read in openshift-install
-  hosts: masters[0]
+  hosts: "{{ l_init_fact_hosts | default('nodes') }}"
   tasks:
   - slurp:
       src: "{{ openshift_install_config_path }}"
     register: openshift_install_config_reg
     delegate_to: localhost
-    run_once: True
-  - set_fact:
+    when: openshift_install_config_path is defined
+  - name: 'set openshift_install_config if path is defined'
+    set_fact:
       openshift_install_config: "{{ openshift_install_config_reg['content'] | b64decode | from_yaml }}"
+    when: openshift_install_config_path is defined
 
-# We might need to access these values on each host later.
-- name: set_fact openshift_install_config across all nodes
-  hosts: "{{ l_init_fact_hosts | default('nodes') }}"
+- name: Set worker openshift_bootstrap_endpoint if not already defined
+  hosts: "{{ l_init_fact_hosts | default('nodes') }}:!masters:!bootstrap"
   tasks:
   - set_fact:
-      openshift_install_config: "{{ hostvars[groups['masters'][0]].openshift_install_config }}"
+      openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/worker"
+    when:
+    - openshift_install_config_path is defined
+    - openshift_bootstrap_endpoint is not defined
+
+- name: Set master openshift_bootstrap_endpoint if not already defined
+  hosts: "{{ l_init_fact_hosts | default('nodes') }}:&masters"
+  tasks:
+  - set_fact:
+      openshift_bootstrap_endpoint: "https://{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}:49500/config/master"
+    when:
+    - openshift_install_config_path is defined
+    - openshift_bootstrap_endpoint is not defined
