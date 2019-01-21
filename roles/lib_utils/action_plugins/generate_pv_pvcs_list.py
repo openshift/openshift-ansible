@@ -62,7 +62,7 @@ class ActionModule(ActionBase):
 
     def build_pv_openstack(self, varname=None):
         """Build pv dictionary for openstack storage type"""
-        volume, size, labels, _, access_modes = self.build_common(varname=varname)
+        volume, size, labels, annotations, access_modes = self.build_common(varname=varname)
         filesystem = self.get_templated(str(varname) + '_openstack_filesystem')
         volume_name = self.get_templated(str(varname) + '_volume_name')
         volume_id = self.get_templated(str(varname) + '_openstack_volumeID')
@@ -72,6 +72,7 @@ class ActionModule(ActionBase):
             name="{0}-volume".format(volume),
             capacity=size,
             labels=labels,
+            annotations=annotations,
             access_modes=access_modes,
             storage=dict(
                 cinder=dict(

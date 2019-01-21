@@ -960,10 +960,13 @@ and then set the following in `inventory/group_vars/OSEv3.yml`:
 * `openshift_hosted_registry_storage_volume_size`: 10Gi
 
 For a volume *you created*, you must also specify its **UUID** (it must be
-the UUID, not the volume's name):
+the UUID, not the volume's name). If using the default storage class, you must specify
+that as well (for OpenStack it's `standard`):
 
 ```
 openshift_hosted_registry_storage_openstack_volumeID: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
+openshift_hosted_registry_storage_annotations:
+- 'volume.beta.kubernetes.io/storage-class: standard'
 ```
 
 If you want the volume *created automatically*, set the desired name instead:
