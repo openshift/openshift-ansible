@@ -265,3 +265,29 @@ objects:
   - kind: ServiceAccount
     name: service-catalog-apiserver
     namespace: kube-service-catalog
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata:
+    name: servicecatalog.k8s.io:service-catalog-readiness
+  rules:
+  - nonResourceURLs:
+    - /healthz/ready
+    verbs:
+      - get
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: servicecatalog.k8s.io:service-catalog-readiness
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: servicecatalog.k8s.io:service-catalog-readiness
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:unauthenticated
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:authenticated

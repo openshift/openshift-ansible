@@ -67,7 +67,7 @@ spec:
         readinessProbe:
           httpGet:
             port: 6443
-            path: /healthz
+            path: /healthz/ready
             scheme: HTTPS
           failureThreshold: 1
           initialDelaySeconds: 30
