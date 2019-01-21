@@ -10,16 +10,10 @@
     dest: "/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS"
   notify: refresh cache
 
-# openshift_release is formatted to a standard string in openshift_version role.
-# openshift_release is expected to be in format 'x.y.z...' here.
-# Here, we drop the '.' characters and try to match the correct repo template
-# for our corresponding openshift_release.
+# The version is hardcoded since we cannot use the openshift_version role
+# (it uses the installed packages to determine the version).
 - name: Configure correct origin release repository
   template:
-    src: "{{ item }}"
-    dest: "/etc/yum.repos.d/{{ (item | basename | splitext)[0] }}"
-  with_first_found:
-    - "CentOS-OpenShift-Origin{{ (openshift_release | default('')).split('.') | join('') }}.repo.j2"
-    - "CentOS-OpenShift-Origin{{ ((openshift_release | default('')).split('.') | join(''))[0:2] }}.repo.j2"
-    - "CentOS-OpenShift-Origin.repo.j2"
+    src: "CentOS-OpenShift-Origin39.repo.j2"
+    dest: "/etc/yum.repos.d/CentOS-OpenShift-Origin39.repo"
   notify: refresh cache
