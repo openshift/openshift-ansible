@@ -88,7 +88,7 @@
     curator_cpu_limit: "{{ openshift_logging_curator_cpu_limit }}"
     curator_cpu_request: "{{ openshift_logging_curator_cpu_request | min_cpu(openshift_logging_curator_cpu_limit | default(none)) }}"
     curator_memory_limit: "{{ openshift_logging_curator_memory_limit }}"
-    curator_node_selector: "{{openshift_logging_curator_nodeselector | default({})}}"
+    curator_node_selector: "{{openshift_logging_curator_nodeselector | default({}) | map_from_pairs }}"
     cron_job_schedule: "{{ openshift_logging_curator_run_minute | default(0) }} {{ openshift_logging_curator_run_hour | default(0) }} * * *"
   check_mode: no
   changed_when: no

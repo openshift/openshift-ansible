@@ -34,7 +34,7 @@
     src: "eventrouter-template.j2"
     dest: "{{ tempdir }}/templates/eventrouter-template.yaml"
   vars:
-    node_selector: "{{ openshift_logging_eventrouter_nodeselector | default({}) }}"
+    node_selector: "{{ openshift_logging_eventrouter_nodeselector | default({}) | map_from_pairs }}"
     cpu_limit: "{{ openshift_logging_eventrouter_cpu_limit }}"
 
 - name: Create EventRouter template

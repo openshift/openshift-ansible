@@ -257,7 +257,7 @@
     kibana_proxy_cpu_request: "{{ openshift_logging_kibana_proxy_cpu_request | min_cpu(openshift_logging_kibana_proxy_cpu_limit | default(none)) }}"
     kibana_proxy_memory_limit: "{{ openshift_logging_kibana_proxy_memory_limit }}"
     kibana_replicas: "{{ openshift_logging_kibana_replicas | default (1) }}"
-    kibana_node_selector: "{{ openshift_logging_kibana_nodeselector | default({}) }}"
+    kibana_node_selector: "{{ openshift_logging_kibana_nodeselector | default({}) | map_from_pairs }}"
     kibana_env_vars: "{{ openshift_logging_kibana_env_vars | default({}) }}"
 
 - name: Set Kibana DC
