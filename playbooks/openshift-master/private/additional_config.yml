@@ -26,11 +26,9 @@
     when: openshift_use_openshift_sdn | default(True) | bool
   - role: openshift_project_request_template
     when: openshift_project_request_template_manage
-  # We don't want to populate examples on a power cluster.
   - role: openshift_examples
     when:
     - openshift_install_examples | default(true) | bool
-    - ansible_architecture != 'ppc64le'
   - role: openshift_cluster_autoscaler
     when: openshift_cluster_autoscaler_deploy | default(false) | bool
   - role: openshift_manageiq

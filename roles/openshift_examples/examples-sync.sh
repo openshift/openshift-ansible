@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Utility script to update the ansible repo with the latest templates and image
+# Utility script to update the ansible repo with the latest (x86_86) templates and image
 # streams from several github repos
 #
 # This script should be run from openshift-ansible/roles/openshift_examples
@@ -12,7 +12,7 @@ DG_72_VERSION=1.1.1
 ORIGIN_VERSION=${1:-v3.11}
 ORIGIN_BRANCH=${2:-master}
 RHAMP_TAG=2.0.0.GA
-EXAMPLES_BASE=$(pwd)/files/examples/latest
+EXAMPLES_BASE=$(pwd)/files/examples/x86_64
 find ${EXAMPLES_BASE} -name '*.json' -delete
 TEMP=`mktemp -d`
 pushd $TEMP
