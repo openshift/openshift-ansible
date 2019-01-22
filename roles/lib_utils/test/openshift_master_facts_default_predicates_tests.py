@@ -37,6 +37,7 @@ DEFAULT_PREDICATES_3_9 = [
     {'name': 'MaxEBSVolumeCount'},
     {'name': 'MaxGCEPDVolumeCount'},
     {'name': 'MaxAzureDiskVolumeCount'},
+    {'name': 'MaxCinderVolumeCount'},
     {'name': 'MatchInterPodAffinity'},
     {'name': 'NoDiskConflict'},
     {'name': 'GeneralPredicates'},

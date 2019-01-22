@@ -70,6 +70,7 @@ class LookupModule(LookupBase):
                 {'name': 'MaxEBSVolumeCount'},
                 {'name': 'MaxGCEPDVolumeCount'},
                 {'name': 'MaxAzureDiskVolumeCount'},
+                {'name': 'MaxCinderVolumeCount'},
                 {'name': 'MatchInterPodAffinity'},
                 {'name': 'NoDiskConflict'},
                 {'name': 'GeneralPredicates'},
