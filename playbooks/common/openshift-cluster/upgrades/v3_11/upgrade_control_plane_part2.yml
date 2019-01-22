@@ -68,6 +68,13 @@
     - openshift_reconcile_sccs_reject_change | default(true) | bool
     - check_reconcile_scc_result.stdout != '' or check_reconcile_scc_result.rc != 0
 
+- name: Change SDN/OVS DaemonSets to 'OnDelete' updateStrategy
+  hosts: masters[0]
+  tasks:
+  - import_role:
+      name: openshift_sdn
+      tasks_from: update_daemonsets.yml
+
 # TODO: need to verify settings about the bootstrap configs
 # 1. Does network policy match the master config
 

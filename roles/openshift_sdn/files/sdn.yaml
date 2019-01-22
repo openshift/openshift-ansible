@@ -16,7 +16,7 @@ spec:
     matchLabels:
       app: sdn
   updateStrategy:
-    type: RollingUpdate
+    type: OnDelete
   template:
     metadata:
       labels:
