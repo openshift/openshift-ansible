@@ -668,10 +668,14 @@ debug_level=2
 # openshift_cluster_monitoring_operator_install=false
 #
 # Cluster monitoring configuration variables allow setting the amount of
-# storage requested through PersistentVolumeClaims.
+# storage and storageclass requested through PersistentVolumeClaims.
 #
 # openshift_cluster_monitoring_operator_prometheus_storage_capacity="50Gi"
 # openshift_cluster_monitoring_operator_alertmanager_storage_capacity="2Gi"
+#
+# openshift_cluster_monitoring_operator_prometheus_storage_class_name=""
+# openshift_cluster_monitoring_operator_alertmanager_storage_class_name=""
+
 
 # Logging deployment
 #
