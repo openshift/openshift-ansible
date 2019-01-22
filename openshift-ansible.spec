@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.103
+Version:        3.10.104
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Jan 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.104-1
+- Hardcode CentOS repository template for 3.10 (mail@leoschabel.de)
+- glusterfs: revert changes to /dev bind-mounts (ndevos@redhat.com)
+- [release 3.10] fix openstack facts when ec2 var is empty
+  (tzumainn@redhat.com)
+
 * Fri Jan 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.103-1
 - 
 
