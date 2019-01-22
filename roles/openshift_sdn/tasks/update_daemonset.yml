@@ -1,0 +1,44 @@
+---
+
+- name: Retrieve openshift-sdn DaemonSet [{{ l_daemonset }}]
+  oc_obj:
+    namespace: "openshift-sdn"
+    kind: DaemonSet
+    name: "{{ l_daemonset }}"
+    state: list
+  register: ds_out
+  ignore_errors: true
+
+- when:
+    - ds_out is succeeded
+    - ds_out.results.results[0].spec.updateStrategy.type == 'RollingUpdate'
+  block:
+    - name: Create DaemonSet tempdir
+      command: mktemp -d
+      register: mktemp
+
+    - name: Create DaemonSet manifest
+      copy:
+        content: "{{ ds_out.results.results[0] }}"
+        dest: "{{ mktemp.stdout }}/tmp_ds.yaml"
+
+    - name: Update DaemonSet updateStrategy
+      yedit:
+        src: "{{ mktemp.stdout }}/tmp_ds.yaml"
+        key: 'spec.updateStrategy.type'
+        value: "OnDelete"
+
+    - name: Apply DaemonSet manifest
+      oc_obj:
+        namespace: "openshift-sdn"
+        kind: DaemonSet
+        name: "ovs"
+        state: present
+        files:
+          - "{{ mktemp.stdout }}/tmp_ds.yaml"
+
+    - name: Remove DaemonSet tempdir
+      file:
+        state: absent
+        name: "{{ mktemp.stdout }}"
+      changed_when: False

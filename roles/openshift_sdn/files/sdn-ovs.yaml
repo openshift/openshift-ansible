@@ -13,7 +13,7 @@ spec:
     matchLabels:
       app: ovs
   updateStrategy:
-    type: RollingUpdate
+    type: OnDelete
   template:
     metadata:
       labels:

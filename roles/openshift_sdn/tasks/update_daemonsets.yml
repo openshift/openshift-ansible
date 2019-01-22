@@ -1,0 +1,16 @@
+---
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1660880
+# Updates to DaemonSets using the 'RollingUpdate' updateStrategy could cause pod
+# restarts on all nodes in a cluster, which will result in network and application
+# outages as the rollout occurs. The tasks below change the updateStrategy to
+# 'OnDelete' which will only update pods on nodes when they are deleted.  The
+# openshift_node upgrade.yml task file incorporates an SDN/OVS pod delete task
+# to delete these pods when the node is unschedulable and drained.
+
+- include_tasks: update_daemonset.yml
+  vars:
+    l_daemonset: "{{ item }}"
+  with_items:
+  - sdn
+  - ovs
