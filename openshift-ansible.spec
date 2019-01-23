@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.72
+Version:        3.11.73
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,20 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Jan 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.73-1
+- Hardcode CentOS repository template for 3.11 (mail@leoschabel.de)
+- Run nsx_node role on opensift nodes only, Closes #11038 (yasensim@gmail.com)
+- Add tasks to run init playbooks for collecting "openshift_is_atomic" fact
+  (bysnupy@hotmail.com)
+- Handle openshift multi-arch examples (jeyoung@redhat.com)
+- Fix auditConfig.policyConfiguration in master_check_paths_in_config
+  (jkupfere@redhat.com)
+- split readiness from liveness probe (jaboyd@redhat.com)
+- [release 3.11] Allow OpenStack persistent volumes to specify storage class
+  (tzumainn@redhat.com)
+- add new variables to specify storageclass to prometheus and alertmanager
+  (bysnupy@hotmail.com)
+
 * Sun Jan 20 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.72-1
 - 
 
