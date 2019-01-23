@@ -8,8 +8,8 @@
   block:
   - import_tasks: glusterfs_config_facts.yml
   - import_tasks: label_nodes.yml
-  - import_tasks: heketi_pod_check.yml
   - import_tasks: heketi_get_key.yml
+  - import_tasks: heketi_pod_check.yml
   - import_tasks: wait_for_pods.yml
   - import_tasks: heketi_load.yml
     when:
@@ -20,8 +20,8 @@
   block:
   - import_tasks: glusterfs_registry_facts.yml
   - import_tasks: label_nodes.yml
-  - import_tasks: heketi_pod_check.yml
   - import_tasks: heketi_get_key.yml
+  - import_tasks: heketi_pod_check.yml
   - import_tasks: wait_for_pods.yml
   - import_tasks: heketi_load.yml
     when:
