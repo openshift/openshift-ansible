@@ -7,6 +7,7 @@ from ansible.template import Templar
 from ansible import errors
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), os.pardir, "action_plugins"))
+import sanity_checks  # noqa: E402
 from sanity_checks import ActionModule  # noqa: E402
 
 
@@ -108,3 +109,19 @@ class FakeTask(object):
         self.action = action
         self.args = args
         self.async = 0
+
+
+def test_removed_vars():
+    host1d = {'somevar': 'someval', 'openshift_hostname': '1'}
+    hostvars = {'host1': host1d}
+    host = "host1"
+    with pytest.raises(errors.AnsibleModuleError):
+        sanity_checks.check_for_removed_vars(hostvars, host)
+
+
+def main():
+    test_removed_vars()
+
+
+if __name__ == '__main__':
+    main()
