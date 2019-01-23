@@ -63,10 +63,11 @@ description:
 options:
   state:
     description:
+    - State controls the action that will be taken with resource
     - Currently present is only supported state.
     required: true
     default: present
-    choices: ["present", "absent", "list"]
+    choices: ["present"]
     aliases: []
   kubeconfig:
     description:

@@ -57,15 +57,15 @@ from ansible.module_utils.basic import AnsibleModule
 DOCUMENTATION = '''
 ---
 module: oc_image
-short_description: Create, modify, and idempotently manage openshift labels.
+short_description: Create, modify, and idempotently manage openshift images.
 description:
-  - Modify openshift labels programmatically.
+  - Modify openshift images programmatically.
 options:
   state:
     description:
     - State controls the action that will be taken with resource
-    - 'present' will create.  Does _not_ support update.
-    - 'list' will read the labels
+    - present - will create the image. Does _not_ support update.
+    - list - will read the images
     default: present
     choices: ["present", "list"]
     aliases: []

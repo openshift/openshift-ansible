@@ -63,7 +63,10 @@ description:
 options:
   state:
     description:
-    - If present, the project will be created if it doesn't exist or update if different. If absent, the project will be removed if present. If list, information about the project will be gathered and returned as part of the Ansible call results.
+    - State controls the action that will be taken with resource
+    - present - the project will be created if it doesn't exist or update if different.
+    - absent - the project will be removed if present.
+    - list -  information about the project will be gathered and returned as part of the Ansible call results.
     required: false
     default: present
     choices: ["present", "absent", "list"]

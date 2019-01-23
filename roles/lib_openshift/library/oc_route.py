@@ -63,7 +63,10 @@ description:
 options:
   state:
     description:
-    - State represents whether to create, modify, delete, or list
+    - State controls the action that will be taken with resource
+    - present - create the route
+    - absent - remove the route
+    - list - returns the current representiation of the route
     required: true
     default: present
     choices: ["present", "absent", "list"]

@@ -10,11 +10,13 @@ description:
 options:
   state:
     description:
-    - approve|deny|list Approve, deny, and list are the only supported states for certificates
+    - State controls the action that will be taken with resource
+    - approve - create the certificate
+    - deny - remove the certificate
+    - list - return the current representation of a certificate
     required: false
-    default: present
-    choices:
-    - present
+    default: approve
+    choices: ["approve", "deny", "list"]
     aliases: []
   kubeconfig:
     description:
