@@ -21,7 +21,7 @@ AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key }}
 {% endif -%}
 
 # Proxy configuration
-# See https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html#configuring-global-proxy
+# See https://docs.openshift.com/container-platform/3.5/install_config/install/advanced_install.html#advanced-install-configuring-global-proxy
 {% if 'http_proxy' in openshift.common %}
 HTTP_PROXY={{ openshift.common.http_proxy | default('') }}
 {% endif %}
