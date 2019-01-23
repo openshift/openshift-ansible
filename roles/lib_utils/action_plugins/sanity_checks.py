@@ -152,7 +152,7 @@ def check_for_removed_vars(hostvars, host):
     """Fails if removed variables are found"""
     found_removed = []
     for item in REMOVED_VARIABLES:
-        if item in hostvars[host]:
+        if item[0] in hostvars[host]:
             found_removed.append(item)
 
     if found_removed:
