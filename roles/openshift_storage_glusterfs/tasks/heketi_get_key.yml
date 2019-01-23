@@ -1,13 +1,13 @@
 ---
-- name: Get heketi admin secret
-  oc_secret:
+- name: Get heketi deployment config
+  oc_obj:
     state: list
+    kind: deploymentconfig
     namespace: "{{ glusterfs_namespace }}"
-    name: "heketi-{{ glusterfs_name }}-admin-secret"
-    decode: True
-  register: glusterfs_heketi_admin_secret
+    name: "heketi-{{ glusterfs_name }}"
+  register: glusterfs_heketi_deployment_config
 
 - name: Set heketi admin key
   set_fact:
-    glusterfs_heketi_admin_key: "{{ glusterfs_heketi_admin_secret.results.decoded.key }}"
-  when: glusterfs_heketi_admin_secret.results.results[0]
+    glusterfs_heketi_admin_key: "{{ (glusterfs_heketi_deployment_config.results.results[0].spec.template.spec.containers[0].env | selectattr('name', 'match', '^HEKETI_ADMIN_KEY$') | first).value }}"
+  when: glusterfs_heketi_deployment_config.results.results[0]
