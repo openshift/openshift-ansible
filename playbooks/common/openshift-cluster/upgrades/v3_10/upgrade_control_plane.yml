@@ -86,6 +86,13 @@
       name: openshift_control_plane
       tasks_from: static_shim
 
+- name: Change SDN/OVS DaemonSets to 'OnDelete' updateStrategy
+  hosts: masters[0]
+  tasks:
+  - import_role:
+      name: openshift_sdn
+      tasks_from: update_daemonsets.yml
+
 # TODO: need to verify settings about the bootstrap configs
 # 1. Does network policy match the master config
 
