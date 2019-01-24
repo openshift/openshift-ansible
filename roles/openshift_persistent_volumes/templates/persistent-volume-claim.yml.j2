@@ -7,7 +7,7 @@ items:
   kind: "PersistentVolumeClaim"
   metadata:
     name: "{{ claim.name }}"
-{% if claim.annotations %}
+{% if claim.annotations is defined %}
     annotations:
 {% for annotation in claim.annotations %}
         {{ annotation }}
