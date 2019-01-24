@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.104
+Version:        3.10.105
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jan 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.105-1
+- Fix 404 url ( bz1668221 ) (lxia@redhat.com)
+- split readiness from liveness probe (jaboyd@redhat.com)
+- Supply namespace when generating hawkular role binding (jmartisk@redhat.com)
+
 * Mon Jan 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.104-1
 - Hardcode CentOS repository template for 3.10 (mail@leoschabel.de)
 - glusterfs: revert changes to /dev bind-mounts (ndevos@redhat.com)
