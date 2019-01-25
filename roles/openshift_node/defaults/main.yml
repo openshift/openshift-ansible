@@ -94,6 +94,9 @@ default_r_openshift_node_os_firewall_allow:
   cond: "{{ openshift_node_port_range is defined }}"
 - service: Prometheus monitoring
   port: 9000-10000/tcp
+- service: Router stats port
+  port: 1936/tcp
+  cond: "{{ openshift_router_stats_port_enable | default(True) }}"
 # Allow multiple port ranges to be added to the role
 r_openshift_node_os_firewall_allow: "{{ default_r_openshift_node_os_firewall_allow | union(openshift_node_open_ports | default([])) }}"
 
