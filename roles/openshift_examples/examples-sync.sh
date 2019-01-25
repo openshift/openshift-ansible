@@ -5,10 +5,12 @@
 #
 # This script should be run from openshift-ansible/roles/openshift_examples
 
-XPAAS_VERSION=ose-v1.4.14
+XPAAS_VERSION=ose-v1.4.17
 RHDM_7_TAG=7.1.1.GA
 RHPAM_7_TAG=7.1.1.GA
 DG_72_VERSION=1.1.1
+EAP_CD_BRANCH=eap-cd
+EAP_72_BRANCH=eap72
 ORIGIN_VERSION=${1:-v3.11}
 ORIGIN_BRANCH=${2:-master}
 RHAMP_TAG=2.0.0.GA
@@ -27,6 +29,8 @@ wget https://github.com/jboss-container-images/rhdm-7-openshift-image/archive/${
 wget https://github.com/jboss-container-images/rhpam-7-openshift-image/archive/${RHPAM_7_TAG}.zip -O rhpam-templates.zip
 wget https://github.com/3scale/rhamp-openshift-templates/archive/${RHAMP_TAG}.zip -O amp.zip
 wget https://github.com/jboss-container-images/jboss-datagrid-7-openshift-image/archive/${DG_72_VERSION}.zip -O dg-application-templates.zip
+wget https://github.com/jboss-container-images/jboss-eap-7-openshift-image/archive/${EAP_72_BRANCH}.zip -O jboss-eap-7-openshift-image-${EAP_72_BRANCH}.zip
+wget https://github.com/jboss-container-images/jboss-eap-7-openshift-image/archive/${EAP_CD_BRANCH}.zip -O eap-cd-application-templates-${EAP_CD_BRANCH}.zip
 unzip origin.zip
 unzip application-templates-master.zip
 unzip rhdm-templates.zip
@@ -34,14 +38,20 @@ unzip rhpam-templates.zip
 unzip fis-GA.zip
 unzip amp.zip
 unzip dg-application-templates.zip
+unzip jboss-eap-7-openshift-image-${EAP_72_BRANCH}.zip
+unzip eap-cd-application-templates-${EAP_CD_BRANCH}.zip
+
 mv origin-${ORIGIN_BRANCH}/examples/db-templates/*.{yaml,json} ${EXAMPLES_BASE}/db-templates/
 mv origin-${ORIGIN_BRANCH}/examples/quickstarts/*.{yaml,json} ${EXAMPLES_BASE}/quickstart-templates/
 mv origin-${ORIGIN_BRANCH}/examples/jenkins/jenkins-*template.json ${EXAMPLES_BASE}/quickstart-templates/
 mv origin-${ORIGIN_BRANCH}/examples/image-streams/*.{yaml,json} ${EXAMPLES_BASE}/image-streams/
-mv application-templates-${XPAAS_VERSION}/jboss-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/
+find application-templates-${XPAAS_VERSION}/ -name '*image-stream*.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-streams/
 mv rhdm-7-openshift-image-${RHDM_7_TAG}/rhdm71-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
 mv rhpam-7-openshift-image-${RHPAM_7_TAG}/rhpam71-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
 mv jboss-datagrid-7-openshift-image-${DG_72_VERSION}/templates/datagrid72-image-stream.json ${EXAMPLES_BASE}/xpaas-streams/
+mv jboss-eap-7-openshift-image-${EAP_72_BRANCH}/templates/eap72-image-stream.json ${EXAMPLES_BASE}/xpaas-streams/
+mv jboss-eap-7-openshift-image-${EAP_CD_BRANCH}/templates/eap-cd-image-stream.json ${EXAMPLES_BASE}/xpaas-streams/
+
 # fis content from jboss-fuse/application-templates-GA would collide with jboss-openshift/application-templates
 # as soon as they use the same branch/tag names
 mv application-templates-GA/fis-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
@@ -54,6 +64,9 @@ find rhdm-7-openshift-image-${RHDM_7_TAG}/templates -name '*.yaml' -exec mv {} $
 find rhpam-7-openshift-image-${RHPAM_7_TAG}/templates -name '*.yaml' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
 find 3scale-amp-openshift-templates-${RHAMP_TAG}/ -name '*.yml' -exec mv {} ${EXAMPLES_BASE}/quickstart-templates/ \;
 find jboss-datagrid-7-openshift-image-${DG_72_VERSION}/templates/ -name '*.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
+find jboss-eap-7-openshift-image-${EAP_72_BRANCH}/templates/ -name '*.json' ! -wholename '*image-stream*' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
+find jboss-eap-7-openshift-image-${EAP_CD_BRANCH}/templates/ -name '*.json' ! -wholename '*image-stream*' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
+rm ${EXAMPLES_BASE}/xpaas-templates/eap-cd-image-stream.json
 popd
 
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/dotnet_imagestreams.json         -O ${EXAMPLES_BASE}/image-streams/dotnet_imagestreams.json
