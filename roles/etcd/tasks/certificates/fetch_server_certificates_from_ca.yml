@@ -19,7 +19,7 @@
   - "{{ etcd_peer_cert_file }}"
   - "{{ etcd_ca_file }}"
   register: g_etcd_server_cert_stat_result
-  when: not etcd_certificates_redeploy | default(false) | bool
+
 
 - set_fact:
     etcd_server_certs_missing: "{{ true if etcd_certificates_redeploy | default(false) | bool
@@ -27,6 +27,10 @@
                                                    | default({})
                                                    | lib_utils_oo_collect(attribute='stat.exists')
                                                    | list)) }}"
+    etcd_file_owner: "{{ ('etcd' in (g_etcd_server_cert_stat_result.results
+                                            | default({})
+                                            | lib_utils_oo_collect(attribute='stat.pw_name')
+                                            | list)) }}"
 
 - name: Ensure generated_certs directory present
   file:
@@ -183,6 +187,8 @@
   file:
     path: "{{ item }}"
     mode: 0600
+    owner: "{{ 'etcd' if etcd_file_owner | bool else omit }}"
+    group: "{{ 'etcd' if etcd_file_owner | bool else omit }}"
   when: etcd_url_scheme == 'https'
   with_items:
   - "{{ etcd_ca_file }}"
@@ -193,6 +199,8 @@
   file:
     path: "{{ item }}"
     mode: 0600
+    owner: "{{ 'etcd' if etcd_file_owner | bool else omit }}"
+    group: "{{ 'etcd' if etcd_file_owner | bool else omit }}"
   when: etcd_peer_url_scheme == 'https'
   with_items:
   - "{{ etcd_peer_ca_file }}"
@@ -205,3 +213,5 @@
     path: "{{ etcd_conf_dir }}"
     state: directory
     mode: 0700
+    owner: "{{ 'etcd' if etcd_file_owner | bool else omit }}"
+    group: "{{ 'etcd' if etcd_file_owner | bool else omit }}"
