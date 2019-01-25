@@ -1,7 +1,7 @@
 ---
 
 kind: ClusterRole
-apiVersion: v1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-kube-controllers
   namespace: kube-system
@@ -27,7 +27,7 @@ rules:
       - list
 ---
 kind: ClusterRoleBinding
-apiVersion: v1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-kube-controllers
 roleRef:
@@ -42,7 +42,7 @@ subjects:
 ---
 
 kind: ClusterRole
-apiVersion: v1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-node
   namespace: kube-system
@@ -69,8 +69,8 @@ rules:
 
 ---
 
-apiVersion: v1
 kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-node
 roleRef:
@@ -85,7 +85,7 @@ subjects:
 ---
 
 kind: ClusterRole
-apiVersion: v1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-upgrade-job
   namespace: kube-system
@@ -100,8 +100,8 @@ rules:
       - watch
 ---
 
-apiVersion: v1
 kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-upgrade-job
 roleRef:
@@ -167,6 +167,64 @@ data:
   etcd_ca: "/calico-secrets/etcd-ca"
   etcd_cert: "/calico-secrets/etcd-cert"
   etcd_key: "/calico-secrets/etcd-key"
+
+  pools.json: |-
+    {{ ip_pools | to_json }}
+
+---
+
+# This Job will install Calico IP pools.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: install-calico-pools
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: calicoctl
+        image: {{ calicoctl_image }}
+        command: ["/calicoctl", "apply", "-f", "/etc/config/pools.json"]
+        env:
+        - name: ETCD_ENDPOINTS
+          valueFrom:
+            configMapKeyRef:
+              name: calico-config
+              key: etcd_endpoints
+        - name: ETCD_CA_CERT_FILE
+          valueFrom:
+            configMapKeyRef:
+              name: calico-config
+              key: etcd_ca
+        - name: ETCD_KEY_FILE
+          valueFrom:
+            configMapKeyRef:
+              name: calico-config
+              key: etcd_key
+        - name: ETCD_CERT_FILE
+          valueFrom:
+            configMapKeyRef:
+              name: calico-config
+              key: etcd_cert
+        volumeMounts:
+        - name: etcd-certs
+          mountPath: /calico-secrets
+        - name: config-volume
+          mountPath: /etc/config
+      restartPolicy: OnFailure
+      hostNetwork: true
+      volumes:
+      - name: etcd-certs
+        secret:
+          secretName: calico-etcd-secrets
+      - name: config-volume
+        configMap:
+          name: calico-config
+          items:
+          - key: pools.json
+            path: pools.json
+  backoffLimit: 10
 
 ---
 
@@ -302,13 +360,9 @@ spec:
             # Set Felix endpoint to host default action to ACCEPT.
             - name: FELIX_DEFAULTENDPOINTTOHOSTACTION
               value: "ACCEPT"
-            # The default IPv4 pool to create on startup if none exists. Pod IPs will be
-            # chosen from this range. Changing this value after installation will have
-            # no effect. This should fall within '--cluster-cidr'.
-            - name: CALICO_IPV4POOL_CIDR
-              value: "{{ openshift_cluster_network_cidr }}"
-            - name: CALICO_IPV4POOL_IPIP
-              value: "{{ calico_ipv4pool_ipip }}"
+            # IP pools sold separately.
+            - name: NO_DEFAULT_POOLS
+              value: "true"
             # Disable IPv6 on Kubernetes.
             - name: FELIX_IPV6SUPPORT
               value: "false"
