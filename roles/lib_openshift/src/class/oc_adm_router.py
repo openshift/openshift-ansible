@@ -218,11 +218,11 @@ class Router(OpenShiftCLI):
 
             router_pem = '/tmp/router.pem'
             with open(router_pem, 'w') as rfd:
-                rfd.write(open(self.config.config_options['cert_file']['value']).read())
-                rfd.write(open(self.config.config_options['key_file']['value']).read())
+                rfd.write(open(self.config.config_options['cert_file']['value']).read() + "\n")
+                rfd.write(open(self.config.config_options['key_file']['value']).read() + "\n")
                 if self.config.config_options['cacert_file']['value'] and \
                    os.path.exists(self.config.config_options['cacert_file']['value']):
-                    rfd.write(open(self.config.config_options['cacert_file']['value']).read())
+                    rfd.write(open(self.config.config_options['cacert_file']['value']).read() + "\n")
 
             atexit.register(Utils.cleanup, [router_pem])
 
