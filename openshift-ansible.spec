@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.73
+Version:        3.11.74
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,19 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jan 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.74-1
+- openshift_node: open the router stats port by default (pgier@redhat.com)
+- Pull heketi admin key from deploymentconfig object (m.andre@redhat.com)
+- Fixed "AnsibleUndefinedVariable: 'dict object' has no attribute
+  'annotations'" error. (fcarrus@redhat.com)
+- gluster: detect intent to deploy legacy OpenShift Container Storage
+  (ndevos@redhat.com)
+- Fix sanity-check removed vars (mgugino@redhat.com)
+- Fix documentation for oc - modules (sebastian.gumprich@supplyon.com)
+- Include namedcertificates in the list of expiration check
+  (dsanzmor@redhat.com)
+- Retrieve heketi secret before setting CLI command (m.andre@redhat.com)
+
 * Wed Jan 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.73-1
 - Hardcode CentOS repository template for 3.11 (mail@leoschabel.de)
 - Run nsx_node role on opensift nodes only, Closes #11038 (yasensim@gmail.com)
