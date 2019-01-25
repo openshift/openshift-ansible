@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.81
+Version:        3.7.82
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 25 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.82-1
+- 
+
 * Thu Jan 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.81-1
 - Fix 404 url ( bz1668210 ) for v3.7 (lxia@redhat.com)
 - Add OWNERS file. (pdd@redhat.com)
