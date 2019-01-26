@@ -237,6 +237,7 @@
     name: openshift_logging_kibana
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_kibana_ops_deployment: false
     openshift_logging_kibana_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_kibana_master_url: "{{ openshift_logging_master_url }}"
     openshift_logging_kibana_master_public_url: "{{ openshift_logging_master_public_url }}"
@@ -278,6 +279,7 @@
     name: openshift_logging_curator
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_curator_ops_deployment: false
     openshift_logging_curator_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_curator_es_host: "{{ openshift_logging_es_host }}"
     openshift_logging_curator_es_port: "{{ openshift_logging_es_port }}"
