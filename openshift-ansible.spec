@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.65
+Version:        3.9.66
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jan 26 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.66-1
+- Revert "Enable cinder predicate by default" (sdodson@redhat.com)
+- Fix 404 url ( bz1668210 ) (lxia@redhat.com)
+- Enable cinder predicate by default (hekumar@redhat.com)
+- Hardcode CentOS repository template for 3.9 (mail@leoschabel.de)
+
 * Mon Jan 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.65-1
 - Juniper Contrail SDN patch (pvijayaragav@juniper.net)
 - [release 3.9] fix openstack facts when ec2 var is empty (tzumainn@redhat.com)
