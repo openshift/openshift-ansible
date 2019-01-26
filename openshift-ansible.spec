@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.105
+Version:        3.10.106
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,16 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Jan 25 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.106-1
+- Fix OpenShift SDN/OVS pod restart during upgrades (rteague@redhat.com)
+- Fix auditConfig.policyConfiguration in master_check_paths_in_config
+  (jkupfere@redhat.com)
+- test/ci: avoid using ec2_ami_facts (vrutkovs@redhat.com)
+- Fix sanity-check removed vars (mgugino@redhat.com)
+- openshift_node: open the router stats port by default (pgier@redhat.com)
+- Add tasks to run init playbooks for collecting "openshift_is_atomic" fact
+  (bysnupy@hotmail.com)
+
 * Thu Jan 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.105-1
 - Fix 404 url ( bz1668221 ) (lxia@redhat.com)
 - split readiness from liveness probe (jaboyd@redhat.com)
