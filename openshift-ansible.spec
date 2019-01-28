@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.74
+Version:        3.11.75
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Jan 27 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.75-1
+- Maintain etcd as owner of certs. (pdd@redhat.com)
+- Update Calico README (casey@tigera.io)
+- Allow configuration of Calico IP pools (casey@tigera.io)
+- Add newlines when concatenating router certificate (sdodson@redhat.com)
+- Add openshift_cloud_provider config for subnetwork-name (jkupfere@redhat.com)
+
 * Thu Jan 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.74-1
 - openshift_node: open the router stats port by default (pgier@redhat.com)
 - Pull heketi admin key from deploymentconfig object (m.andre@redhat.com)
