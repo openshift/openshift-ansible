@@ -35,7 +35,8 @@ def loaded_cert(request, valid_cert):
     (subject,
      expiry_date,
      time_remaining,
-     serial) = openshift_cert_expiry.load_and_handle_cert(cert_string, now)
+     serial,
+     issuer) = openshift_cert_expiry.load_and_handle_cert(cert_string, now)
 
     return {
         'now': now,
@@ -43,6 +44,7 @@ def loaded_cert(request, valid_cert):
         'expiry_date': expiry_date,
         'time_remaining': time_remaining,
         'serial': serial,
+        'issuer': issuer,
     }
 
 
