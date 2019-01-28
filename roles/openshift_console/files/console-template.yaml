@@ -34,6 +34,9 @@ parameters:
 - name: OAUTH_SECRET
   generate: expression
   from: "[a-zA-Z0-9]{32}"
+- name: FORCE_ROLLOUT_ANNOTATION_VALUE
+  generate: expression
+  from: "[a-zA-Z0-9]{7}"
 objects:
 
 # to create the web console server
@@ -56,6 +59,8 @@ objects:
     replicas: "${{REPLICA_COUNT}}"
     template:
       metadata:
+        annotations:
+          installer-triggered-rollout: ${FORCE_ROLLOUT_ANNOTATION_VALUE}
         labels:
           app: openshift-console
           component: ui
