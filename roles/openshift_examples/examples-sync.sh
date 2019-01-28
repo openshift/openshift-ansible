@@ -6,8 +6,8 @@
 # This script should be run from openshift-ansible/roles/openshift_examples
 
 XPAAS_VERSION=ose-v1.4.14
-RHDM_7_TAG=7.1.1.GA
-RHPAM_7_TAG=7.1.1.GA
+RHDM_7_TAG=7.2.0.GA
+RHPAM_7_TAG=7.2.0.GA
 DG_72_VERSION=1.1.1
 ORIGIN_VERSION=${1:-v3.11}
 ORIGIN_BRANCH=${2:-master}
@@ -39,8 +39,8 @@ mv origin-${ORIGIN_BRANCH}/examples/quickstarts/*.{yaml,json} ${EXAMPLES_BASE}/q
 mv origin-${ORIGIN_BRANCH}/examples/jenkins/jenkins-*template.json ${EXAMPLES_BASE}/quickstart-templates/
 mv origin-${ORIGIN_BRANCH}/examples/image-streams/*.{yaml,json} ${EXAMPLES_BASE}/image-streams/
 mv application-templates-${XPAAS_VERSION}/jboss-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/
-mv rhdm-7-openshift-image-${RHDM_7_TAG}/rhdm71-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
-mv rhpam-7-openshift-image-${RHPAM_7_TAG}/rhpam71-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
+mv rhdm-7-openshift-image-${RHDM_7_TAG}/rhdm72-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
+mv rhpam-7-openshift-image-${RHPAM_7_TAG}/rhpam72-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
 mv jboss-datagrid-7-openshift-image-${DG_72_VERSION}/templates/datagrid72-image-stream.json ${EXAMPLES_BASE}/xpaas-streams/
 # fis content from jboss-fuse/application-templates-GA would collide with jboss-openshift/application-templates
 # as soon as they use the same branch/tag names
