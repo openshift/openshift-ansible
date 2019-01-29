@@ -85,6 +85,8 @@ objects:
             value: '1'
           - name: HEKETI_IGNORE_STALE_OPERATIONS
             value: "true"
+          - name: HEKETI_DEBUG_UMOUNT_FAILURES
+            value: "true"
           ports:
           - containerPort: 8080
           volumeMounts:
@@ -127,6 +129,9 @@ parameters:
   displayName: heketi fstab path
   description: Set the fstab path, file that is populated with bricks that heketi creates
   value: /var/lib/heketi/fstab
+- name: HEKETI_DEBUG_UMOUNT_FAILURES
+  displayName: Capture more details in case brick unmounting fails
+  description: When unmounting a brick fails, Heketi will not be able to cleanup the Gluster volume completely. The main causes for preventing to unmount a brick, seem to originate from Gluster processes. By enabling this option, the heketi.log will contain the output of 'lsof' to aid with debugging of the Gluster processes and help with identifying any files that may be left open.
 - name: HEKETI_ROUTE
   displayName: heketi route name
   description: Set the hostname for the route URL
