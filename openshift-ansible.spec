@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.106
+Version:        3.10.107
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jan 29 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.107-1
+- Add newlines when concatenating router certificate (sdodson@redhat.com)
+
 * Fri Jan 25 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.106-1
 - Fix OpenShift SDN/OVS pod restart during upgrades (rteague@redhat.com)
 - Fix auditConfig.policyConfiguration in master_check_paths_in_config
