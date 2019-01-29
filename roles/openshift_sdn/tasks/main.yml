@@ -51,24 +51,6 @@
   shell: >
     {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig apply -f "{{ mktemp.stdout }}"
 
-- name: Wait for rollout
-  command: >
-    {{ openshift_client_binary }} rollout status ds/sdn --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift-sdn
-  changed_when: false
-  # Ignore errors so we can log troubleshooting info on failures.
-  ignore_errors: yes
-  register: sdn_rollout_status
-
-- when: sdn_rollout_status.rc != 0
-  block:
-    - name: Get pods in the openshift-sdn namespace
-      command: >
-        {{ openshift_client_binary }} get pods -o wide --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift-sdn
-      register: pods
-      ignore_errors: true
-    - debug:
-        msg: "{{ pods.stdout_lines }}"
-
 - name: Remove temp directory
   file:
     state: absent

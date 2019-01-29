@@ -68,6 +68,13 @@
     - openshift_reconcile_sccs_reject_change | default(true) | bool
     - check_reconcile_scc_result.stdout != '' or check_reconcile_scc_result.rc != 0
 
+- name: Change SDN/OVS DaemonSets to 'OnDelete' updateStrategy
+  hosts: masters[0]
+  tasks:
+  - import_role:
+      name: openshift_sdn
+      tasks_from: update_daemonsets.yml
+
 # TODO: need to verify settings about the bootstrap configs
 # 1. Does network policy match the master config
 
@@ -77,6 +84,13 @@
   - role: metrics_server
     # a default is set on the actual variable in the role, so no fancy logic is needed here
     when: openshift_metrics_server_install | default(true) | bool
+
+
+- name: Configure components that must be available prior to upgrade
+  hosts: oo_first_master
+  roles:
+  - role: openshift_sdn
+    when: openshift_use_openshift_sdn | default(True) | bool
 
 - import_playbook: ../upgrade_control_plane.yml
   vars:

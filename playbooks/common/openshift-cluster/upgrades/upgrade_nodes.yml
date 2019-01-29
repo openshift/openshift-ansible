@@ -94,12 +94,6 @@
           ('glusterfs' in groups and inventory_hostname in groups['glusterfs'])
           or ('glusterfs_registry' in groups and inventory_hostname in groups['glusterfs_registry'])
 
-- name: Upgrade SDN
-  hosts: oo_first_master
-  roles:
-  - role: openshift_sdn
-    when: openshift_use_openshift_sdn | default(True) | bool
-
 - name: Re-enable excluders
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config
   tasks:
