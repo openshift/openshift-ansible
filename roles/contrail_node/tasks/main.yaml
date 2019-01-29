@@ -3,6 +3,12 @@
   include_role:
     name: contrail_common
 
+#- name: Generate and copy etcd client certs to contrail nodes
+#  include_tasks: etcd_certs.yaml
+#  when:
+#    - inventory_hostname in contrail_masters
+#    - inventory_hostname not in groups.oo_masters_to_config
+
 - name: Set ntp on nodes
   include_tasks: ntp.yml
 

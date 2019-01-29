@@ -3,7 +3,7 @@
 ### Borrowed from https://github.com/kubernetes/charts/blob/master/test/verify-release.sh
 ### 
 
-NAMESPACE=kube-system
+NAMESPACE=contrail-system
 
 # Ensure all pods in the namespace entered a Running state
 SUCCESS=0
@@ -48,7 +48,7 @@ if [ "$PODS_FOUND" -eq 0 ];then
   echo "WARN: No pods launched by this chart's default settings"
   exit 0
 else
-  POD_FAILED=`{{ openshift_client_binary }} get pods --no-headers --namespace kube-system | grep -v Running | cut -d " " -f1`
+  POD_FAILED=`{{ openshift_client_binary }} get pods --no-headers --namespace contrail-system | grep -v Running | cut -d " " -f1`
   echo "ERROR: Some containers failed to reach the ready state"
   echo ERROR  POD $POD_FAILED is not ready
   exit 1

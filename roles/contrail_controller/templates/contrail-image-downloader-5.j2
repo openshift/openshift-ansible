@@ -8,7 +8,7 @@ apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: contrail-image-installer
-  namespace: kube-system
+  namespace: contrail-system
   labels:
     app: contrail-image-download
 spec:
@@ -21,9 +21,6 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: "opencontrail.org/controller"
-                operator: Exists
             - matchExpressions:
               - key: "opencontrail.org/controller"
                 operator: Exists

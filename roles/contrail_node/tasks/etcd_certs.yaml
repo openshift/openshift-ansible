@@ -1,0 +1,24 @@
+---
+- name: Contrail Generate OpenShift-etcd certs
+  import_role:
+    name: etcd
+    tasks_from: client_certificates
+  vars:
+    etcd_cert_prefix: master.etcd-
+    etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_cert_subdir: "openshift-contrail-{{ openshift.common.hostname }}"
+
+- name: Set Contrail etcd cert location facts
+  set_fact:
+    contrail_etcd_ca_cert_file: "/etc/origin/master/master.etcd-ca.crt"
+    contrail_etcd_cert_file: "/etc/origin/master/master.etcd-client.crt"
+    contrail_etcd_key_file: "/etc/origin/master/master.etcd-client.key"
+
+- name: check if certs are present
+  stat:
+    path: "{{ item }}"
+  with_items:
+  - "{{ contrail_etcd_ca_cert_file }}"
+  - "{{ contrail_etcd_cert_file }}"
+  - "{{ contrail_etcd_key_file }}"

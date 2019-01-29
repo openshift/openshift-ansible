@@ -28,7 +28,7 @@
     api_vip: "{{ api_vip_result.stdout }}"
   when: api_vip_result is success
 
-- name: Create the agent template file
+- name: Create the image downloader template file
   template:
     src: contrail-image-downloader-5.j2
     dest: /tmp/contrail-image-downloader.yaml
@@ -37,7 +37,16 @@
   run_once: true
   when:
     - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
+
+- name: Create the contrail namespace template file
+  template:
+    src: contrail-namespace.j2
+    dest: /tmp/contrail-namespace.yaml
+    owner: root
+    mode: 0644
+  run_once: true
+  when:
+    - contrail_version is version('5.0', '>=')
 
 - name: Create the agent template file
   template:
@@ -48,7 +57,6 @@
   run_once: true
   when:
     - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
 
 - name: Create the contrail infrastructure template file
   template:
@@ -59,7 +67,6 @@
   run_once: true
   when:
     - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
 
 - name: Create Contrail single YAML file for Contrail 4.0
   template:
@@ -80,17 +87,6 @@
   run_once: true
   when:
     - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
-
-- name: Create Contrail single YAML file for Contrail 5.1
-  template:
-    src: contrail-installer-5.1.j2
-    dest: /tmp/contrail-installer.yaml
-    owner: root
-    mode: 0644
-  run_once: true
-  when:
-    - contrail_version is version('5.1', '>=')
 
 - name: Create Contrail single YAML file for Contrail nested mode
   template:
@@ -109,17 +105,16 @@
     mode: 0777
   run_once: true
 
-- name: Add Contrail service account to privileged scc
-  oc_adm_policy_user:
-    user: system:serviceaccount:kube-system:contrail
-    resource_kind: scc
-    resource_name: privileged
-    state: present
+- name: Create the contrail-system namespace
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-namespace.yaml"
   run_once: True
+  ignore_errors: True
+  when:
+    - contrail_version is version('5.0', '>=')
 
-- name: Add the daemonset-controller service account to privileged scc
+- name: Give privileged access to default service account of contrail-system namespace
   oc_adm_policy_user:
-    user: system:serviceaccount:kube-system:daemon-set-controller
+    user: system:serviceaccount:contrail-system:default
     resource_kind: scc
     resource_name: privileged
     state: present
@@ -134,7 +129,7 @@
   with_items: "{{ contrail_masters.split() }}"
 
 - name: Create Contrail registry secret
-  command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n kube-system"
+  command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n contrail-system"
   run_once: True
   when: contrail_registry_username is defined
   ignore_errors: True
@@ -145,7 +140,6 @@
   ignore_errors: True
   when:
     - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
 
 - name: sleep for 300 seconds and continue with play
   wait_for: timeout=300
@@ -163,7 +157,6 @@
   ignore_errors: True
   when:
     - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
 
 - name: sleep for 180 seconds and continue with play
   wait_for: timeout=180
@@ -187,7 +180,6 @@
   ignore_errors: True
   when:
     - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
 
 - name: Check Pods script to Master Node
   command: /tmp/wait_for_pod.sh
