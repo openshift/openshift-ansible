@@ -10,3 +10,22 @@
   - meta: refresh_inventory
 
 - import_playbook: install.yml
+
+# Inventory refresh required to remove deleted bootstrap node
+- hosts: localhost
+  tasks:
+  - meta: refresh_inventory
+
+# Re-scan GCP machines
+- hosts: localhost
+  connection: local
+  tasks:
+  - name: place all scale groups into Ansible groups
+    include_role:
+      name: openshift_gcp
+      tasks_from: setup_scale_group_facts.yml
+
+- name: run worker scaleup
+  import_playbook: ../../playbooks/openshift-node/scaleup.yml
+  vars:
+    openshift_api_host: "{{ openshift_install_config['metadata']['name'] }}-api.{{ openshift_install_config['baseDomain'] }}"
