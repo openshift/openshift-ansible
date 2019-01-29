@@ -27,6 +27,10 @@ openshift_logging_fluentd_app_port: 9200
 openshift_logging_fluentd_ops_host: "{{ openshift_logging_fluentd_app_host }}"
 openshift_logging_fluentd_ops_port: "{{ openshift_logging_fluentd_app_port }}"
 
+# openshift_logging_fluentd_merge_json_log configures fluentd to parse
+# JSON log messages into the top level payload envelope
+openshift_logging_fluentd_merge_json_log: "true"
+
 ### Used by "hosted" and "secure-aggregator" deployments
 openshift_logging_fluentd_journal_source: "{{ openshift_hosted_logging_journal_source | default('') }}"
 openshift_logging_fluentd_journal_read_from_head: "{{ openshift_hosted_logging_journal_read_from_head | default('') }}"
