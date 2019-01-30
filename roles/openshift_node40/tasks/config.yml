@@ -16,6 +16,7 @@
 - debug:
     var: ign_contents
 
+# parse_ignition is a custom module in lib_utils
 - name: parse ignition file
   parse_ignition:
     ign_file_contents: "{{ ign_contents }}"
