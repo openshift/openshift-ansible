@@ -189,6 +189,9 @@ default_r_openshift_node_os_firewall_allow:
   cond: "{{ openshift_node_port_range is defined }}"
 - service: Prometheus monitoring
   port: 9000-10000/tcp
+- service: Router stats port
+  port: 1936/tcp
+  cond: "{{ openshift_router_stats_port_enable | default(True) }}"
 - service: Contrail VRouter Agent Introspect
   port: 8085/tcp
   condition: "{{ openshift_node_use_contrail }}"
