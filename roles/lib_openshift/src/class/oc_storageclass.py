@@ -61,6 +61,14 @@ class OCStorageClass(OpenShiftCLI):
             if 'is-default-class' in anno_key and anno_value != self.config.default_storage_class:
                 return True
 
+        # check if mount options have updated
+        if set(self.storage_class.get_mount_options()) != set(self.config.mount_options):
+            return True
+
+        # check if reclaim policy has been updated
+        if self.storage_class.get_reclaim_policy() != self.config.reclaim_policy:
+            return True
+
         return False
 
     @staticmethod
@@ -90,6 +98,8 @@ class OCStorageClass(OpenShiftCLI):
                                      api_version="storage.k8s.io/{}".format(params['api_version']),
                                      default_storage_class=params.get('default_storage_class', 'false'),
                                      kubeconfig=params['kubeconfig'],
+                                     mount_options=params['mount_options'],
+                                     reclaim_policy=params['reclaim_policy']
                                     )
 
         oc_sc = OCStorageClass(rconfig, verbose=params['debug'])
