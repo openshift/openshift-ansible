@@ -1,0 +1,124 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-analytics
+  namespace: contrail-system
+  labels:
+    app: contrail-analytics
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-analytics
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/infra"
+                operator: Exists
+      hostNetwork: true
+      initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        env:
+        - name: CONFIGURE_IPTABLES
+          value: "true"
+        - name: IPTABLES_CHAIN
+          value: "OS_FIREWALL_ALLOW"
+        - name: NODE_TYPE
+          value: "analytics"
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: env
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+      containers:
+      - name: contrail-analytics-api
+        image: "{{ contrail_registry }}/contrail-analytics-api:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: analyticszookeeperenv
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+        - mountPath: /etc/localtime
+          name: localtime
+      - name: contrail-analytics-collector
+        image: "{{ contrail_registry }}/contrail-analytics-collector:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        env:
+        - name: NODE_TYPE
+          value: analytics
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: analyticszookeeperenv
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+        - mountPath: /etc/localtime
+          name: localtime
+      - name: contrail-analytics-nodemgr
+        image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: nodemgr-config
+        env:
+        - name: NODE_TYPE
+          value: analytics
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+        - mountPath: /mnt
+          name: docker-unix-socket
+        - mountPath: /etc/localtime
+          name: localtime
+          containers:
+      volumes:
+      - name: analytics-logs
+        hostPath:
+          path: /var/log/contrail/analytics
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      - name: analytics-zookeeper-data
+        hostPath:
+          path: /var/lib/analytics_zookeeper_data
+      - name: analytics-zookeeper-datalog
+        hostPath:
+          path: /var/lib/analytics_zookeeper_datalog
+      - name: zookeeper-logs
+        hostPath:
+          path: /var/log/contrail/analytics
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
+---

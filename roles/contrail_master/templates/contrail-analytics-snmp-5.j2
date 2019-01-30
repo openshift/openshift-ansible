@@ -1,0 +1,132 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-analytics-snmp
+  namespace: contrail-system
+  labels:
+    app: contrail-analytics-snmp
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-analytics-snmp
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/infra"
+                operator: Exists
+      hostNetwork: true
+      initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: CONFIGURE_IPTABLES
+          value: "true"
+        - name: IPTABLES_CHAIN
+          value: "OS_FIREWALL_ALLOW"
+        - name: NODE_TYPE
+          value: "analytics-snmp"
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: contrail-analyticsdb-config
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+        - mountPath: /host/var/lib
+          name: host-var-lib
+      containers:
+      - name: contrail-analytics-snmp-collector
+        image: "{{ contrail_registry }}/contrail-analytics-snmp-collector:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        env:
+        - name: NODE_TYPE
+          value: analytics-snmp
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: analyticszookeeperenv
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-snmp-logs
+        - mountPath: /etc/localtime
+          name: localtime
+      - name: contrail-analytics-snmp-nodemgr
+        image: "{{contrail_registry}}/contrail-nodemgr:{{contrail_container_tag}}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: nodemgr-config
+        - configMapRef:
+            name: contrail-analyticsdb-config
+        env:
+        - name: NODE_TYPE
+          value: analytics-snmp
+        - name: DATABASE_NODEMGR__DEFAULTS__minimum_diskGB
+          value: "2"
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-snmp-nodemgr-logs
+        - mountPath: /mnt
+          name: docker-unix-socket
+        - mountPath: /etc/localtime
+          name: localtime
+      - name: contrail-analytics-topology
+        image: "{{ contrail_registry }}/contrail-analytics-snmp-topology:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        env:
+        - name: NODE_TYPE
+          value: analytics-snmp
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: analyticszookeeperenv
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-snmp-topology-logs
+        - mountPath: /etc/localtime
+          name: localtime
+      volumes:
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
+      - name: host-var-lib
+        hostPath:
+          path: /var/lib
+      - name: analytics-snmp-topology-logs
+        hostPath:
+          path: /var/lib/contrail/analytics-snmp
+      - name: analytics-snmp-logs
+        hostPath:
+          path: /var/lib/contrail/analytics-snmp
+      - name: analytics-snmp-nodemgr-logs
+        hostPath:
+          path: /var/log/contrail/analytics-snmp
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
+---

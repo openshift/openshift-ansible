@@ -83,6 +83,8 @@
     when: openshift_use_calico | default(false) | bool
   - role: nsx
     when: openshift_use_nsx | default(false) | bool
+  - role: contrail_master
+    when: openshift_use_contrail | default(false) | bool
   tasks:
   - import_role:
       name: kuryr

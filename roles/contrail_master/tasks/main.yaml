@@ -1,0 +1,17 @@
+---
+- name: Run kube proxy
+  import_role:
+    name: kube_proxy_and_dns
+  when: inventory_hostname == groups.masters.0
+
+- name: Get contrail nodes and ips
+  include_role:
+    name: contrail_common
+
+- name: Create contrail controller components and Daemonsets
+  include_tasks: os_contrail_master.yaml
+  when: not nested_mode_contrail | default(false) | bool
+
+- name: Create contrail nested components
+  include_tasks: os_contrail_nested.yaml
+  when: nested_mode_contrail | default(false) | bool

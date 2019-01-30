@@ -1,0 +1,41 @@
+---
+- name: Run contrail-status command to get status of contrail services.
+  command: /usr/bin/contrail-status
+  register: contrail_status_output
+  when:
+    - inventory_hostname in contrail_masters
+
+- set_fact:
+    schema_valid: true
+  when:
+    - inventory_hostname in contrail_masters
+
+- name: If Schema Transformer is not in active or backup state, mark it as being in invalid state.
+  set_fact:
+    schema_valid: false
+  when:
+    - inventory_hostname in contrail_masters
+    - '"schema: active" not in contrail_status_output.stdout'
+    - '"schema: backup" not in contrail_status_output.stdout'
+
+- when:
+    - inventory_hostname in contrail_masters
+    - not schema_valid
+
+    # Schema Transformer is invalid.
+    # We will attempt to resuscitate it by restarting its container.
+
+  block:
+    - name: Get docker container details of Schema Transformer
+      command: docker ps --filter "name=schema" -q
+      register: schema_docker_output
+      ignore_errors: yes
+
+    - name: Restart Schema Transformer container "{{ schema_docker_output.stdout }}"
+      command: docker restart "{{ schema_docker_output.stdout }}"
+      when: schema_docker_output.stdout != ""
+      ignore_errors: yes
+
+    - name: Wait for Schema Transformer to restart.
+      wait_for: timeout=10
+      when: schema_docker_output.stdout != ""

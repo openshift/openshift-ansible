@@ -1,0 +1,102 @@
+# This file contains the contrail webui components.
+# Thiscomponent will be installed as DaemonSet on the infra node
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-controller-webui
+  namespace: contrail-system
+  labels:
+    app: contrail-controller-webui
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-controller-webui
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/infra"
+                operator: Exists
+      hostNetwork: true
+      initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        env:
+        - name: CONFIGURE_IPTABLES
+          value: "true"
+        - name: IPTABLES_CHAIN
+          value: "OS_FIREWALL_ALLOW"
+        - name: NODE_TYPE
+          value: "webui"
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: env
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+      containers:
+      - name: contrail-controller-webui-job
+        image: "{{ contrail_registry }}/contrail-controller-webui-job:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: configzookeeperenv
+        - configMapRef:
+            name: kubernetes-config
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: webui-logs
+        - mountPath: /tmp/serviceaccount
+          name: ssl-secret-gen-token
+        - mountPath: /etc/localtime
+          name: localtime
+      - name: contrail-controller-webui-web
+        image: "{{ contrail_registry }}/contrail-controller-webui-web:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: configzookeeperenv
+        - configMapRef:
+            name: kubernetes-config
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: webui-logs
+        - mountPath: /tmp/serviceaccount
+          name: ssl-secret-gen-token
+        - mountPath: /etc/localtime
+          name: localtime
+      volumes:
+      - name: webui-logs
+        hostPath:
+          path: /var/log/contrail/webui
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
+      - name: ssl-secret-gen-token
+        secret:
+          secretName: contrail-kubernetes-token
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
+---

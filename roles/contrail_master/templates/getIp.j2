@@ -1,0 +1,13 @@
+import sys
+import socket
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print >> sys.stderr, "Invalid Usage: No hostname provided as argument."
+        sys.exit(1)
+    try:
+       sys.stdout.write(socket.gethostbyname(sys.argv[1]))
+       sys.exit(0)
+    except Exception as e:
+        print >> sys.stderr, e
+        sys.exit(1)
