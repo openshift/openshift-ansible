@@ -3,7 +3,7 @@
   package:
     name: glusterfs-fuse
     state: present
-  when: not openshift_is_atomic | bool
+  when: not (openshift_is_atomic | default(False) | bool)
   register: result
   until: result is succeeded
 
