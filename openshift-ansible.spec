@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.107
+Version:        3.10.108
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Jan 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.108-1
+- logging configure fluent to merge_json_log (jcantril@redhat.com)
+- Node problem detector always pull images from registry.redhat.io for
+  openshift-enterprise (sgaikwad@redhat.com)
+- Add unit test for oo_oreg_image filter (mgugino@redhat.com)
+
 * Tue Jan 29 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.107-1
 - Add newlines when concatenating router certificate (sdodson@redhat.com)
 
