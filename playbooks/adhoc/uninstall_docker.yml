@@ -49,4 +49,4 @@
     - /etc/systemd/system/docker*
 
   - name: Erase docker package
-    command: "yum -y erase docker"
+    command: "yum -y erase docker docker-client docker-common"
