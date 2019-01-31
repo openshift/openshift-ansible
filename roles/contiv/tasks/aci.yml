@@ -1,11 +1,6 @@
 ---
-- name: ACI | Check aci-gw container image
-  command: "{{ openshift_container_cli }} images -q contiv/aci-gw"
-  register: docker_aci_image
-
 - name: ACI | Pull aci-gw container
   command: "{{ openshift_container_cli }} pull contiv/aci-gw"
-  when: docker_aci_image.stdout_lines == []
 
 - name: ACI | Copy shell script used by aci-gw service
   template:

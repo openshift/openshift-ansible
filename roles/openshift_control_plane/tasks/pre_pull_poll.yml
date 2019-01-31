@@ -4,7 +4,6 @@
     jid: "{{ image_prepull.ansible_job_id }}"
   register: job_result
   until: job_result.finished
-  when: control_plane_image.stdout_lines == []
   retries: 20
   delay: 30
   failed_when: false
@@ -14,10 +13,6 @@
     jid: "{{ etcd_prepull.ansible_job_id }}"
   register: job_result
   until: job_result.finished
-  when:
-  - etcd_image_exists is defined
-  - "'stdout_lines' in etcd_image_exists"
-  - etcd_image_exists.stdout_lines == []
   retries: 20
   delay: 30
   failed_when: false
