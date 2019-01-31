@@ -1276,7 +1276,6 @@ def main():
     )
 
     module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']  # noqa: F405
-    module.params['gather_timeout'] = 10  # noqa: F405
     module.params['filter'] = '*'  # noqa: F405
 
     role = module.params['role']  # noqa: F405
