@@ -579,7 +579,7 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules: {{ openshift_openstack_infra_secgroup_rules|to_json }}
-  {% if openshift_openstack_num_cns > 0 %}
+{% if openshift_openstack_num_cns > 0 %}
   cns-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -594,7 +594,7 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules: {{ openshift_openstack_cns_secgroup_rules|to_json }}
-  {% endif %}
+{% endif %}
 {% endif %}
 
   lb-secgrp:
