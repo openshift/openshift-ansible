@@ -61,6 +61,21 @@ objects:
               path: /healthz
               port: 8443
               scheme: HTTPS
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8443
+              scheme: HTTPS
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
         nodeSelector: "${{NODE_SELECTOR}}"
         volumes:
         - name: serving-cert
