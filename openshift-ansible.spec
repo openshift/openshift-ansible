@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.76
+Version:        3.11.77
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,16 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jan 31 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.77-1
+- Remove hard coded gather_timeout in openshift_facts (rteague@redhat.com)
+- Remove docker-common in uninstall (rteague@redhat.com)
+- Fix formatting (igeorgio@redhat.com)
+- Update router service when its annotation changes (miciah.masters@gmail.com)
+- multipath: add hardware_handler for LIO-ORG (gluster-block) config
+  (ndevos@redhat.com)
+- Set openshift_is_atomic default for gluster and kernel modules install
+  (igeorgio@redhat.com)
+
 * Tue Jan 29 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.76-1
 - Bug 1651632 - Force console rollout every time the playbook runs
   (spadgett@redhat.com)
