@@ -106,9 +106,13 @@ spec:
           requests:
             cpu: 100m
             memory: 300Mi
-          limits:
-            cpu: 200m
-            memory: 400Mi
+        livenessProbe:
+          exec:
+            command:
+            - /usr/share/openvswitch/scripts/ovs-ctl
+            - status
+          initialDelaySeconds: 15
+          periodSeconds: 5
 
       volumes:
       - name: host-modules
