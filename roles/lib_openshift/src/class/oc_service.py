@@ -84,7 +84,7 @@ class OCService(OpenShiftCLI):
 
     def needs_update(self):
         ''' verify an update is needed '''
-        skip = ['clusterIP', 'portalIP']
+        skip = ['clusterIP', 'portalIP', 'sessionAffinityConfig']
         return not Utils.check_def_equal(self.user_svc.yaml_dict, self.service.yaml_dict, skip_keys=skip, debug=True)
 
     # pylint: disable=too-many-return-statements,too-many-branches
