@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.108
+Version:        3.10.109
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Feb 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.109-1
+- Remove docker-common in uninstall (rteague@redhat.com)
+- Start node image prepull after CRIO is restarted (vrutkovs@redhat.com)
+
 * Wed Jan 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.108-1
 - logging configure fluent to merge_json_log (jcantril@redhat.com)
 - Node problem detector always pull images from registry.redhat.io for
