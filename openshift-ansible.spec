@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.66
+Version:        3.9.67
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Feb 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.67-1
+- logging configure fluent to merge_json_log (jcantril@redhat.com)
+- openshift_node: open the router stats port by default (pgier@redhat.com)
+- Add newlines when concatenating router certificate (sdodson@redhat.com)
+- default_storage: configure rolebindings for azure-file storage backend
+  (arun.neelicattu@gmail.com)
+- default_storage: allow configuring mountOptions and reclaimPolicy
+  (arun.neelicattu@gmail.com)
+- lib_openshift/oc_storageclass: support mountOptions and reclaimPolicy
+  (arun.neelicattu@gmail.com)
+
 * Sat Jan 26 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.66-1
 - Revert "Enable cinder predicate by default" (sdodson@redhat.com)
 - Fix 404 url ( bz1668210 ) (lxia@redhat.com)
