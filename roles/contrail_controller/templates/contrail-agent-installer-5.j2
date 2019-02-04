@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: agent-env
-  namespace: kube-system
+  namespace: contrail-system
 data:
   AAA_MODE: {{ aaa_mode }}
   ANALYTICS_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
@@ -29,7 +29,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: agent-nodemgr-config
-  namespace: kube-system
+  namespace: contrail-system
 data:
   DOCKER_HOST: "unix://mnt/docker.sock"
 ---
@@ -37,7 +37,7 @@ apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: contrail-agent
-  namespace: kube-system
+  namespace: contrail-system
   labels:
     app: contrail-agent
 spec:
@@ -46,16 +46,6 @@ spec:
       labels:
         app: contrail-agent
     spec:
-      #Disable affinity for single node setup
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: "node-role.kubernetes.io/compute"
-                operator: In
-                values:
-                  - "true"
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:

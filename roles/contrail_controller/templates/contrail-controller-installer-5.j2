@@ -8,13 +8,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: contrail
-  namespace: kube-system
+  namespace: contrail-system
 ---
 kind: ClusterRole
 apiVersion: v1
 metadata:
   name: contrail
-  namespace: kube-system
+  namespace: contrail-system
 rules:
   - apiGroups: ["*"]
     resources: ["*"]
@@ -28,18 +28,18 @@ roleRef:
   name: contrail
 subjects:
 - kind: SystemUser
-  name: kube-system:contrail
+  name: contrail-system:contrail
 - kind: ServiceAccount
   name: contrail
-  namespace: kube-system
+  namespace: contrail-system
 userNames:
-  - system:serviceaccount:kube-system:contrail
+  - system:serviceaccount:contrail-system:contrail
 ---
 apiVersion: v1
 kind: Secret
 metadata:
   name: contrail-kubernetes-token
-  namespace: kube-system
+  namespace: contrail-system
   annotations:
     kubernetes.io/service-account.name: contrail
 type: kubernetes.io/service-account-token
@@ -48,7 +48,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kube-manager-config
-  namespace: kube-system
+  namespace: contrail-system
 data:
   KUBERNETES_API_SERVER: {{ kubernetes_api_server | default(api_vip | ipaddr) }}
   KUBERNETES_API_SECURE_PORT: "{{ openshift_master_api_port | default(kubernetes_api_secure_port) }}"
@@ -67,7 +67,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kubernetes-config
-  namespace: kube-system
+  namespace: contrail-system
 data:
   KUBERNETES_API_SERVER: {{ kubernetes_api_server | default(api_vip | ipaddr) }}
   KUBERNETES_API_PORT: "{{ openshift_master_api_port | default(kubernetes_api_secure_port) }}"
@@ -77,7 +77,7 @@ apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: contrail-analytics
-  namespace: kube-system
+  namespace: contrail-system
   labels:
     app: contrail-analytics
 spec:
@@ -247,7 +247,7 @@ apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: contrail-controller-control
-  namespace: kube-system
+  namespace: contrail-system
   labels:
     app: contrail-controller-control
 spec:
@@ -380,7 +380,7 @@ apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: contrail-controller-config
-  namespace: kube-system
+  namespace: contrail-system
   labels:
     app: contrail-controller-config
 spec:
@@ -526,7 +526,7 @@ apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: contrail-controller-webui
-  namespace: kube-system
+  namespace: contrail-system
   labels:
     app: contrail-controller-webui
 spec:
@@ -619,7 +619,7 @@ apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: contrail-kube-manager
-  namespace: kube-system
+  namespace: contrail-system
   labels:
     app: contrail-kube-manager
 spec:
