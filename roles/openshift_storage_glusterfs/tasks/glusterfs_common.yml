@@ -1,4 +1,6 @@
 ---
+- import_tasks: version_check.yml
+
 - name: Make sure heketi-client is installed
   package:
     name: heketi-client

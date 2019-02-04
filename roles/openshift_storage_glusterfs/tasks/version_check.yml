@@ -1,0 +1,23 @@
+---
+- name: Check for specified container versions
+  fail:
+    msg: |
+      A valid version tag must be specified for all GlusterFS container images.
+      Valid image tags take the form of "v3.x" where "x" can be a one or two release
+      versions (e.g. "v3.0" or "v3.0.1"). The following image versions were detected:
+
+      {% if glusterfs_is_native | bool %}GlusterFS: {{ glusterfs_version }}{% endif %}
+
+      {% if glusterfs_heketi_is_native | bool %}Heketi: {{ heketi_version }}{% endif %}
+
+      {% if glusterfs_block_deploy | bool %}glusterblock-provisioner: {{ glusterblock_version }}{% endif %}
+  vars:
+    glusterfs_version: "{{ (openshift_storage_glusterfs_image | regex_replace('^.*:(v?)(?P<version>.+$)', '\\g<version>')) }}"
+    heketi_version: "{{ (openshift_storage_glusterfs_heketi_image | regex_replace('^.*:(v?)(?P<version>.+$)', '\\g<version>')) }}"
+    glusterblock_version: "{{ (openshift_storage_glusterfs_block_image | regex_replace('^.*:(v?)(?P<version>.+$)', '\\g<version>')) }}"
+    glusterfs_fail: "{{ glusterfs_is_native | bool and glusterfs_version in [ 'latest', '' ] }}"
+    heketi_fail: "{{ glusterfs_heketi_is_native | bool and heketi_version in [ 'latest', '' ] }}"
+    glusterblock_fail: "{{ glusterfs_block_deploy | bool and glusterblock_version in [ 'latest', '' ] }}"
+  when:
+  - openshift_deployment_type == 'openshift-enterprise'
+  - glusterfs_fail or heketi_fail or glusterblock_fail
