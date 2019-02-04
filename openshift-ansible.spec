@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.77
+Version:        3.11.78
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Feb 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.78-1
+- Fixes idempotency on update of service in oc_service
+  (eric.mountain@amadeus.com)
+- Fixing incorrect indentation for cns-secgrp in heat template
+  (bedin@redhat.com)
+- Added liveness probes to apiserver template (bysnupy@hotmail.com)
+
 * Thu Jan 31 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.77-1
 - Remove hard coded gather_timeout in openshift_facts (rteague@redhat.com)
 - Remove docker-common in uninstall (rteague@redhat.com)
