@@ -299,7 +299,7 @@ A tuple of the form:
         if isinstance(name, bytes) or isinstance(value, bytes):
             name = name.decode('utf-8')
             value = value.decode('utf-8')
-        cert_subjects.append('{}:{}'.format(name, value))
+        cert_subjects.append(u'{}:{}'.format(name, value))
 
     # To read SANs from a cert we must read the subjectAltName
     # extension from the X509 Object. What makes this more difficult
@@ -317,7 +317,7 @@ A tuple of the form:
         # to the list of existing names
         cert_subjects.extend(str(san).split(', '))
 
-    cert_subject = ', '.join(cert_subjects)
+    cert_subject = u', '.join(cert_subjects)
     ######################################################################
 
     # Grab the expiration date
