@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.109
+Version:        3.10.110
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Feb 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.110-1
+- Update router service when its annotation changes (miciah.masters@gmail.com)
+- GlusterFS: Fix registry playbook PV creation (jarrpa@redhat.com)
+
 * Sat Feb 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.109-1
 - Remove docker-common in uninstall (rteague@redhat.com)
 - Start node image prepull after CRIO is restarted (vrutkovs@redhat.com)
