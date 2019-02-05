@@ -4,9 +4,13 @@ approvers:
   - mtnbikenc
   - sdodson
   - vrutkovs
+  - jstuever
+  - patrickdillon
 # review == this code is good /lgtm
 reviewers:
   - michaelgugino
   - mtnbikenc
   - sdodson
   - vrutkovs
+  - jstuever
+  - patrickdillon
