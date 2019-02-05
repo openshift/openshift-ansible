@@ -65,6 +65,12 @@ spec:
             touch /tmp/.old
           fi
 
+          if [[ -f /etc/origin/node/volume-config.yaml ]]; then
+            md5sum /etc/origin/node/volume-config.yaml > /tmp/.old-volume.config
+          else
+            touch /tmp/.old-volume-config
+          fi
+          
           # loop until BOOTSTRAP_CONFIG_NAME is set
           while true; do
             file=/etc/sysconfig/origin-node
@@ -123,9 +129,30 @@ spec:
               cat /dev/null > /tmp/.old
             fi
 
+            if [[ ! -f /etc/origin/node/volume-config.yaml ]]; then
+              cat /dev/null > /tmp/.old-volume-config
+            fi
+
             md5sum /etc/origin/node/tmp/node-config.yaml > /tmp/.new
+
+            if [[ ! -f /etc/origin/node/tmp/volume-config.yaml ]]; then
+              cat /dev/null > /tmp/.new-volume-config
+            else
+              md5sum /etc/origin/node/tmp/volume-config.yaml > /tmp/.new-volume-config
+            fi
+
+            trigger_restart=false
             if [[ "$( cat /tmp/.old )" != "$( cat /tmp/.new )" ]]; then
               mv /etc/origin/node/tmp/node-config.yaml /etc/origin/node/node-config.yaml
+              trigger_restart=true
+            fi
+
+            if [[ "$( cat /tmp/.old-volume-config )" != "$( cat /tmp/.new-volume-config )" ]]; then
+              mv /etc/origin/node/tmp/volume-config.yaml /etc/origin/node/volume-config.yaml
+              trigger_restart=true
+            fi
+            
+            if [[ "$trigger_restart" = true ]]; then
               SYSTEMD_IGNORE_CHROOT=1 systemctl restart tuned || :
               echo "info: Configuration changed, restarting kubelet" 2>&1
               # TODO: kubelet doesn't relabel nodes, best effort for now
@@ -158,6 +185,7 @@ spec:
             oc annotate --config=/etc/origin/node/node.kubeconfig "node/${NODE_NAME}" \
               node.openshift.io/md5sum="$( cat /tmp/.new | cut -d' ' -f1 )" --overwrite
             cp -f /tmp/.new /tmp/.old
+            cp -f /tmp/.new-volume-config /tmp/.old-volume-config
             sleep 180 &
             wait $!
           done
