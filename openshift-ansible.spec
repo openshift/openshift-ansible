@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.78
+Version:        3.11.79
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Feb 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.79-1
+- cert expiry: cert subject can contain unicode (vrutkovs@redhat.com)
+
 * Sun Feb 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.78-1
 - Fixes idempotency on update of service in oc_service
   (eric.mountain@amadeus.com)
