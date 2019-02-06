@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.67
+Version:        3.9.68
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Feb 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.68-1
+- Add new team members to OWNERS file. (pdd@redhat.com)
+- Pass possible string through bool filter (sdodson@redhat.com)
+- Create contrail-system namespace and nodeselector changes
+  (pvijayaragav@juniper.net)
+
 * Sat Feb 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.67-1
 - logging configure fluent to merge_json_log (jcantril@redhat.com)
 - openshift_node: open the router stats port by default (pgier@redhat.com)
