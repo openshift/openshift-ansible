@@ -25,7 +25,7 @@ spec:
       serviceAccountName: ncp-svc-account
       containers:
         - name: nsx-ncp
-          image: nsx-ncp
+          image: "{{ nsx_ncp_image }}"
           imagePullPolicy: IfNotPresent
           env:
             - name: NCP_NAME
