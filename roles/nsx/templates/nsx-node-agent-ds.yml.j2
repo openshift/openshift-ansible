@@ -27,7 +27,7 @@ spec:
         effect: NoSchedule
       containers:
         - name: nsx-node-agent
-          image: nsx-ncp
+          image: "{{ nsx_ncp_image }}"
           imagePullPolicy: IfNotPresent
           command: ["start_node_agent"]
           livenessProbe:
@@ -67,7 +67,7 @@ spec:
             mountPath: /host/proc
             readOnly: true
         - name: nsx-kube-proxy
-          image: nsx-ncp
+          image: "{{ nsx_ncp_image }}"
           imagePullPolicy: IfNotPresent
           command: ["start_kube_proxy"]
           livenessProbe:

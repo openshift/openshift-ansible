@@ -14,3 +14,4 @@ nsx_lb_pool_algorithm: 'ROUND_ROBIN'
 nsx_enable_snat: true
 nsx_lb_default_cert: '/etc/nsx-ujo/lb-default.crt'
 nsx_lb_default_key: '/etc/nsx-ujo/lb-default.key'
+nsx_ncp_image: nsx-ncp
