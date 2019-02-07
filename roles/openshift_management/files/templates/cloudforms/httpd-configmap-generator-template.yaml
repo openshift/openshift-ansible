@@ -91,7 +91,7 @@ parameters:
 - name: HTTPD_CONFIGMAP_GENERATOR_IMG_NAME
   displayName: Httpd Configmap Generator Image Name
   description: This is the httpd configmap generator image name requested to deploy.
-  value: registry.redhat.io/cloudforms46/cfme-httpd-configmap-generator
+  value: registry.redhat.io/cloudforms47/cfme-httpd-configmap-generator
 - name: HTTPD_CONFIGMAP_GENERATOR_IMG_TAG
   displayName: Httpd Configmap Generator Image Tag
   description: This is the httpd configmap generator image tag/version requested to deploy.
