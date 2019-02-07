@@ -6,6 +6,9 @@
   async: 600
   poll: 0
   register: image_prepull
+  # Pre-pull is not critical to upgrade.  When upgrading from 3.9, crictl may
+  # not be installed yet or may not match the installed crio version.
+  ignore_errors: true
 
 # This task runs async to save time while other downloads proceed
 - name: pre-pull pod image
@@ -16,3 +19,6 @@
   async: 600
   poll: 0
   register: pod_image_prepull
+  # Pre-pull is not critical to upgrade.  When upgrading from 3.9, crictl may
+  # not be installed yet or may not match the installed crio version.
+  ignore_errors: true
