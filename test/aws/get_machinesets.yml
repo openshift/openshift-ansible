@@ -1,5 +1,5 @@
 ---
-- name: List existing workers
+- name: List existing worker nodes
   oc_obj:
     kubeconfig: "{{ kubeconfig_path }}"
     state: list
@@ -27,11 +27,19 @@
 - name: get existing worker machinesets
   oc_obj:
     state: list
-    kind: machinesets
+    kind: machinesets.machine.openshift.io
     namespace: openshift-cluster-api
     selector: ""
     kubeconfig: "{{ kubeconfig_path }}"
   register: machineset
+  until:
+  - machineset.results is defined
+  - machineset.results.returncode is defined
+  - machineset.results.results is defined
+  - machineset.results.returncode == 0
+  - machineset.results.results[0]['items'] | length > 0
+  retries: 36
+  delay: 5
 
 - set_fact:
     pre_scaleup_machineset_names: "{{ machineset.results.results[0]['items'] |map(attribute='metadata.name') | list }}"
