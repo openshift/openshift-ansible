@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.110
+Version:        3.10.111
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Feb 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.111-1
+- GlusterFS: Implement container image version check (jarrpa@redhat.com)
+- Add new team members to OWNERS file. (pdd@redhat.com)
+- Fixes idempotency on update of service in oc_service
+  (eric.mountain@amadeus.com)
+
 * Tue Feb 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.110-1
 - Update router service when its annotation changes (miciah.masters@gmail.com)
 - GlusterFS: Fix registry playbook PV creation (jarrpa@redhat.com)
