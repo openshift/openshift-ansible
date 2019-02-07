@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.80
+Version:        3.11.81
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,17 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Feb 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.81-1
+- Run nsx role on the first master only (yasensim@gmail.com)
+- GlusterFS: Keep logs on uninstall (jarrpa@redhat.com)
+- GlusterFS: Implement container image version check (jarrpa@redhat.com)
+- ovs process gets killed when oom-killer is invoked (pcameron@redhat.com)
+- Check for changes to volume-config in sync pod. (pdd@redhat.com)
+- Add new team members to OWNERS file. (pdd@redhat.com)
+- [BZ1665835] - jboss image streams do not have referencePolicy.type set to
+  local (fspolti@redhat.com)
+- Remove condition for pre-pulling container images. (pdd@redhat.com)
+
 * Wed Feb 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.80-1
 - 
 
