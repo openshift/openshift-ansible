@@ -127,13 +127,6 @@
   delegate_to: "{{ item }}"
   with_items: "{{ glusterfs_nodes | default([]) }}"
 
-- name: Delete Glusterfs logs
-  file:
-    path: /var/log/glusterfs
-    state: absent
-  delegate_to: "{{ item }}"
-  with_items: "{{ glusterfs_nodes | default([]) }}"
-
 # This recreates expected directory structures
 - name: Reinstall GlusterFS Server (external)
   command: "yum reinstall -y glusterfs*"
