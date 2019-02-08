@@ -3,6 +3,9 @@
   template:
     dest: "{{ openshift.common.config_base }}/cloudprovider/vsphere.conf"
     src: vsphere.conf.j2
+    owner: root
+    group: root
+    mode: 0660
   when:
   - openshift_cloudprovider_vsphere_username is defined
   - openshift_cloudprovider_vsphere_password is defined
