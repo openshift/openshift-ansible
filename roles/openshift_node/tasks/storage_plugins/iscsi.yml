@@ -24,14 +24,12 @@
 
 # Copy conf file only if not exists
 - name: Template multipath configuration
-  stat:
-    path: "/etc/multipath.conf"
-  register: st
   template:
     dest: "/etc/multipath.conf"
     src: multipath.conf.j2
     backup: true
-  when: not st.stat.exists and (not openshift_is_atomic | bool)
+    force: no
+  when: not openshift_is_atomic | bool
 
 #enable multipath
 - name: Enable and start multipath
