@@ -354,6 +354,12 @@ default_r_openshift_node_os_firewall_allow:
 - service: Contrail Openshift WebConsole
   port: 18443/tcp
   condition: "{{ openshift_node_use_contrail }}"
+- service: skydns tcp 2 contrail_dns
+  port: "53/tcp"
+  condition: "{{ openshift_node_use_contrail }}"
+- service: skydns udp 2 contrail_dns
+  port: "53/udp"
+  condition: "{{ openshift_node_use_contrail }}"
 # Allow multiple port ranges to be added to the role
 r_openshift_node_os_firewall_allow: "{{ default_r_openshift_node_os_firewall_allow | union(openshift_node_open_ports | default([])) }}"
 
