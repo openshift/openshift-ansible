@@ -33,7 +33,7 @@
 - name: import machinespec
   oc_obj:
     state: present
-    namespace: "openshift-cluster-api"
+    namespace: "openshift-machine-api"
     kind: machineset
     name: "{{ machineset_name.result }}-centos"
     kubeconfig: "{{ kubeconfig_path }}"
@@ -44,7 +44,7 @@
   oc_obj:
     state: list
     kind: machines.machine.openshift.io
-    namespace: openshift-cluster-api
+    namespace: openshift-machine-api
     selector: "sigs.k8s.io/cluster-api-machineset={{ machineset_name.result }}-centos"
     kubeconfig: "{{ kubeconfig_path }}"
   register: new_machine
