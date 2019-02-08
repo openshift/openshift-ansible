@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.81
+Version:        3.11.82
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Feb 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.82-1
+- 
+
 * Thu Feb 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.81-1
 - Run nsx role on the first master only (yasensim@gmail.com)
 - GlusterFS: Keep logs on uninstall (jarrpa@redhat.com)
