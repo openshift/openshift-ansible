@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.111
+Version:        3.10.112
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,17 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Feb 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.112-1
+- Ensure async etcd-image-pull job exists before checking status.
+  (pdd@redhat.com)
+- ovs process gets killed when oom-killer is invoked (pcameron@redhat.com)
+- Check for changes to volume-config in sync pod. (pdd@redhat.com)
+- Ignore errors on node/pod image pre-pull (rteague@redhat.com)
+- GlusterFS: Keep logs on uninstall (jarrpa@redhat.com)
+- Remove condition for pre-pulling container images. (pdd@redhat.com)
+- Prepull node image using openshift_container_cli (vrutkovs@redhat.com)
+- cert expiry: cert subject can contain unicode (vrutkovs@redhat.com)
+
 * Thu Feb 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.111-1
 - GlusterFS: Implement container image version check (jarrpa@redhat.com)
 - Add new team members to OWNERS file. (pdd@redhat.com)
