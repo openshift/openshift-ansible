@@ -36,6 +36,8 @@ spec:
        name: master-data
      - mountPath: /etc/pki
        name: master-pki
+     - mountPath: /etc/localtime
+       name: host-localtime
     livenessProbe:
       httpGet:
         scheme: HTTPS
@@ -63,3 +65,6 @@ spec:
   - name: master-pki
     hostPath:
       path: /etc/pki
+  - name: host-localtime
+    hostPath:
+      path: /etc/localtime

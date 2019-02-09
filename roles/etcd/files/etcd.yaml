@@ -31,6 +31,8 @@ spec:
        readOnly: true
      - mountPath: /var/lib/etcd/
        name: master-data
+     - mountPath: /etc/localtime
+       name: host-localtime
     livenessProbe:
       exec:
       initialDelaySeconds: 45
@@ -41,3 +43,6 @@ spec:
   - name: master-data
     hostPath:
       path: /var/lib/etcd
+  - name: host-localtime
+    hostPath:
+      path: /etc/localtime
