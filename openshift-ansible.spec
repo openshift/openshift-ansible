@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.68
+Version:        3.9.69
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Feb 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.69-1
+- Open up tcp/udp DNS port 53 (pvijayaragav@juniper.net)
+
 * Wed Feb 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.68-1
 - Add new team members to OWNERS file. (pdd@redhat.com)
 - Pass possible string through bool filter (sdodson@redhat.com)
