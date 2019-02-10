@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.89
+Version:        3.7.90
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Feb 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.90-1
+- 
+
 * Sat Feb 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.89-1
 - Pass possible strings through bool filter (sdodson@redhat.com)
 
