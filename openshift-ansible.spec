@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.82
+Version:        3.11.83
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Feb 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.83-1
+- Ensure async etcd-image-pull job exists before checking status.
+  (pdd@redhat.com)
+
 * Thu Feb 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.82-1
 - 
 
