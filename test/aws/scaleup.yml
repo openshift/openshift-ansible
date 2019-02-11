@@ -121,7 +121,7 @@
   - name: remove existing machinesets
     oc_obj:
       state: absent
-      kind: machinesets
+      kind: machinesets.machine.openshift.io
       namespace: openshift-cluster-api
       name: "{{ item }}"
       kubeconfig: "{{ kubeconfig_path }}"

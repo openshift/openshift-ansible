@@ -43,7 +43,7 @@
 - name: wait for machine to be created
   oc_obj:
     state: list
-    kind: machines
+    kind: machines.machine.openshift.io
     namespace: openshift-cluster-api
     selector: "sigs.k8s.io/cluster-api-machineset={{ machineset_name.result }}-centos"
     kubeconfig: "{{ kubeconfig_path }}"
