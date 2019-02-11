@@ -98,6 +98,8 @@ spec:
           readOnly: true
 {% endif %}
         env:
+        - name: "MERGE_JSON_LOG"
+          value: "{{ openshift_logging_fluentd_merge_json_log }}"
         - name: "K8S_HOST_URL"
           value: "{{ openshift_logging_fluentd_master_url }}"
         - name: "ES_HOST"
