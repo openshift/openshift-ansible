@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
       - name: postgresql
-        image: registry.access.redhat.com/cloudforms46/cfme-openshift-postgresql:latest
+        image: registry.access.redhat.com/cloudforms47/cfme-openshift-postgresql:latest
         command:
         - "/opt/rh/cfme-container-scripts/backup_db"
         env:
