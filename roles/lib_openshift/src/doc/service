@@ -10,7 +10,10 @@ description:
 options:
   state:
     description:
-    - State represents whether to create, modify, delete, or list
+    - State controls the action that will be taken with resource
+    - present - create the service
+    - absent - remove the service
+    - list - return the current representation of a service
     required: False
     default: present
     choices: ["present", "absent", "list"]

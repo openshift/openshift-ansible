@@ -63,7 +63,10 @@ description:
 options:
   state:
     description:
-    - State represents whether to create, modify, delete, or list
+    - State controls the action that will be taken with resource
+    - present - create the storageclass
+    - absent - remove the storageclass
+    - list - return the current representation of a storageclass
     required: False
     default: present
     choices: ["present", "absent", "list"]

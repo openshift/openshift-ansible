@@ -63,12 +63,13 @@ description:
 options:
   state:
     description:
-    - The desired action when managing openshift registry
+    - State controls the action that will be taken with resource
     - present - update or create the registry
     - absent - tear down the registry service and deploymentconfig
     - list - returns the current representiation of a registry
     required: false
     default: False
+    choices: ["present", 'absent', 'list']
     aliases: []
   kubeconfig:
     description:

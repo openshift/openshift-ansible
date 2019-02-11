@@ -63,6 +63,7 @@ description:
 options:
   state:
     description:
+    - State controls the action that will be taken with resource
     - Currently list is only supported state.
     required: true
     default: list
