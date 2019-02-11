@@ -17,6 +17,17 @@
   register: set_loopback_cluster
 
 - command: >
+    {{ openshift_client_binary }} config set-credentials
+    --client-certificate=/etc/origin/master/openshift-master.crt
+    --client-key=/etc/origin/master/openshift-master.key
+    --embed-certs=true
+    {{ openshift.master.loopback_user }}
+    --config={{ openshift_master_loopback_config }}
+  when:
+  - set_loopback_cluster is changed
+  register: l_set_loopback_credentials
+
+- command: >
     {{ openshift_client_binary }} config set-context
     --cluster={{ openshift.master.loopback_cluster_name }}
     --namespace=default --user={{ openshift.master.loopback_user }}
