@@ -53,13 +53,23 @@ objects:
     database-url: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_SERVICE_NAME}/${DATABASE_NAME}?encoding=utf8&pool=5&wait_timeout=5
     v2-key: "${V2_KEY}"
 - apiVersion: v1
-  kind: Secret
+  kind: ConfigMap
   metadata:
-    name: "${ANSIBLE_SERVICE_NAME}-secrets"
-  stringData:
-    rabbit-password: "${ANSIBLE_RABBITMQ_PASSWORD}"
-    secret-key: "${ANSIBLE_SECRET_KEY}"
-    admin-password: "${ANSIBLE_ADMIN_PASSWORD}"
+    name: cfme-logs-config
+  data:
+    miq_logs.conf: |
+      /var/www/miq/vmdb/log/*.log /var/www/miq/vmdb/log/apache/*.log {
+        daily
+        dateext
+        missingok
+        rotate 14
+        notifempty
+        compress
+        copytruncate
+        lastaction
+          /sbin/service httpd reload > /dev/null 2>&1 || true
+        endscript
+      }
 - apiVersion: v1
   kind: ConfigMap
   metadata:
@@ -78,7 +88,7 @@ objects:
       # RESOURCE USAGE (except WAL)
       #------------------------------------------------------------------------------
 
-      shared_preload_libraries = 'pglogical,repmgr_funcs'
+      shared_preload_libraries = 'pglogical,repmgr'
       max_worker_processes = 10
 
       #------------------------------------------------------------------------------
@@ -162,6 +172,10 @@ objects:
 
         # For SAML /saml2 is only served by mod_auth_mellon in the httpd pod
         RewriteCond %{REQUEST_URI} !^/saml2
+
+        # For OpenID-Connect /openid-connect is only served by mod_auth_openidc
+        RewriteCond %{REQUEST_URI} !^/openid-connect
+
         RewriteRule ^/ http://${NAME}%{REQUEST_URI} [P,QSA,L]
         ProxyPassReverse / http://${NAME}/
 
@@ -180,14 +194,11 @@ objects:
       Include "conf.d/external-auth-load-modules-conf"
 
       <Location /dashboard/kerberos_authenticate>
-        AuthType                   Kerberos
-        AuthName                   "Kerberos Login"
-        KrbMethodNegotiate         On
-        KrbMethodK5Passwd          Off
-        KrbAuthRealms              ${HTTPD_AUTH_KERBEROS_REALMS}
-        Krb5KeyTab                 /etc/http.keytab
-        KrbServiceName             Any
-        Require                    pam-account httpd-auth
+        AuthType           GSSAPI
+        AuthName           "GSSAPI Single Sign On Login"
+        GssapiCredStore    keytab:/etc/http.keytab
+        GssapiLocalName    on
+        Require            pam-account httpd-auth
 
         ErrorDocument 401 /proxy_pages/invalid_sso_credentials.js
       </Location>
@@ -200,14 +211,11 @@ objects:
       Include "conf.d/external-auth-load-modules-conf"
 
       <Location /dashboard/kerberos_authenticate>
-        AuthType                   Kerberos
-        AuthName                   "Kerberos Login"
-        KrbMethodNegotiate         On
-        KrbMethodK5Passwd          Off
-        KrbAuthRealms              ${HTTPD_AUTH_KERBEROS_REALMS}
-        Krb5KeyTab                 /etc/krb5.keytab
-        KrbServiceName             Any
-        Require                    pam-account httpd-auth
+        AuthType           GSSAPI
+        AuthName           "GSSAPI Single Sign On Login"
+        GssapiCredStore    keytab:/etc/krb5.keytab
+        GssapiLocalName    on
+        Require            pam-account httpd-auth
 
         ErrorDocument 401 /proxy_pages/invalid_sso_credentials.js
       </Location>
@@ -254,6 +262,24 @@ objects:
       </Location>
 
       Include "conf.d/external-auth-remote-user-conf"
+    configuration-openid-connect-auth: |
+      LoadModule auth_openidc_module modules/mod_auth_openidc.so
+
+      OIDCProviderMetadataURL      ${HTTPD_AUTH_OIDC_PROVIDER_METADATA_URL}
+      OIDCClientID                 ${HTTPD_AUTH_OIDC_CLIENT_ID}
+      OIDCClientSecret             ${HTTPD_AUTH_OIDC_CLIENT_SECRET}
+
+      OIDCRedirectURI              "https://${APPLICATION_DOMAIN}/oidc_login/redirect_uri"
+      OIDCOAuthRemoteUserClaim     username
+
+      OIDCCryptoPassphrase         sp-secret
+
+      <Location /oidc_login>
+        AuthType                   openid-connect
+        Require                    valid-user
+      </Location>
+
+      Include "conf.d/external-auth-openid-connect-remote-user-conf"
     external-auth-load-modules-conf: |
       LoadModule authnz_pam_module            modules/mod_authnz_pam.so
       LoadModule intercept_form_submit_module modules/mod_intercept_form_submit.so
@@ -307,6 +333,17 @@ objects:
       RequestHeader set X_REMOTE_USER_FULLNAME  %{REMOTE_USER_FULLNAME}e  env=REMOTE_USER_FULLNAME
       RequestHeader set X_REMOTE_USER_GROUPS    %{REMOTE_USER_GROUPS}e    env=REMOTE_USER_GROUPS
       RequestHeader set X_REMOTE_USER_DOMAIN    %{REMOTE_USER_DOMAIN}e    env=REMOTE_USER_DOMAIN
+    external-auth-openid-connect-remote-user-conf: |
+      RequestHeader unset X_REMOTE_USER
+
+      RequestHeader set X_REMOTE_USER           %{OIDC_CLAIM_PREFERRED_USERNAME}e env=OIDC_CLAIM_PREFERRED_USERNAME
+      RequestHeader set X_EXTERNAL_AUTH_ERROR   %{EXTERNAL_AUTH_ERROR}e           env=EXTERNAL_AUTH_ERROR
+      RequestHeader set X_REMOTE_USER_EMAIL     %{OIDC_CLAIM_EMAIL}e              env=OIDC_CLAIM_EMAIL
+      RequestHeader set X_REMOTE_USER_FIRSTNAME %{OIDC_CLAIM_GIVEN_NAME}e         env=OIDC_CLAIM_GIVEN_NAME
+      RequestHeader set X_REMOTE_USER_LASTNAME  %{OIDC_CLAIM_FAMILY_NAME}e        env=OIDC_CLAIM_FAMILY_NAME
+      RequestHeader set X_REMOTE_USER_FULLNAME  %{OIDC_CLAIM_NAME}e               env=OIDC_CLAIM_NAME
+      RequestHeader set X_REMOTE_USER_GROUPS    %{OIDC_CLAIM_GROUPS}e             env=OIDC_CLAIM_GROUPS
+      RequestHeader set X_REMOTE_USER_DOMAIN    %{OIDC_CLAIM_DOMAIN}e             env=OIDC_CLAIM_DOMAIN
 - apiVersion: v1
   kind: ConfigMap
   metadata:
@@ -314,6 +351,9 @@ objects:
   data:
     auth-type: internal
     auth-kerberos-realms: undefined
+    auth-oidc-provider-metadata-url: undefined
+    auth-oidc-client-id: undefined
+    auth-oidc-client-secret: undefined
     auth-configuration.conf: |
       # External Authentication Configuration File
       #
@@ -323,7 +363,6 @@ objects:
   metadata:
     annotations:
       description: Exposes and load balances CloudForms pods
-      service.alpha.openshift.io/dependencies: '[{"name":"${DATABASE_SERVICE_NAME}","namespace":"","kind":"Service"},{"name":"${MEMCACHED_SERVICE_NAME}","namespace":"","kind":"Service"}]'
     name: "${NAME}"
   spec:
     clusterIP: None
@@ -394,13 +433,17 @@ objects:
           volumeMounts:
           - name: "${NAME}-server"
             mountPath: "/persistent"
+          - name: cfme-logs-config
+            mountPath: "/etc/logrotate.d/miq_logs.conf"
+            subPath: miq_logs.conf
           env:
-          - name: MY_POD_NAMESPACE
+          - name: ALLOW_INSECURE_SESSION
+            value: 'true'
+          - name: APPLICATION_ADMIN_PASSWORD
             valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: APPLICATION_INIT_DELAY
-            value: "${APPLICATION_INIT_DELAY}"
+              secretKeyRef:
+                name: "${NAME}-secrets"
+                key: admin-password
           - name: DATABASE_REGION
             value: "${DATABASE_REGION}"
           - name: DATABASE_URL
@@ -408,21 +451,15 @@ objects:
               secretKeyRef:
                 name: "${NAME}-secrets"
                 key: database-url
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
           - name: V2_KEY
             valueFrom:
               secretKeyRef:
                 name: "${NAME}-secrets"
                 key: v2-key
-          - name: APPLICATION_ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "${NAME}-secrets"
-                key: admin-password
-          - name: ANSIBLE_ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "${ANSIBLE_SERVICE_NAME}-secrets"
-                key: admin-password
           resources:
             requests:
               memory: "${APPLICATION_MEM_REQ}"
@@ -434,6 +471,10 @@ objects:
               exec:
                 command:
                 - "/opt/rh/cfme-container-scripts/sync-pv-data"
+        volumes:
+        - name: cfme-logs-config
+          configMap:
+            name: cfme-logs-config
         serviceAccount: cfme-orchestrator
         serviceAccountName: cfme-orchestrator
         terminationGracePeriodSeconds: 90
@@ -486,8 +527,6 @@ objects:
           - name: "${NAME}-server"
             mountPath: "/persistent"
           env:
-          - name: APPLICATION_INIT_DELAY
-            value: "${APPLICATION_INIT_DELAY}"
           - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
@@ -502,11 +541,6 @@ objects:
               secretKeyRef:
                 name: "${NAME}-secrets"
                 key: v2-key
-          - name: ANSIBLE_ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "${ANSIBLE_SERVICE_NAME}-secrets"
-                key: admin-password
           resources:
             requests:
               memory: "${APPLICATION_MEM_REQ}"
@@ -681,105 +715,9 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    annotations:
-      description: Exposes and load balances Ansible pods
-      service.alpha.openshift.io/dependencies: '[{"name":"${DATABASE_SERVICE_NAME}","namespace":"","kind":"Service"}]'
-    name: "${ANSIBLE_SERVICE_NAME}"
-  spec:
-    ports:
-    - name: http
-      port: 80
-      protocol: TCP
-      targetPort: 80
-    - name: https
-      port: 443
-      protocol: TCP
-      targetPort: 443
-    selector:
-      name: "${ANSIBLE_SERVICE_NAME}"
-- apiVersion: v1
-  kind: DeploymentConfig
-  metadata:
-    name: "${ANSIBLE_SERVICE_NAME}"
-    annotations:
-      description: Defines how to deploy the Ansible appliance
-  spec:
-    strategy:
-      type: Recreate
-    serviceName: "${ANSIBLE_SERVICE_NAME}"
-    replicas: 0
-    template:
-      metadata:
-        labels:
-          name: "${ANSIBLE_SERVICE_NAME}"
-        name: "${ANSIBLE_SERVICE_NAME}"
-      spec:
-        containers:
-        - name: ansible
-          image: "${ANSIBLE_IMG_NAME}:${ANSIBLE_IMG_TAG}"
-          livenessProbe:
-            tcpSocket:
-              port: 443
-            initialDelaySeconds: 480
-            timeoutSeconds: 3
-          readinessProbe:
-            httpGet:
-              path: "/"
-              port: 443
-              scheme: HTTPS
-            initialDelaySeconds: 200
-            timeoutSeconds: 3
-          ports:
-          - containerPort: 80
-            protocol: TCP
-          - containerPort: 443
-            protocol: TCP
-          securityContext:
-            privileged: true
-          env:
-          - name: ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "${ANSIBLE_SERVICE_NAME}-secrets"
-                key: admin-password
-          - name: RABBITMQ_USER_NAME
-            value: "${ANSIBLE_RABBITMQ_USER_NAME}"
-          - name: RABBITMQ_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "${ANSIBLE_SERVICE_NAME}-secrets"
-                key: rabbit-password
-          - name: ANSIBLE_SECRET_KEY
-            valueFrom:
-              secretKeyRef:
-                name: "${ANSIBLE_SERVICE_NAME}-secrets"
-                key: secret-key
-          - name: DATABASE_SERVICE_NAME
-            value: "${DATABASE_SERVICE_NAME}"
-          - name: POSTGRESQL_USER
-            value: "${DATABASE_USER}"
-          - name: POSTGRESQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "${NAME}-secrets"
-                key: pg-password
-          - name: POSTGRESQL_DATABASE
-            value: "${ANSIBLE_DATABASE_NAME}"
-          resources:
-            requests:
-              memory: "${ANSIBLE_MEM_REQ}"
-              cpu: "${ANSIBLE_CPU_REQ}"
-            limits:
-              memory: "${ANSIBLE_MEM_LIMIT}"
-        serviceAccount: cfme-privileged
-        serviceAccountName: cfme-privileged
-- apiVersion: v1
-  kind: Service
-  metadata:
     name: "${HTTPD_SERVICE_NAME}"
     annotations:
       description: Exposes the httpd server
-      service.alpha.openshift.io/dependencies: '[{"name":"${NAME}","namespace":"","kind":"Service"}]'
   spec:
     ports:
     - name: http
@@ -793,7 +731,6 @@ objects:
     name: "${HTTPD_DBUS_API_SERVICE_NAME}"
     annotations:
       description: Exposes the httpd server dbus api
-      service.alpha.openshift.io/dependencies: '[{"name":"${NAME}","namespace":"","kind":"Service"}]'
   spec:
     ports:
     - name: http-dbus-api
@@ -862,6 +799,8 @@ objects:
             limits:
               memory: "${HTTPD_MEM_LIMIT}"
           env:
+          - name: APPLICATION_DOMAIN
+            value: "${APPLICATION_DOMAIN}"
           - name: HTTPD_AUTH_TYPE
             valueFrom:
               configMapKeyRef:
@@ -872,6 +811,24 @@ objects:
               configMapKeyRef:
                 name: "${HTTPD_SERVICE_NAME}-auth-configs"
                 key: auth-kerberos-realms
+          - name: HTTPD_AUTH_OIDC_PROVIDER_METADATA_URL
+            valueFrom:
+              configMapKeyRef:
+                name: "${HTTPD_SERVICE_NAME}-auth-configs"
+                key: auth-oidc-provider-metadata-url
+                optional: true
+          - name: HTTPD_AUTH_OIDC_CLIENT_ID
+            valueFrom:
+              configMapKeyRef:
+                name: "${HTTPD_SERVICE_NAME}-auth-configs"
+                key: auth-oidc-client-id
+                optional: true
+          - name: HTTPD_AUTH_OIDC_CLIENT_SECRET
+            valueFrom:
+              configMapKeyRef:
+                name: "${HTTPD_SERVICE_NAME}-auth-configs"
+                key: auth-oidc-client-secret
+                optional: true
           lifecycle:
             postStart:
               exec:
@@ -922,11 +879,6 @@ parameters:
   required: true
   description: Admin password that will be set on the application.
   value: smartvm
-- name: ANSIBLE_DATABASE_NAME
-  displayName: Ansible PostgreSQL database name
-  required: true
-  description: The database to be used by the Ansible continer
-  value: awx
 - name: MEMCACHED_SERVICE_NAME
   required: true
   displayName: Memcached Service Name
@@ -952,33 +904,6 @@ parameters:
   displayName: PostgreSQL Shared Buffer Amount
   description: Amount of memory dedicated for PostgreSQL shared memory buffers.
   value: 1GB
-- name: ANSIBLE_SERVICE_NAME
-  displayName: Ansible Service Name
-  description: The name of the OpenShift Service exposed for the Ansible container.
-  value: ansible
-- name: ANSIBLE_ADMIN_PASSWORD
-  displayName: Ansible admin User password
-  required: true
-  description: The password for the Ansible container admin user
-  from: "[a-zA-Z0-9]{32}"
-  generate: expression
-- name: ANSIBLE_SECRET_KEY
-  displayName: Ansible Secret Key
-  required: true
-  description: Encryption key for the Ansible container
-  from: "[a-f0-9]{32}"
-  generate: expression
-- name: ANSIBLE_RABBITMQ_USER_NAME
-  displayName: RabbitMQ Username
-  required: true
-  description: Username for the Ansible RabbitMQ Server
-  value: ansible
-- name: ANSIBLE_RABBITMQ_PASSWORD
-  displayName: RabbitMQ Server Password
-  required: true
-  description: Password for the Ansible RabbitMQ Server
-  from: "[a-zA-Z0-9]{32}"
-  generate: expression
 - name: APPLICATION_CPU_REQ
   displayName: Application Min CPU Requested
   required: true
@@ -994,11 +919,6 @@ parameters:
   required: true
   description: Minimum amount of CPU time the Memcached container will need (expressed in millicores).
   value: 200m
-- name: ANSIBLE_CPU_REQ
-  displayName: Ansible Min CPU Requested
-  required: true
-  description: Minimum amount of CPU time the Ansible container will need (expressed in millicores).
-  value: 1000m
 - name: APPLICATION_MEM_REQ
   displayName: Application Min RAM Requested
   required: true
@@ -1014,11 +934,6 @@ parameters:
   required: true
   description: Minimum amount of memory the Memcached container will need.
   value: 64Mi
-- name: ANSIBLE_MEM_REQ
-  displayName: Ansible Min RAM Requested
-  required: true
-  description: Minimum amount of memory the Ansible container will need.
-  value: 2048Mi
 - name: APPLICATION_MEM_LIMIT
   displayName: Application Max RAM Limit
   required: true
@@ -1034,15 +949,10 @@ parameters:
   required: true
   description: Maximum amount of memory the Memcached container can consume.
   value: 256Mi
-- name: ANSIBLE_MEM_LIMIT
-  displayName: Ansible Max RAM Limit
-  required: true
-  description: Maximum amount of memory the Ansible container can consume.
-  value: 8096Mi
 - name: POSTGRESQL_IMG_NAME
   displayName: PostgreSQL Image Name
   description: This is the PostgreSQL image name requested to deploy.
-  value: registry.redhat.io/cloudforms46/cfme-openshift-postgresql
+  value: registry.redhat.io/cloudforms47/cfme-openshift-postgresql
 - name: POSTGRESQL_IMG_TAG
   displayName: PostgreSQL Image Tag
   description: This is the PostgreSQL image tag/version requested to deploy.
@@ -1050,7 +960,7 @@ parameters:
 - name: MEMCACHED_IMG_NAME
   displayName: Memcached Image Name
   description: This is the Memcached image name requested to deploy.
-  value: registry.redhat.io/cloudforms46/cfme-openshift-memcached
+  value: registry.redhat.io/cloudforms47/cfme-openshift-memcached
 - name: MEMCACHED_IMG_TAG
   displayName: Memcached Image Tag
   description: This is the Memcached image tag/version requested to deploy.
@@ -1058,11 +968,11 @@ parameters:
 - name: FRONTEND_APPLICATION_IMG_NAME
   displayName: Frontend Application Image Name
   description: This is the Frontend Application image name requested to deploy.
-  value: registry.redhat.io/cloudforms46/cfme-openshift-app-ui
+  value: registry.redhat.io/cloudforms47/cfme-openshift-app-ui
 - name: BACKEND_APPLICATION_IMG_NAME
   displayName: Backend Application Image Name
   description: This is the Backend Application image name requested to deploy.
-  value: registry.redhat.io/cloudforms46/cfme-openshift-app
+  value: registry.redhat.io/cloudforms47/cfme-openshift-app
 - name: FRONTEND_APPLICATION_IMG_TAG
   displayName: Front end Application Image Tag
   description: This is the CloudForms Frontend Application image tag/version requested to deploy.
@@ -1070,14 +980,6 @@ parameters:
 - name: BACKEND_APPLICATION_IMG_TAG
   displayName: Back end Application Image Tag
   description: This is the CloudForms Backend Application image tag/version requested to deploy.
-  value: latest
-- name: ANSIBLE_IMG_NAME
-  displayName: Ansible Image Name
-  description: This is the Ansible image name requested to deploy.
-  value: registry.redhat.io/cloudforms46/cfme-openshift-embedded-ansible
-- name: ANSIBLE_IMG_TAG
-  displayName: Ansible Image Tag
-  description: This is the Ansible image tag/version requested to deploy.
   value: latest
 - name: APPLICATION_DOMAIN
   displayName: Application Hostname
@@ -1087,11 +989,6 @@ parameters:
   displayName: Application Replica Count
   description: This is the number of Application replicas requested to deploy.
   value: '1'
-- name: APPLICATION_INIT_DELAY
-  displayName: Application Init Delay
-  required: true
-  description: Delay in seconds before we attempt to initialize the application.
-  value: '15'
 - name: APPLICATION_VOLUME_CAPACITY
   displayName: Application Volume Capacity
   required: true
@@ -1115,7 +1012,7 @@ parameters:
 - name: HTTPD_IMG_NAME
   displayName: Apache httpd Image Name
   description: This is the httpd image name requested to deploy.
-  value: registry.redhat.io/cloudforms46/cfme-openshift-httpd
+  value: registry.redhat.io/cloudforms47/cfme-openshift-httpd
 - name: HTTPD_IMG_TAG
   displayName: Apache httpd Image Tag
   description: This is the httpd image tag/version requested to deploy.
