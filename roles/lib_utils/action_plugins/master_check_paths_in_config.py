@@ -24,6 +24,7 @@ for you: {}"""
 ITEMS_TO_POP = (
     ('auditConfig', 'policyConfiguration'),
     ('oauthConfig', 'identityProviders'),
+    ('kubernetesMasterConfig', 'apiServerArguments', 'etcd-servers-overrides')
 )
 # Create csv string of dot-separated dictionary keys:
 # eg: 'oathConfig.identityProviders, something.else.here'
