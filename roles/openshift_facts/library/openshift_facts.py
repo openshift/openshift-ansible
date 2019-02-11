@@ -394,7 +394,7 @@ def set_url_facts_if_unset(facts):
                                                                    ports[prefix]))
 
         r_lhn = "{0}:{1}".format(hostname, ports['api']).replace('.', '-')
-        r_lhu = "system:openshift-master/{0}:{1}".format(api_hostname, ports['api']).replace('.', '-')
+        r_lhu = "system:openshift-master/{0}:{1}".format(hostname, ports['api']).replace('.', '-')
         facts['master'].setdefault('loopback_cluster_name', r_lhn)
         facts['master'].setdefault('loopback_context_name', "default/{0}/system:openshift-master".format(r_lhn))
         facts['master'].setdefault('loopback_user', r_lhu)
