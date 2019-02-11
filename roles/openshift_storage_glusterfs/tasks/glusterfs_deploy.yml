@@ -41,7 +41,7 @@
   vars:
     is_enterprise: "{{ openshift_deployment_type == 'openshift-enterprise' }}"
     version: "{{ (openshift_storage_glusterfs_image | regex_replace('^.*:(v?)(?P<version>.+$)', '\\g<version>')) }}"
-    is_legacy_ocs_version: "{{ version is version_compare('3.11.1', '<') }}"
+    is_legacy_ocs_version: "{{ version != 'latest' and version is version_compare('3.11.1', '<') }}"
     gluster_use_legacy_ocs: "{{ is_enterprise and is_legacy_ocs_version }}"
     host_dev_dir: "{{ '/dev' if gluster_use_legacy_ocs else '/mnt/host-dev' }}"
   when: (glusterfs_ds.results.results[0].status is not defined) or
