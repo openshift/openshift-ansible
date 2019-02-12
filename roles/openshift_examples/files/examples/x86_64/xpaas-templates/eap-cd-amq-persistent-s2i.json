@@ -5,11 +5,11 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "1.5.0",
-            "openshift.io/display-name": "JBoss EAP CD + AMQ 7 (with https)",
+            "version": "14.0",
+            "openshift.io/display-name": "JBoss EAP CD 14 + AMQ 7 with passthrough TLS",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Enterprise Application Platform continuous delivery application using Red Hat JBoss AMQ with persistence and secure communication using https. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap-cd/README.adoc",
-            "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform continuous delivery based application, including a build configuration, application deployment configuration, using Red Hat JBoss AMQ with persistence and secure communication using https.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform continuous delivery based application, including a build configuration, application deployment configuration, using Red Hat JBoss AMQ with persistence and secure communication using passthrough TLS.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap-cd-amq-persistent-s2i",
-        "xpaas": "1.5.0"
+        "xpaas": "15.0"
     },
     "message": "A new JBoss EAP CD and AMQ persistent based application with SSL support has been created in your project. The username/password for accessing the AMQ service is ${MQ_USERNAME}/${MQ_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -324,6 +324,7 @@
             "kind": "Service",
             "apiVersion": "v1",
             "spec": {
+                "publishNotReadyAddresses": true,
                 "clusterIP": "None",
                 "ports": [
                     {
@@ -484,10 +485,11 @@
                             }
                         ],
                         "forcePull": true,
+                        "incremental": true,
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "eap-cd-openshift:13"
+                            "name": "eap-cd-openshift:15"
                         }
                     }
                 },
@@ -769,7 +771,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "amq-broker-71-openshift:1.0"
+                                "name": "amq-broker-72-openshift:1.1"
                             }
                         }
                     },
@@ -794,7 +796,7 @@
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}-amq",
-                                "image": "amq-broker-71-openshift",
+                                "image": "amq-broker-72-openshift",
                                 "imagePullPolicy": "Always",
                                 "readinessProbe": {
                                     "exec": {
