@@ -1,16 +1,18 @@
 ---
 azure_base_repos:
   RedHat:
-  - name: rhel-server-7-releases
-    baseurl: https://mirror.openshift.com/libra/rhui-rhel-server-7-releases/
+  - name: rhel-7-server-rpms
+    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/extras/os
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    sslcacert: /etc/rhsm/ca/redhat-uep.pem
     sslclientcert: /var/lib/yum/client-cert.pem
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
-  - name: rhel-server-7-extras
-    baseurl: https://mirror.openshift.com/libra/rhui-rhel-server-7-extras/
+  - name: rhel-7-server-extras-rpms
+    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/extras/os
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    sslcacert: /etc/rhsm/ca/redhat-uep.pem
     sslclientcert: /var/lib/yum/client-cert.pem
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
@@ -19,30 +21,34 @@ azure_base_repos:
 
 azure_node_repos:
   RedHat:
-  - name: rhel-server-7-releases
-    baseurl: https://mirror.openshift.com/libra/rhui-rhel-server-7-releases/
+  - name: rhel-7-server-rpms
+    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/extras/os
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    sslcacert: /etc/rhsm/ca/redhat-uep.pem
     sslclientcert: /var/lib/yum/client-cert.pem
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
-  - name: rhel-server-7-extras
-    baseurl: https://mirror.openshift.com/libra/rhui-rhel-server-7-extras/
+  - name: rhel-7-server-extras-rpms
+    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/extras/os
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    sslcacert: /etc/rhsm/ca/redhat-uep.pem
     sslclientcert: /var/lib/yum/client-cert.pem
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
   - name: rhel-7-server-ansible-2.6-rpms
-    baseurl: https://mirror.openshift.com/enterprise/rhel/rhel-7-server-ansible-2.6-rpms/
+    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/ansible/2.6/os
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    sslcacert: /etc/rhsm/ca/redhat-uep.pem
     sslclientcert: /var/lib/yum/client-cert.pem
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
-  - name: rhel-server-7-ose-3.11
-    baseurl: https://mirror.openshift.com/libra/rhui-rhel-server-7-ose-3.11/
+  - name: rhel-7-server-ose-3.11-rpms
+    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/ose/3.11/os
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    sslcacert: /etc/rhsm/ca/redhat-uep.pem
     sslclientcert: /var/lib/yum/client-cert.pem
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
