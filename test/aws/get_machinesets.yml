@@ -28,7 +28,7 @@
   oc_obj:
     state: list
     kind: machinesets.machine.openshift.io
-    namespace: openshift-cluster-api
+    namespace: openshift-machine-api
     selector: ""
     kubeconfig: "{{ kubeconfig_path }}"
   register: machineset

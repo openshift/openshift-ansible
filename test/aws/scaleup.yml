@@ -122,7 +122,7 @@
     oc_obj:
       state: absent
       kind: machinesets.machine.openshift.io
-      namespace: openshift-cluster-api
+      namespace: openshift-machine-api
       name: "{{ item }}"
       kubeconfig: "{{ kubeconfig_path }}"
     with_items: "{{ pre_scaleup_machineset_names }}"
