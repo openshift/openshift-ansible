@@ -108,6 +108,24 @@
     - logging-fluentd
     - logging-mux
 
+# remove annotations added by logging
+- command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    get namespaces -o name {{ __default_logging_ops_projects | join(' ') }}
+  register: __logging_ops_projects
+
+- name: Remove Annotation of Operations Projects
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    annotate {{ project }} openshift.io/logging.ui.hostname-
+  with_items: "{{ __logging_ops_projects.stdout_lines }}"
+  loop_control:
+    loop_var: project
+  when:
+    - __logging_ops_projects.stderr | length == 0
+
 ## EventRouter
 - include_role:
     name: openshift_logging_eventrouter
