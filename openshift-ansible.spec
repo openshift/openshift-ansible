@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.112
+Version:        3.10.113
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Feb 12 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.113-1
+- Ignore paths in `etcd-servers-overrides` (vrutkovs@redhat.com)
+- bug 1668338. Fix the correct ds template (jcantril@redhat.com)
+- add Initialize facts step to html_and_json_timestamp.yaml (gpei@redhat.com)
+
 * Sat Feb 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.112-1
 - Ensure async etcd-image-pull job exists before checking status.
   (pdd@redhat.com)
