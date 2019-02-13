@@ -57,6 +57,9 @@
   - "'items' in new_machine.results.results[0]"
   - "new_machine.results.results[0]['items'] | length > 0"
   - "'status' in new_machine.results.results[0]['items'][0]"
+  - "'providerStatus' in new_machine.results.results[0]['items'][0]['status']"
+  - "'instanceState' in new_machine.results.results[0]['items'][0]['status']['providerStatus']"
+  - "new_machine.results.results[0]['items'][0]['status']['providerStatus']['instanceState'] == 'running'"
 
 - name: add machine to the inventory
   add_host:
