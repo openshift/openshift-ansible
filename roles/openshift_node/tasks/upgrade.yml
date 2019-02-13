@@ -104,4 +104,6 @@
   retries: 30
   until: node_upgrade_oc_csr_approve is succeeded
 
+- import_tasks: firewall.yml
+
 - import_tasks: journald.yml
