@@ -118,7 +118,6 @@ journald_vars_to_replace:
 - { var: RateLimitInterval, val: 1s }
 - { var: RateLimitBurst, val: 10000 }
 - { var: SystemMaxUse, val: 8G }
-- { var: SystemKeepFree, val: 20% }
 - { var: SystemMaxFileSize, val: 10M }
 - { var: MaxRetentionSec, val: 1month }
 - { var: MaxFileSec, val: 1day }
