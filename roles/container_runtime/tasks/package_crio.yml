@@ -97,6 +97,18 @@
     state: restarted
     daemon_reload: yes
   register: start_result
+  ignore_errors: true
+
+- when: start_result is failed
+  block:
+    - name: Get crio logs
+      command: journalctl --no-pager -u crio
+      register: crio_logs
+      ignore_errors: true
+    - debug:
+        msg: "{{ crio_logs.stdout_lines }}"
+    - fail:
+        msg: crio start failed.
 
 # If we are using crio only, docker.service might not be available for
 # 'docker login'
