@@ -22,7 +22,7 @@
     - rpcbind
     - iscsid
 
-# Copy conf file only if not exists
+# Copy the conf file only if not exists
 - name: Template multipath configuration
   template:
     dest: "/etc/multipath.conf"
@@ -30,6 +30,32 @@
     backup: true
     force: no
   when: not openshift_is_atomic | bool
+
+# If the conf file already exists, update it
+- name: "Add LIO-ORG in MultiPath configuration"
+  blockinfile:
+    path: /etc/multipath.conf
+    marker: "# <!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    block: |
+      devices {
+          device {
+                    vendor "LIO-ORG"
+                    user_friendly_names "yes"
+                    path_grouping_policy "failover"
+                    path_selector "round-robin 0"
+                    failback immediate
+                    path_checker "tur"
+                    prio "alua"
+                    hardware_handler "1 alua"
+                    no_path_retry 120
+                    rr_weight "uniform"
+          }
+      }
+    owner: root
+    group: root
+    mode: 0600
+    backup: yes
+    state: present
 
 #enable multipath
 - name: Enable and start multipath
