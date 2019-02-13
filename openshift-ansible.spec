@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.83
+Version:        3.11.84
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,21 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Feb 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.84-1
+- Removing SystemKeepFree to use default value (javilinux@gmail.com)
+- Run firewall task on upgrades (spasquie@redhat.com)
+- azure: pull RPMs from CDN (jminter@redhat.com)
+- openshift_node: use init_file to replace journald.conf settings
+  (jstuever@redhat.com)
+- Remove cfme templates from openshift_examples directory (simaishi@redhat.com)
+- Ignore paths in `etcd-servers-overrides` (vrutkovs@redhat.com)
+- add Initialize facts step to html_and_json_timestamp.yaml (gpei@redhat.com)
+- Fix gluster deploy checks (jimi@sngx.net)
+- GlusterFS: Recreate config directories for external uninstall
+  (jarrpa@redhat.com)
+- set permissions on vsphere.conf file (tmlapp@gmail.com)
+- Templates for CloudForms 4.7 (simaishi@redhat.com)
+
 * Sun Feb 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.83-1
 - Ensure async etcd-image-pull job exists before checking status.
   (pdd@redhat.com)
