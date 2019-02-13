@@ -5,7 +5,7 @@ metadata:
   annotations:
     iconClass: icon-jboss
     tags: rhpam,processserver,jboss,trial
-    version: "1.0"
+    version: "1.1"
     openshift.io/display-name: Red Hat Process Automation Manager 7.2 ephemeral trial environment
     openshift.io/provider-display-name: Red Hat, Inc.
     description: Application template for an ephemeral authoring and testing environment, for Red Hat Process Automation Manager 7.2
@@ -16,7 +16,7 @@ metadata:
   name: rhpam72-trial-ephemeral
 labels:
   template: rhpam72-trial-ephemeral
-  rhpam: "1.0"
+  rhpam: "1.1"
 message: |-
           A new Process Automation Manager trial environment has been created.
           The username/password for accessing the Business Central interface is
@@ -122,9 +122,9 @@ parameters:
   value: "rhpam72-kieserver-openshift"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.1".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
+  value: "1.1"
   required: true
 - displayName: KIE Server Container Deployment
   description: 'KIE Server Container deployment configuration in format: containerId=groupId:artifactId:version|c2=g2:a2:v2'

@@ -5,7 +5,7 @@ metadata:
   annotations:
     iconClass: icon-jboss
     tags: rhpam,processserver,jboss,kieserver,immutable,s2i
-    version: "1.0"
+    version: "1.1"
     openshift.io/display-name: Red Hat Process Automation Manager 7.2 immutable production environment
     openshift.io/provider-display-name: Red Hat, Inc.
     description: Application template for an immultable KIE server in a production environment, for Red Hat Process Automation Manager 7.2
@@ -16,7 +16,7 @@ metadata:
   name: rhpam72-prod-immutable-kieserver
 labels:
   template: rhpam72-prod-immutable-kieserver
-  rhpam: "1.0"
+  rhpam: "1.1"
 message: |-
           A new immutable Red Hat Process Automation Manager KIE server have been created in your project.
           The username/password for accessing the KIE server is
@@ -67,9 +67,9 @@ parameters:
   value: "rhpam72-kieserver-openshift"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.1".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
+  value: "1.1"
   required: true
 - displayName: KIE Server Monitor User
   description: KIE server monitor username, for optional use of the business-central-monitor (Sets the org.kie.server.controller.user system property)

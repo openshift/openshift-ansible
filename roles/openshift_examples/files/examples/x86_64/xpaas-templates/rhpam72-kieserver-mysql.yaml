@@ -5,7 +5,7 @@ metadata:
   annotations:
     iconClass: icon-jboss
     tags: rhpam,processserver,jboss,kieserver,mysql
-    version: "1.0"
+    version: "1.1"
     openshift.io/display-name: Red Hat Process Automation Manager 7.2 managed KIE Server with a MySQL database
     openshift.io/provider-display-name: Red Hat, Inc.
     description: Application template for a managed KIE Server with a MySQL database, for Red Hat Process Automation Manager 7.2
@@ -16,7 +16,7 @@ metadata:
   name: rhpam72-kieserver-mysql
 labels:
   template: rhpam72-kieserver-mysql
-  rhpam: "1.0"
+  rhpam: "1.1"
 message: |-
           A new Process Automation Manager KIE server application have been created in your project.
           The username/password for accessing the KIE server
@@ -100,9 +100,9 @@ parameters:
   value: "rhpam72-kieserver-openshift"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.1".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
+  value: "1.1"
   required: true
 - displayName: Smart Router Service
   description: The service name for the optional smart router.
