@@ -13,14 +13,23 @@
     state: directory
 
 - name: Update journald setup
-  replace:
-    dest: /etc/systemd/journald.conf
-    regexp: '^(\#| )?{{ item.var }}=\s*.*?$'
-    replace: ' {{ item.var }}={{ item.val }}'
+  ini_file:
+    path: /etc/systemd/journald.conf
+    section: 'Journal'
+    option: "{{ item.var }}"
+    value: "{{ item.val }}"
+    no_extra_spaces: yes
     backup: yes
   with_items: "{{ journald_vars_to_replace | default([]) }}"
   when: journald_conf_file.stat.exists
   register: journald_update
+
+- name: Tag journald managed by Ansible
+  lineinfile:
+    path: /etc/systemd/journald.conf
+    line: '# Managed by OpenShift Ansible'
+    insertbefore: BOF
+  when: journald_update is changed
 
 # I need to restart journald immediatelly, otherwise it gets into way during
 # further steps in ansible
