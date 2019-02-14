@@ -2,7 +2,7 @@
 azure_base_repos:
   RedHat:
   - name: rhel-7-server-rpms
-    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/extras/os
+    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/os
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
     sslcacert: /etc/rhsm/ca/redhat-uep.pem
     sslclientcert: /var/lib/yum/client-cert.pem
@@ -22,7 +22,7 @@ azure_base_repos:
 azure_node_repos:
   RedHat:
   - name: rhel-7-server-rpms
-    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/extras/os
+    baseurl: https://cdn.redhat.com/content/dist/rhel/server/7/7Server/$basearch/os
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
     sslcacert: /etc/rhsm/ca/redhat-uep.pem
     sslclientcert: /var/lib/yum/client-cert.pem
