@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.113
+Version:        3.10.114
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Feb 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.114-1
+- openshift_node: use init_file to replace journald.conf settings
+  (jstuever@redhat.com)
+- Removing SystemKeepFree to use default value (javilinux@gmail.com)
+
 * Tue Feb 12 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.113-1
 - Ignore paths in `etcd-servers-overrides` (vrutkovs@redhat.com)
 - bug 1668338. Fix the correct ds template (jcantril@redhat.com)
