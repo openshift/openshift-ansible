@@ -5,7 +5,7 @@ metadata:
   annotations:
     iconClass: icon-jboss
     tags: rhdm,decisionserver,jboss,optaweb,employee-rostering,trial
-    version: "1.0"
+    version: "1.1"
     openshift.io/display-name: Red Hat Decision Manager 7.2 Business Optimizer Employee Rostering ephemeral trial environment
     openshift.io/provider-display-name: Red Hat, Inc.
     description: Application template for an ephemeral Optaweb Employee Rostering for Red Hat Decision Manager 7.2
@@ -16,7 +16,7 @@ metadata:
   name: rhdm72-optaweb-employee-rostering-trial-ephemeral
 labels:
   template: rhdm72-optaweb-employee-rostering-trial-ephemeral
-  rhdm: "1.0"
+  rhdm: "1.1"
 message: |-
           A new Decision Manager Optaweb employee rostering application have been created in your project.
 
@@ -51,9 +51,9 @@ parameters:
   value: "rhdm72-optaweb-employee-rostering-openshift"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.1".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
+  value: "1.1"
   required: true
 - displayName: Optaweb Employee Rostering Custom http Route Hostname
   description: 'Custom hostname for http service route, if set will also configure the OPTAWEB_HOST. Leave blank for default hostname,

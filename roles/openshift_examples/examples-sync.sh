@@ -6,8 +6,8 @@
 # This script should be run from openshift-ansible/roles/openshift_examples
 
 XPAAS_VERSION=ose-v1.4.14
-RHDM_7_TAG=7.2.0.GA
-RHPAM_7_TAG=7.2.0.GA
+RHDM_7_TAG=7.2.1.GA
+RHPAM_7_TAG=7.2.1.GA
 DG_72_VERSION=1.1.1
 ORIGIN_VERSION=${1:-v3.11}
 ORIGIN_BRANCH=${2:-master}
