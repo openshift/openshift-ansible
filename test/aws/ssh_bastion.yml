@@ -1,0 +1,50 @@
+---
+- name: Create ssh bastion project
+  oc_project:
+    name: openshift-ssh-bastion
+    description: openshift-ssh-bastion
+    node_selector: ""
+    kubeconfig: "{{ kubeconfig_path }}"
+
+- name: Create ssh keys secret
+  oc_secret:
+    state: present
+    namespace: openshift-ssh-bastion
+    name: ssh-host-keys
+    kubeconfig: "{{ kubeconfig_path }}"
+    files:
+    - name: ssh_host_rsa_key
+      path: ../../inventory/dynamic/injected/ssh-privatekey
+    - name: sshd_config
+      path: files/sshd_config
+  no_log: true
+
+- name: Create ssh bastion
+  command: "oc --kubeconfig={{ kubeconfig_path }} apply -f files/"
+
+- name: Wait for deployment to rollout
+  command: "oc --kubeconfig={{ kubeconfig_path }} -n openshift-ssh-bastion rollout status deployment ssh-bastion -w"
+
+- name: Get ssh bastion address
+  oc_obj:
+    name: ssh-bastion
+    kind: service
+    namespace: openshift-ssh-bastion
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+  register: svc
+  until:
+  - svc.results is defined
+  - svc.results.returncode is defined
+  - svc.results.returncode == 0
+  - svc.results.results is defined
+  - svc.results.results | length > 0
+  - svc.results.results[0].status is defined
+  - svc.results.results[0].status.loadBalancer is defined
+  - svc.results.results[0].status.loadBalancer.ingress | length > 0
+  - svc.results.results[0].status.loadBalancer.ingress[0].hostname is defined
+  retries: 36
+  delay: 5
+
+- set_fact:
+    ssh_bastion: "{{ svc.results.results[0].status.loadBalancer.ingress[0].hostname }}"
