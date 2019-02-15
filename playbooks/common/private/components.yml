@@ -16,6 +16,7 @@
 
 - import_playbook: ../../openshift-glusterfs/private/new_install.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0
+  ignore_errors: yes
 
 - import_playbook: ../../openshift-hosted/private/config.yml
 
@@ -50,8 +51,8 @@
 - import_playbook: ../../olm/private/config.yml
   when: openshift_enable_olm | default(false) | bool
 
-- import_playbook: ../../openshift-management/private/config.yml
-  when: openshift_management_install_management | default(false) | bool
+# - import_playbook: ../../openshift-management/private/config.yml
+#   when: openshift_management_install_management | default(false) | bool
 
 - import_playbook: ../../openshift-descheduler/private/config.yml
   when: openshift_descheduler_install | default(false) | bool
