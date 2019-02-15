@@ -83,6 +83,15 @@ spec:
                   name: "CURATOR_DEFAULT_DAYS"
                   value: "{{openshift_logging_curator_default_days}}"
                 -
+                  name: "CURATOR_RUN_HOUR"
+                  value: "{{openshift_logging_curator_run_hour}}"
+                -
+                  name: "CURATOR_RUN_MINUTE"
+                  value: "{{openshift_logging_curator_run_minute}}"
+                -
+                  name: "CURATOR_RUN_TIMEZONE"
+                  value: "{{openshift_logging_curator_run_timezone}}"
+                -
                   name: "CURATOR_SCRIPT_LOG_LEVEL"
                   value: "{{openshift_logging_curator_script_log_level}}"
                 -
