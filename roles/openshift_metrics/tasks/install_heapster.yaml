@@ -19,7 +19,7 @@
   template: src=heapster.j2 dest={{mktemp.stdout}}/templates/metrics-heapster-rc.yaml
   vars:
     replica_count: "{{heapster_replica_count.stdout | default(0)}}"
-    node_selector: "{{openshift_metrics_heapster_nodeselector | default('') }}"
+    node_selector: "{{openshift_metrics_heapster_nodeselector | default('') | map_from_pairs }}"
   changed_when: no
 
 - set_fact:

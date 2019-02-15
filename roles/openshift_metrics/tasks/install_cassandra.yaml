@@ -26,7 +26,7 @@
     node: "{{ item }}"
     master: "{{ (item == '1')|string|lower }}"
     replica_count: "{{cassandra_replica_count.results[item|int - 1].stdout}}"
-    node_selector: "{{openshift_metrics_cassandra_nodeselector | default('') }}"
+    node_selector: "{{openshift_metrics_cassandra_nodeselector | default('') | map_from_pairs }}"
     fsgroup: "{{ openshift_metrics_namespace_fsgroup }}"
     run_as_uid: "{{ openshift_metrics_namespace_uid }}"
     selinux_level: "{{ openshift_metrics_namespace_selinux }}"
