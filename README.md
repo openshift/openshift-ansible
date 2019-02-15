@@ -1,7 +1,7 @@
 [![Join the chat at https://gitter.im/openshift/openshift-ansible](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/openshift/openshift-ansible)
 [![Build Status](https://travis-ci.org/openshift/openshift-ansible.svg?branch=master)](https://travis-ci.org/openshift/openshift-ansible)
 [![Coverage Status](https://coveralls.io/repos/github/openshift/openshift-ansible/badge.svg?branch=master)](https://coveralls.io/github/openshift/openshift-ansible?branch=master)
-
+# This is not intune with upstream master, this is based off of openshift-ansible-3.11.54-1
 # OpenShift Ansible
 
 This repository contains [Ansible](https://www.ansible.com/) roles and
