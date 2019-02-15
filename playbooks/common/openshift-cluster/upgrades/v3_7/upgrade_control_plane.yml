@@ -131,6 +131,7 @@
 # names are changed
 - name: Configure API aggregation on masters
   hosts: oo_masters_to_config
+  serial: 1
   tasks:
   - include: ../../../openshift-master/tasks/wire_aggregator.yml
 
