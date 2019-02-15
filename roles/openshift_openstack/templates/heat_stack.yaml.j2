@@ -727,10 +727,12 @@ resources:
 {% if openshift_openstack_provider_network_name %}
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:         {{ openshift_openstack_provider_network_name }}
-{% elif openshift_openstack_node_network_id|default(false) %}
+{% else %}
+{% if openshift_openstack_node_network_id|default(false) %}
           net:         {{ openshift_openstack_node_network_id }}
 {% else %}
           net:         { get_resource: net }
+{% endif %}
 {% if openshift_openstack_node_subnet_name %}
           subnet:      {{ openshift_openstack_node_subnet_name }}
 {% else %}
@@ -745,6 +747,11 @@ resources:
               template: openshift-ansible-cluster_id-net
               params:
                 cluster_id: {{ openshift_openstack_full_dns_domain }}
+{% if openshift_use_flannel|default(False)|bool %}
+          attach_data_net: true
+          data_net:    { get_resource: data_net }
+          data_subnet: { get_resource: data_subnet }
+{% endif %}
 {% endif %}
           secgrp:
             - { get_resource: lb-secgrp }
