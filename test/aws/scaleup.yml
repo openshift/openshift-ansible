@@ -63,14 +63,6 @@
       owner: core
       group: wheel
       mode: 0700
-  - name: Copy a list of authorized ssh keys
-    copy:
-      src: /home/ec2-user/.ssh/authorized_keys
-      dest: /home/core/.ssh/authorized_keys
-      remote_src: true
-      owner: core
-      group: wheel
-      mode: 600
   - name: Install nfs-utils for storage tests
     package:
       name: nfs-utils
