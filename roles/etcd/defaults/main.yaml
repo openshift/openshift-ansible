@@ -12,7 +12,8 @@ r_etcd_default_version: "3.2.22"
 # This filter attempts to combine oreg_url host with project/component from etcd_image_dict.
 # "oreg.example.com/openshift3/ose-${component}:${version}"
 # becomes "oreg.example.com/rhel7/etcd:{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
-osm_etcd_image: "{{ etcd_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
+l_default_osm_etcd_image: "{{ etcd_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
+osm_etcd_image: "{{ l_default_osm_etcd_image }}"
 etcd_image_dict:
   origin: "quay.io/coreos/etcd:v{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
   openshift-enterprise: "registry.redhat.io/rhel7/etcd:{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"

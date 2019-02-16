@@ -2,6 +2,18 @@
 # Set some facts to reference from hostvars
 - import_tasks: set_facts.yml
 
+- name: Warn if osm_etcd_image is redefined
+  debug:
+    msg: "WARNING Overriding `osm_etcd_image` is not recommended. It may result in running an incorrect etcd version for this version of OpenShift. Please use `oreg_url` if you need to pull etcd from another location"
+  when:
+  - etcd_image != l_default_osm_etcd_image
+
+- name: Ensure etcd version has a version tag
+  fail:
+    msg: "etcd image '{{ etcd_image }}' doesn't contain explicit tag, so it will pull latest etcd image. It may not be compatible with this version of OpenShift. Please use `oreg_url` if you need to pull etcd from another location"
+  when:
+  - etcd_image.split(":") | length < 2
+
 - name: Pre-pull etcd image
   command: "{{ openshift_container_cli }} pull {{ etcd_image }}"
   environment:
