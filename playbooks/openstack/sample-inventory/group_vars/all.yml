@@ -52,9 +52,15 @@ openshift_openstack_external_network_name: "public"
 # information
 # kuryr_openstack_public_subnet_id: uuid_of_my_fip_subnet
 
-# # Kuryr can use a different subnet per namespace
+# # Kuryr can use a different subnet per namespace by enabling:
 # openshift_kuryr_subnet_driver: namespace
-# openshift_kuryr_sg_driver: namespace
+
+# # Kuryr can use different security group driver to provide different
+# isolation policies. The two options available are namespace isolation and
+# network policies. and both of them require the subnet per namespace driver
+# to be enabled. To enable one or the other use the next, by setting it to
+# 'namespace' or 'policy'
+# openshift_kuryr_sg_driver: policy
 
 # If you VM images will name the ethernet device different than 'eth0',
 # override this

@@ -19,7 +19,7 @@
 
 # pylint: disable=unused-wildcard-import,wildcard-import,unused-import,redefined-builtin
 
-''' os_namespace_resources_deletion '''
+''' os_netpolicy_sg_deletions '''
 import keystoneauth1
 
 from ansible.module_utils.basic import AnsibleModule
@@ -32,11 +32,10 @@ except ImportError:
 
 DOCUMENTATION = '''
 ---
-module: os_namespace_resources_deletion
-short_description: Delete network resources associated to the namespace
+module: os_netpolicy_sg_deletions
+short_description: Delete security group associated to the network policy
 description:
-    - Detach namespace's subnet from the router and delete the network and the
-      associated security groups
+    - Delete the security group associated to the network policy
 author:
     - "Luis Tomas Bolivar <ltomasbo@redhat.com>"
 '''
@@ -49,10 +48,7 @@ def main():
     ''' Main module function '''
     module = AnsibleModule(
         argument_spec=dict(
-            router_id=dict(default=False, type='str'),
-            subnet_id=dict(default=False, type='str'),
-            net_id=dict(default=False, type='str'),
-            sg_id=dict(default=None, type='str'),
+            sg_id=dict(default=False, type='str'),
         ),
         supports_check_mode=True,
     )
@@ -79,25 +75,12 @@ def main():
                              'API')
 
     try:
-        subnet_info = {"subnet_id": module.params['subnet_id'].encode('ascii')}
-        data = {'data': str(subnet_info).replace('\'', '\"')}
-        adapter.put('/routers/' + module.params['router_id'] + '/remove_router_interface', **data)
-    # pylint: disable=broad-except
-    except Exception:
-        module.fail_json(msg='Failed to detach subnet from the router')
-
-    try:
-        adapter.delete('/networks/' + module.params['net_id'])
-    # pylint: disable=broad-except
-    except Exception:
-        module.fail_json(msg='Failed to delete Neutron Network associated to the namespace')
-
-    try:
         if module.params.get('sg_id'):
             adapter.delete('/security-groups/' + module.params['sg_id'])
     # pylint: disable=broad-except
     except Exception:
-        module.fail_json(msg='Failed to delete Security groups associated to the namespace')
+        module.fail_json(msg='Failed to delete Security group associated to '
+                         'the network policy')
 
     module.exit_json(
         changed=True)

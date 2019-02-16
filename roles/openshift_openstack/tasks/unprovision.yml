@@ -19,6 +19,7 @@
     - not (item.metadata.name == "kubernetes")
     - openshift_use_kuryr | default(false) | bool
     - item.metadata.annotations is defined
+  ignore_errors: true
 
 - name: Remove trunk subports
   os_subports_deletion:
@@ -27,29 +28,59 @@
   when:
     - openshift_use_kuryr | default(false) | bool
 
+- name: Get kuryr net policies CRDs
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  oc_obj:
+    kind: kuryrnetpolicies
+    state: list
+    all_namespaces: true
+  register: knp_output
+  ignore_errors: true
+
+- name: Delete network policy security groups
+  os_netpolicy_sg_deletion:
+    sg_id: "{{ item.spec.securityGroupId }}"
+  with_items: "{{ knp_output.results.results[0]['items'] if 'results' in knp_output else []}}"
+  when:
+    - openshift_use_kuryr|default(false) == true
+    - openshift_kuryr_sg_driver|default("default") == 'policy'
+    - item.metadata.annotations is defined
+
 - name: Get kuryr net CRDs
   delegate_to: "{{ groups.oo_first_master.0 }}"
   oc_obj:
     kind: kuryrnets
     state: list
     all_namespaces: true
-  register: svc_output
+  register: knet_output
   ignore_errors: true
 
 # NOTE(ltomasbo) This only works for nested deployments.
 # Moreover the pods should not have FIPs attached
-- name: Delete namespaced resources
+- name: Delete namespaced resources with project isolation
   os_namespace_resources_deletion:
     router_id: "{{ item.spec.routerId }}"
     subnet_id: "{{ item.spec.subnetId }}"
     net_id: "{{ item.spec.netId }}"
     sg_id: "{{ item.spec.sgId }}"
-  with_items: "{{ svc_output.results.results[0]['items'] if 'results' in svc_output else [] }}"
+  with_items: "{{ knet_output.results.results[0]['items'] if 'results' in knet_output else [] }}"
   when:
     - openshift_use_kuryr|default(false) == true
     - openshift_kuryr_subnet_driver|default("default") == 'namespace'
-    - openshift_kuryr_sg_driver|default("default") == 'namespace'
     - item.metadata.annotations is defined
+    - item.spec.sgId is defined
+  ignore_errors: true
+- name: Delete namespaced resources without project isolation
+  os_namespace_resources_deletion:
+    router_id: "{{ item.spec.routerId }}"
+    subnet_id: "{{ item.spec.subnetId }}"
+    net_id: "{{ item.spec.netId }}"
+  with_items: "{{ knet_output.results.results[0]['items'] if 'results' in knet_output else [] }}"
+  when:
+    - openshift_use_kuryr|default(false) == true
+    - openshift_kuryr_subnet_driver|default("default") == 'namespace'
+    - item.metadata.annotations is defined
+  ignore_errors: true
 
 - name: Delete the Stack
   ignore_errors: False

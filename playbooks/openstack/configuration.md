@@ -762,6 +762,23 @@ openshift_kuryr_sg_driver: namespace
 ```
 
 
+### Network Policies
+
+By default, kuryr is configured with the default isolation policy where pods
+isolation is statically defined. Kuryr also permits to enable more advanced
+and dynamic isolation policies by implementing network policies through
+security groups. To enable it you need to uncomment the following on the
+all.yml inventory file:
+
+```yaml
+openshift_kuryr_subnet_driver: namespace
+openshift_kuryr_sg_driver: policy
+```
+
+Note enabling the namespace subnet driver is required to enabled network
+policy isolation
+
+
 ### Kuryr Controller and CNI healthchecks probes
 
 By default kuryr controller and cni pods are deployed with readiness and
@@ -1118,7 +1135,7 @@ Modify the all.yml file and add the following variables:
 ```
 openshift_openstack_master_group_name: node-config-master-crio
 openshift_openstack_infra_group_name: node-config-infra-crio
-openshift_openstack_compute_group_name: node-config-compute-crio  
+openshift_openstack_compute_group_name: node-config-compute-crio
 ```
 
 NOTE: Currently, OpenShift builds require docker.
@@ -1153,6 +1170,8 @@ openshift_use_crio: true
 
 ```
 openshift_openstack_master_group_name: node-config-master-crio
+openshift_openstack_infra_group_name: node-config-infra-crio
+openshift_openstack_compute_group_name: node-config-compute-crio
 ```
 
 ### Some nodes using cri-o, some others docker
@@ -1228,7 +1247,7 @@ After a successful installation, the containerRuntimeVersion field says the CR
 it uses:
 
 ```
-$ oc get nodes -o=custom-columns=NAME:.metadata.name,CR:.status.nodeInfo.containerRuntimeVersion --selector='node-role.kubernetes.io/compute=true'                                                                   
+$ oc get nodes -o=custom-columns=NAME:.metadata.name,CR:.status.nodeInfo.containerRuntimeVersion --selector='node-role.kubernetes.io/compute=true'
 NAME                                  CR
 app-node-0.shiftstack.automated.lan   cri-o://1.11.5
 app-node-1.shiftstack.automated.lan   docker://1.13.1
