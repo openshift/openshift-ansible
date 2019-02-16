@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.69
+Version:        3.9.70
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Feb 16 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.70-1
+- openshift_node: use init_file to replace journald.conf settings
+  (jstuever@redhat.com)
+- Allow to configure BlockStorage.ignore-volume-az for Openstack Cloud Provider
+  (alberto.rodriguez.peon@cern.ch)
+- bug 1668338. Fix the correct ds template (jcantril@redhat.com)
+- Allow override of logging ES image (haeusler.christian@mac.com)
+- Override of logging ES image pull secret (haeusler.christian@mac.com)
+- Add openshift_node_upgrade_pre_drain_hook (mgugino@redhat.com)
+- Set log-path = ~/openshift-ansible.log (sdodson@redhat.com)
+- Bug 1589015 - Switch to rolling deployment for web console
+  (spadgett@redhat.com)
+
 * Sat Feb 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.69-1
 - Open up tcp/udp DNS port 53 (pvijayaragav@juniper.net)
 
