@@ -90,7 +90,20 @@
     shell: oc get nodes | awk {'print $1'} | grep infra
     register: oc_node_results
 
-  - name: Label all the nodes
-    shell: "oc label node {{ item }} node-role.kubernetes.io/infra=true region=infra"
+  - name: Label all infra the nodes
+    shell: "oc label node {{ item }} node-role.kubernetes.io/infra=true region=infra router=router"
+    with_items: "{{ oc_node_results.stdout_lines }}"
+    ignore_errors: yes
+
+- name: Label app nodes
+  hosts: masters
+  gather_facts: false
+  tasks:
+  - name: Get the app node names
+    shell: oc get nodes | awk {'print $1'} | grep app
+    register: oc_node_results
+
+  - name: Label all app the nodes
+    shell: "oc label node {{ item }} application_node=yes"
     with_items: "{{ oc_node_results.stdout_lines }}"
     ignore_errors: yes
