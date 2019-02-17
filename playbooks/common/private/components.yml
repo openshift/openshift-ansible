@@ -14,6 +14,32 @@
 #    include the masters and usually includes infra nodes.
 # 5. The init/main.yml playbook has been invoked
 
+- name: Label Infra nodes
+  hosts: masters
+  gather_facts: false
+  tasks:
+  - name: Get the Infra node names
+    shell: oc get nodes | awk {'print $1'} | grep infra
+    register: oc_node_results
+
+  - name: Label all infra the nodes
+    shell: "oc label node {{ item }} region=infra router=router --overwrite"
+    with_items: "{{ oc_node_results.stdout_lines }}"
+    ignore_errors: yes
+
+- name: Label app nodes
+  hosts: masters
+  gather_facts: false
+  tasks:
+  - name: Get the app node names
+    shell: oc get nodes | awk {'print $1'} | grep app
+    register: oc_node_results
+
+  - name: Label all app the nodes
+    shell: "oc label node {{ item }} application_node=yes --overwrite"
+    with_items: "{{ oc_node_results.stdout_lines }}"
+    ignore_errors: yes
+
 #ignore gluster for now - bfraz 2/16
 #- import_playbook: ../../openshift-glusterfs/private/new_install.yml
 #  when: groups.oo_glusterfs_to_config | default([]) | count > 0
