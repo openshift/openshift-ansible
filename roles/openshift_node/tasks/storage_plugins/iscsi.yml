@@ -31,13 +31,34 @@
     force: no
   when: not openshift_is_atomic | bool
 
-# If the conf file already exists, update it
+# check whether devices section is present
+- name: Check devices section present
+  command: grep -e "^devices {" /etc/multipath.conf
+  register: devices_multipath
+  failed_when: false
+
+# Add empty devices section if not present
+- name: "Add devices section"
+  blockinfile:
+    path: /etc/multipath.conf
+    marker: "# <!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    block: |
+      devices {
+      }
+    owner: root
+    group: root
+    mode: 0600
+    backup: yes
+    state: present
+    when: devices_multipath.rc == 1
+
+# Update LIO section under devices section
 - name: "Add LIO-ORG in MultiPath configuration"
   blockinfile:
     path: /etc/multipath.conf
+    insertafter: "devices {"
     marker: "# <!-- {mark} ANSIBLE MANAGED BLOCK - LIO iSCSI device -->"
     block: |
-      devices {
           device {
                     vendor "LIO-ORG"
                     product "TCMU device"
@@ -51,7 +72,6 @@
                     no_path_retry 120
                     rr_weight "uniform"
           }
-      }
     owner: root
     group: root
     mode: 0600
