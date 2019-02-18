@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.85
+Version:        3.11.86
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Feb 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.86-1
+- Add kuryr support for network policies (ltomasbo@redhat.com)
+- Correct regressions of Curator5 template file (bysnupy@hotmail.com)
+- Protect from dangerous etcd_image changes (vrutkovs@redhat.com)
+
 * Thu Feb 14 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.85-1
 - azure: fix typo in repo (jminter@redhat.com)
 - [KIECLOUD-112] - Update RHPAM/DM templates on OpenShift Service Catalog for
