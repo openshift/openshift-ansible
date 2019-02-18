@@ -15,4 +15,6 @@
 - name: Load heketi topology
   command: "{{ glusterfs_heketi_client }} topology load --json={{ mktemp.stdout }}/topology.json 2>&1"
   register: topology_load
-  failed_when: "topology_load.rc != 0 or 'Unable' in topology_load.stdout"
+  until: "'Unable' not in topology_load.stdout and topology_load.rc == 0"
+  retries: 4
+  delay: 6
