@@ -30,6 +30,46 @@
     - openshift_deployment_type is undefined
     - deployment_type is defined
 
+- name: Read API URL from infra config
+  hosts: "{{ l_init_fact_hosts | default('nodes') }}"
+  tasks:
+  - oc_obj:
+      name: cluster
+      kind: infrastructures.config.openshift.io
+      kubeconfig: "{{ kubeconfig_path }}"
+      state: present
+    register: clustercfg
+    when: kubeconfig_path is defined
+    until:
+    - clustercfg.results is defined
+    - clustercfg.results.returncode is defined
+    - clustercfg.results.returncode == 0
+    - clustercfg.results.results is defined
+    - clustercfg.results.results | length > 0
+    retries: 36
+    delay: 5
+    delegate_to: localhost
+  - set_fact:
+      openshift_api_prefix: "{{ clustercfg.results.results[0].status.apiServerURL.split(':')[0:-1] | join(':') }}"
+
+- name: Set worker openshift_bootstrap_endpoint if not already defined
+  hosts: "{{ l_init_fact_hosts | default('nodes') }}:!masters:!bootstrap"
+  tasks:
+  - set_fact:
+      openshift_bootstrap_endpoint: "{{ openshift_api_prefix }}:22623/config/worker"
+    when:
+    - kubeconfig_path is defined
+    - openshift_bootstrap_endpoint is not defined
+
+- name: Set master openshift_bootstrap_endpoint if not already defined
+  hosts: "{{ l_init_fact_hosts | default('nodes') }}:&masters"
+  tasks:
+  - set_fact:
+      openshift_bootstrap_endpoint: "{{ openshift_api_prefix }}:22623/config/master"
+    when:
+    - kubeconfig_path is defined
+    - openshift_bootstrap_endpoint is not defined
+
 - name: Read in openshift-install
   hosts: "{{ l_init_fact_hosts | default('nodes') }}"
   tasks:
