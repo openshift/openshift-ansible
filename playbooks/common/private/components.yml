@@ -19,7 +19,7 @@
   gather_facts: false
   tasks:
   - name: Get the Infra node names
-    shell: oc get nodes | awk {'print $1'} | grep infra
+    shell: oc get nodes | grep infra | awk {'print $1'}
     register: oc_node_results
 
   - name: Label all infra the nodes
@@ -31,8 +31,8 @@
   hosts: masters
   gather_facts: false
   tasks:
-  - name: Get the app node names
-    shell: oc get nodes | awk {'print $1'} | grep app
+  - name: Get the app node names  oc get nodes
+    shell: oc get nodes | grep -F " compute " | awk {'print $1'}
     register: oc_node_results
 
   - name: Label all app the nodes
