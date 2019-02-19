@@ -17,11 +17,11 @@
                 "annotations": {
                     "openshift.io/display-name": "Red Hat JBoss EAP 6.4",
                     "openshift.io/provider-display-name": "Red Hat, Inc.",
-                    "version": "1.4.14"
+                    "version": "1.4.18"
                 }
             },
             "labels": {
-                "xpaas": "1.4.14"
+                "xpaas": "1.4.18"
             },
             "spec": {
                 "tags": [
@@ -212,6 +212,27 @@
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-eap-6/eap64-openshift:1.8"
+                        }
+                    },
+                    {
+                        "name": "1.9",
+                        "annotations": {
+                            "description": "JBoss EAP 6.4 S2I images.",
+                            "iconClass": "icon-eap",
+                            "tags": "builder,eap,javaee,java,jboss,hidden",
+                            "supports": "eap:6.4,javaee:6,java:8",
+                            "sampleRepo": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
+                            "sampleContextDir": "kitchensink",
+                            "sampleRef": "6.4.x",
+                            "version": "1.9",
+                            "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-eap-6/eap64-openshift:1.9"
                         }
                     }
                 ]
