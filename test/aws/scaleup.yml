@@ -9,12 +9,17 @@
   hosts: localhost
   connection: local
   tasks:
+  - name: create temp directory
+    command: mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: mktemp
+    changed_when: False
   - name: add localhost as master
     add_host:
       name: localhost
       ansible_connection: local
       groups: masters
 
+  - import_tasks: ssh_bastion.yml
   - import_tasks: get_machinesets.yml
 
   - include_tasks: create_machineset.yml
@@ -29,6 +34,14 @@
   tasks:
   - wait_for_connection: {}
   - setup: {}
+  - name: Copy ops-mirror.pem
+    copy:
+      src: ../../inventory/dynamic/injected/ops-mirror.pem
+      dest: /var/lib/yum/ops-mirror.pem
+      owner: root
+      group: root
+      mode: 0644
+    ignore_errors: true
 
 - import_playbook: ../../playbooks/openshift-node/scaleup.yml
 
@@ -50,14 +63,6 @@
       owner: core
       group: wheel
       mode: 0700
-  - name: Copy a list of authorized ssh keys
-    copy:
-      src: /home/ec2-user/.ssh/authorized_keys
-      dest: /home/core/.ssh/authorized_keys
-      remote_src: true
-      owner: core
-      group: wheel
-      mode: 600
   - name: Install nfs-utils for storage tests
     package:
       name: nfs-utils
@@ -92,10 +97,20 @@
       register: crictl_logs_output
       with_items: "{{ crictl_ps_output.stdout_lines }}"
       ignore_errors: true
+    - name: Get crio logs
+      command: journalctl --no-pager -u cri-o
+      register: crio_logs
+      ignore_errors: true
+    - name: Get kubelet logs
+      command: journalctl --no-pager -u kubelet
+      register: kubelet_logs
+      ignore_errors: tru
     - debug:
         var: crictl_logs_output
     - debug:
-        msg: "{{ bootkube_logs.stdout_lines }}"
+        msg: "{{ kubelet_logs.stdout_lines }}"
+    - debug:
+        msg: "{{ crio_logs.stdout_lines }}"
     - fail:
         msg: Node failed to become Ready
 
