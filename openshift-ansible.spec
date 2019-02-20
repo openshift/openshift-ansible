@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.86
+Version:        3.11.87
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Feb 20 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.87-1
+- Bug 1672847. Corrected KUBERNETES_TRUST_CERTIFICATES reference.
+  (bostrt@gmail.com)
+- Make same timezone with running hosts (bysnupy@hotmail.com)
+
 * Sun Feb 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.86-1
 - Add kuryr support for network policies (ltomasbo@redhat.com)
 - Correct regressions of Curator5 template file (bysnupy@hotmail.com)
