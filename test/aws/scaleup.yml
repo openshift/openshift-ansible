@@ -119,10 +119,9 @@
   connection: local
   tasks:
   - name: Mark CoreOS nodes as unschedulable
-    oc_adm_manage_node:
-      kubeconfig: "{{ kubeconfig_path }}"
-      node: "{{ item }}"
-      schedulable: False
+    command: >
+      oc adm cordon {{ item | lower }}
+      --config={{ kubeconfig_path }}
     with_items: "{{ pre_scaleup_workers_name }}"
 
   - name: Drain CoreOS nodes
