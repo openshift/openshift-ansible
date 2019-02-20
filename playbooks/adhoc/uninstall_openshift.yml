@@ -210,6 +210,11 @@
     failed_when: False
     with_items: "{{ exited_containers_to_delete.results }}"
 
+  - name: Delete all cri-o containers
+    shell: 'crictl ps --all -q | xargs crictl rm'
+    changed_when: False
+    failed_when: False
+
   - name: Remove k8s_ containters
     shell: docker ps -a -q -f name=k8s_ | xargs docker rm -f
     failed_when: False
