@@ -185,7 +185,7 @@
     - openvswitch
     when: openshift_use_openshift_sdn | default(True) | bool
 
-  - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+  - shell: find /var/lib/origin/openshift.local.volumes/* -type d -exec umount {} \; 2>/dev/null || true
     changed_when: False
 
   - shell: docker rm -f "{{ item }}"-master "{{ item }}"-node
@@ -268,6 +268,8 @@
     with_subelements:
     - "{{ directories.results | default([]) }}"
     - files
+    # Ignore failure when openshift.local.volumes is mounted.
+    failed_when: false
 
   - shell: systemctl daemon-reload
     changed_when: False
