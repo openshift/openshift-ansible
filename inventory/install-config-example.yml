@@ -13,7 +13,7 @@ networking:
   - cidr: 10.128.0.0/14
     hostSubnetLength: 9
   serviceCIDR: 172.30.0.0/16
-  type: OpenshiftSDN
+  type: OpenShiftSDN
 platform:
   libvirt:
     # This URI is not actually used
