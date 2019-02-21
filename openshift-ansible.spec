@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.116
+Version:        3.10.117
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Feb 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.117-1
+- bug 1678442. fix logging env var (jcantril@redhat.com)
+
 * Tue Feb 19 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.116-1
 - 
 
