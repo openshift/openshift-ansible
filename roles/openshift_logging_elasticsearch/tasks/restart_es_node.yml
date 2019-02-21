@@ -14,12 +14,23 @@
     - (_disable_output.stdout | from_json)['acknowledged'] | bool
   failed_when: false
 
+- name: "Check if there is a rollout in progress for {{ _es_node }}"
+  command: >
+    {{ openshift_client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    rollout status --watch=false dc/{{ _es_node }}
+    -n {{ openshift_logging_elasticsearch_namespace }}
+  register: _rollout_status
+  ignore_errors: True
+
 - name: "Rolling out new pod(s) for {{ _es_node }}"
   command: >
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     rollout latest {{ _es_node }}
     -n {{ openshift_logging_elasticsearch_namespace }}
+  when:
+    - _rollout_status.stdout.find('Waiting for rollout to finish') < 0
 
 - when: not _skip_healthcheck | bool
   name: "Waiting for {{ _es_node }} to finish scaling up"
