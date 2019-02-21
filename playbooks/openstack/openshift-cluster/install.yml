@@ -18,7 +18,7 @@
 
 - name: Prepare the Nodes in the cluster for installation
   any_errors_fatal: true
-  hosts: oo_all_hosts
+  hosts: "{{ l_etcd_scale_up_crt_hosts | default(l_scale_up_hosts) | default('oo_nodes_to_config') }}"
   become: yes
   gather_facts: yes
   tasks:
