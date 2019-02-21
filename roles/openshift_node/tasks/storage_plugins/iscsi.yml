@@ -50,7 +50,7 @@
     mode: 0600
     backup: yes
     state: present
-    when: devices_multipath.rc == 1
+  when: devices_multipath.rc == 1
 
 # Update LIO section under devices section
 - name: "Add LIO-ORG in MultiPath configuration"
