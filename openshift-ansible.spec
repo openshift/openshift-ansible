@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.87
+Version:        3.11.88
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,25 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Feb 22 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.88-1
+- Fix when clause formatting. (sarumuga@redhat.com)
+- Ensure dns records are available when deleting the stack
+  (ltomasbo@redhat.com)
+- kibana, curator ops false; wait for es deploy (rmeggins@redhat.com)
+- Uninstall no longer unmounts openshift.local.volumes (jstuever@redhat.com)
+- Add a empty device section if not present. If present, only add LIO section
+  under it. (sarumuga@redhat.com)
+- Move LIO-iSCSI comment to role (sarumuga@redhat.com)
+- Remove LIO-ORG configuration in multipath conf as new task will take care of
+  adding the device. (sarumuga@redhat.com)
+- Add product as "TCMU device". Without product field "multipath -t" fails to
+  list the device (sarumuga@redhat.com)
+- If the multipath config file already exists, append LIO-ORG device
+  configuration. (sarumuga@redhat.com)
+- Use force:no in template section to avoid overwrite (sarumuga@redhat.com)
+- Copy multipath.conf file only if target does not exists. This is to avoid any
+  overwriting of existing configuration. (sarumuga@redhat.com)
+
 * Wed Feb 20 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.87-1
 - Bug 1672847. Corrected KUBERNETES_TRUST_CERTIFICATES reference.
   (bostrt@gmail.com)
