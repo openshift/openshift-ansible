@@ -64,6 +64,12 @@
 
 - hosts: nodes
   tasks:
+  - name: set seboolean for samba use
+    seboolean:
+      name: virt_use_samba
+      state: yes
+      persistent: yes
+
   - name: deconfigure yum repositories
     import_tasks: tasks/remove_yum.yml
 
