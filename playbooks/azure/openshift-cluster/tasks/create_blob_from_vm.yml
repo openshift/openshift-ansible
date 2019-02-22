@@ -23,7 +23,7 @@
 - name: start copy
   command: >
     az storage blob copy start
-    --source-uri "{{ (sas.stdout | from_json).accessSas }}"
+    --source-uri "{{ (sas.stdout | from_json).properties.output.accessSAS }}"
     --account-name "{{ openshift_azure_storage_account }}"
     --account-key "{{ (keys.stdout | from_json)[0].value }}"
     --destination-container "{{ openshift_azure_container }}"
