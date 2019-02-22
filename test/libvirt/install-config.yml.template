@@ -9,10 +9,10 @@ metadata:
   name: ${OCP_CLUSTER_NAME}
 networking:
   clusterNetworks:
-  - cidr:             10.128.0.0/14
+  - cidr: 10.128.0.0/14
     hostSubnetLength: 9
   serviceCIDR: 172.30.0.0/16
-  type:        OpenshiftSDN
+  type: OpenShiftSDN
 platform:
   libvirt:
     URI: qemu+tcp://192.168.122.1/system
