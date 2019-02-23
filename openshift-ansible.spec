@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.117
+Version:        3.10.118
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Feb 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.118-1
+- Uninstall no longer unmounts openshift.local.volumes (jstuever@redhat.com)
+
 * Thu Feb 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.117-1
 - bug 1678442. fix logging env var (jcantril@redhat.com)
 
