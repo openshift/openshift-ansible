@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.70
+Version:        3.9.71
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Feb 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.71-1
+- 
+
 * Sat Feb 16 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.70-1
 - openshift_node: use init_file to replace journald.conf settings
   (jstuever@redhat.com)
