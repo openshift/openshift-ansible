@@ -24,7 +24,6 @@ openshift_logging_curator_ops_deployment: false
 openshift_logging_curator_default_days: 30
 openshift_logging_curator_run_hour: 3
 openshift_logging_curator_run_minute: 30
-openshift_logging_curator_run_timezone: UTC
 openshift_logging_curator_script_log_level: INFO
 openshift_logging_curator_log_level: ERROR
 openshift_logging_curator_timeout: 300
