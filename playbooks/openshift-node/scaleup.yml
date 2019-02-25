@@ -50,6 +50,3 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
-  - import_role:
-      name: openshift_node40
-      tasks_from: systemd.yml

@@ -32,12 +32,6 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
-  - import_role:
-      name: openshift_node40
-      tasks_from: systemd.yml
-    vars:
-      excluded_services:
-      - progress.service
   - name: Wait for MCS endpoint to show up
     uri:
       url: "{{ mcd_endpoint }}/config/master"
@@ -83,15 +77,12 @@
     until:
     - "'status' in result"
     - result.status == 200
-  - import_role:
-      name: openshift_node40
-      tasks_from: config.yml
   - name: Make sure etcd user exists
     user:
       name: etcd
   - import_role:
       name: openshift_node40
-      tasks_from: systemd.yml
+      tasks_from: config.yml
 
 - name: Start workers
   hosts: workers
@@ -109,9 +100,6 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
-  - import_role:
-      name: openshift_node40
-      tasks_from: systemd.yml
 
 - name: Wait for nodes to become ready
   hosts: bootstrap

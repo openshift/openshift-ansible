@@ -37,6 +37,7 @@
       - libsemanage-python
       - yum-utils
       - "{{ 'python3-docker' if ansible_distribution == 'Fedora' else 'python-docker-py' }}"
+      - systemd-journal-gateway
       pkg_list_non_fedora:
       - 'python-ipaddress'
       pkg_list_use_non_fedora: "{{ ansible_distribution != 'Fedora' | bool }}"
