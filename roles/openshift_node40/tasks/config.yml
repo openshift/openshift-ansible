@@ -66,6 +66,10 @@
     ignore_unreachable: true
   # Wait for the host to come back and reset 'unreachable' status
   - wait_for_connection: {}
+  # Collect facts from the node, this would cause the status to change to passing instead of
+  # unreachable
+  - setup:
+      gather_subset: min
   # Clear unreachable status
   - name: clear any host unreachable error messages.
     meta: clear_host_errors
