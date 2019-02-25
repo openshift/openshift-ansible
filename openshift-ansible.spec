@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.88
+Version:        3.11.89
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,14 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Feb 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.89-1
+- Revert "JSON structure appears to have changed" (jgallego@redhat.com)
+- JSON structure appears to have changed (jgallego@redhat.com)
+- Set the SE boolean for docker to use samba (jgallego@redhat.com)
+- Adding samba-client to list of packages to install (jgallego@redhat.com)
+- Revert "[release-3.11] Correct regressions of Curator5 template file"
+  (ewolinet@redhat.com)
+
 * Fri Feb 22 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.88-1
 - Fix when clause formatting. (sarumuga@redhat.com)
 - Ensure dns records are available when deleting the stack
