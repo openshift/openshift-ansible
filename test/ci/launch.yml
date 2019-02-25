@@ -60,6 +60,7 @@
         assign_public_ip: yes
         instance_tags: "{{ aws_instance_tags }}"
         volumes: "{{ item.aws_volumes | default(omit) }}"
+        instance_initiated_shutdown_behavior: "{{ (aws_use_auto_terminator | default(true)) | ternary('stop', 'terminate') }}"
       register: ec2
       with_items: "{{ aws_instances }}"
       vars:
