@@ -45,10 +45,9 @@
           with_items: "{{ ec2.instances }}"
 
     - name: Delete security groups
-      group_id:
-        name: "{{ item.security_groups.0.group_id }}"
+      ec2_group:
+        group_id: "{{ item.security_groups.0.group_id }}"
         state: absent
-        vpc_id: "{{ aws_vpc_id }}"
         region: "{{ aws_region }}"
       with_items: "{{ ec2.instances }}"
       when: not aws_use_auto_terminator | default(true)
