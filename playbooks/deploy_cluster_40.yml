@@ -29,14 +29,6 @@
 - name: Config bootstrap node
   hosts: bootstrap
   tasks:
-  # Bootstrap ignition file wants to set /home/core/.bash_history and requires a user to exist
-  # to set permissions
-  - name: FIXME Make sure core user exists
-    user:
-      name: "{{ item }}"
-    with_items:
-    - core
-    - systemd-journal-gateway
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
