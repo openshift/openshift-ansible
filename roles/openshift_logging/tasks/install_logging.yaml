@@ -303,7 +303,6 @@
     openshift_logging_curator_default_days: "{{ openshift_logging_curator_ops_default_days | default() }}"
     openshift_logging_curator_run_hour: "{{ openshift_logging_curator_ops_run_hour | default() }}"
     openshift_logging_curator_run_minute: "{{ openshift_logging_curator_ops_run_minute | default() }}"
-    openshift_logging_curator_run_timezone: "{{ openshift_logging_curator_ops_run_timezone | default() }}"
   when:
   - openshift_logging_use_ops | bool
 
