@@ -20,7 +20,7 @@
         instance_ids: "{{ item.instance_id }}"
         region: "{{ aws_region }}"
         state: absent
-        wait: no
+        wait: yes
       with_items: "{{ ec2.instances }}"
 
     - when: aws_use_auto_terminator | default(true)
