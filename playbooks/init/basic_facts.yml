@@ -11,10 +11,6 @@
   roles:
   - role: openshift_facts
   tasks:
-  # TODO: Should this role be refactored into health_checks??
-  - name: Run openshift_sanitize_inventory to set variables
-    import_role:
-      name: openshift_sanitize_inventory
 
   - name: Detect OS Variant from /etc/os-release
     fail:
@@ -32,6 +28,8 @@
 
 - name: Read API URL from infra config
   hosts: "{{ l_init_fact_hosts | default('nodes') }}"
+  roles:
+  - lib_openshift
   tasks:
   - oc_obj:
       name: cluster
