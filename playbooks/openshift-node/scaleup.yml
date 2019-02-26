@@ -1,5 +1,5 @@
 ---
-- name: Ensure there are new_nodes
+- name: Pre-scaleup checks
   hosts: localhost
   connection: local
   gather_facts: no
@@ -8,8 +8,7 @@
       msg: >
         Detected no new_workers in inventory. Please add hosts to the
         new_workers host group to add nodes.
-    when:
-    - groups.new_workers | default([]) | length == 0
+    when: groups.new_workers | default([]) | length == 0
 
 - name: run the init
   import_playbook: ../init/main.yml
@@ -19,6 +18,30 @@
     l_install_base_packages: True
     l_repo_hosts: "new_workers"
     l_base_packages_hosts: "new_workers"
+
+- name: Get release image
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: Get release image
+    oc_obj:
+      kubeconfig: "{{ kubeconfig_path }}"
+      state: present
+      kind: clusterversion.config.openshift.io
+      name: version
+    register: clusterversion
+    until:
+    - clusterversion.results is defined
+    - clusterversion.results.returncode is defined
+    - clusterversion.results.returncode == 0
+    - clusterversion.results.results is defined
+    - clusterversion.results.results | length > 0
+    - clusterversion.results.results[0].status is defined
+    - clusterversion.results.results[0].status.desired is defined
+    - clusterversion.results.results[0].status.desired.image is defined
+    retries: 5
+    delay: 5
 
 - name: install nodes
   hosts: new_workers
@@ -50,3 +73,5 @@
   - import_role:
       name: openshift_node40
       tasks_from: config.yml
+    vars:
+      openshift_release_image: "{{ hostvars['localhost'].clusterversion.results.results[0].status.desired.image }}"
