@@ -1,24 +1,21 @@
 ---
-- name: save machineset to a file
-  copy:
-    content: "{{ item | to_yaml }}"
-    dest: "{{ mktemp.stdout }}/machineset.yaml"
-
 - name: get existing machineset name
   yedit:
     state: list
-    src: "{{ mktemp.stdout }}/machineset.yaml"
+    content: "{{ item | to_yaml }}"
     key: "metadata.name"
   register: machineset_name
 
 - name: edit machineset name
   yedit:
-    src: "{{ mktemp.stdout }}/machineset.yaml"
+    content: "{{ item | to_yaml }}"
     separator: '#'
     state: present
     edits:
     - key: metadata#name
       value: "{{ machineset_name.result }}-centos"
+    - key: metadata#resourceVersion
+      value: ""
     - key: spec#selector#matchLabels#sigs.k8s.io/cluster-api-machineset
       value: "{{ machineset_name.result }}-centos"
     - key: spec#template#metadata#labels#sigs.k8s.io/cluster-api-machineset
@@ -29,41 +26,35 @@
       value: "{{ openshift_aws_scaleup_key }}"
     - key: spec#template#spec#providerSpec#value#ami#id
       value: "{{ openshift_aws_scaleup_ami }}"
+  register: edited_machineset
 
 - name: import machinespec
-  oc_obj:
-    state: present
-    namespace: "openshift-machine-api"
-    kind: machineset
-    name: "{{ machineset_name.result }}-centos"
+  k8s:
     kubeconfig: "{{ kubeconfig_path }}"
-    files:
-    - "{{ mktemp.stdout }}/machineset.yaml"
+    definition: "{{ edited_machineset.result[-1].edit }}"
 
 - name: wait for machine to be created
-  oc_obj:
-    state: list
-    kind: machines.machine.openshift.io
-    namespace: openshift-machine-api
-    selector: "sigs.k8s.io/cluster-api-machineset={{ machineset_name.result }}-centos"
+  k8s_facts:
+    api_version: machine.openshift.io/v1beta1
     kubeconfig: "{{ kubeconfig_path }}"
+    namespace: openshift-machine-api
+    kind: Machine
+    label_selectors:
+    - "sigs.k8s.io/cluster-api-machineset={{ machineset_name.result }}-centos"
   register: new_machine
   retries: 36
   delay: 5
   until:
-  - "'results' in new_machine"
-  - "'results' in new_machine.results"
-  - "new_machine.results.results | length > 0"
-  - "'items' in new_machine.results.results[0]"
-  - "new_machine.results.results[0]['items'] | length > 0"
-  - "'status' in new_machine.results.results[0]['items'][0]"
-  - "'providerStatus' in new_machine.results.results[0]['items'][0]['status']"
-  - "'instanceState' in new_machine.results.results[0]['items'][0]['status']['providerStatus']"
-  - "new_machine.results.results[0]['items'][0]['status']['providerStatus']['instanceState'] == 'running'"
+  - new_machine.resources is defined
+  - new_machine.resources | length > 0
+  - new_machine.resources[0].status is defined
+  - new_machine.resources[0].status.providerStatus is defined
+  - new_machine.resources[0].status.providerStatus.instanceState is defined
+  - new_machine.resources[0].status.providerStatus.instanceState == 'running'
 
 - name: add machine to the inventory
   add_host:
-    name: "{{ new_machine.results.results[0]['items'][0].status.addresses | selectattr('type', 'match', '^InternalIP$') | map(attribute='address') | first }}"
-    node_name: "{{ new_machine.results.results[0]['items'][0].status.addresses | selectattr('type', 'match', '^InternalDNS$') | map(attribute='address') | first }}"
+    name: "{{ new_machine.resources[0].status.addresses | selectattr('type', 'match', '^InternalIP$') | map(attribute='address') | first }}"
+    node_name: "{{ new_machine.resources[0].status.addresses | selectattr('type', 'match', '^InternalDNS$') | map(attribute='address') | first }}"
     groups: new_workers
     ansible_ssh_common_args: "-o ProxyCommand=\"ssh -o IdentityFile='{{ openshift_aws_scaleup_key_path | default('/opt/app-root/src/.ssh/id_rsa') }}' -o StrictHostKeyChecking=no -W %h:%p -q core@{{ ssh_bastion }}\""
