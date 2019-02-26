@@ -41,6 +41,7 @@
   - svc.results.results | length > 0
   - svc.results.results[0].status is defined
   - svc.results.results[0].status.loadBalancer is defined
+  - svc.results.results[0].status.loadBalancer.ingress is defined
   - svc.results.results[0].status.loadBalancer.ingress | length > 0
   - svc.results.results[0].status.loadBalancer.ingress[0].hostname is defined
   retries: 36
