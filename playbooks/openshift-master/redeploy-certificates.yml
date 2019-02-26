@@ -4,3 +4,6 @@
 - import_playbook: private/redeploy-certificates.yml
 
 - import_playbook: private/restart.yml
+
+- import_playbook: ../openshift-web-console/private/redeploy-certificates.yml
+  when: openshift_web_console_install | default(true) | bool
