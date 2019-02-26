@@ -560,9 +560,11 @@ an OpenShift Container Platform cluster
                 cert_meta['proxyClient'] = os.path.join(cfg_path, proxyClient)
 
             namedCertificates = cfg.get('servingInfo', {}).get('namedCertificates', [])
-            for i in namedCertificates:
-                if 'certFile' in i:
-                    cert_meta['namedCertificates'] = os.path.join(cfg_path, i.get('certFile'))
+            if namedCertificates:
+                for i, v in enumerate(namedCertificates):
+                    if 'certFile' in v:
+                        namedCertKey = 'namedCertificate-{}'.format(i)
+                        cert_meta[namedCertKey] = os.path.join(cfg_path, v.get('certFile'))
 
         ######################################################################
         # Load the certificate and the CA, parse their expiration dates into
