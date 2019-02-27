@@ -1,6 +1,0 @@
----
-- name: restart udev
-  systemd:
-    name: systemd-udevd
-    state: restarted
-    daemon_reload: yes

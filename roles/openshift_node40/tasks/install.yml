@@ -1,9 +1,21 @@
 ---
+- name: Install openshift packages
+  package:
+    name: "{{ openshift_node_install_packages | join(',') }}"
+    update_cache: true
+  register: install_openshift
+  until: install_openshift.rc == 0
+  retries: 3
+  delay: 1
+
+- name: Enable the CRI-O service
+  systemd:
+    name: "cri-o"
+    enabled: yes
 
 - name: Install openshift packages
   package:
     name: "{{ l_node_packages | join(',') }}"
-    update_cache: true
   register: install_openshift
   until: install_openshift.rc == 0
   retries: 3
