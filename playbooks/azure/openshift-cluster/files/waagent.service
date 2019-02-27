@@ -1,0 +1,7 @@
+[Unit]
+Description=Azure Linux Agent
+Wants=network-online.target sshd.service sshd-keygen.service
+After=network-online.target docker.service
+
+ConditionFileIsExecutable=/usr/sbin/waagent
+ConditionPathExists=/etc/waagent.conf
