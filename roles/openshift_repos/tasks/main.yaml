@@ -1,13 +1,6 @@
 ---
 
 # TODO: This needs to be removed and placed into a role
-- name: Ensure libselinux-python is installed
-  package:
-    name: libselinux-python
-    state: present
-  register: result
-  until: result is succeeded
-
 - name: Remove openshift_additional.repo file
   file:
     dest: /etc/yum.repos.d/openshift_additional.repo

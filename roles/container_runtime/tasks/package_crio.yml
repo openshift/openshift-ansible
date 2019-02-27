@@ -33,7 +33,7 @@
   until: result is succeeded
   vars:
     pkg_list:
-      - cri-o
+      - cri-o-1.11.7
       - cri-tools
       - skopeo
       - podman

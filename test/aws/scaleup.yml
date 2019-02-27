@@ -37,11 +37,17 @@
   - name: Copy ops-mirror.pem
     copy:
       src: ../../inventory/dynamic/injected/ops-mirror.pem
-      dest: /var/lib/yum/ops-mirror.pem
+      dest: /var/lib/dnf/ops-mirror.pem
       owner: root
       group: root
       mode: 0644
     ignore_errors: true
+  - name: Upgrade rhui
+    package:
+      name: rh-amazon-rhui-client-beta
+      state: latest
+  - debug: var=ansible_distribution
+  - debug: var=ansible_distribution_version
 
 - import_playbook: ../../playbooks/openshift-node/scaleup.yml
 
@@ -130,21 +136,4 @@
       --config={{ kubeconfig_path }}
       --force --delete-local-data --ignore-daemonsets
       --timeout=0s
-    with_items: "{{ pre_scaleup_workers_name }}"
-
-  - name: remove existing machinesets
-    oc_obj:
-      state: absent
-      kind: machinesets.machine.openshift.io
-      namespace: openshift-machine-api
-      name: "{{ item }}"
-      kubeconfig: "{{ kubeconfig_path }}"
-    with_items: "{{ pre_scaleup_machineset_names }}"
-
-  - name: Delete CoreOS nodes
-    oc_obj:
-      kubeconfig: "{{ kubeconfig_path }}"
-      state: absent
-      kind: node
-      name: "{{ item }}"
     with_items: "{{ pre_scaleup_workers_name }}"
