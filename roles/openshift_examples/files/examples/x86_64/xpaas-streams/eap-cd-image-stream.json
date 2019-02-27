@@ -17,7 +17,7 @@
                 "annotations": {
                     "openshift.io/display-name": "JBoss EAP continuous delivery",
                     "openshift.io/provider-display-name": "Red Hat, Inc.",
-                    "version": "14.0"
+                    "version": "15.0"
                 }
             },
             "labels": {
