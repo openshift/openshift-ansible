@@ -12,7 +12,7 @@
   when: openshift_logging_mux_default_namespaces is defined
 
 - name: Ensure that Logging Mux has nodes to run on
-  import_role:
+  include_role:
     name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
@@ -92,7 +92,7 @@
     dest: "{{mktemp.stdout}}/secure-forward-mux.conf"
   changed_when: no
 
-- import_role:
+- include_role:
     name: openshift_logging
     tasks_from: patch_configmap_files.yaml
   vars:
