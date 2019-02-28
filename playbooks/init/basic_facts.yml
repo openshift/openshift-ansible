@@ -26,8 +26,6 @@
 
 - name: Read API URL from infra config
   hosts: "{{ l_init_fact_hosts | default('nodes') }}"
-  roles:
-  - lib_openshift
   tasks:
   - name: Read cluster config
     k8s_facts:
