@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.118
+Version:        3.10.119
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Feb 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.119-1
+- Remove deprecated "openshift_logging_curator_run_timezone variable" as of
+  v3.11 (bysnupy@hotmail.com)
+- Update OWNERS file. (pdd@redhat.com)
+- test/ci/deprovision: wait for machine to be terminated (vrutkovs@redhat.com)
+- test/ci/deprovision: set shutdown behaviour when creating VMs
+  (vrutkovs@redhat.com)
+- test/ci: remove SG using `ec2_group` (vrutkovs@redhat.com)
+
 * Sat Feb 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.118-1
 - Uninstall no longer unmounts openshift.local.volumes (jstuever@redhat.com)
 
