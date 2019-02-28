@@ -4,21 +4,21 @@
     "metadata": {
         "annotations": {
             "iconClass": "icon-datagrid",
-            "tags": "datagrid,jboss",
-            "version": "1.1",
-            "openshift.io/display-name": "Red Hat JBoss Data Grid 7.2 (Ephemeral, no https)",
+            "tags": "datagrid,jboss,hidden",
+            "version": "1.0",
+            "openshift.io/display-name": "Red Hat JBoss Data Grid 7.3 (Ephemeral with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example Red Hat JBoss Data Grid application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
-            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.2 based applications, including a deployment configuration, using ephemeral (temporary) storage and communication using http.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.3 based applications, including a deployment configuration, using ephemeral (temporary) storage and secure communication using https.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-data-grid/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
-        "name": "datagrid72-basic"
+        "name": "datagrid73-https"
     },
     "labels": {
-        "template": "datagrid72-basic"
+        "template": "datagrid73-https"
     },
-    "message": "A new data grid service has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\".",
+    "message": "A new data grid service has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\". Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
         {
             "displayName": "Application Name",
@@ -31,6 +31,13 @@
             "displayName": "Custom http Route Hostname",
             "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTP",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Custom https Route Hostname",
+            "description": "Custom hostname for https service route.  Leave blank for default hostname, e.g.: secure-<application-name>-<project>.<default-domain-suffix>",
+            "name": "HOSTNAME_HTTPS",
             "value": "",
             "required": false
         },
@@ -77,6 +84,34 @@
             "required": false
         },
         {
+            "displayName": "Server Keystore Secret Name",
+            "description": "The name of the secret containing the keystore file",
+            "name": "HTTPS_SECRET",
+            "value": "datagrid-app-secret",
+            "required": true
+        },
+        {
+            "displayName": "Server Keystore Filename",
+            "description": "The name of the keystore file within the secret",
+            "name": "HTTPS_KEYSTORE",
+            "value": "keystore.jks",
+            "required": false
+        },
+        {
+            "displayName": "Server Certificate Name",
+            "description": "The name associated with the server certificate",
+            "name": "HTTPS_NAME",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Server Keystore Password",
+            "description": "The password for the keystore and certificate",
+            "name": "HTTPS_PASSWORD",
+            "value": "",
+            "required": false
+        },
+        {
             "displayName": "ImageStream Namespace",
             "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
             "name": "IMAGE_STREAM_NAMESPACE",
@@ -112,6 +147,13 @@
             "required": false
         },
         {
+            "displayName": "Encryption Requires SSL Client Authentication?",
+            "description": "Whether to require client certificate authentication. Defaults to false",
+            "name": "ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH",
+            "value": "",
+            "required": false
+        },
+        {
             "displayName": "Memcached Cache Name",
             "description": "The name of the cache to expose through this memcached connector",
             "name": "MEMCACHED_CACHE",
@@ -122,6 +164,34 @@
             "displayName": "REST Security Domain",
             "description": "The domain, declared in the security subsystem, that should be used to authenticate access to the REST endpoint",
             "name": "REST_SECURITY_DOMAIN",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "JGroups Secret Name",
+            "description": "The name of the secret containing the keystore file",
+            "name": "JGROUPS_ENCRYPT_SECRET",
+            "value": "datagrid-app-secret",
+            "required": false
+        },
+        {
+            "displayName": "JGroups Keystore Filename",
+            "description": "The name of the keystore file within the secret",
+            "name": "JGROUPS_ENCRYPT_KEYSTORE",
+            "value": "jgroups.jceks",
+            "required": false
+        },
+        {
+            "displayName": "JGroups Certificate Name",
+            "description": "The name associated with the server certificate",
+            "name": "JGROUPS_ENCRYPT_NAME",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "JGroups Keystore Password",
+            "description": "The password for the keystore and certificate",
+            "name": "JGROUPS_ENCRYPT_PASSWORD",
             "value": "",
             "required": false
         },
@@ -162,6 +232,30 @@
                 },
                 "annotations": {
                     "description": "The web server's HTTP port."
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "ports": [
+                    {
+                        "port": 8443,
+                        "targetPort": 8443
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                }
+            },
+            "metadata": {
+                "name": "secure-${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "The web server's HTTPS port."
                 }
             }
         },
@@ -260,6 +354,29 @@
             }
         },
         {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "id": "${APPLICATION_NAME}-https",
+            "metadata": {
+                "name": "secure-${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "Route for application's HTTPS service."
+                }
+            },
+            "spec": {
+                "host": "${HOSTNAME_HTTPS}",
+                "to": {
+                    "name": "secure-${APPLICATION_NAME}"
+                },
+                "tls": {
+                    "termination": "passthrough"
+                }
+            }
+        },
+        {
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
@@ -283,7 +400,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid72-openshift:1.1"
+                                "name": "jboss-datagrid73-openshift:1.0"
                             }
                         }
                     },
@@ -308,13 +425,25 @@
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
-                                "image": "jboss-datagrid72-openshift",
+                                "image": "jboss-datagrid73-openshift",
                                 "imagePullPolicy": "Always",
                                 "resources": {
                                     "limits": {
                                         "memory": "${MEMORY_LIMIT}"
                                     }
                                 },
+                                "volumeMounts": [
+                                    {
+                                        "name": "datagrid-keystore-volume",
+                                        "mountPath": "/etc/datagrid-secret-volume",
+                                        "readOnly": true
+                                    },
+                                    {
+                                        "name": "datagrid-jgroups-keystore-volume",
+                                        "mountPath": "/etc/jgroups-encrypt-secret-volume",
+                                        "readOnly": true
+                                    }
+                                ],
                                 "livenessProbe": {
                                     "exec": {
                                         "command": [
@@ -343,6 +472,11 @@
                                     {
                                         "name": "http",
                                         "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "https",
+                                        "containerPort": 8443,
                                         "protocol": "TCP"
                                     },
                                     {
@@ -392,6 +526,22 @@
                                         "value": "${CONTAINER_SECURITY_ROLES}"
                                     },
                                     {
+                                        "name": "HTTPS_KEYSTORE_DIR",
+                                        "value": "/etc/datagrid-secret-volume"
+                                    },
+                                    {
+                                        "name": "HTTPS_KEYSTORE",
+                                        "value": "${HTTPS_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "HTTPS_NAME",
+                                        "value": "${HTTPS_NAME}"
+                                    },
+                                    {
+                                        "name": "HTTPS_PASSWORD",
+                                        "value": "${HTTPS_PASSWORD}"
+                                    },
+                                    {
                                         "name": "JGROUPS_PING_PROTOCOL",
                                         "value": "openshift.DNS_PING"
                                     },
@@ -420,8 +570,16 @@
                                         "value": "${CACHE_TYPE_DEFAULT}"
                                     },
                                     {
+                                        "name": "ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH",
+                                        "value": "${ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH}"
+                                    },
+                                    {
                                         "name": "HOTROD_SERVICE_NAME",
                                         "value": "${APPLICATION_NAME}-hotrod"
+                                    },
+                                    {
+                                        "name": "HOTROD_ENCRYPTION",
+                                        "value": "${HTTPS_NAME}"
                                     },
                                     {
                                         "name": "MEMCACHED_CACHE",
@@ -432,10 +590,44 @@
                                         "value": "${REST_SECURITY_DOMAIN}"
                                     },
                                     {
+                                        "name": "JGROUPS_ENCRYPT_SECRET",
+                                        "value": "${JGROUPS_ENCRYPT_SECRET}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_KEYSTORE",
+                                        "value": "${JGROUPS_ENCRYPT_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_KEYSTORE_DIR",
+                                        "value": "/etc/jgroups-encrypt-secret-volume"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_NAME",
+                                        "value": "${JGROUPS_ENCRYPT_NAME}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_PASSWORD",
+                                        "value": "${JGROUPS_ENCRYPT_PASSWORD}"
+                                    },
+                                    {
                                         "name": "JGROUPS_CLUSTER_PASSWORD",
                                         "value": "${JGROUPS_CLUSTER_PASSWORD}"
                                     }
                                 ]
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "name": "datagrid-keystore-volume",
+                                "secret": {
+                                    "secretName": "${HTTPS_SECRET}"
+                                }
+                            },
+                            {
+                                "name": "datagrid-jgroups-keystore-volume",
+                                "secret": {
+                                    "secretName": "${JGROUPS_ENCRYPT_SECRET}"
+                                }
                             }
                         ]
                     }
