@@ -7,7 +7,6 @@ from ansible.template import Templar
 from ansible import errors
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), os.pardir, "action_plugins"))
-import sanity_checks  # noqa: E402
 from sanity_checks import ActionModule  # noqa: E402
 
 
@@ -18,7 +17,9 @@ from sanity_checks import ActionModule  # noqa: E402
 def test_template_var(hostvars, host, varname, result):
     task = FakeTask('sanity_checks', {'checks': []})
     plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
-    check = plugin.template_var(hostvars, host, varname)
+    plugin.hostvars = hostvars
+    plugin.current_hostvars = hostvars[host]
+    check = plugin.template_var(host, varname)
     assert check == result
 
 
@@ -32,7 +33,8 @@ def test_template_var(hostvars, host, varname, result):
 def test_valid_check_pkg_version_format(hostvars, host, result):
     task = FakeTask('sanity_checks', {'checks': []})
     plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
-    check = plugin.check_pkg_version_format(hostvars, host)
+    plugin.current_hostvars = hostvars[host]
+    check = plugin.check_pkg_version_format(host)
     assert check == result
 
 
@@ -44,7 +46,8 @@ def test_invalid_check_pkg_version_format(hostvars, host, result):
     with pytest.raises(errors.AnsibleModuleError):
         task = FakeTask('sanity_checks', {'checks': []})
         plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
-        plugin.check_pkg_version_format(hostvars, host)
+        plugin.current_hostvars = hostvars[host]
+        plugin.check_pkg_version_format(host)
 
 
 @pytest.mark.parametrize('hostvars, host, result', [
@@ -56,7 +59,8 @@ def test_invalid_check_pkg_version_format(hostvars, host, result):
 def test_valid_check_release_format(hostvars, host, result):
     task = FakeTask('sanity_checks', {'checks': []})
     plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
-    check = plugin.check_release_format(hostvars, host)
+    plugin.current_hostvars = hostvars[host]
+    check = plugin.check_release_format(host)
     assert check == result
 
 
@@ -69,7 +73,8 @@ def test_invalid_check_release_format(hostvars, host, result):
     with pytest.raises(errors.AnsibleModuleError):
         task = FakeTask('sanity_checks', {'checks': []})
         plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
-        plugin.check_release_format(hostvars, host)
+        plugin.current_hostvars = hostvars[host]
+        plugin.check_release_format(host)
 
 
 @pytest.mark.parametrize('hostvars, host, result', [
@@ -84,7 +89,8 @@ def test_invalid_check_release_format(hostvars, host, result):
 def test_valid_valid_json_format_vars(hostvars, host, result):
     task = FakeTask('sanity_checks', {'checks': []})
     plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
-    check = plugin.validate_json_format_vars(hostvars, host)
+    plugin.current_hostvars = hostvars[host]
+    check = plugin.validate_json_format_vars(host)
     assert check == result
 
 
@@ -97,7 +103,8 @@ def test_invalid_valid_json_format_vars(hostvars, host, result):
     with pytest.raises(errors.AnsibleModuleError):
         task = FakeTask('sanity_checks', {'checks': []})
         plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
-        plugin.validate_json_format_vars(hostvars, host)
+        plugin.current_hostvars = hostvars[host]
+        plugin.validate_json_format_vars(host)
 
 
 def fake_execute_module(*args):
@@ -112,11 +119,11 @@ class FakeTask(object):
 
 
 def test_removed_vars():
-    host1d = {'somevar': 'someval', 'openshift_hostname': '1'}
-    hostvars = {'host1': host1d}
-    host = "host1"
+    task = FakeTask('sanity_checks', {'checks': []})
+    plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
+    plugin.current_hostvars = {'somevar': 'someval', 'openshift_hostname': '1'}
     with pytest.raises(errors.AnsibleModuleError):
-        sanity_checks.check_for_removed_vars(hostvars, host)
+        plugin.check_for_removed_vars()
 
 
 def main():
