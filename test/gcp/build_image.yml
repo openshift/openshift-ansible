@@ -95,6 +95,8 @@
     package:
       name: NetworkManager-glib
       state: present
+    async: 3600
+    poll: 60
   - name: Set MTU
     nmcli:
       conn_name: "System eth0"
@@ -106,6 +108,8 @@
     package:
       name: "nfs-utils"
       state: present
+    async: 3600
+    poll: 60
 
 - name: Commit image
   hosts: localhost

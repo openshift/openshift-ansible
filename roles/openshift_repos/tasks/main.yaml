@@ -7,6 +7,8 @@
     state: present
   register: result
   until: result is succeeded
+  async: 3600
+  poll: 60
 
 - name: Remove openshift_additional.repo file
   file:

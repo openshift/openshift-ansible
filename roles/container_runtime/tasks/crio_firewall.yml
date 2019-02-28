@@ -5,6 +5,8 @@
     package:
       name: iptables-services
       state: present
+    async: 3600
+    poll: 60
 
   - name: Add iptables allow rules
     os_firewall_manage_iptables:

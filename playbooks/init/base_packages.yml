@@ -15,6 +15,8 @@
     package:
       name: ntp
       state: present
+    async: 3600
+    poll: 60
     when:
     - openshift_clock_enabled | default(True) | bool
     - chrony_installed.rc != 0
@@ -29,6 +31,8 @@
     package:
       name: "{{ pkg_list | join(',') }}"
       state: present
+    async: 3600
+    poll: 60
     vars:
       pkg_list_temp:
       - iproute

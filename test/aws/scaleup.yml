@@ -67,6 +67,8 @@
     package:
       name: nfs-utils
       state: present
+    async: 3600
+    poll: 60
   - name: Wait for new nodes to be ready
     oc_obj:
       kubeconfig: "{{ kubeconfig_path }}"

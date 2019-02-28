@@ -8,6 +8,8 @@
   until: install_openshift.rc == 0
   retries: 3
   delay: 1
+  async: 3600
+  poll: 60
   vars:
     l_node_packages:
     - "{{ openshift_service_type }}-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
