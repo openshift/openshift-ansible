@@ -84,6 +84,12 @@
 
 - import_tasks: htpass_provider.yml
 
+- name: Create AWS Custom CA if specified
+  copy:
+    dest: "/etc/origin/master/aws_ca_bundle.crt"
+    src: "{{ openshift_cloudprovider_aws_ca_bundle }}"
+  when: openshift_cloudprovider_aws_ca_bundle is defined
+
 - name: Create the ldap ca file if needed
   copy:
     dest: "/etc/origin/master/{{ item.name }}_ldap_ca.crt"

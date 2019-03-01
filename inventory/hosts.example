@@ -285,6 +285,10 @@ debug_level=2
 # Note: IAM profiles may be used instead of storing API credentials on disk.
 #openshift_cloudprovider_aws_access_key=aws_access_key_id
 #openshift_cloudprovider_aws_secret_key=aws_secret_access_key
+# If a custom CA is required for your AWS endpoint, this is copied to
+# /etc/origin/{master,node}/aws_ca_bundle.crt and configured via the envvar
+# AWS_CA_BUNDLE for master and node.
+#openshift_cloudprovider_aws_ca_bundle=/path/to/aws_ca_bundle.crt
 #
 # Openstack
 #openshift_cloudprovider_kind=openstack

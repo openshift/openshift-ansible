@@ -17,3 +17,18 @@
     - openshift_cloudprovider_kind == 'aws'
     - openshift_cloudprovider_aws_access_key is defined
     - openshift_cloudprovider_aws_secret_key is defined
+
+# not certain if it's safe to set this to an empty value so only set it when
+# specified
+- when: openshift_cloudprovider_aws_ca_bundle is defined
+  block:
+    - name: Copy aws_ca_bundle
+      copy:
+        dest: /etc/origin/node/aws_ca_bundle.crt
+        src: "{{ openshift_cloudprovider_aws_ca_bundle }}"
+    - name: Configure AWS_CA_BUNDLE if specified
+      lineinfile:
+        dest: /etc/sysconfig/{{ openshift_service_type }}-node
+        regexp: "^AWS_CA_BUNDLE"
+        line: "AWS_CA_BUNDLE=/etc/origin/node/aws_ca_bundle.crt"
+        create: true
