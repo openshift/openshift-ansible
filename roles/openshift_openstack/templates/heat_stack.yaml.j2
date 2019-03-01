@@ -256,6 +256,25 @@ resources:
 {% endfor %}
 {% endif %}
 
+{% if not openshift_openstack_router_name %}
+  router:
+    type: OS::Neutron::Router
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-router
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      external_gateway_info:
+        network: {{ openshift_openstack_external_network_name }}
+
+  interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: subnet }
+{% endif %}
+
 {% endif %}
 
 {% if openshift_use_kuryr|default(false)|bool %}
@@ -390,25 +409,6 @@ resources:
       network: { get_resource: data_net }
       cidr: {{ openshift_cluster_network_cidr }}
       gateway_ip: null
-{% endif %}
-
-{% if not openshift_openstack_router_name %}
-  router:
-    type: OS::Neutron::Router
-    properties:
-      name:
-        str_replace:
-          template: openshift-ansible-cluster_id-router
-          params:
-            cluster_id: {{ openshift_openstack_full_dns_domain }}
-      external_gateway_info:
-        network: {{ openshift_openstack_external_network_name }}
-
-  interface:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router_id: { get_resource: router }
-      subnet_id: { get_resource: subnet }
 {% endif %}
 
 {% if openshift_use_kuryr|default(false)|bool %}
