@@ -64,14 +64,27 @@
     - ('OPENSHIFT_CERT_DATA' in router_env_vars)
     - ('OPENSHIFT_KEY_DATA' in router_env_vars)
 
+  - name: Delete existing router certificate secret
+    oc_secret:
+      kubeconfig: "{{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig"
+      name: router-certs
+      namespace: default
+      state: absent
+    run_once: true
+    when:
+    - l_router_dc.rc == 0
+    - l_router_svc.rc == 0
+    - ('router-certs' in router_secrets)
+    - openshift_hosted_router_certificate is undefined
+
   # When the router service contains service signer annotations we
   # will delete the existing certificate secret and allow OpenShift to
   # replace the secret.
   - block:
-    - name: Delete existing router certificate secret
+    - name: Delete existing router metrics certificate secret
       oc_secret:
         kubeconfig: "{{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig"
-        name: router-certs
+        name: router-metrics-tls
         namespace: default
         state: absent
       run_once: true
@@ -87,14 +100,13 @@
     - name: Add serving-cert-secret annotation to router service
       command: >
         {{ openshift_client_binary }} annotate service/router
-        service.alpha.openshift.io/serving-cert-secret-name=router-certs
+        service.alpha.openshift.io/serving-cert-secret-name=router-metrics-tls
         --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
         -n default
     when:
     - l_router_dc.rc == 0
     - l_router_svc.rc == 0
-    - ('router-certs' in router_secrets)
-    - openshift_hosted_router_certificate is undefined
+    - ('router-metrics-tls' in router_secrets)
     - ('service.alpha.openshift.io/serving-cert-secret-name') in router_service_annotations
     - ('service.alpha.openshift.io/serving-cert-signed-by') in router_service_annotations
 
