@@ -94,6 +94,23 @@
     with_items:
     - { regexp: '^ResourceDisk\.Format=', line: 'ResourceDisk.Format=n' }
 
+  - name: create systemd directory for waagent
+    file:
+      path: /etc/systemd/system/waagent.service.d
+      state: directory
+      mode: 0755
+      owner: root
+      group: root
+
+  # set waagent to start after docker
+  - name: set waagent systemd file
+    copy:
+      dest: /etc/systemd/system/waagent.service.d/custom.conf
+      src: files/waagent.service
+      owner: root
+      group: root
+      mode: 0644
+
   - name: persist oreg_url
     copy:
       dest: "/etc/origin/oreg_url"
