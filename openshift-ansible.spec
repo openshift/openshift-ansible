@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.119
+Version:        3.10.120
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Mar 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.120-1
+- fixing docs to match actual defaults (mharri@redhat.com)
+- Add Data Grid 7.3 to OpenShift Cloud Platform (galder@zamarreno.com)
+- Re-create webconsole secrets and pods after master certs were redeployed
+  (vrutkovs@redhat.com)
+- Add a playbook to redeploy web-console certs (vrutkovs@redhat.com)
+
 * Thu Feb 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.119-1
 - Remove deprecated "openshift_logging_curator_run_timezone variable" as of
   v3.11 (bysnupy@hotmail.com)
