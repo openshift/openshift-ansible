@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.172
+Version:        3.4.173
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -255,6 +255,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.4.173-1
+- Fix 404 url ( bz1668210 ) for v3.4 (lxia@redhat.com)
+
 * Thu Nov 15 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.4.172-1
 - 
 
