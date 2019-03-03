@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.151
+Version:        3.6.173.0.153
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Mar 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.153-1
+- 
+
 * Sun Feb 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.6.173.0.151-1
 - Update glusterfs_deploy.yml (chinacoolhacker@gmail.com)
 
