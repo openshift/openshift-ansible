@@ -13,7 +13,13 @@ clone https://github.com/openshift/aos-ansible/pull/74 to ~/git/aos-ansible
 
 # Setup
 
-Ensure openshift-install and terraform are in your path.
+Ensure openshift-install and terraform are in your path. You also need to install terraform-libvirt-provider from https://github.com/dmacvicar/terraform-provider-libvirt/releases:
+```
+mkdir -p ~/.terraform.d/plugins
+cd ~/.terraform.d/plugins
+get wget https://github.com/dmacvicar/terraform-provider-libvirt/releases/download/v0.5.1/terraform-provider-libvirt-0.5.1.CentOS_7.x86_64.tar.gz
+tar zxvf terraform-provider-libvirt-0.5.1.CentOS_7.x86_64.tar.gz
+```
 
 cd to this directory.
 
