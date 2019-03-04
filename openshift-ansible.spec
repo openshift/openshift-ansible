@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.90
+Version:        3.11.91
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Mar 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.91-1
+- Require ansible 2.6, allow ansible 2.7 (vrutkovs@redhat.com)
+- Use correct Data Grid version (galder@zamarreno.com)
+- Adding docker as waagent systemd dependency (kwoodson@redhat.com)
+- Prevent OpenStack heat from trying to create router when provider network is
+  specified (tzumainn@redhat.com)
+- fixing docs to match actual defaults (mharri@redhat.com)
+- Correct service serving secret name in the annotation (bysnupy@hotmail.com)
+
 * Thu Feb 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.90-1
 - Add Data Grid 7.3 to OpenShift Cloud Platform (galder@zamarreno.com)
 - Handle null values and multiple certs when checking namedCertificates.
