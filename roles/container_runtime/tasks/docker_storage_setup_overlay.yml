@@ -1,8 +1,0 @@
----
-- name: Setup the docker-storage for overlay
-  template:
-    src: docker_storage_setup.j2
-    dest: /etc/sysconfig/docker-storage-setup
-    owner: root
-    group: root
-    mode: 0664

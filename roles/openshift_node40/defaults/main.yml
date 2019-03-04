@@ -3,3 +3,7 @@ openshift_release_image: "registry.svc.ci.openshift.org/openshift/origin-release
 ign_file: "/tmp/bootstrap.ign"
 pull_secret: "{{ files_dir }}/pull-secret"
 tls_verify: false
+openshift_node_install_packages:
+  - cri-o
+  - cri-tools
+  - podman

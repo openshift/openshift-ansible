@@ -10,18 +10,7 @@
 # TODO(michaelgugino): break up the rest of this file into reusable chunks.
 - name: Install nodes
   hosts: nodes
-  roles:
-  - role: container_runtime
   tasks:
-  - import_role:
-      name: container_runtime
-      tasks_from: docker_storage_setup_overlay.yml
-  - import_role:
-      name: container_runtime
-      tasks_from: extra_storage_setup.yml
-  - import_role:
-      name: container_runtime
-      tasks_from: package_crio.yml
   - import_role:
       name: openshift_node40
       tasks_from: install.yml
