@@ -15,9 +15,10 @@
   until: not (l_openshift_node_upgrade_docker_stop_result is failed)
   retries: 3
   delay: 30
-  when: >
-        inventory_hostname in groups['oo_masters_to_config']
-        or (l_docker_upgrade is defined and l_docker_upgrade | bool)
+  when:
+  - not openshift_use_crio_only | bool
+  - inventory_hostname in groups['oo_masters_to_config'] or (l_docker_upgrade is defined and l_docker_upgrade | bool)
+
 
 - name: Stop crio
   service:
