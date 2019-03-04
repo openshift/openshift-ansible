@@ -148,24 +148,9 @@ def to_bool(var_to_check):
     return var_to_check in yes_list
 
 
-def check_for_removed_vars(hostvars, host):
-    """Fails if removed variables are found"""
-    found_removed = []
-    for item in REMOVED_VARIABLES:
-        if item[0] in hostvars[host]:
-            found_removed.append(item)
-
-    if found_removed:
-        msg = "Found removed variables: "
-        for item in found_removed:
-            msg += "{} is replaced by {}; ".format(item[0], item[1])
-        raise errors.AnsibleModuleError(msg)
-    return None
-
-
 class ActionModule(ActionBase):
     """Action plugin to execute sanity checks."""
-    def template_var(self, hostvars, host, varname):
+    def template_var(self, host, varname):
         """Retrieve a variable from hostvars and template it.
            If undefined, return None type."""
         # We will set the current host and variable checked for easy debugging
@@ -174,26 +159,25 @@ class ActionModule(ActionBase):
         self.last_checked_var = varname
         # pylint: disable=W0201
         self.last_checked_host = host
-        res = hostvars[host].get(varname)
+        res = self.current_hostvars.get(varname)
         if res is None:
             return None
         return self._templar.template(res)
 
-    def check_openshift_deployment_type(self, hostvars, host):
+    def check_openshift_deployment_type(self, host):
         """Ensure a valid openshift_deployment_type is set"""
-        openshift_deployment_type = self.template_var(hostvars, host,
-                                                      'openshift_deployment_type')
+        openshift_deployment_type = self.template_var(host, 'openshift_deployment_type')
         if openshift_deployment_type not in VALID_DEPLOYMENT_TYPES:
             type_strings = ", ".join(VALID_DEPLOYMENT_TYPES)
             msg = "openshift_deployment_type must be defined and one of {}".format(type_strings)
             raise errors.AnsibleModuleError(msg)
         return openshift_deployment_type
 
-    def get_allowed_registries(self, hostvars, host):
+    def get_allowed_registries(self, host):
         """Returns a list of configured allowedRegistriesForImport as a list of patterns"""
-        allowed_registries_for_import = self.template_var(hostvars, host, ALLOWED_REGISTRIES_VAR)
+        allowed_registries_for_import = self.template_var(host, ALLOWED_REGISTRIES_VAR)
         if allowed_registries_for_import is None:
-            image_policy_config = self.template_var(hostvars, host, IMAGE_POLICY_CONFIG_VAR)
+            image_policy_config = self.template_var(host, IMAGE_POLICY_CONFIG_VAR)
             if not image_policy_config:
                 return image_policy_config
 
@@ -230,9 +214,9 @@ class ActionModule(ActionBase):
 
         return allowed_registries_for_import
 
-    def check_whitelisted_registries(self, hostvars, host):
+    def check_whitelisted_registries(self, host):
         """Ensure defined registries are whitelisted"""
-        allowed = self.get_allowed_registries(hostvars, host)
+        allowed = self.get_allowed_registries(host)
         if allowed is None:
             return
 
@@ -244,7 +228,7 @@ class ActionModule(ActionBase):
                 "openshift_logging_image_prefix",
                 "openshift_service_catalog_image_prefix",
                 "openshift_docker_insecure_registries"):
-            value = self.template_var(hostvars, host, regvar)
+            value = self.template_var(host, regvar)
             if not value:
                 continue
             if isinstance(value, list):
@@ -262,9 +246,9 @@ class ActionModule(ActionBase):
                 "registry hostnames of the following image prefixes are not whitelisted by image"
                 " policy configuration: {}".format(registry_list))
 
-    def check_python_version(self, hostvars, host, distro):
+    def check_python_version(self, host, distro):
         """Ensure python version is 3 for Fedora and python 2 for others"""
-        ansible_python = self.template_var(hostvars, host, 'ansible_python')
+        ansible_python = self.template_var(host, 'ansible_python')
         if distro == "Fedora":
             if ansible_python['version']['major'] != 3:
                 msg = "openshift-ansible requires Python 3 for {};".format(distro)
@@ -275,9 +259,9 @@ class ActionModule(ActionBase):
             if ansible_python['version']['major'] != 2:
                 msg = "openshift-ansible requires Python 2 for {};".format(distro)
 
-    def check_image_tag_format(self, hostvars, host, openshift_deployment_type):
+    def check_image_tag_format(self, host, openshift_deployment_type):
         """Ensure openshift_image_tag is formatted correctly"""
-        openshift_image_tag = self.template_var(hostvars, host, 'openshift_image_tag')
+        openshift_image_tag = self.template_var(host, 'openshift_image_tag')
         if not openshift_image_tag or openshift_image_tag == 'latest':
             return None
         regex_to_match = IMAGE_TAG_REGEX[openshift_deployment_type]['re']
@@ -287,9 +271,9 @@ class ActionModule(ActionBase):
             msg = msg.format(str(openshift_image_tag))
             raise errors.AnsibleModuleError(msg)
 
-    def check_pkg_version_format(self, hostvars, host):
+    def check_pkg_version_format(self, host):
         """Ensure openshift_pkg_version is formatted correctly"""
-        openshift_pkg_version = self.template_var(hostvars, host, 'openshift_pkg_version')
+        openshift_pkg_version = self.template_var(host, 'openshift_pkg_version')
         if not openshift_pkg_version:
             return None
         regex_to_match = PKG_VERSION_REGEX['re']
@@ -299,9 +283,9 @@ class ActionModule(ActionBase):
             msg = msg.format(str(openshift_pkg_version))
             raise errors.AnsibleModuleError(msg)
 
-    def check_release_format(self, hostvars, host):
+    def check_release_format(self, host):
         """Ensure openshift_release is formatted correctly"""
-        openshift_release = self.template_var(hostvars, host, 'openshift_release')
+        openshift_release = self.template_var(host, 'openshift_release')
         if not openshift_release:
             return None
         regex_to_match = RELEASE_REGEX['re']
@@ -311,13 +295,13 @@ class ActionModule(ActionBase):
             msg = msg.format(str(openshift_release))
             raise errors.AnsibleModuleError(msg)
 
-    def network_plugin_check(self, hostvars, host):
+    def network_plugin_check(self, host):
         """Ensure only one type of network plugin is enabled"""
         res = []
         # Loop through each possible network plugin boolean, determine the
         # actual boolean value, and append results into a list.
         for plugin, default_val in NET_PLUGIN_LIST:
-            res_temp = self.template_var(hostvars, host, plugin)
+            res_temp = self.template_var(host, plugin)
             if res_temp is None:
                 res_temp = default_val
             res.append(to_bool(res_temp))
@@ -328,22 +312,20 @@ class ActionModule(ActionBase):
             msg = "Host Checked: {} Only one of must be true. Found: {}".format(host, plugin_str)
             raise errors.AnsibleModuleError(msg)
 
-    def check_hostname_vars(self, hostvars, host):
+    def check_hostname_vars(self, host):
         """Checks to ensure openshift_kubelet_name_override
            and openshift_public_hostname
            conform to the proper length of 63 characters or less"""
         for varname in ('openshift_public_hostname', 'openshift_kubelet_name_override'):
-            var_value = self.template_var(hostvars, host, varname)
+            var_value = self.template_var(host, varname)
             if var_value and len(var_value) > 63:
                 msg = '{} must be 63 characters or less'.format(varname)
                 raise errors.AnsibleModuleError(msg)
 
-    def check_session_auth_secrets(self, hostvars, host):
+    def check_session_auth_secrets(self, host):
         """Checks session_auth_secrets is correctly formatted"""
-        sas = self.template_var(hostvars, host,
-                                'openshift_master_session_auth_secrets')
-        ses = self.template_var(hostvars, host,
-                                'openshift_master_session_encryption_secrets')
+        sas = self.template_var(host, 'openshift_master_session_auth_secrets')
+        ses = self.template_var(host, 'openshift_master_session_encryption_secrets')
         # This variable isn't mandatory, only check if set.
         if sas is None and ses is None:
             return None
@@ -368,18 +350,17 @@ class ActionModule(ActionBase):
                     'Secrets must be 16, 24, or 32 characters in length.')
         return None
 
-    def check_unsupported_nfs_configs(self, hostvars, host):
+    def check_unsupported_nfs_configs(self, host):
         """Fails if nfs storage is in use for any components. This check is
            ignored if openshift_enable_unsupported_configurations=True"""
 
-        enable_unsupported = self.template_var(
-            hostvars, host, 'openshift_enable_unsupported_configurations')
+        enable_unsupported = self.template_var(host, 'openshift_enable_unsupported_configurations')
 
         if to_bool(enable_unsupported):
             return None
 
         for storage in STORAGE_KIND_TUPLE:
-            kind = self.template_var(hostvars, host, storage)
+            kind = self.template_var(host, storage)
             if kind == 'nfs':
                 raise errors.AnsibleModuleError(
                     'nfs is an unsupported type for {}. '
@@ -388,18 +369,16 @@ class ActionModule(ActionBase):
                     ''.format(storage))
         return None
 
-    def check_htpasswd_provider(self, hostvars, host):
+    def check_htpasswd_provider(self, host):
         """Fails if openshift_master_identity_providers contains an entry of
         kind HTPasswdPasswordIdentityProvider and
         openshift_master_manage_htpasswd is False"""
 
-        manage_pass = self.template_var(
-            hostvars, host, 'openshift_master_manage_htpasswd')
+        manage_pass = self.template_var(host, 'openshift_master_manage_htpasswd')
         if to_bool(manage_pass):
             # If we manage the file, we can just generate in the new path.
             return None
-        idps = self.template_var(
-            hostvars, host, 'openshift_master_identity_providers')
+        idps = self.template_var(host, 'openshift_master_identity_providers')
         if not idps:
             # If we don't find any identity_providers, nothing for us to do.
             return None
@@ -418,12 +397,12 @@ class ActionModule(ActionBase):
                             'existing master configs, and remove the {} key'
                             'before proceeding.'.format(old_key, old_key))
 
-    def validate_json_format_vars(self, hostvars, host):
+    def validate_json_format_vars(self, host):
         """Fails if invalid json format are found"""
         found_invalid_json = []
         for var in JSON_FORMAT_VARIABLES:
-            if var in hostvars[host]:
-                json_var = self.template_var(hostvars, host, var)
+            if var in self.current_hostvars:
+                json_var = self.template_var(host, var)
                 try:
                     json.loads(json_var)
                 except ValueError as json_err:
@@ -438,7 +417,7 @@ class ActionModule(ActionBase):
             raise errors.AnsibleModuleError(msg)
         return None
 
-    def check_for_oreg_password(self, hostvars, host, odt):
+    def check_for_oreg_password(self, host, odt):
         """Ensure oreg_password is defined when using registry.redhat.io"""
         reg_to_check = 'registry.redhat.io'
         err_msg = ("oreg_auth_user and oreg_auth_password must be provided when"
@@ -446,12 +425,12 @@ class ActionModule(ActionBase):
         err_msg2 = ("oreg_auth_user and oreg_auth_password must be provided when using"
                     "{}".format(reg_to_check))
 
-        oreg_password = self.template_var(hostvars, host, 'oreg_auth_password')
+        oreg_password = self.template_var(host, 'oreg_auth_password')
         if oreg_password is not None:
             # A password is defined, so we're good to go.
             return None
 
-        oreg_url = self.template_var(hostvars, host, 'oreg_url')
+        oreg_url = self.template_var(host, 'oreg_url')
 
         if oreg_url is not None:
             if reg_to_check in oreg_url:
@@ -462,23 +441,37 @@ class ActionModule(ActionBase):
             # registry.  We require oreg_auth_user and oreg_auth_password
             raise errors.AnsibleModuleError(err_msg)
 
-    def run_checks(self, hostvars, host):
+    def check_for_removed_vars(self):
+        """Fails if removed variables are found"""
+        found_removed = []
+        for item in REMOVED_VARIABLES:
+            if item[0] in self.current_hostvars:
+                found_removed.append(item)
+
+        if found_removed:
+            msg = "Found removed variables: "
+            for item in found_removed:
+                msg += "{} is replaced by {}; ".format(item[0], item[1])
+            raise errors.AnsibleModuleError(msg)
+        return None
+
+    def run_checks(self, host):
         """Execute the hostvars validations against host"""
-        distro = self.template_var(hostvars, host, 'ansible_distribution')
-        odt = self.check_openshift_deployment_type(hostvars, host)
-        self.check_whitelisted_registries(hostvars, host)
-        self.check_python_version(hostvars, host, distro)
-        self.check_image_tag_format(hostvars, host, odt)
-        self.check_pkg_version_format(hostvars, host)
-        self.check_release_format(hostvars, host)
-        self.network_plugin_check(hostvars, host)
-        self.check_hostname_vars(hostvars, host)
-        self.check_session_auth_secrets(hostvars, host)
-        self.check_unsupported_nfs_configs(hostvars, host)
-        self.check_htpasswd_provider(hostvars, host)
-        check_for_removed_vars(hostvars, host)
-        self.validate_json_format_vars(hostvars, host)
-        self.check_for_oreg_password(hostvars, host, odt)
+        distro = self.template_var(host, 'ansible_distribution')
+        odt = self.check_openshift_deployment_type(host)
+        self.check_whitelisted_registries(host)
+        self.check_python_version(host, distro)
+        self.check_image_tag_format(host, odt)
+        self.check_pkg_version_format(host)
+        self.check_release_format(host)
+        self.network_plugin_check(host)
+        self.check_hostname_vars(host)
+        self.check_session_auth_secrets(host)
+        self.check_unsupported_nfs_configs(host)
+        self.check_htpasswd_provider(host)
+        self.check_for_removed_vars()
+        self.validate_json_format_vars(host)
+        self.check_for_oreg_password(host, odt)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
@@ -507,10 +500,13 @@ class ActionModule(ActionBase):
             msg = hostvars
             raise errors.AnsibleModuleError(msg)
 
+        self.hostvars = hostvars
+
         # We loop through each host in the provided list check_hosts
         for host in check_hosts:
             try:
-                self.run_checks(hostvars, host)
+                self.current_hostvars = self.hostvars[host]
+                self.run_checks(host)
             except Exception as uncaught_e:
                 msg = "last_checked_host: {}, last_checked_var: {};"
                 msg = msg.format(self.last_checked_host, self.last_checked_var)
