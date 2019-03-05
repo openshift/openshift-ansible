@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.120
+Version:        3.10.121
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Mar 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.121-1
+- added provisioner file path parameter to template (marriott_robert@bah.com)
+
 * Sat Mar 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.120-1
 - fixing docs to match actual defaults (mharri@redhat.com)
 - Add Data Grid 7.3 to OpenShift Cloud Platform (galder@zamarreno.com)
