@@ -16,8 +16,9 @@ License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
-
-Requires:      ansible >= 2.6
+# We expect most to run >= 2.6 but there are some module dependency conflicts
+# in openstack modules for 2.6 that are nearly impossible to resolve so tolerate 2.5.7
+Requires:      ansible >= 2.5.7
 Requires:      python2
 Requires:      python-six
 Requires:      tar
