@@ -23,7 +23,6 @@ Environment variables may also be used.
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
 * [Multi-Master Configuration](#multi-master-configuration)
-* [Provider Network Configuration](#provider-network-configuration)
 * [Cinder-Backed Persistent Volumes Configuration](#cinder-backed-persistent-volumes-configuration)
 * [Cinder-Backed Registry Configuration](#cinder-backed-registry-configuration)
 * [Swift or Ceph Rados GW Backed Registry Configuration](#swift-or-ceph-rados-gw-backed-registry-configuration)
@@ -923,6 +922,10 @@ In `inventory/group_vars/all.yml`:
 
 * `openshift_openstack_provider_network_name` Provider network name. Setting this will cause the `openshift_openstack_external_network_name` and `openshift_openstack_private_network_name` parameters to be ignored.
 
+If you are using Octavia as the load balancer, set the following as well:
+
+* `openshift_openstack_node_subnet_name`
+* `openshift_openstack_load_balancer_floating_ip: false`
 
 ## Cinder-Backed Persistent Volumes Configuration
 
