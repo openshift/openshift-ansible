@@ -14,6 +14,10 @@ vnetName: {{ openshift_cloudprovider_azure_vnet_name }}
 {% if openshift_cloudprovider_azure_security_group_name is defined %}
 securityGroupName: {{ openshift_cloudprovider_azure_security_group_name }}
 {% endif %}
+{% if openshift_cloudprovider_azure_subnet_name is defined %}
+subnetName: {{ openshift_cloudprovider_azure_subnet_name }}
+{% endif %}
 {% if openshift_cloudprovider_azure_availability_set_name is defined %}
 primaryAvailabilitySetName: {{ openshift_cloudprovider_azure_availability_set_name }}
 {% endif %}
+
