@@ -1,0 +1,5 @@
+---
+openshift_node_labels:
+  region: infra
+  zone: default
+  node-role.kubernetes.io/infra: "true"
