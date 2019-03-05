@@ -62,7 +62,9 @@ class Elasticsearch(LoggingCheck):
 
     @staticmethod
     def _build_es_curl_cmd(pod_name, url):
-        base = "exec {name} -- curl -s --cert {base}cert --key {base}key --cacert {base}ca -XGET '{url}'"
+        base = "exec {name} -c elasticsearch " \
+               "-- curl -s --cert {base}cert --key {base}key " \
+               "--cacert {base}ca -XGET '{url}'"
         return base.format(base="/etc/elasticsearch/secret/admin-", name=pod_name, url=url)
 
     def check_elasticsearch_masters(self, pods_by_name):
