@@ -354,7 +354,9 @@ resources:
       pool: { get_param: router_lb_pool_http }
       protocol_port: 80
       address: { get_attr: [server, first_address]}
+{% if openshift_openstack_lbaasv2_provider != "Octavia"  %}
       subnet: { get_param: subnet }
+{% endif %}
 
   router_lb_pool_member_https:
     condition:
@@ -364,4 +366,6 @@ resources:
       pool: { get_param: router_lb_pool_https }
       protocol_port: 443
       address: { get_attr: [server, first_address]}
+{% if openshift_openstack_lbaasv2_provider != "Octavia"  %}
       subnet: { get_param: subnet }
+{% endif %}
