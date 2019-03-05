@@ -21,7 +21,7 @@ def display(*args, **kwargs):
 
 
 # Set to minimum required Ansible version
-REQUIRED_VERSION = parse_version('2.7.8')
+REQUIRED_VERSION = '2.7.8'
 DESCRIPTION = "Supported versions: %s or newer" % REQUIRED_VERSION
 
 
@@ -40,7 +40,7 @@ class CallbackModule(CallbackBase):
         """
         super(CallbackModule, self).__init__()
 
-        if not parse_version(__version__) >= REQUIRED_VERSION:
+        if not parse_version(__version__) >= parse_version(REQUIRED_VERSION):
             display(
                 'FATAL: Current Ansible version (%s) is not supported. %s'
                 % (__version__, DESCRIPTION), color='red')
