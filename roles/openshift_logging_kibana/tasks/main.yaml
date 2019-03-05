@@ -11,7 +11,7 @@
     msg: "Provided value for 'openshift_logging_kibana_session_timeout_seconds' is invalid. Only positive integers are allowed."
 
 - name: Ensure that Kibana has nodes to run on
-  import_role:
+  include_role:
     name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:

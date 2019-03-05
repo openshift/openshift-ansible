@@ -1,6 +1,6 @@
 ---
 - name: Ensure that Logging Curator has nodes to run on
-  import_role:
+  include_role:
     name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
@@ -103,7 +103,7 @@
     - "curator.yml"
 
 # Patch existing configuration, if present
-- import_role:
+- include_role:
     name: openshift_logging
     tasks_from: patch_configmap_files.yaml
   vars:

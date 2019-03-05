@@ -233,7 +233,7 @@
 
 
 ## Kibana
-- import_role:
+- include_role:
     name: openshift_logging_kibana
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -246,7 +246,7 @@
     openshift_logging_kibana_es_port: "{{ openshift_logging_es_port }}"
 
 
-- import_role:
+- include_role:
     name: openshift_logging_kibana
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -275,7 +275,7 @@
 - include_tasks: annotate_ops_projects.yaml
 
 ## Curator
-- import_role:
+- include_role:
     name: openshift_logging_curator
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -286,7 +286,7 @@
     openshift_logging_curator_master_url: "{{ openshift_logging_master_url }}"
     openshift_logging_curator_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
 
-- import_role:
+- include_role:
     name: openshift_logging_curator
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -307,7 +307,7 @@
   - openshift_logging_use_ops | bool
 
 ## Mux
-- import_role:
+- include_role:
     name: openshift_logging_mux
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -320,7 +320,7 @@
 
 
 ## Fluentd
-- import_role:
+- include_role:
     name: openshift_logging_fluentd
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -331,7 +331,7 @@
 
 
 ## EventRouter
-- import_role:
+- include_role:
     name: openshift_logging_eventrouter
   when:
     openshift_logging_install_eventrouter | default(false) | bool

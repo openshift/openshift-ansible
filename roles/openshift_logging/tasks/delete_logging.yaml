@@ -129,7 +129,7 @@
     loop_var: project
 
 ## EventRouter
-- import_role:
+- include_role:
     name: openshift_logging_eventrouter
   when:
     not openshift_logging_install_eventrouter | default(false) | bool

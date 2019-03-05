@@ -5,7 +5,7 @@
     that: openshift_logging_eventrouter_sink in __eventrouter_sinks
 
 - name: Ensure that Logging EventRouter has nodes to run on
-  import_role:
+  include_role:
     name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
