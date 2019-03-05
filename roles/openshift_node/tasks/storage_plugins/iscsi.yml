@@ -3,7 +3,6 @@
   package:
     name: "{{ pkg_list | join(',') }}"
     state: present
-  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
   vars:
@@ -16,7 +15,6 @@
     name: "{{ item }}"
     state: started
     enabled: True
-  when: not openshift_is_atomic | bool
   with_items:
     - multipathd
     - rpcbind
@@ -29,7 +27,6 @@
     src: multipath.conf.j2
     backup: true
     force: no
-  when: not openshift_is_atomic | bool
 
 # check whether devices section is present
 - name: Check devices section present
@@ -82,4 +79,3 @@
 #enable multipath
 - name: Enable and start multipath
   command: "mpathconf --enable --with_multipathd y"
-  when: not openshift_is_atomic | bool

@@ -80,6 +80,8 @@
 
 - name: iSCSI storage plugin configuration
   import_tasks: storage_plugins/iscsi.yml
-  when: "'iscsi' in osn_storage_plugin_deps"
+  when:
+    - "'iscsi' in osn_storage_plugin_deps"
+    - not openshift_is_atomic | bool
 
 ##### END Storage #####
