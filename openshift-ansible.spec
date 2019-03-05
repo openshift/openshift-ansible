@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.121
+Version:        3.10.122
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Mar 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.122-1
+- sanity checks: avoid extra hostvar lookups (vrutkovs@redhat.com)
+- Revert "Remove deprecated "openshift_logging_curator_run_timezone variable"
+  as of v3.11" (nhosoi@redhat.com)
+
 * Tue Mar 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.121-1
 - added provisioner file path parameter to template (marriott_robert@bah.com)
 
