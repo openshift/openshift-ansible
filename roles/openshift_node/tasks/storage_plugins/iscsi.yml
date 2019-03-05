@@ -77,6 +77,7 @@
     mode: 0600
     backup: yes
     state: present
+  when: devices_multipath.rc == 1
 
 #enable multipath
 - name: Enable and start multipath
