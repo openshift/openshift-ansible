@@ -5,6 +5,9 @@ metadata:
     run: ssh-bastion
   name: ssh-bastion
   namespace: openshift-ssh-bastion
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 spec:
   externalTrafficPolicy: Local
   ports:
