@@ -69,7 +69,7 @@ spec:
           else
             touch /tmp/.old-volume-config
           fi
-          
+
           # loop until BOOTSTRAP_CONFIG_NAME is set
           while true; do
             file=/etc/sysconfig/origin-node
@@ -150,7 +150,7 @@ spec:
               mv /etc/origin/node/tmp/volume-config.yaml /etc/origin/node/volume-config.yaml
               trigger_restart=true
             fi
-            
+
             if [[ "$trigger_restart" = true ]]; then
               SYSTEMD_IGNORE_CHROOT=1 systemctl restart tuned || :
               echo "info: Configuration changed, restarting kubelet" 2>&1
@@ -210,7 +210,8 @@ spec:
         - mountPath: /run/systemd/system
           name: run-systemd-system
           readOnly: true
-
+      tolerations:
+      - operator: "Exists"
       volumes:
       # In bootstrap mode, the host config contains information not easily available
       # from other locations.
