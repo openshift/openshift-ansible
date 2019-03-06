@@ -41,7 +41,6 @@
       owner: root
       group: root
       mode: 0644
-    ignore_errors: true
 
 - import_playbook: ../../playbooks/openshift-node/scaleup.yml
 
