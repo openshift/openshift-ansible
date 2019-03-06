@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.91
+Version:        3.11.92
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -189,6 +189,19 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Mar 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.92-1
+- Include iscsi storage only on non-atomic host installs. (pdd@redhat.com)
+- additional provider network/octavia documentation (tzumainn@redhat.com)
+- In atomic host, multipath file does not exists. Use the result while adding
+  LIO-ORG section as well. (sarumuga@redhat.com)
+- Add lbaas check to router subnet (tzumainn@redhat.com)
+- added provisioner file path parameter to template (marriott_robert@bah.com)
+- Set AWS_CA_BUNDLE via openshift_cloudprovider_aws_ca_bundle
+  (sdodson@redhat.com)
+- sanity checks: avoid extra hostvar lookups (vrutkovs@redhat.com)
+- Bug 1671315 - Kibana and Curator pods names are with ops
+  (rmeggins@redhat.com)
+
 * Sun Mar 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.91-1
 - Require ansible 2.6, allow ansible 2.7 (vrutkovs@redhat.com)
 - Use correct Data Grid version (galder@zamarreno.com)
