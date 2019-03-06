@@ -1,0 +1,16 @@
+[Unit]
+Description=Cleanup of cni/net.d and ovs
+Before=atomic-openshift-node.service
+ConditionPathExists=/etc/cni/net.d
+ConditionPathExists=/etc/origin/openvswitch
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/rm -f /etc/cni/net.d/80-openshift-network.conf
+ExecStart=/usr/bin/rm -f /etc/origin/openvswitch/conf.db
+ExecStart=/usr/bin/ls -R /etc/cni
+ExecStart=/usr/bin/ls -R /etc/origin
+
+[Install]
+WantedBy=atomic-openshift-node.service
+WantedBy=multi-user.target
