@@ -1,37 +1,35 @@
 ---
-- name: get existing machineset name
-  yedit:
-    state: list
-    content: "{{ item | to_yaml }}"
-    key: "metadata.name"
-  register: machineset_name
+- name: Create machineset_name
+  set_fact:
+    machineset_name: "{{ item.metadata.name ~ '-centos'}}"
 
-- name: edit machineset name
-  yedit:
-    content: "{{ item | to_yaml }}"
-    separator: '#'
-    state: present
-    edits:
-    - key: metadata#name
-      value: "{{ machineset_name.result }}-centos"
-    - key: metadata#resourceVersion
-      value: ""
-    - key: spec#selector#matchLabels#sigs.k8s.io/cluster-api-machineset
-      value: "{{ machineset_name.result }}-centos"
-    - key: spec#template#metadata#labels#sigs.k8s.io/cluster-api-machineset
-      value: "{{ machineset_name.result }}-centos"
-    - key: spec#template#metadata#labels#sigs.k8s.io/cluster-api-machineset
-      value: "{{ machineset_name.result }}-centos"
-    - key: spec#template#spec#providerSpec#value#keyName
-      value: "{{ openshift_aws_scaleup_key }}"
-    - key: spec#template#spec#providerSpec#value#ami#id
-      value: "{{ openshift_aws_scaleup_ami }}"
-  register: edited_machineset
+- name: Update machineset definition
+  set_fact:
+    machineset: "{{ item | combine(dict_edit, recursive=True) }}"
+  vars:
+    dict_edit:
+      metadata:
+        name: "{{ machineset_name }}"
+        resourceVersion: ""
+      spec:
+        selector:
+          matchLabels:
+            machine.openshift.io/cluster-api-machineset: "{{ machineset_name }}"
+        template:
+          metadata:
+            labels:
+              machine.openshift.io/cluster-api-machineset: "{{ machineset_name }}"
+          spec:
+            providerSpec:
+              value:
+                ami:
+                  id: "{{ openshift_aws_scaleup_ami }}"
+                keyName: "{{ openshift_aws_scaleup_key }}"
 
-- name: import machinespec
+- name: Import machineset definition
   k8s:
     kubeconfig: "{{ kubeconfig_path }}"
-    definition: "{{ edited_machineset.result[-1].edit }}"
+    definition: "{{ machineset | to_yaml }}"
 
 - name: wait for machine to be created
   k8s_facts:
@@ -40,7 +38,7 @@
     namespace: openshift-machine-api
     kind: Machine
     label_selectors:
-    - "sigs.k8s.io/cluster-api-machineset={{ machineset_name.result }}-centos"
+    - "machine.openshift.io/cluster-api-machineset={{ machineset_name }}"
   register: new_machine
   retries: 36
   delay: 5
