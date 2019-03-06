@@ -9,7 +9,7 @@ kuryr_openstack_user_domain_name: default
 kuryr_openstack_project_domain_name: default
 
 # Kuryr OpenShift namespace
-kuryr_namespace: openshift-infra
+kuryr_namespace: kuryr
 
 # Default pod-in-VM link interface
 kuryr_cni_link_interface: eth0

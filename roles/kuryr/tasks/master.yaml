@@ -1,4 +1,11 @@
 ---
+- name: Ensure project exists
+  oc_project:
+    name: "{{ kuryr_namespace }}"
+    state: present
+    node_selector:
+    - ""
+
 - name: Perform OpenShift ServiceAccount config
   include_tasks: serviceaccount.yaml
   run_once: true
