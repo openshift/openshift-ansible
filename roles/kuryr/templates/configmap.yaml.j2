@@ -237,7 +237,7 @@ data:
     # in the pipeline. (list value)
 {% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
 {% if openshift_kuryr_sg_driver|default('default') == 'policy' %}
-    enabled_handlers = vif,lb,lbaasspec,namespace,policy,pod_label
+    enabled_handlers = vif,lb,lbaasspec,namespace,policy,pod_label,kuryrnetpolicy
 {% else %}
     enabled_handlers = vif,lb,lbaasspec,namespace
 {% endif %}
