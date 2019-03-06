@@ -262,3 +262,6 @@ spec:
       - name: filebufferstorage
         hostPath:
           path: "/var/lib/fluentd"
+      tolerations:
+      - operator: "Exists"
+
