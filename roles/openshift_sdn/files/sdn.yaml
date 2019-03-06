@@ -37,7 +37,7 @@ spec:
       # It relies on an up to date node-config.yaml being present.
       - name: sdn
         image: " "
-        command: 
+        command:
         - /bin/bash
         - -c
         - |
@@ -161,7 +161,8 @@ spec:
         #     port: 10256
         #     scheme: HTTP
         lifecycle:
-
+      tolerations:
+      - operator: "Exists"
       volumes:
       # In bootstrap mode, the host config contains information not easily available
       # from other locations.
