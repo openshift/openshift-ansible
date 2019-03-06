@@ -8,8 +8,6 @@
   # l_init_fact_hosts is passed in via play during control-plane-only
   # upgrades and scale-up plays; otherwise oo_all_hosts is used.
   hosts: "{{ l_init_fact_hosts | default('oo_all_hosts') }}"
-  roles:
-  - role: openshift_facts
   tasks:
 
   - name: Detect OS Variant from /etc/os-release
