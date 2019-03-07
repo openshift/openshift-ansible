@@ -13,20 +13,14 @@
     - ds_out is succeeded
     - ds_out.results.results[0].spec.updateStrategy.type == 'RollingUpdate'
   block:
-    - name: Create DaemonSet tempdir
-      command: mktemp -d
-      register: mktemp
-
-    - name: Create DaemonSet manifest
-      copy:
-        content: "{{ ds_out.results.results[0] }}"
-        dest: "{{ mktemp.stdout }}/tmp_ds.yaml"
-
     - name: Update DaemonSet updateStrategy
-      yedit:
-        src: "{{ mktemp.stdout }}/tmp_ds.yaml"
-        key: 'spec.updateStrategy.type'
-        value: "OnDelete"
+      set_fact:
+        daemonset: "{{ ds_out.results.results[0] | combine(dict_edit, recursive=True) }}"
+      vars:
+        dict_edit:
+          spec:
+            updateStrategy:
+              type: "OnDelete"
 
     - name: Apply DaemonSet manifest
       oc_obj:
@@ -34,11 +28,4 @@
         kind: DaemonSet
         name: "ovs"
         state: present
-        files:
-          - "{{ mktemp.stdout }}/tmp_ds.yaml"
-
-    - name: Remove DaemonSet tempdir
-      file:
-        state: absent
-        name: "{{ mktemp.stdout }}"
-      changed_when: False
+        content: "{{ daemonset }}"
