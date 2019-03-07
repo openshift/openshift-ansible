@@ -277,7 +277,7 @@ A tuple of the form:
     if HAS_OPENSSL:
         # No work-around required
         cert_loaded = OpenSSL.crypto.load_certificate(
-            OpenSSL.crypto.FILETYPE_PEM, _cert_string)
+            OpenSSL.crypto.FILETYPE_PEM, _cert_string.encode('utf-8'))
     else:
         # Missing library, work-around required. Run the 'openssl'
         # command on it to decode it
