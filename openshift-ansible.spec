@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.122
+Version:        3.10.123
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Mar 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.123-1
+- bug 1685618. Modify default_md for logging cert generation bug 1685655.
+  Update key size for logging cert generation (jcantril@redhat.com)
+- sync and SDN pods should tolerate all taints (vrutkovs@redhat.com)
+- Remove hidden tag for latest Fuse builders #11292 (apupier@redhat.com)
+
 * Tue Mar 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.122-1
 - sanity checks: avoid extra hostvar lookups (vrutkovs@redhat.com)
 - Revert "Remove deprecated "openshift_logging_curator_run_timezone variable"
