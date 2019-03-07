@@ -1,51 +1,94 @@
 ---
-- name: Create ssh bastion project
-  oc_project:
+- name: Create ssh bastion namespace
+  k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    kind: Namespace
     name: openshift-ssh-bastion
-    description: openshift-ssh-bastion
-    node_selector: ""
-    kubeconfig: "{{ kubeconfig_path }}"
-
-- name: Create ssh keys secret
-  oc_secret:
     state: present
-    namespace: openshift-ssh-bastion
-    name: ssh-host-keys
+
+- name: Create ssh bastion keys secret
+  k8s:
     kubeconfig: "{{ kubeconfig_path }}"
-    files:
-    - name: ssh_host_rsa_key
-      path: ../../inventory/dynamic/injected/ssh-privatekey
-    - name: sshd_config
-      path: files/sshd_config
+    resource_definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: ssh-host-keys
+        namespace: openshift-ssh-bastion
+      data:
+        ssh_host_rsa_key: "{{ lookup('file', '../../inventory/dynamic/injected/ssh-privatekey') | b64encode }}"
+        sshd_config: "{{ lookup('file', 'files/sshd_config') | b64encode }}"
   no_log: true
 
-- name: Create ssh bastion
-  command: "oc --kubeconfig={{ kubeconfig_path }} apply -f files/"
-
-- name: Wait for deployment to rollout
-  command: "oc --kubeconfig={{ kubeconfig_path }} -n openshift-ssh-bastion rollout status deployment ssh-bastion -w"
-
-- name: Get ssh bastion address
-  oc_obj:
-    name: ssh-bastion
-    kind: service
-    namespace: openshift-ssh-bastion
+- name: Create ssh bastion service
+  k8s:
     kubeconfig: "{{ kubeconfig_path }}"
-    state: present
-  register: svc
+    src: files/01_service.yml
+
+- name: Create ssh bastion service account
+  k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    src: files/02_serviceaccount.yml
+
+- name: Create ssh bastion role
+  k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    src: files/03_role.yml
+
+- name: Create ssh bastion role binding
+  k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    src: files/04_rolebinding.yml
+
+- name: Create ssh bastion cluster role
+  k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    src: files/05_clusterrole.yml
+
+- name: Create ssh bastion cluster role binding
+  k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    src: files/06_clusterrolebinding.yml
+
+- name: Create ssh bastion deployment
+  k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    src: files/07_deployment.yml
+
+- name: Wait for ssh bastion deployment to rollout
+  k8s_facts:
+    kubeconfig: "{{ kubeconfig_path }}"
+    namespace: openshift-ssh-bastion
+    kind: Deployment
+    name: ssh-bastion
+  register: k8s_result
   until:
-  - svc.results is defined
-  - svc.results.returncode is defined
-  - svc.results.returncode == 0
-  - svc.results.results is defined
-  - svc.results.results | length > 0
-  - svc.results.results[0].status is defined
-  - svc.results.results[0].status.loadBalancer is defined
-  - svc.results.results[0].status.loadBalancer.ingress is defined
-  - svc.results.results[0].status.loadBalancer.ingress | length > 0
-  - svc.results.results[0].status.loadBalancer.ingress[0].hostname is defined
+  - k8s_result.resources is defined
+  - k8s_result.resources | length > 0
+  - k8s_result.resources[0].status is defined
+  - k8s_result.resources[0].status.availableReplicas is defined
+  - k8s_result.resources[0].status.availableReplicas > 0
   retries: 36
   delay: 5
 
-- set_fact:
-    ssh_bastion: "{{ svc.results.results[0].status.loadBalancer.ingress[0].hostname }}"
+- name: Get ssh bastion address
+  k8s_facts:
+    kubeconfig: "{{ kubeconfig_path }}"
+    namespace: openshift-ssh-bastion
+    kind: Service
+    name: ssh-bastion
+  register: k8s_result
+  until:
+  - k8s_result.resources is defined
+  - k8s_result.resources | length > 0
+  - k8s_result.resources[0].status is defined
+  - k8s_result.resources[0].status.loadBalancer is defined
+  - k8s_result.resources[0].status.loadBalancer.ingress is defined
+  - k8s_result.resources[0].status.loadBalancer.ingress | length > 0
+  - k8s_result.resources[0].status.loadBalancer.ingress[0].hostname is defined
+  retries: 36
+  delay: 5
+
+- name: Set fact ssh_bastion
+  set_fact:
+    ssh_bastion: "{{ k8s_result.resources[0].status.loadBalancer.ingress[0].hostname }}"

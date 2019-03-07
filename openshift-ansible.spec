@@ -33,6 +33,7 @@ Requires:      python2-crypto
 Requires:      patch
 Requires:      pyOpenSSL
 Requires:      iproute
+Requires:      python2-openshift
 
 %description
 Openshift and Atomic Enterprise Ansible

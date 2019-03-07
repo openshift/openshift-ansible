@@ -1,40 +1,34 @@
 ---
 - name: List existing worker nodes
-  oc_obj:
+  k8s_facts:
     kubeconfig: "{{ kubeconfig_path }}"
-    state: list
-    kind: node
-    selector: "node-role.kubernetes.io/worker"
-  delegate_to: localhost
+    kind: Node
+    label_selectors:
+    - "node-role.kubernetes.io/worker"
   register: pre_scaleup_workers
   until:
-  - pre_scaleup_workers.results is defined
-  - pre_scaleup_workers.results.returncode is defined
-  - pre_scaleup_workers.results.results is defined
-  - pre_scaleup_workers.results.returncode == 0
-  - pre_scaleup_workers.results.results[0]['items'] | length > 0
+  - pre_scaleup_workers.resources is defined
+  - pre_scaleup_workers.resources | length > 0
   retries: 36
   delay: 5
 
-- set_fact:
-    pre_scaleup_workers_name: "{{ pre_scaleup_workers.results.results[0]['items'] |map(attribute='metadata.name') | list }}"
+- name: Set fact pre_scaleup_workers_name
+  set_fact:
+    pre_scaleup_workers_name: "{{ pre_scaleup_workers.resources | map(attribute='metadata.name') | list }}"
 
-- name: get existing worker machinesets
-  oc_obj:
-    state: list
-    kind: machinesets.machine.openshift.io
-    namespace: openshift-machine-api
-    selector: ""
+- name: Get existing worker machinesets
+  k8s_facts:
+    api_version: machine.openshift.io/v1beta1
     kubeconfig: "{{ kubeconfig_path }}"
+    namespace: openshift-machine-api
+    kind: MachineSet
   register: machineset
   until:
-  - machineset.results is defined
-  - machineset.results.returncode is defined
-  - machineset.results.results is defined
-  - machineset.results.returncode == 0
-  - machineset.results.results[0]['items'] | length > 0
+  - machineset.resources is defined
+  - machineset.resources | length > 0
   retries: 36
   delay: 5
 
-- set_fact:
-    pre_scaleup_machineset_names: "{{ machineset.results.results[0]['items'] |map(attribute='metadata.name') | list }}"
+- name: Set fact pre_scaleup_machineset_names
+  set_fact:
+    pre_scaleup_machineset_names: "{{ machineset.resources | map(attribute='metadata.name') | list }}"

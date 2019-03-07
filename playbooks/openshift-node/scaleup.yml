@@ -25,22 +25,18 @@
   gather_facts: no
   tasks:
   - name: Get release image
-    oc_obj:
+    k8s_facts:
       kubeconfig: "{{ kubeconfig_path }}"
-      state: present
-      kind: clusterversion.config.openshift.io
+      kind: ClusterVersion
       name: version
     register: clusterversion
     until:
-    - clusterversion.results is defined
-    - clusterversion.results.returncode is defined
-    - clusterversion.results.returncode == 0
-    - clusterversion.results.results is defined
-    - clusterversion.results.results | length > 0
-    - clusterversion.results.results[0].status is defined
-    - clusterversion.results.results[0].status.desired is defined
-    - clusterversion.results.results[0].status.desired.image is defined
-    retries: 5
+    - clusterversion.resources is defined
+    - clusterversion.resources | length > 0
+    - clusterversion.resources[0].status is defined
+    - clusterversion.resources[0].status.desired is defined
+    - clusterversion.resources[0].status.desired.image is defined
+    retries: 36
     delay: 5
 
 - name: install nodes
@@ -63,4 +59,4 @@
       name: openshift_node40
       tasks_from: config.yml
     vars:
-      openshift_release_image: "{{ hostvars['localhost'].clusterversion.results.results[0].status.desired.image }}"
+      openshift_release_image: "{{ hostvars['localhost'].clusterversion.resources[0].status.desired.image }}"

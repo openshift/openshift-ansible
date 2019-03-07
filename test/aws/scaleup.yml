@@ -9,21 +9,12 @@
   hosts: localhost
   connection: local
   tasks:
-  - name: create temp directory
-    command: mktemp -d /tmp/openshift-ansible-XXXXXXX
-    register: mktemp
-    changed_when: False
-  - name: add localhost as master
-    add_host:
-      name: localhost
-      ansible_connection: local
-      groups: masters
-
   - import_tasks: ssh_bastion.yml
+
   - import_tasks: get_machinesets.yml
 
   - include_tasks: create_machineset.yml
-    loop: "{{ machineset.results.results[0]['items'] }}"
+    loop: "{{ machineset.resources }}"
     when:
     - item.status.replicas is defined
     - item.status.replicas != 0
@@ -67,21 +58,18 @@
       name: nfs-utils
       state: present
   - name: Wait for new nodes to be ready
-    oc_obj:
+    k8s_facts:
       kubeconfig: "{{ kubeconfig_path }}"
-      state: list
-      kind: node
+      kind: Node
       name: "{{ node_name }}"
     delegate_to: localhost
     register: new_machine
     until:
-    - new_machine.results is defined
-    - new_machine.results.returncode is defined
-    - new_machine.results.results is defined
-    - new_machine.results.returncode == 0
-    - new_machine.results.results[0].status is defined
-    - new_machine.results.results[0].status.conditions is defined
-    - new_machine.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+    - new_machine.resources is defined
+    - new_machine.resources | length > 0
+    - new_machine.resources[0].status is defined
+    - new_machine.resources[0].status.conditions is defined
+    - new_machine.resources[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
     # Give the node three minutes to come back online.
     retries: 48
     delay: 30
@@ -132,18 +120,19 @@
     with_items: "{{ pre_scaleup_workers_name }}"
 
   - name: remove existing machinesets
-    oc_obj:
-      state: absent
-      kind: machinesets.machine.openshift.io
-      namespace: openshift-machine-api
-      name: "{{ item }}"
+    k8s:
+      api_version: machine.openshift.io/v1beta1
       kubeconfig: "{{ kubeconfig_path }}"
+      namespace: openshift-machine-api
+      kind: MachineSet
+      name: "{{ item }}"
+      state: absent
     with_items: "{{ pre_scaleup_machineset_names }}"
 
   - name: Delete CoreOS nodes
-    oc_obj:
+    k8s:
       kubeconfig: "{{ kubeconfig_path }}"
-      state: absent
-      kind: node
+      kind: Node
       name: "{{ item }}"
+      state: absent
     with_items: "{{ pre_scaleup_workers_name }}"

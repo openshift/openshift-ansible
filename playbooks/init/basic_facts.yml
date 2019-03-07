@@ -26,27 +26,25 @@
 
 - name: Read API URL from infra config
   hosts: "{{ l_init_fact_hosts | default('nodes') }}"
-  roles:
-  - lib_openshift
   tasks:
-  - oc_obj:
-      name: cluster
-      kind: infrastructures.config.openshift.io
+  - name: Read cluster config
+    k8s_facts:
       kubeconfig: "{{ kubeconfig_path }}"
-      state: present
+      kind: Infrastructure
+      name: cluster
     register: clustercfg
     when: kubeconfig_path is defined
     until:
-    - clustercfg.results is defined
-    - clustercfg.results.returncode is defined
-    - clustercfg.results.returncode == 0
-    - clustercfg.results.results is defined
-    - clustercfg.results.results | length > 0
+    - clustercfg.resources is defined
+    - clustercfg.resources | length > 0
+    - clustercfg.resources[0].status is defined
+    - clustercfg.resources[0].status.apiServerURL is defined
     retries: 36
     delay: 5
     delegate_to: localhost
-  - set_fact:
-      openshift_api_prefix: "{{ clustercfg.results.results[0].status.apiServerURL.split(':')[0:-1] | join(':') }}"
+  - name: Set fact openshift_api_prefix
+    set_fact:
+      openshift_api_prefix: "{{ clustercfg.resources[0].status.apiServerURL.split(':')[0:-1] | join(':') }}"
 
 - name: Set worker openshift_bootstrap_endpoint if not already defined
   hosts: "{{ l_init_fact_hosts | default('nodes') }}:!masters:!bootstrap"
