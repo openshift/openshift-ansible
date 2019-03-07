@@ -182,7 +182,7 @@
       service: asb
     service_name: asb
     port: 1337
-  when: ansible_service_broker_enable_dashboard_redirector
+  when: ansible_service_broker_enable_dashboard_redirector | bool
 
 - name: Set Ansible Service Broker deployment config
   oc_obj:

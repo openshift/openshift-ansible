@@ -25,7 +25,7 @@
   - role: openshift_sdn
     when: openshift_use_openshift_sdn | default(True) | bool
   - role: openshift_project_request_template
-    when: openshift_project_request_template_manage
+    when: openshift_project_request_template_manage | bool
   - role: openshift_examples
     when:
     - openshift_install_examples | default(true) | bool

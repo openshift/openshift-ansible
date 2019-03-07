@@ -1,7 +1,7 @@
 """
 Module for performing checks on a Fluentd logging deployment configuration
 """
-
+import json
 from openshift_checks import OpenShiftCheckException
 from openshift_checks.logging.logging import LoggingCheck
 
@@ -49,13 +49,19 @@ class FluentdConfig(LoggingCheck):
         if "oo_masters_to_config" in group_names:
             use_journald = self.check_fluentd_env_var()
 
-        docker_info = self.execute_module("docker_info", {})
+        command = ' '.join(['docker', 'info', '--format', '"{{json .}}"'])
+        command_args = dict(_raw_params=command)
+        command_result = self.execute_module('command', command_args)
+        if command_result.get('rc', 0) != 0 or command_result.get('failed'):
+            raise OpenShiftCheckException(
+                'RemoteCommandFailure',
+                'Failed to execute command on remote host: %s' % command)
+        docker_info = json.loads(command_result["stdout"])
         try:
-            logging_driver = docker_info["info"]["LoggingDriver"]
+            logging_driver = docker_info["LoggingDriver"]
         except KeyError:
             return "Unable to determine Docker logging driver."
 
-        logging_driver = docker_info["info"]["LoggingDriver"]
         recommended_logging_driver = "journald"
         error = None
 

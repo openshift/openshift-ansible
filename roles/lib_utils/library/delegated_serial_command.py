@@ -192,9 +192,9 @@ def main():
             fcntl.flock(lockfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             break
         # pylint: disable=invalid-name
-        except IOError as e:
-            if e.errno != errno.EAGAIN:
-                module.fail_json(msg="I/O Error {0}: {1}".format(e.errno, e.strerror))
+        except IOError as ioerror:
+            if ioerror.errno != errno.EAGAIN:
+                module.fail_json(msg="I/O Error {0}: {1}".format(ioerror.errno, ioerror.strerror))
             else:
                 iterated += 1
                 time.sleep(0.1)

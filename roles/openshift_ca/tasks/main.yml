@@ -109,6 +109,11 @@
     use_regex: true
   register: g_master_legacy_ca_result
 
+- name: Set fact master_legacy_ca_files
+  # Setting this fact because it is used in a later delegated task where the lib_utils filter is not available
+  set_fact:
+    master_legacy_ca_files: "{{ g_master_legacy_ca_result.files | default([]) | lib_utils_oo_collect('path') }}"
+
 # This should NOT replace the CA due to --overwrite=false when a CA already exists.
 - name: Create the front-proxy CA if it does not already exist
   command: >
@@ -129,7 +134,7 @@
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
-    {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | lib_utils_oo_collect('path') %}
+    {% for legacy_ca_certificate in master_legacy_ca_files %}
     --certificate-authority {{ legacy_ca_certificate }}
     {% endfor %}
     {% if openshift_additional_ca is defined %}
@@ -158,7 +163,7 @@
       src: "{{ item }}"
       dest: "{{ openshift_ca_clientconfig_tmpdir.stdout }}/"
       remote_src: true
-    with_items: "{{ g_master_legacy_ca_result.files | default([]) | lib_utils_oo_collect('path') }}"
+    with_items: "{{ master_legacy_ca_files }}"
     delegate_to: "{{ openshift_ca_host }}"
     run_once: true
   - copy:

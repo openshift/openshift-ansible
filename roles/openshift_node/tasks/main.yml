@@ -2,7 +2,7 @@
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when:
-    - (not ansible_selinux or ansible_selinux.status != 'enabled')
+    - (ansible_selinux is not defined or ansible_selinux.status != 'enabled')
     - openshift_deployment_type == 'openshift-enterprise'
     - not openshift_use_crio | bool
 
