@@ -7,39 +7,22 @@ The plugin is named with leading `aa_` to ensure this plugin is loaded
 first (alphanumerically) by Ansible.
 """
 import sys
-from distutils import version
+from pkg_resources import parse_version
 
 from ansible import __version__
+from ansible.plugins.callback import CallbackBase
+from ansible.utils.display import Display
 
-if __version__ < '2.0':
-    # pylint: disable=import-error,no-name-in-module
-    # Disabled because pylint warns when Ansible v2 is installed
-    from ansible.callbacks import display as pre2_display
-    CallbackBase = object
 
-    def display(*args, **kwargs):
-        """Set up display function for pre Ansible v2"""
-        pre2_display(*args, **kwargs)
-else:
-    from ansible.plugins.callback import CallbackBase
-    from ansible.utils.display import Display
-
-    def display(*args, **kwargs):
-        """Set up display function for Ansible v2"""
-        display_instance = Display()
-        display_instance.display(*args, **kwargs)
+def display(*args, **kwargs):
+    """Set up display function for Ansible v2"""
+    display_instance = Display()
+    display_instance.display(*args, **kwargs)
 
 
 # Set to minimum required Ansible version
-REQUIRED_VERSION = version.StrictVersion('2.5.7')
+REQUIRED_VERSION = '2.5.7'
 DESCRIPTION = "Supported versions: %s or newer" % REQUIRED_VERSION
-
-
-def version_requirement(ver):
-    """Test for minimum required version"""
-    if not isinstance(ver, version.StrictVersion):
-        ver = version.StrictVersion(ver)
-    return ver >= REQUIRED_VERSION
 
 
 class CallbackModule(CallbackBase):
@@ -57,7 +40,7 @@ class CallbackModule(CallbackBase):
         """
         super(CallbackModule, self).__init__()
 
-        if not version_requirement(__version__):
+        if not parse_version(__version__) >= parse_version(REQUIRED_VERSION):
             display(
                 'FATAL: Current Ansible version (%s) is not supported. %s'
                 % (__version__, DESCRIPTION), color='red')
