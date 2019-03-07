@@ -4,8 +4,6 @@
 #.defaults:
 #  delete:
 #    days: 30
-#  runhour: 0
-#  runminute: 0
 
 # to keep ops logs for a different duration:
 #.operations:
