@@ -1,7 +1,7 @@
 ---
 #### Disable SWAP #####
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
-# swapoff is a custom module in lib_utils that comments out swap entries in
+# swapoff is a custom module that comments out swap entries in
 # /etc/fstab and runs swapoff -a, if necessary.
 - name: Disable swap
   swapoff: {}

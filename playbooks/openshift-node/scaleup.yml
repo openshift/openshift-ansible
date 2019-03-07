@@ -13,4 +13,4 @@
 - name: install nodes
   hosts: new_workers
   roles:
-    - openshift_node40
+  - openshift_node40
