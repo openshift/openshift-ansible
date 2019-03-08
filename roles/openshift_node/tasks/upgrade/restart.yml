@@ -29,6 +29,7 @@
   until: not (docker_start_result is failed)
   retries: 3
   delay: 30
+  when: not openshift_use_crio_only | bool
 
 - name: Restart cri-o
   service:
