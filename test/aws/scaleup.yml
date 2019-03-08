@@ -1,10 +1,4 @@
 ---
-- name: run the init
-  import_playbook: ../../playbooks/init/main.yml
-  vars:
-    l_init_fact_hosts: "all:!all"
-    l_openshift_version_set_hosts: "all:!all"
-
 - name: create new nodes
   hosts: localhost
   connection: local
@@ -32,6 +26,11 @@
       owner: root
       group: root
       mode: 0644
+  - name: Initialize openshift repos
+    import_role:
+      name: openshift_repos
+    vars:
+      openshift_version: "4.0"
 
 - import_playbook: ../../playbooks/openshift-node/scaleup.yml
 

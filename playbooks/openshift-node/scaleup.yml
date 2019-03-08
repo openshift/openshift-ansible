@@ -10,53 +10,7 @@
         new_workers host group to add nodes.
     when: groups.new_workers | default([]) | length == 0
 
-- name: run the init
-  import_playbook: ../init/main.yml
-  vars:
-    l_init_fact_hosts: "new_workers"
-    l_openshift_version_set_hosts: "new_workers"
-    l_install_base_packages: True
-    l_repo_hosts: "new_workers"
-    l_base_packages_hosts: "new_workers"
-
-- name: Get release image
-  hosts: localhost
-  connection: local
-  gather_facts: no
-  tasks:
-  - name: Get release image
-    k8s_facts:
-      kubeconfig: "{{ kubeconfig_path }}"
-      kind: ClusterVersion
-      name: version
-    register: clusterversion
-    until:
-    - clusterversion.resources is defined
-    - clusterversion.resources | length > 0
-    - clusterversion.resources[0].status is defined
-    - clusterversion.resources[0].status.desired is defined
-    - clusterversion.resources[0].status.desired.image is defined
-    retries: 36
-    delay: 5
-
 - name: install nodes
   hosts: new_workers
-  tasks:
-  - import_role:
-      name: openshift_node40
-      tasks_from: install.yml
-  - name: Wait for bootstrap endpoint to show up
-    uri:
-      url: "{{ openshift_bootstrap_endpoint }}"
-      validate_certs: false
-    delay: 10
-    retries: 60
-    register: result
-    until:
-    - "'status' in result"
-    - result.status == 200
-  - import_role:
-      name: openshift_node40
-      tasks_from: config.yml
-    vars:
-      openshift_release_image: "{{ hostvars['localhost'].clusterversion.resources[0].status.desired.image }}"
+  roles:
+  - openshift_node40

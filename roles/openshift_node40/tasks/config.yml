@@ -1,7 +1,7 @@
 ---
 #### Disable SWAP #####
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
-# swapoff is a custom module in lib_utils that comments out swap entries in
+# swapoff is a custom module that comments out swap entries in
 # /etc/fstab and runs swapoff -a, if necessary.
 - name: Disable swap
   swapoff: {}
@@ -22,6 +22,23 @@
     state: yes
     persistent: yes
 
+- name: Wait for bootstrap endpoint to show up
+  uri:
+    url: "{{ openshift_node_bootstrap_endpoint }}"
+    validate_certs: false
+  delay: 10
+  retries: 60
+  register: result
+  until:
+  - "'status' in result"
+  - result.status == 200
+
+- name: Fetch bootstrap ignition file locally
+  uri:
+    url: "{{ openshift_node_bootstrap_endpoint }}"
+    dest: "{{ ign_file }}"
+    validate_certs: false
+
 - name: create temp directory
   tempfile:
     state: directory
@@ -32,25 +49,32 @@
     src: "{{ pull_secret }}"
     dest: "{{ tempfile.path }}/pull-secret.json"
 
+- name: Get release image
+  k8s_facts:
+    kubeconfig: "{{ kubeconfig_path }}"
+    kind: ClusterVersion
+    name: version
+  delegate_to: localhost
+  register: clusterversion
+  until:
+  - clusterversion.resources is defined
+  - clusterversion.resources | length > 0
+  - clusterversion.resources[0].status is defined
+  - clusterversion.resources[0].status.desired is defined
+  - clusterversion.resources[0].status.desired.image is defined
+  retries: 36
+  delay: 5
+
+- name: Set openshift_release_image fact
+  set_fact:
+    openshift_release_image: "{{ clusterversion.resources[0].status.desired.image }}"
+
 - name: Pull release image
   command: "podman pull --tls-verify={{ tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ openshift_release_image }}"
 
 - name: Get machine controller daemon image from release image
   command: "podman run --rm {{ openshift_release_image }} image machine-config-daemon"
   register: release_image_mcd
-
-- name: Copy bootstrap ignition file locally
-  copy:
-    src: "{{ openshift_ignition_file_path }}"
-    dest: "{{ ign_file }}"
-  when: openshift_ignition_file_path is defined
-
-- name: Fetch bootstrap ignition file locally
-  uri:
-    url: "{{ openshift_bootstrap_endpoint }}"
-    dest: "{{ ign_file }}"
-    validate_certs: false
-  when: openshift_bootstrap_endpoint is defined
 
 - block:
   - name: Pull MCD image
