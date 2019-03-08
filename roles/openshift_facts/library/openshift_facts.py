@@ -495,9 +495,11 @@ def set_nodename(facts):
 
 def make_allowed_registries(registry_list):
     """ turns a list of wildcard registries to allowedRegistriesForImport json setting """
+    if False in [isinstance(reg, string_types) for reg in registry_list]:
+        raise Exception("image_policy_allowed_registries_for_import is not a list of strings: '%s'" % registry_list)
     return {
         "allowedRegistriesForImport": [
-            {'domainName': reg} if isinstance(reg, str) else reg for reg in registry_list
+            {'domainName': reg} for reg in registry_list
         ]
     }
 
