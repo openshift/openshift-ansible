@@ -19,7 +19,7 @@
 
 - name: Creating cert req for {{component}}
   command: >
-    openssl req -out {{generated_certs_dir}}/{{component}}.csr -new -newkey rsa:2048 -keyout {{generated_certs_dir}}/{{component}}.key
+    openssl req -out {{generated_certs_dir}}/{{component}}.csr -new -newkey rsa:4096 -keyout {{generated_certs_dir}}/{{component}}.key
     -subj "/CN={{component}}/OU=OpenShift/O=Logging/subjectAltName=DNS.1=localhost{{cert_ext.stdout}}" -days 712 -nodes
   when:
     - not key_file.stat.exists
@@ -29,7 +29,7 @@
 
 - name: Creating cert req for {{component}}
   command: >
-    openssl req -out {{generated_certs_dir}}/{{component}}.csr -new -newkey rsa:2048 -keyout {{generated_certs_dir}}/{{component}}.key
+    openssl req -out {{generated_certs_dir}}/{{component}}.csr -new -newkey rsa:4096 -keyout {{generated_certs_dir}}/{{component}}.key
     -subj "/CN={{component}}/OU=OpenShift/O=Logging" -days 712 -nodes
   when:
     - not key_file.stat.exists
