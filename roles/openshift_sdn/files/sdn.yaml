@@ -81,9 +81,13 @@ spec:
           rm -Rf /etc/cni/net.d/80-openshift-network.conf
           cp -Rf /opt/cni/bin/* /host/opt/cni/bin/
 
+          # Load DEBUG_LOGLEVEL
           if [[ -f /etc/sysconfig/origin-node ]]; then
             set -o allexport
             source /etc/sysconfig/origin-node
+          elif [[ -f /etc/sysconfig/atomic-openshift-node ]]; then
+            set -o allexport
+            source /etc/sysconfig/atomic-openshift-node
           fi
 
           # use either the bootstrapped node kubeconfig or the static configuration
