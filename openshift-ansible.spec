@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.92
+Version:        3.11.93
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,21 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Mar 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.93-1
+- Simplify DaemonSet Update (rteague@redhat.com)
+- Remove runhour and runminute from curator config sample (bysnupy@hotmail.com)
+- Ensure kuryr has its own namespace (ltomasbo@redhat.com)
+- Adding new kuryr handler to avoid races (ltomasbo@redhat.com)
+- Logs are already being shipped to journald (jgallego@redhat.com)
+- fluentd: tolerate all taints (jdesousa@redhat.com)
+- Fix typo mistake: appliction 2 application. (jmferrer@paradigmadigital.com)
+- Relax version requirements (sdodson@redhat.com)
+- bug 1685618. Modify default_md for logging cert generation bug 1685655.
+  Update key size for logging cert generation (jcantril@redhat.com)
+- Remove hidden tag for latest Fuse builders #11292 (apupier@redhat.com)
+- Make sure that the user we expect has proper credentials set.
+  (rhowe@redhat.com)
+
 * Wed Mar 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.92-1
 - Include iscsi storage only on non-atomic host installs. (pdd@redhat.com)
 - additional provider network/octavia documentation (tzumainn@redhat.com)
