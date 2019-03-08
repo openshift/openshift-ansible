@@ -56,17 +56,19 @@ def check_swap_in_fstab(module):
         module.fail_json(**result)
     elif res == 1:
         # No grep match, fstab looks good.
-        return False
+        check_result = False
     elif res == 0:
         # There is an uncommented entry for fstab.
-        return True
+        check_result = True
     else:
         # Some other grep error code, we shouldn't get here.
         result = {'failed': True,
                   'changed': False,
-                  'msg': 'unknow problem with grep "^[^#].*swap" /etc/fstab ',
+                  'msg': 'unknown problem with grep "^[^#].*swap" /etc/fstab ',
                   'state': 'unknown'}
         module.fail_json(**result)
+
+    return check_result
 
 
 def check_swapon_status(module):
