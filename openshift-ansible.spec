@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.123
+Version:        3.10.124
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Mar 08 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.124-1
+- Simplify DaemonSet Update (rteague@redhat.com)
+- Make sure that the user we expect has proper credentials set.
+  (rhowe@redhat.com)
+
 * Thu Mar 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.123-1
 - bug 1685618. Modify default_md for logging cert generation bug 1685655.
   Update key size for logging cert generation (jcantril@redhat.com)
