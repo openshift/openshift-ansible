@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.71
+Version:        3.9.72
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Mar 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.72-1
+- Revert "Merge pull request #11286 from patrickdillon/add-ci-evars"
+  (pdd@redhat.com)
+- bug 1685618. Modify default_md for logging cert generation bug 1685655.
+  Update key size for logging cert generation (jcantril@redhat.com)
+- Remove cfme templates from openshift_examples v3.9 directory
+  (simaishi@redhat.com)
+- Templates for CloudForms 4.7
+- Add evars file to push to CI. (pdd@redhat.com)
+- Re-create webconsole secrets and pods after master certs were redeployed
+  (vrutkovs@redhat.com)
+- Add a playbook to redeploy web-console certs (vrutkovs@redhat.com)
+- Update OWNERS file. (pdd@redhat.com)
+- bug 1678442. fix logging env var (jcantril@redhat.com)
+- [release-3.9] Set credentials and proper hostname when updating loopback
+  kubeconfig Make sure that the user we expect has proper credentials set.
+  (rhowe@redhat.com)
+
 * Sat Feb 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.71-1
 - 
 
