@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.93
+Version:        3.11.94
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Mar 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.94-1
+- sdn: respect DEBUG_LOGLEVEL as written out by the "Configure Node settings"
+  task (dcbw@redhat.com)
+- Fix validation of values in image_policy_allowed_registries_for_import
+  (vrutkovs@redhat.com)
+- Don't start/stop docker when openshift_use_crio_only (sdodson@redhat.com)
+
 * Thu Mar 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.93-1
 - Simplify DaemonSet Update (rteague@redhat.com)
 - Remove runhour and runminute from curator config sample (bysnupy@hotmail.com)
