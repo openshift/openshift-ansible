@@ -13,6 +13,11 @@ class MissingComponentPods(OpenShiftCheckException):
     pass
 
 
+class MissingComponentCronJobs(OpenShiftCheckException):
+    """Raised when a component has no cronjobs in the namespace."""
+    pass
+
+
 class CouldNotUseOc(OpenShiftCheckException):
     """Raised when ocutil has a failure running oc."""
     pass
@@ -51,6 +56,25 @@ class LoggingCheck(OpenShiftCheck):
             )
 
         return pods['items']
+
+    def get_cronjobs_for_component(self, logging_component):
+        """Get all cronjobs for a given component. Returns: list of cronjobs."""
+        cron_output = self.exec_oc(
+            "get cronjobs -l component={} -o json".format(logging_component),
+            [],
+        )
+        try:
+            crons = json.loads(cron_output)  # raises ValueError if deserialize fails
+            if not crons or not crons.get('items'):  # also a broken response, treat the same
+                raise ValueError()
+        except ValueError:
+            # successful run but non-parsing data generally means there were no cronjobs to be found
+            raise MissingComponentCronJobs(
+                'There are no "{}" component cronjobs in the "{}" namespace.\n'
+                'Is logging deployed?'.format(logging_component, self.logging_namespace())
+            )
+
+        return crons['items']
 
     @staticmethod
     def not_running_pods(pods):
