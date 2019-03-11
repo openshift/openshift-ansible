@@ -197,7 +197,7 @@ objects:
       spec:
         containers:
         - image: ${CASSANDRA_IMAGE}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: hawkular-cassandra
           env:
           - name: DATA_VOLUME
