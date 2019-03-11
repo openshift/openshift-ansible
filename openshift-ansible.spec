@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.124
+Version:        3.10.125
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Mar 11 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.125-1
+- 
+
 * Fri Mar 08 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.124-1
 - Simplify DaemonSet Update (rteague@redhat.com)
 - Make sure that the user we expect has proper credentials set.
