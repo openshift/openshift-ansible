@@ -27,7 +27,7 @@ COPY images/installer/origin-extra-root /
 RUN yum install -y epel-release && \
     yum-config-manager --enable built > /dev/null && \
     yum install --setopt=tsflags=nodocs -y \
-      openshift-ansible-test origin-clients && \
+      openshift-ansible-test openshift-clients && \
     yum clean all
 
 RUN /usr/local/bin/user_setup \

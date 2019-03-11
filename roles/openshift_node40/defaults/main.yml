@@ -10,11 +10,6 @@ ign_file: "/tmp/bootstrap.ign"
 pull_secret: "{{ files_dir }}/pull-secret"
 tls_verify: false
 
-openshift_service_type_dict:
-  origin: origin
-  openshift-enterprise: atomic-openshift
-openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_type] }}"
-
 openshift_node_install_packages:
   # Packages from old init/base_packages
   - iproute
