@@ -1,5 +1,5 @@
 ---
-- name: Install openshift packages
+- name: Install openshift support packages
   package:
     name: "{{ openshift_node_install_packages | join(',') }}"
     update_cache: true
@@ -18,6 +18,5 @@
   poll: 30
   vars:
     l_node_packages:
-    - "{{ openshift_service_type }}-node"
-    - "{{ openshift_service_type }}-clients"
-    - "{{ openshift_service_type }}-hyperkube"
+    - openshift-clients
+    - openshift-hyperkube
