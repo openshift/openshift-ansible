@@ -72,8 +72,8 @@
   tasks:
   - import_tasks: verify_upgrade_targets.yml
     vars:
-      dedicated_etcds: "{{ groups['oo_etcd_to_config'] | difference(groups['oo_masters']) }}"
-    when: inventory_hostname not in dedicated_etcds
+      not_nodes: "{{ groups['oo_etcd_to_config'] | difference( groups['oo_masters'] | union(groups['oo_nodes_to_config']) ) }}"
+    when: inventory_hostname not in not_nodes
 
 - name: Verify docker upgrade targets
   hosts: "{{ l_upgrade_docker_target_hosts }}"
