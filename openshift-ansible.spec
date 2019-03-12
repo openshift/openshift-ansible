@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.94
+Version:        3.11.95
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,22 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Mar 12 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.95-1
+- Include dedicated etcd in upgrade if they are nodes (rteague@redhat.com)
+- Redeploy admin console certificates when master certs are updated
+  (vrutkovs@redhat.com)
+- bug 1660956. Add container name to elasticsearch exec call
+  (jcantril@redhat.com)
+- openshift-sync: tolerate absence of KUBELET_HOSTNAME_OVERRIDE
+  (sdodson@redhat.com)
+- bug 1676720. Check for curator cronjob (jcantril@redhat.com)
+- Increase etcd quota to 8GB. (jnovy@redhat.com)
+- Fix version_requirement callback plugin (rteague@redhat.com)
+- Encode the cert when loading it (waseemhassanshahid@gmail.com)
+- Update roles/openshift_examples/files/examples/x86_64/xpaas-streams/eap-cd-
+  image-stream.json (roignac@gmail.com)
+- Add EAP CD 15 to xpass templates (ken@zaptillion.net)
+
 * Sun Mar 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.94-1
 - sdn: respect DEBUG_LOGLEVEL as written out by the "Configure Node settings"
   task (dcbw@redhat.com)
