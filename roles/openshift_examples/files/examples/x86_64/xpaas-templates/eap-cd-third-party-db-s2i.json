@@ -4,12 +4,12 @@
     "metadata": {
         "annotations": {
             "iconClass": "icon-eap",
-            "tags": "eap,javaee,java,jboss,hidden",
-            "version": "1.5.0",
-            "openshift.io/display-name": "JBoss EAP CD (with https, DB drivers)",
+            "tags": "eap,javaee,java,jboss",
+            "version": "15.0",
+            "openshift.io/display-name": "JBoss EAP CD 15 (with passthrough TLS, DB drivers)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Enterprise Application Platform continuous delivery application. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap-cd/README.adoc.",
-            "template.openshift.io/long-description": "This template defines resources needed to develop JBoss Enterprise Application Server continuous delivery based application, including a build configuration, application deployment configuration, using third-party DB drivers and secure communication using https.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop JBoss Enterprise Application Server continuous delivery based application, including a build configuration, application deployment configuration, using third-party DB drivers and secure communication using passthrough TLS.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap-cd-third-party-db-s2i",
-        "xpaas": "1.5.0"
+        "xpaas": "15.0"
     },
     "message": "A new EAP 7 based application with SSL support has been created in your project. Please be sure to create the following secrets:\"${CONFIGURATION_NAME}\" containing the datasource configuration details required by the deployed application(s);  \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -287,6 +287,7 @@
             "kind": "Service",
             "apiVersion": "v1",
             "spec": {
+                "publishNotReadyAddresses": true,
                 "clusterIP": "None",
                 "ports": [
                     {
@@ -416,10 +417,11 @@
                             }
                         ],
                         "forcePull": true,
+                        "incremental": true,
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "eap-cd-openshift:13"
+                            "name": "eap-cd-openshift:15"
                         }
                     }
                 },

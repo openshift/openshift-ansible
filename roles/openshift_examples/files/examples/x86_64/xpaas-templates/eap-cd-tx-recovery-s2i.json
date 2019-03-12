@@ -4,12 +4,12 @@
     "metadata": {
         "annotations": {
             "iconClass": "icon-eap",
-            "tags": "eap,javaee,java,jboss",
-            "version": "1.5.0",
-            "openshift.io/display-name": "JBoss EAP CD + AMQ 7 (tx recovery)",
+            "tags": "eap,javaee,java,jboss,hidden",
+            "version": "15.0",
+            "openshift.io/display-name": "JBoss EAP CD 15 + AMQ 7 (tx recovery)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Enterprise Application Platform continuous delivery application with transaction recovery configured. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap-cd/README.adoc",
-            "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform continuous delivery based application, including a build configuration, application deployment configuration and insecure communication using http.  The template also demonstrates how to enable automated transaction recovery on scale down of application pods.  Automated transaction recovery is currently Technology Preview.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform continuous delivery based application, including a build configuration, application deployment configuration and insecure communication using http. The template also demonstrates how to enable automated transaction recovery on scale down of application pods.  Automated transaction recovery is currently Technology Preview.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap-cd-tx-recovery-s2i",
-        "xpaas": "1.5.0"
+        "xpaas": "15.0"
     },
     "message": "A new JBoss EAP CD based application has been created in your project.",
     "parameters": [
@@ -39,7 +39,7 @@
             "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "1.3",
+            "value": "1.4",
             "required": false
         },
         {
@@ -88,7 +88,7 @@
             "displayName": "Queues",
             "description": "Queue names, separated by commas. These queues will be automatically created when the broker starts. Also, they will be made accessible as JNDI resources in EAP. Note that all queues used by the application *must* be specified here in order to be created automatically on the remote AMQ broker.",
             "name": "MQ_QUEUES",
-            "value": "jta-crash-rec-quickstart",
+            "value": "jms.queue.jta-crash-rec-quickstart",
             "required": false
         },
         {
@@ -230,6 +230,30 @@
     ],
     "objects": [
         {
+            "apiVersion": "v1",
+            "kind": "ServiceAccount",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-sa"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "RoleBinding",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-role-binding"
+            },
+            "subjects": [
+                {
+                    "kind": "ServiceAccount",
+                    "name": "${APPLICATION_NAME}-sa"
+                }
+            ],
+            "roleRef": {
+                "kind": "Role",
+                "name": "view"
+            }
+        },
+        {
             "kind": "Service",
             "apiVersion": "v1",
             "spec": {
@@ -257,6 +281,7 @@
             "kind": "Service",
             "apiVersion": "v1",
             "spec": {
+                "publishNotReadyAddresses": true,
                 "clusterIP": "None",
                 "ports": [
                     {
@@ -394,10 +419,11 @@
                             }
                         ],
                         "forcePull": true,
+                        "incremental": true,
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "eap-cd-openshift:13"
+                            "name": "eap-cd-openshift:15"
                         }
                     }
                 },
@@ -474,6 +500,7 @@
                         }
                     },
                     "spec": {
+                        "serviceAccountName": "${APPLICATION_NAME}-sa",
                         "terminationGracePeriodSeconds": 75,
                         "containers": [
                             {
@@ -553,7 +580,7 @@
                                         "value": "${MQ_QUEUES}"
                                     },
                                     {
-                                        "name": "MQ_TOPICS",
+                                        "name": "MQ_ADDRESSES",
                                         "value": "${MQ_TOPICS}"
                                     },
                                     {
@@ -575,10 +602,6 @@
                                     {
                                         "name": "MQ_CLUSTER_PASSWORD",
                                         "value": "${MQ_CLUSTER_PASSWORD}"
-                                    },
-                                    {
-                                        "name": "MQ_SERIALIZABLE_PACKAGES",
-                                        "value": "${MQ_SERIALIZABLE_PACKAGES}"
                                     },
                                     {
                                         "name": "JGROUPS_CLUSTER_PASSWORD",
@@ -638,7 +661,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "amq-broker-71-openshift:1.0"
+                                "name": "amq-broker-72-openshift:1.1"
                             }
                         }
                     },
@@ -663,7 +686,7 @@
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}-amq",
-                                "image": "amq-broker-71-openshift",
+                                "image": "amq-broker-72-openshift",
                                 "imagePullPolicy": "Always",
                                 "readinessProbe": {
                                     "exec": {
@@ -834,6 +857,7 @@
                         }
                     },
                     "spec": {
+                        "serviceAccountName": "${APPLICATION_NAME}-sa",
                         "terminationGracePeriodSeconds": 75,
                         "containers": [
                             {
@@ -912,7 +936,7 @@
                                         "value": "${MQ_QUEUES}"
                                     },
                                     {
-                                        "name": "MQ_TOPICS",
+                                        "name": "MQ_ADDRESSES",
                                         "value": "${MQ_TOPICS}"
                                     },
                                     {

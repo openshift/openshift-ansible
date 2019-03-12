@@ -5,11 +5,11 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss,hidden",
-            "version": "1.5.0",
-            "openshift.io/display-name": "JBoss EAP CD + Single Sign-On (with https)",
+            "version": "15.0",
+            "openshift.io/display-name": "JBoss EAP CD 15 + Single Sign-On with passthrough TLS",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Enterprise Application Platform continuous delivery application Single Sign-On application. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap-cd/README.adoc",
-            "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform continuous delivery based application, including a build configuration, application deployment configuration and integrated with Red Hat Single Sign-On.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform continuous delivery based application, including a build configuration, application deployment configuration, integrated with Red Hat Single Sign-On and secure communication using passthrough TLS.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap-cd-sso-s2i",
-        "xpaas": "1.5.0"
+        "xpaas": "15.0"
     },
     "message": "A new JBoss EAP CD based application with SSL and SSO support has been created in your project. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -387,6 +387,7 @@
             "kind": "Service",
             "apiVersion": "v1",
             "spec": {
+                "publishNotReadyAddresses": true,
                 "clusterIP": "None",
                 "ports": [
                     {
@@ -477,18 +478,38 @@
                         "uri": "${SOURCE_REPOSITORY_URL}",
                         "ref": "${SOURCE_REPOSITORY_REF}"
                     },
-                    "contextDir": "${CONTEXT_DIR}"
+                    "contextDir": "${CONTEXT_DIR}",
+                    "images": [
+                        {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "redhat-sso-cd-openshift:1.0"
+                            },
+                            "paths": [
+                                {
+                                    "destinationDir": "./${CONTEXT_DIR}/extensions/sso-adapters",
+                                    "sourcePath": "/opt/rh/rh-sso/client/eap7/."
+                                }
+                            ]
+                        }
+                    ]
                 },
                 "strategy": {
                     "type": "Source",
                     "sourceStrategy": {
                         "forcePull": true,
+                        "incremental": true,
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "eap-cd-openshift:13"
+                            "name": "eap-cd-openshift:15"
                         },
                         "env": [
+                            {
+                                "name": "CUSTOM_INSTALL_DIRECTORIES",
+                                "value": "extensions/*"
+                            },
                             {
                                 "name": "ARTIFACT_DIR",
                                 "value": "${ARTIFACT_DIR}"
