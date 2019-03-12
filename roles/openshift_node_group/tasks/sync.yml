@@ -27,7 +27,7 @@
 - name: Ensure the service account can run privileged
   oc_adm_policy_user:
     namespace: "openshift-node"
-    resource_kind: scc
+    resource_kind: securitycontextconstraints.security.openshift.io
     resource_name: privileged
     state: present
     user: "system:serviceaccount:openshift-node:sync"
@@ -37,7 +37,7 @@
   command: >
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    delete -n openshift-node istag node:v3.10 --ignore-not-found
+    delete -n openshift-node imagestreamtags.image.openshift.io node:v3.10 --ignore-not-found
   register: l_os_istag_del
   # The istag might not be there, so we want to not fail in that case.
   failed_when:

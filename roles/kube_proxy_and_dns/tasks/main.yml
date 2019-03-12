@@ -27,7 +27,7 @@
 - name: Ensure the service account can run privileged
   oc_adm_policy_user:
     namespace: "kube-proxy-and-dns"
-    resource_kind: scc
+    resource_kind: securitycontextconstraints.security.openshift.io
     resource_name: privileged
     state: present
     user: "system:serviceaccount:kube-proxy-and-dns:proxy"
