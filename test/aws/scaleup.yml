@@ -33,6 +33,8 @@
       openshift_version: "4.0"
 
 - import_playbook: ../../playbooks/scaleup.yml
+  vars:
+    openshift_kubeconfig_path: "{{ kubeconfig_path }}"
 
 - name: wait for nodes to join
   hosts: new_workers
