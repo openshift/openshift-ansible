@@ -22,7 +22,7 @@
   command: >
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    delete -n openshift-infra istag node:v3.11 --ignore-not-found
+    delete -n openshift-infra imagestreamtags.image.openshift.io node:v3.11 --ignore-not-found
   register: l_os_istag_del
   # The istag might not be there, so we want to not fail in that case.
   failed_when:
