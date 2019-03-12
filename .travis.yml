@@ -14,7 +14,7 @@ python:
 
 install:
   - pip install --upgrade pip
-  - pip install tox-travis coveralls
+  - pip install tox-travis
 
 script:
   - tox
@@ -32,6 +32,3 @@ after_failure:
   - pip_debug_log=/home/travis/.cache/pip/log/debug.log
   - echo Outputting pip debug log from $pip_debug_log
   - cat $pip_debug_log
-
-after_success:
-  - coveralls
