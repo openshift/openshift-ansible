@@ -1,14 +1,14 @@
 ---
-openshift_node_kubeconfig: "{{ lookup('file', kubeconfig_path) | from_yaml }}"
-openshift_node_bootstrap_port: 22623
-openshift_node_bootstrap_machineconfigpool: 'worker'
-openshift_node_bootstrap_server: "{{ openshift_node_kubeconfig.clusters.0.cluster.server.split(':')[0:-1] | join(':') }}:{{ openshift_node_bootstrap_port }}"
-openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config/{{ openshift_node_bootstrap_machineconfigpool }}"
+openshift_kubeconfig_path: '~/.kube/config'
+openshift_pull_secret_path: '~/pull-secret.txt'
 
-openshift_release_image: "registry.svc.ci.openshift.org/openshift/origin-release:v4.0"
-ign_file: "/tmp/bootstrap.ign"
-pull_secret: "{{ files_dir }}/pull-secret"
-tls_verify: false
+openshift_node_machineconfigpool: 'worker'
+openshift_node_tls_verify: false
+
+openshift_node_kubeconfig: "{{ lookup('file', openshift_kubeconfig_path) | from_yaml }}"
+openshift_node_bootstrap_port: 22623
+openshift_node_bootstrap_server: "{{ openshift_node_kubeconfig.clusters.0.cluster.server.split(':')[0:-1] | join(':') }}:{{ openshift_node_bootstrap_port }}"
+openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config/{{ openshift_node_machineconfigpool }}"
 
 openshift_node_install_packages:
   # Packages from old init/base_packages

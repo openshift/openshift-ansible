@@ -22,6 +22,11 @@
     state: yes
     persistent: yes
 
+- name: create temp directory
+  tempfile:
+    state: directory
+  register: tempfile
+
 - name: Wait for bootstrap endpoint to show up
   uri:
     url: "{{ openshift_node_bootstrap_endpoint }}"
@@ -36,22 +41,17 @@
 - name: Fetch bootstrap ignition file locally
   uri:
     url: "{{ openshift_node_bootstrap_endpoint }}"
-    dest: "{{ ign_file }}"
+    dest: "{{ tempfile.path }}/bootstrap.ign"
     validate_certs: false
-
-- name: create temp directory
-  tempfile:
-    state: directory
-  register: tempfile
 
 - name: Copy pull secret in the directory
   copy:
-    src: "{{ pull_secret }}"
+    src: "{{ openshift_pull_secret_path }}"
     dest: "{{ tempfile.path }}/pull-secret.json"
 
 - name: Get release image
   k8s_facts:
-    kubeconfig: "{{ kubeconfig_path }}"
+    kubeconfig: "{{ openshift_kubeconfig_path }}"
     kind: ClusterVersion
     name: version
   delegate_to: localhost
@@ -70,7 +70,7 @@
     openshift_release_image: "{{ clusterversion.resources[0].status.desired.image }}"
 
 - name: Pull release image
-  command: "podman pull --tls-verify={{ tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ openshift_release_image }}"
+  command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ openshift_release_image }}"
 
 - name: Get machine controller daemon image from release image
   command: "podman run --rm {{ openshift_release_image }} image machine-config-daemon"
@@ -78,14 +78,14 @@
 
 - block:
   - name: Pull MCD image
-    command: "podman pull --tls-verify={{ tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ release_image_mcd.stdout }}"
+    command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ release_image_mcd.stdout }}"
 
   - name: Apply ignition manifest
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
     vars:
       podman_flags: "--privileged --rm -ti {{ release_image_mcd.stdout }}"
       podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
-      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ ign_file }}"
+      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ tempfile.path }}/bootstrap.ign"
     # MCD reboots the machine, run the task but do not wait for completion
     register: manifest_apply
     async: 900  # 15 minutes
