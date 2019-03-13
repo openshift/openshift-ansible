@@ -10,7 +10,7 @@ RHDM_7_TAG=7.2.1.GA
 RHPAM_7_TAG=7.2.1.GA
 DG_VERSION=7.3-v1.0
 ORIGIN_VERSION=${1:-v3.11}
-ORIGIN_BRANCH=${2:-master}
+ORIGIN_BRANCH=${2:-release-3.11}
 RHAMP_TAG=2.0.0.GA
 EXAMPLES_BASE=$(pwd)/files/examples/x86_64
 find ${EXAMPLES_BASE} -name '*.json' -delete

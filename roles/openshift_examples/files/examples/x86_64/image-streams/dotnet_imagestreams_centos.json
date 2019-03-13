@@ -58,9 +58,9 @@
                         "name": "2.0",
                         "annotations": {
                             "openshift.io/display-name": ".NET Core 2.0",
-                            "description": "Build and run .NET Core 2.0 applications on CentOS 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.0/build/README.md.",
+                            "description": "RETIRED: Build and run .NET Core 2.0 applications on CentOS 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.0/build/README.md.",
                             "iconClass": "icon-dotnet",
-                            "tags": "builder,.net,dotnet,dotnetcore,rh-dotnet20",
+                            "tags": "hidden,builder,.net,dotnet,dotnetcore,rh-dotnet20",
                             "supports":"dotnet:2.0,dotnet",
                             "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
                             "sampleContextDir": "app",
@@ -119,9 +119,9 @@
                         "name": "2.0",
                         "annotations": {
                             "openshift.io/display-name": ".NET Core 2.0 Runtime",
-                            "description": "Run .NET Core applications on CentOS 7. For more information about using this image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.0/runtime/README.md.",
+                            "description": "RETIRED: Run .NET Core applications on CentOS 7. For more information about using this image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.0/runtime/README.md.",
                             "iconClass": "icon-dotnet",
-                            "tags": "runtime,.net-runtime,dotnet-runtime,dotnetcore-runtime",
+                            "tags": "hidden,runtime,.net-runtime,dotnet-runtime,dotnetcore-runtime",
                             "supports":"dotnet-runtime",
                             "version": "2.0"
                         },
