@@ -39,13 +39,7 @@
   command: >
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    delete -n openshift-sdn istag node:v3.11 --ignore-not-found
-  register: l_os_istag_del
-  # The istag might not be there, so we want to not fail in that case.
-  failed_when:
-    - l_os_istag_del.rc != 0
-    - "'have a resource type' not in l_os_istag_del.stderr"
-
+    delete -n openshift-sdn imagestreamtags.image.openshift.io node:v3.11 --ignore-not-found
 
 - name: Apply the config
   shell: >

@@ -37,12 +37,7 @@
   command: >
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    delete -n openshift-node istag node:v3.11 --ignore-not-found
-  register: l_os_istag_del
-  # The istag might not be there, so we want to not fail in that case.
-  failed_when:
-    - l_os_istag_del.rc != 0
-    - "'have a resource type' not in l_os_istag_del.stderr"
+    delete -n openshift-node imagestreamtags.image.openshift.io node:v3.11 --ignore-not-found
 
 - name: Remove existing pods if present
   oc_obj:

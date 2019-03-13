@@ -2012,11 +2012,11 @@ class PolicyUserConfig(OpenShiftCLIConfig):
     def get_kind(self):
         ''' return the kind we are working with '''
         if self.config_options['resource_kind']['value'] == 'role':
-            return 'rolebinding'
+            return 'rolebinding.rbac.authorization.k8s.io'
         elif self.config_options['resource_kind']['value'] == 'cluster-role':
-            return 'clusterrolebinding'
+            return 'clusterrolebinding.rbac.authorization.k8s.io'
         elif self.config_options['resource_kind']['value'] == 'scc':
-            return 'scc'
+            return 'scc.security.openshift.io'
 
         return None
 
