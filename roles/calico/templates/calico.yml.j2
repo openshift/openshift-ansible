@@ -210,9 +210,11 @@ spec:
                 configMapKeyRef:
                   name: calico-config
                   key: etcd_cert
-            # Auto-detect the BGP IP address.
+            # Use hostIP as the BGP IP address.
             - name: IP
-              value: ""
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
             - name: FELIX_HEALTHENABLED
               value: "true"
           securityContext:
