@@ -253,7 +253,7 @@
             "displayName": ".NET builder",
             "required": true,
             "description": "The image stream tag which is used to build the code.",
-            "value": "dotnet:2.1"
+            "value": "dotnet:2.2"
         },
         {
             "name": "NAMESPACE",
@@ -273,7 +273,7 @@
             "name": "SOURCE_REPOSITORY_REF",
             "displayName": "Git Reference",
             "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch.",
-            "value": "dotnetcore-2.1"
+            "value": "dotnetcore-2.2"
         },
         {
             "name": "CONTEXT_DIR",
