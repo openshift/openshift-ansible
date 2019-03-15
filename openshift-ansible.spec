@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.125
+Version:        3.10.126
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Mar 15 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.126-1
+- Rely on oc_adm_policy_user to fully qualify things (sdodson@redhat.com)
+- don't tolerate absence of resource type (sdodson@redhat.com)
+- Don't rely on aliases after restarting apiservers (sdodson@redhat.com)
+- openshift-sync: tolerate absence of KUBELET_HOSTNAME_OVERRIDE
+  (sdodson@redhat.com)
+- Remove cfme templates from openshift_examples directory (simaishi@redhat.com)
+- Templates for CloudForms 4.7
+
 * Mon Mar 11 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.125-1
 - 
 
