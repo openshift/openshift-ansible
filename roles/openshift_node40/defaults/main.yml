@@ -1,0 +1,26 @@
+---
+openshift_node_kubeconfig: "{{ lookup('file', kubeconfig_path) | from_yaml }}"
+openshift_node_bootstrap_port: 22623
+openshift_node_bootstrap_machineconfigpool: 'worker'
+openshift_node_bootstrap_server: "{{ openshift_node_kubeconfig.clusters.0.cluster.server.split(':')[0:-1] | join(':') }}:{{ openshift_node_bootstrap_port }}"
+openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config/{{ openshift_node_bootstrap_machineconfigpool }}"
+
+openshift_release_image: "registry.svc.ci.openshift.org/openshift/origin-release:v4.0"
+ign_file: "/tmp/bootstrap.ign"
+pull_secret: "{{ files_dir }}/pull-secret"
+tls_verify: false
+
+openshift_node_install_packages:
+  # Packages from old init/base_packages
+  - iproute
+  - dbus-python
+  - PyYAML
+  - libsemanage-python
+  - yum-utils
+  - python-docker-py
+  - systemd-journal-gateway
+  - python-ipaddress
+  # Packages from old roles/container_runtime
+  - cri-o
+  - cri-tools
+  - podman

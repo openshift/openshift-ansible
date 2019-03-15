@@ -1,0 +1,3 @@
+---
+ansible_become: yes
+openshift_deployment_type: origin

@@ -1,0 +1,20 @@
+{
+  "cluster_id": "${OCP_CLUSTER_ID}",
+  "cluster_name": "${OCP_CLUSTER_NAME}",
+  "base_domain": "${OCP_BASE_DOMAIN}",
+  "master_count": ${OCP_MASTERS},
+  "worker_count": ${OCP_WORKERS},
+
+"libvirt_uri": "${OCP_LIBVIRT_URI}",
+"os_image": "${OCP_IMAGE}",
+"libvirt_network_if": "${OCP_NETDEV}",
+"libvirt_ip_range": "${OCP_NETCIDR}",
+"libvirt_master_ips": [
+  ${OCP_MASTER_IPS}
+],
+"libvirt_worker_ips": [
+  ${OCP_WORKER_IPS}
+],
+"libvirt_bootstrap_ip": "${OCP_BOOTSTRAP_IP}",
+"ssh_key": "${OCP_SSH_PUB_KEY}"
+}

@@ -1,0 +1,10 @@
+---
+openshift_additional_repos:
+  - name: "origin-pr"
+    baseurl: "https://rpms.svc.ci.openshift.org/openshift-origin-v4.0/"
+    enabled: 1
+    gpgcheck: 0
+  - name: "origin-pr-dependencies"
+    baseurl: "https://cbs.centos.org/repos/paas7-openshift-origin311-testing/x86_64/os/"
+    enabled: 1
+    gpgcheck: 0

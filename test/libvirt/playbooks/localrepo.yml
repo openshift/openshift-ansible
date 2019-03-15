@@ -1,0 +1,14 @@
+---
+- hosts: nodes
+  tasks:
+    - command: "{{ ansible_pkg_mgr }} install buildah -y"
+    - name: Transfer the buildah script
+      template:
+        src: buildah_repo.sh
+        dest: /root
+    - name: Execute buildah script
+      command: sh /root/buildah_repo.sh
+    - name: Create local repo file
+      copy:
+        src: openshift-local.repo
+        dest: /etc/yum.repos.d/openshift-local.repo

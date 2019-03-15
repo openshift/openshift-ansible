@@ -1,0 +1,25 @@
+#!/bin/bash
+
+export OCP_BASE_DOMAIN="ttb.testing"
+export OCP_CLUSTER_ID=$(uuidgen --random)
+export OCP_MASTERS=1
+export OCP_WORKERS=1
+export OCP_CLUSTER_NAME="byo-dev"
+export OCP_PULL_SECRET=$(cat ~/try.openshift.com.json)
+export OCP_SSH_PUB_KEY=$(cat ~/.ssh/id_rsa.pub)
+export OCP_NETDEV=ttb0
+export OCP_NETCIDR="192.168.128.0/24"
+# OCP_MASTERS is a list of quoted ips, no trailing comma.  eg:
+# "\"192.168.128.11\", \"192.168.128.12\""
+export OCP_MASTER_IPS=\"192.168.128.11\"
+export OCP_BOOTSTRAP_IP="192.168.128.10"
+export OCP_WORKER_IPS=\"192.168.128.21\"
+export OCP_LIBVIRT_URI='qemu+tcp://192.168.124.1/system'
+export OCP_INSTALL_CONFIG_PATH="$PWD/install-config-ansible.yml"
+export OCP_IGNITION_PATH="$PWD/bootstrap.ign"
+
+export ANSIBLE_HOST_KEY_CHECKING=False
+
+# RHEL specific stuff
+export OCP_IMAGE=~/images/rhel-guest-image-7.5-146.x86_64.qcow2
+export OCP_SSH_USER="cloud-user"

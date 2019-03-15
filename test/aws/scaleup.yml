@@ -1,0 +1,137 @@
+---
+- name: create new nodes
+  hosts: localhost
+  connection: local
+  tasks:
+  - import_tasks: ssh_bastion.yml
+
+  - import_tasks: get_machinesets.yml
+
+  - include_tasks: create_machineset.yml
+    loop: "{{ machineset.resources }}"
+    when:
+    - item.status.replicas is defined
+    - item.status.replicas != 0
+
+- name: wait for nodes to become available
+  hosts: new_workers
+  gather_facts: false
+  tasks:
+  - wait_for_connection: {}
+  - setup: {}
+  - name: Copy ops-mirror.pem
+    copy:
+      src: ../../inventory/dynamic/injected/ops-mirror.pem
+      dest: /var/lib/yum/ops-mirror.pem
+      owner: root
+      group: root
+      mode: 0644
+  - name: Initialize openshift repos
+    import_role:
+      name: openshift_repos
+    vars:
+      openshift_version: "4.0"
+
+- import_playbook: ../../playbooks/openshift-node/scaleup.yml
+
+- name: wait for nodes to join
+  hosts: new_workers
+  tasks:
+  - name: HACK disable selinux
+    selinux:
+      policy: targeted
+      state: permissive
+  - name: Create core user for storage tests to pass
+    user:
+      name: core
+      group: wheel
+  - name: Make sure core user has ssh config directory
+    file:
+      name: /home/core/.ssh
+      state: directory
+      owner: core
+      group: wheel
+      mode: 0700
+  - name: Install nfs-utils for storage tests
+    package:
+      name: nfs-utils
+      state: present
+  - name: Wait for new nodes to be ready
+    k8s_facts:
+      kubeconfig: "{{ kubeconfig_path }}"
+      kind: Node
+      name: "{{ node_name }}"
+    delegate_to: localhost
+    register: new_machine
+    until:
+    - new_machine.resources is defined
+    - new_machine.resources | length > 0
+    - new_machine.resources[0].status is defined
+    - new_machine.resources[0].status.conditions is defined
+    - new_machine.resources[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+    # Give the node three minutes to come back online.
+    retries: 48
+    delay: 30
+    ignore_errors: true
+  - when: new_machine is failed
+    block:
+    - name: Collect a list of containers
+      command: crictl ps -a -q
+      register: crictl_ps_output
+    - name: Collect container logs
+      command: "crictl logs {{ item }}"
+      register: crictl_logs_output
+      with_items: "{{ crictl_ps_output.stdout_lines }}"
+      ignore_errors: true
+    - name: Get crio logs
+      command: journalctl --no-pager -u cri-o
+      register: crio_logs
+      ignore_errors: true
+    - name: Get kubelet logs
+      command: journalctl --no-pager -u kubelet
+      register: kubelet_logs
+      ignore_errors: tru
+    - debug:
+        var: crictl_logs_output
+    - debug:
+        msg: "{{ kubelet_logs.stdout_lines }}"
+    - debug:
+        msg: "{{ crio_logs.stdout_lines }}"
+    - fail:
+        msg: Node failed to become Ready
+
+- name: Remove CoreOS nodes
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: Mark CoreOS nodes as unschedulable
+    command: >
+      oc adm cordon {{ item | lower }}
+      --config={{ kubeconfig_path }}
+    with_items: "{{ pre_scaleup_workers_name }}"
+
+  - name: Drain CoreOS nodes
+    command: >
+      oc adm drain {{ item | lower }}
+      --config={{ kubeconfig_path }}
+      --force --delete-local-data --ignore-daemonsets
+      --timeout=0s
+    with_items: "{{ pre_scaleup_workers_name }}"
+
+  - name: remove existing machinesets
+    k8s:
+      api_version: machine.openshift.io/v1beta1
+      kubeconfig: "{{ kubeconfig_path }}"
+      namespace: openshift-machine-api
+      kind: MachineSet
+      name: "{{ item }}"
+      state: absent
+    with_items: "{{ pre_scaleup_machineset_names }}"
+
+  - name: Delete CoreOS nodes
+    k8s:
+      kubeconfig: "{{ kubeconfig_path }}"
+      kind: Node
+      name: "{{ item }}"
+      state: absent
+    with_items: "{{ pre_scaleup_workers_name }}"

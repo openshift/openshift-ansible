@@ -1,0 +1,8 @@
+[openshift-local]
+name=openshift-local
+baseurl=file:///root/rpms/
+enabled=1
+metadata_expire=7d
+repo_gpgcheck=0
+type=rpm
+gpgcheck=0
