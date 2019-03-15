@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.95
+Version:        3.11.96
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Mar 14 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.96-1
+- Update origin and dotnet content (sdodson@redhat.com)
+- add race condition protection when creating projects (tzumainn@redhat.com)
+- Rely on oc_adm_policy_user to fully qualify things (sdodson@redhat.com)
+- don't tolerate absence of resource type (sdodson@redhat.com)
+- Don't rely on aliases after restarting apiservers (sdodson@redhat.com)
+
 * Tue Mar 12 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.95-1
 - Include dedicated etcd in upgrade if they are nodes (rteague@redhat.com)
 - Redeploy admin console certificates when master certs are updated
