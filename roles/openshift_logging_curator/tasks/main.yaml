@@ -33,6 +33,8 @@
     name: "aggregated-logging-curator"
     namespace: "{{ openshift_logging_namespace }}"
     image_pull_secrets: "{{ openshift_logging_curator_image_pull_secret }}"
+    secrets:
+      - logging-curator
   when: openshift_logging_curator_image_pull_secret != ''
 
 - name: Create Curator service account
@@ -40,6 +42,8 @@
     state: present
     name: "aggregated-logging-curator"
     namespace: "{{ openshift_logging_namespace }}"
+    secrets:
+      - logging-curator
   when:
     - openshift_logging_curator_image_pull_secret == ''
 
