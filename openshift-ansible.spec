@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.72
+Version:        3.9.73
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Mar 16 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.73-1
+- Change the example docker_version for 3.9 and higher
+  (gabriel.mainberger@vshn.net)
+
 * Sat Mar 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.72-1
 - Revert "Merge pull request #11286 from patrickdillon/add-ci-evars"
   (pdd@redhat.com)
