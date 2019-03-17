@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.96
+Version:        3.11.97
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Mar 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.97-1
+- Change the example docker_version for 3.9 and higher
+  (gabriel.mainberger@vshn.net)
+
 * Thu Mar 14 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.96-1
 - Update origin and dotnet content (sdodson@redhat.com)
 - add race condition protection when creating projects (tzumainn@redhat.com)
