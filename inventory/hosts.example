@@ -131,7 +131,7 @@ debug_level=2
 
 # Specify exact version of Docker to configure or upgrade to.
 # Downgrades are not supported and will error out. Be careful when upgrading docker from < 1.10 to > 1.10.
-# docker_version="1.12.1"
+# docker_version="1.13.1"
 
 # Specify whether to run Docker daemon with SELinux enabled in containers. Default is True.
 # Uncomment below to disable; for example if your kernel does not support the
