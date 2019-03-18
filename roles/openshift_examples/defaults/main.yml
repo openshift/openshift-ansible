@@ -22,6 +22,7 @@ cockpit_ui_base: "{{ examples_base }}/infrastructure-templates/enterprise"
 
 openshift_examples_import_command: "create"
 registry_host: "{{ openshift_examples_registryurl.split('/')[0] if '.' in openshift_examples_registryurl.split('/')[0] else '' }}"
+satellite_prefix: "{{ openshift_examples_registryurl.split('$')[0] if '.' in openshift_examples_registryurl.split('$')[0] else '' }}"
 
 openshift_hosted_images_dict:
   origin: 'docker.io/openshift/origin-${component}:${version}'
