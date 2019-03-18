@@ -53,6 +53,8 @@
     name: "aggregated-logging-mux"
     namespace: "{{ openshift_logging_mux_namespace }}"
     image_pull_secrets: "{{ openshift_logging_image_pull_secret }}"
+    secrets:
+    - logging-mux
   when: openshift_logging_image_pull_secret != ''
 
 - name: Create Mux service account
@@ -60,6 +62,8 @@
     state: present
     name: "aggregated-logging-mux"
     namespace: "{{ openshift_logging_mux_namespace }}"
+    secrets:
+    - logging-mux
   when:
   - openshift_logging_image_pull_secret == ''
 
