@@ -7,6 +7,7 @@ calico_node_image: "quay.io/calico/node:v3.5.0"
 calico_cni_image: "quay.io/calico/cni:v3.5.0"
 calicoctl_image: "quay.io/calico/ctl:v3.5.0"
 calico_upgrade_image: "quay.io/calico/upgrade:v1.0.5"
+calico_ip_autodetection_method: "first-found"
 use_calico_etcd: False
 
 # Configure the IP Pool(s) from which Pod IPs will be chosen.
