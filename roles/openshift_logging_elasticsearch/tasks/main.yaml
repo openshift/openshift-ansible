@@ -66,6 +66,8 @@
     name: "aggregated-logging-elasticsearch"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     image_pull_secrets: "{{ openshift_logging_elasticsearch_image_pull_secret }}"
+    secrets:
+    - logging-elasticsearch
   when: openshift_logging_elasticsearch_image_pull_secret != ''
 
 - name: Create ES service account
@@ -73,6 +75,8 @@
     state: present
     name: "aggregated-logging-elasticsearch"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    secrets:
+    - logging-elasticsearch
   when:
   - openshift_logging_elasticsearch_image_pull_secret == ''
 

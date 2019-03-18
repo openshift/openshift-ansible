@@ -44,6 +44,8 @@
     name: "aggregated-logging-mux"
     namespace: "{{ openshift_logging_mux_namespace }}"
     image_pull_secrets: "{{ openshift_logging_mux_image_pull_secret }}"
+    secrets:
+      - logging-mux
   when: openshift_logging_mux_image_pull_secret != ''
 
 - name: Create Mux service account
@@ -51,8 +53,10 @@
     state: present
     name: "aggregated-logging-mux"
     namespace: "{{ openshift_logging_mux_namespace }}"
+    secrets:
+      - logging-mux
   when:
-  - openshift_logging_mux_image_pull_secret == ''
+    - openshift_logging_mux_image_pull_secret == ''
 
 # set service account scc
 - name: Set privileged permissions for Mux
@@ -99,10 +103,10 @@
     configmap_name: "logging-mux"
     configmap_namespace: "{{ openshift_logging_mux_namespace }}"
     configmap_file_names:
-    - current_file: "fluent.conf"
-      new_file: "{{ tempdir }}/fluent-mux.conf"
-    - current_file: "secure-forward.conf"
-      new_file: "{{ tempdir }}/secure-forward-mux.conf"
+      - current_file: "fluent.conf"
+        new_file: "{{ tempdir }}/fluent-mux.conf"
+      - current_file: "secure-forward.conf"
+        new_file: "{{ tempdir }}/secure-forward-mux.conf"
 
 - name: Set Mux configmap
   oc_configmap:
@@ -120,14 +124,14 @@
     name: logging-mux
     namespace: "{{ openshift_logging_mux_namespace }}"
     files:
-    - name: ca
-      path: "{{ generated_certs_dir }}/ca.crt"
-    - name: key
-      path: "{{ generated_certs_dir }}/system.logging.mux.key"
-    - name: cert
-      path: "{{ generated_certs_dir }}/system.logging.mux.crt"
-    - name: shared_key
-      path: "{{ generated_certs_dir }}/mux_shared_key"
+      - name: ca
+        path: "{{ generated_certs_dir }}/ca.crt"
+      - name: key
+        path: "{{ generated_certs_dir }}/system.logging.mux.key"
+      - name: cert
+        path: "{{ generated_certs_dir }}/system.logging.mux.crt"
+      - name: shared_key
+        path: "{{ generated_certs_dir }}/mux_shared_key"
 
 # services
 - name: Set logging-mux service for external communication
@@ -141,11 +145,11 @@
     labels:
       logging-infra: 'support'
     ports:
-    - name: mux-forward
-      port: "{{ openshift_logging_mux_port }}"
-      targetPort: "mux-forward"
+      - name: mux-forward
+        port: "{{ openshift_logging_mux_port }}"
+        targetPort: "mux-forward"
     external_ips:
-    - "{{ openshift_logging_mux_external_address }}"
+      - "{{ openshift_logging_mux_external_address }}"
   when: openshift_logging_mux_allow_external | bool
 
 - name: Set logging-mux service for internal communication
@@ -159,9 +163,9 @@
     labels:
       logging-infra: 'support'
     ports:
-    - name: mux-forward
-      port: "{{ openshift_logging_mux_port }}"
-      targetPort: "mux-forward"
+      - name: mux-forward
+        port: "{{ openshift_logging_mux_port }}"
+        targetPort: "mux-forward"
   when: not openshift_logging_mux_allow_external | bool
 
 # create Mux DC
@@ -196,7 +200,7 @@
     selector: "{{ openshift_logging_mux_file_buffer_pvc_pv_selector }}"
     storage_class_name: "{{ openshift_logging_mux_file_buffer_pvc_storage_class_name | default('', true) }}"
   when:
-  - openshift_logging_mux_file_buffer_storage_type == "pvc"
+    - openshift_logging_mux_file_buffer_storage_type == "pvc"
 
 - name: Set logging-mux DC
   oc_obj:
@@ -205,7 +209,7 @@
     namespace: "{{ openshift_logging_mux_namespace }}"
     kind: dc
     files:
-    - "{{ tempdir }}/templates/logging-mux-dc.yaml"
+      - "{{ tempdir }}/templates/logging-mux-dc.yaml"
     delete_after: true
 
 - name: Add mux namespaces

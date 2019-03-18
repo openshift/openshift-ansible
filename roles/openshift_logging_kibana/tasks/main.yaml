@@ -44,6 +44,8 @@
     name: "aggregated-logging-kibana"
     namespace: "{{ openshift_logging_namespace }}"
     image_pull_secrets: "{{ openshift_logging_kibana_image_pull_secret }}"
+    secrets:
+      - logging-kibana
   when: openshift_logging_kibana_image_pull_secret != ''
 
 - name: Create Kibana service account
@@ -51,6 +53,8 @@
     state: present
     name: "aggregated-logging-kibana"
     namespace: "{{ openshift_logging_namespace }}"
+    secrets:
+      - logging-kibana
   when:
     - openshift_logging_kibana_image_pull_secret == ''
 

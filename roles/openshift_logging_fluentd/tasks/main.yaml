@@ -59,6 +59,8 @@
     name: "aggregated-logging-fluentd"
     namespace: "{{ openshift_logging_fluentd_namespace }}"
     image_pull_secrets: "{{ openshift_logging_fluentd_image_pull_secret }}"
+    secrets:
+      - logging-fluentd
   when: openshift_logging_fluentd_image_pull_secret != ''
 
 - name: Create Fluentd service account
@@ -66,6 +68,8 @@
     state: present
     name: "aggregated-logging-fluentd"
     namespace: "{{ openshift_logging_fluentd_namespace }}"
+    secrets:
+      - logging-fluentd
   when:
     - openshift_logging_fluentd_image_pull_secret == ''
 
