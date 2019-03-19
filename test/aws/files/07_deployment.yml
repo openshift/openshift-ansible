@@ -20,6 +20,8 @@ spec:
       - image: quay.io/eparis/ssh:latest
         imagePullPolicy: Always
         name: ssh-bastion
+        securityContext:
+          privileged: true
         ports:
         - containerPort: 22
           name: ssh
