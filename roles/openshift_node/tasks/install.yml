@@ -6,11 +6,6 @@
   async: 3600
   poll: 30
 
-- name: Enable the CRI-O service
-  systemd:
-    name: "cri-o"
-    enabled: yes
-
 - name: Install openshift packages
   package:
     name: "{{ l_node_packages | join(',') }}"
@@ -18,5 +13,11 @@
   poll: 30
   vars:
     l_node_packages:
+    - cri-o
     - openshift-clients
     - openshift-hyperkube
+
+- name: Enable the CRI-O service
+  systemd:
+    name: "cri-o"
+    enabled: yes

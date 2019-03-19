@@ -11,16 +11,79 @@ openshift_node_bootstrap_server: "{{ openshift_node_kubeconfig.clusters.0.cluste
 openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config/{{ openshift_node_machineconfigpool }}"
 
 openshift_node_install_packages:
-  # Packages from old init/base_packages
-  - iproute
-  - dbus-python
-  - PyYAML
-  - libsemanage-python
-  - yum-utils
-  - python-docker-py
+  # Packages from redhat-coreos.git manifest-base.yaml
+  - kernel
+  - irqbalance
+  - microcode_ctl
+  - systemd
   - systemd-journal-gateway
-  - python-ipaddress
-  # Packages from old roles/container_runtime
-  - cri-o
-  - cri-tools
+  #- rpm-ostree
+  #- nss-altfiles
+  - selinux-policy-targeted
+  - setools-console
+  #- ignition
+  #- ignition-dracut
+  - dracut-network
+  - passwd
+  #- grub2
+  #- grub2-efi
+  #- ostree-grub2
+  #- efibootmgr
+  #- shim
+  - openssh-server
+  - openssh-clients
   - podman
+  - skopeo
+  - runc
+  - containernetworking-plugins
+  #- cri-o
+  - cri-tools
+  #- toolbox
+  - nfs-utils
+  - NetworkManager
+  - dnsmasq
+  - lvm2
+  - iscsi-initiator-utils
+  - sg3_utils
+  - device-mapper-multipath
+  - xfsprogs
+  - e2fsprogs
+  - mdadm
+  - cryptsetup
+  - chrony
+  #- coreos-metadata
+  - logrotate
+  - sssd
+  - shadow-utils
+  - sudo
+  - coreutils
+  - less
+  - tar
+  - xz
+  - gzip
+  - bzip2
+  - rsync
+  - tmux
+  - nmap-ncat
+  - net-tools
+  - bind-utils
+  - strace
+  - bash-completion
+  - vim-minimal
+  - nano
+  #- openshift-hyperkube
+  #- openshift-clients
+  #- pivot
+  #- subscription-manager-rhsm-certificates
+  #
+  # Packages from redhat-coreos.git maipo/manifest.yaml
+  #- redhat-release-coreos
+  - authconfig
+  - policycoreutils-python
+  - iptables-services
+  - bridge-utils
+  - biosdevname
+  - container-storage-setup
+  - cloud-utils-growpart
+  - ceph-common
+  - glusterfs-fuse
