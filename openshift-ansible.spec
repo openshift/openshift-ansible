@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.127
+Version:        3.10.128
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Mar 20 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.128-1
+- fluentd: tolerate all taints (jdesousa@redhat.com)
+- Bug 1689149 - adding secret names to SA for whitelisting
+  (ewolinet@redhat.com)
+
 * Mon Mar 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.127-1
 - 
 
