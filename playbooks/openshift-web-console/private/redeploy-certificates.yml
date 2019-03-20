@@ -1,4 +1,5 @@
 ---
+
 - name: Update web console certificates
   hosts: oo_first_master
   vars:
@@ -6,19 +7,31 @@
   - lib_openshift
   - openshift_facts
   tasks:
-  - name: Remove certificates secret
-    oc_obj:
-      name: webconsole-serving-cert
-      kind: secret
-      state: absent
-      namespace: openshift-web-console
+  - name: Remove certificates secret in openshift-web-console
+      shell: oc delete secret console-serving-cert -n openshift-console
 
   - name: Remove web console pods
+      shell: oc delete pods --all -n openshift-console
+
+  - name: Verify that the console is running
     oc_obj:
-      selector: "webconsole=true"
-      kind: pod
-      state: absent
-      namespace: openshift-web-console
+      namespace: openshift-console
+      kind: deployment
+      state: list
+      name: console
+    register: console_deployment
+    until:
+    - console_deployment.results.results[0].status.readyReplicas is defined
+    - console_deployment.results.results[0].status.readyReplicas > 0
+    retries: 60
+    delay: 10
+    changed_when: false
+
+  - name: Remove certificates secret in openshift-web-console
+      shell: oc delete secret webconsole-serving-cert -n openshift-web-console
+
+  - name: Remove web console pods
+      shell: oc delete pods --all -n openshift-web-console
 
   - name: Verify that the console is running
     oc_obj:
@@ -26,10 +39,10 @@
       kind: deployment
       state: list
       name: webconsole
-    register: console_deployment
+    register: webconsole_deployment
     until:
-    - console_deployment.results.results[0].status.readyReplicas is defined
-    - console_deployment.results.results[0].status.readyReplicas > 0
+    - webconsole_deployment.results.results[0].status.readyReplicas is defined
+    - webconsole_deployment.results.results[0].status.readyReplicas > 0
     retries: 60
     delay: 10
     changed_when: false
