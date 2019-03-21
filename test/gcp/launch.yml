@@ -26,6 +26,6 @@
       tasks_from: setup_scale_group_facts.yml
 
 - name: run worker scaleup
-  import_playbook: ../../playbooks/openshift-node/scaleup.yml
+  import_playbook: ../../playbooks/scaleup.yml
   vars:
     openshift_api_host: "api.{{ openshift_install_config['metadata']['name'] }}.{{ openshift_install_config['baseDomain'] }}"
