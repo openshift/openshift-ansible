@@ -59,7 +59,7 @@
     - openshift_logging_kibana_image_pull_secret == ''
 
 - name: Create Kibana service account auth delegator clusterrolebinding
-- oc_adm_policy_user:
+  oc_adm_policy_user:
     state: present
     namespace: "{{ openshift_logging_namespace }}"
     resource_kind: cluster-role
