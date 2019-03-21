@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.98
+Version:        3.11.99
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Mar 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.99-1
+- remove dash causing syntax error in kibana install role
+  (marriott_robert@bah.com)
+- bug 1666674. Add Kibana sar and delegate url for auth-delegator
+  (jcantril@redhat.com)
+
 * Tue Mar 19 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.98-1
 - Bug 1689149 - adding secret names to SA for whitelisting
   (ewolinet@redhat.com)
