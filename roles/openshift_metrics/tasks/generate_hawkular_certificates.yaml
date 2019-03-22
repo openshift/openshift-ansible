@@ -25,7 +25,7 @@
   become: false
 
 - name: generate htpasswd file for hawkular metrics
-  local_action: htpasswd path="{{ local_tmp.stdout }}/hawkular-metrics.htpasswd" name=hawkular password="{{ hawkular_metrics_pwd.content | b64decode }}"
+  local_action: htpasswd crypt_scheme={{ openshift_metrics_hawkular_htpasswd_encryption_algorithm }}  path="{{ local_tmp.stdout }}/hawkular-metrics.htpasswd" name=hawkular password="{{ hawkular_metrics_pwd.content | b64decode }}"
   become: false
 
 - name: copy local generated passwords to target
