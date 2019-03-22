@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.129
+Version:        3.10.130
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Mar 22 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.130-1
+- 
+
 * Wed Mar 20 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.129-1
 - [release 3.10] Allow OpenStack persistent volumes to specify storage class
   (tzumainn@redhat.com)
