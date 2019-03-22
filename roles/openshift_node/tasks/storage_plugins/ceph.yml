@@ -1,7 +1,0 @@
----
-- name: Install Ceph storage plugin dependencies
-  package:
-    name: ceph-common
-    state: present
-  register: result
-  until: result is succeeded

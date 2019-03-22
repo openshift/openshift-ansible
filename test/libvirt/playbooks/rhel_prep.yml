@@ -1,0 +1,9 @@
+---
+- hosts: nodes
+  tasks:
+    - command: "yum -y update"
+    - command: "yum install NetworkManager -y"
+    - name: Start NetworkManager
+      command: systemctl start NetworkManager
+    - name: Enable NetworkManager
+      command: systemctl enable NetworkManager

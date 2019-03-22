@@ -6,7 +6,6 @@ from __future__ import print_function
 import os
 import fnmatch
 import re
-import sys
 import subprocess
 import yaml
 
@@ -14,7 +13,6 @@ import yaml
 from setuptools import setup, Command
 from setuptools_lint.setuptools_command import PylintCommand
 from six import string_types
-from six.moves import reload_module
 from yamllint.config import YamlLintConfig
 from yamllint.cli import Format
 from yamllint import linter
@@ -199,57 +197,6 @@ class OpenShiftAnsiblePylint(PylintCommand):
     def with_project_on_sys_path(self, func, func_args, func_kwargs):
         ''' override behavior, since we don't need to build '''
         return func(*func_args, **func_kwargs)
-
-
-class OpenShiftAnsibleGenerateValidation(Command):
-    ''' Command to run generated module validation'''
-    description = "Run generated module validation"
-    user_options = []
-
-    def initialize_options(self):
-        ''' initialize_options '''
-        pass
-
-    def finalize_options(self):
-        ''' finalize_options '''
-        pass
-
-    # self isn't used but I believe is required when it is called.
-    # pylint: disable=no-self-use
-    def run(self):
-        ''' run command '''
-        # find the files that call generate
-        generate_files = find_files('roles',
-                                    ['inventory',
-                                     'test',
-                                     'playbooks'],
-                                    None,
-                                    'generate.py$')
-
-        if len(generate_files) < 1:
-            print('Did not find any code generation.  Please verify module code generation.')  # noqa: E501
-            raise SystemExit(1)
-
-        errors = False
-        for gen in generate_files:
-            print('Checking generated module code: {0}'.format(gen))
-            try:
-                sys.path.insert(0, os.path.dirname(gen))
-                # we are importing dynamically.  This isn't in
-                # the python path.
-                # pylint: disable=import-error
-                import generate
-                reload_module(generate)
-                generate.verify()
-            except generate.GenerateAnsibleException as gae:
-                print(gae.args)
-                errors = True
-
-        if errors:
-            print('Found errors while generating module code.')
-            raise SystemExit(1)
-
-        print('\nAll generate scripts passed.\n')
 
 
 class OpenShiftAnsibleSyntaxCheck(Command):
@@ -448,7 +395,6 @@ setup(
         'sdist': UnsupportedCommand,
         'lint': OpenShiftAnsiblePylint,
         'yamllint': OpenShiftAnsibleYamlLint,
-        'generate_validation': OpenShiftAnsibleGenerateValidation,
         'ansible_syntax': OpenShiftAnsibleSyntaxCheck,
     },
     packages=[],

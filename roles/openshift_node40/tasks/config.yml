@@ -1,0 +1,106 @@
+---
+#### Disable SWAP #####
+# https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
+# swapoff is a custom module that comments out swap entries in
+# /etc/fstab and runs swapoff -a, if necessary.
+- name: Disable swap
+  swapoff: {}
+  when: openshift_disable_swap | default(true) | bool
+
+# The atomic-openshift-node service will set this parameter on
+# startup, but if the network service is restarted this setting is
+# lost. Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1372388
+- sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_file: "/etc/sysctl.d/99-openshift.conf"
+    reload: yes
+
+- name: Setting sebool container_manage_cgroup
+  seboolean:
+    name: container_manage_cgroup
+    state: yes
+    persistent: yes
+
+- name: Wait for bootstrap endpoint to show up
+  uri:
+    url: "{{ openshift_node_bootstrap_endpoint }}"
+    validate_certs: false
+  delay: 10
+  retries: 60
+  register: result
+  until:
+  - "'status' in result"
+  - result.status == 200
+
+- name: Fetch bootstrap ignition file locally
+  uri:
+    url: "{{ openshift_node_bootstrap_endpoint }}"
+    dest: "{{ ign_file }}"
+    validate_certs: false
+
+- name: create temp directory
+  tempfile:
+    state: directory
+  register: tempfile
+
+- name: Copy pull secret in the directory
+  copy:
+    src: "{{ pull_secret }}"
+    dest: "{{ tempfile.path }}/pull-secret.json"
+
+- name: Get release image
+  k8s_facts:
+    kubeconfig: "{{ kubeconfig_path }}"
+    kind: ClusterVersion
+    name: version
+  delegate_to: localhost
+  register: clusterversion
+  until:
+  - clusterversion.resources is defined
+  - clusterversion.resources | length > 0
+  - clusterversion.resources[0].status is defined
+  - clusterversion.resources[0].status.desired is defined
+  - clusterversion.resources[0].status.desired.image is defined
+  retries: 36
+  delay: 5
+
+- name: Set openshift_release_image fact
+  set_fact:
+    openshift_release_image: "{{ clusterversion.resources[0].status.desired.image }}"
+
+- name: Pull release image
+  command: "podman pull --tls-verify={{ tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ openshift_release_image }}"
+
+- name: Get machine controller daemon image from release image
+  command: "podman run --rm {{ openshift_release_image }} image machine-config-daemon"
+  register: release_image_mcd
+
+- block:
+  - name: Pull MCD image
+    command: "podman pull --tls-verify={{ tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ release_image_mcd.stdout }}"
+
+  - name: Apply ignition manifest
+    command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
+    vars:
+      podman_flags: "--privileged --rm -ti {{ release_image_mcd.stdout }}"
+      podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
+      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ ign_file }}"
+    # MCD reboots the machine, run the task but do not wait for completion
+    register: manifest_apply
+    async: 900  # 15 minutes
+    poll: 0
+
+  # Wait for the host to come back
+  - wait_for_connection: {}
+
+  # If the job fails, the async job status will find rc != 1 and will fail here
+  # When the job is successful, Ansible does not update this job status due to
+  # the host rebooting
+  - name: Check manifest apply status
+    async_status:
+      jid: "{{ manifest_apply.ansible_job_id }}"
+
+  rescue:
+  - fail:
+      msg: "Ignition apply failed"

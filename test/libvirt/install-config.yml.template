@@ -1,0 +1,28 @@
+baseDomain: ${OCP_BASE_DOMAIN}
+clusterID:  ${OCP_CLUSTER_ID}
+machines:
+- name: master
+  replicas: ${OCP_MASTERS}
+- name: worker
+  replicas: 1
+metadata:
+  name: ${OCP_CLUSTER_NAME}
+networking:
+  clusterNetworks:
+  - cidr: 10.128.0.0/14
+    hostSubnetLength: 9
+  serviceCIDR: 172.30.0.0/16
+  type: OpenShiftSDN
+platform:
+  libvirt:
+    URI: qemu+tcp://192.168.122.1/system
+    defaultMachinePlatform:
+      image: file:///unused
+    masterIPs: null
+    network:
+      if: ${OCP_NETDEV}
+      ipRange: ${OCP_NETCIDR}
+pullSecret: |
+  ${OCP_PULL_SECRET}
+sshKey: |
+  ${OCP_SSH_PUB_KEY}
