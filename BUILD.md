@@ -32,22 +32,3 @@ To build a container image of `openshift-ansible` using standalone **Docker**:
 
         cd openshift-ansible
         docker build -f images/installer/Dockerfile -t openshift-ansible .
-
-## Build the Atomic System Container
-
-A system container runs using runC instead of Docker and it is managed
-by the [atomic](https://github.com/projectatomic/atomic/) tool.  As it
-doesn't require Docker to run, the installer can run on a node of the
-cluster without interfering with the Docker daemon that is configured
-by the installer itself.
-
-The first step is to build the [container image](#build-an-openshift-ansible-container-image)
-as described before.  The container image already contains all the
-required files to run as a system container.
-
-Once the container image is built, we can import it into the OSTree
-storage:
-
-```
-atomic pull --storage ostree docker:openshift-ansible:latest
-```

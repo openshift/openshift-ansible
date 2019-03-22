@@ -54,17 +54,3 @@ _OpenShift Components_
 └── test                Contains tests.
 ```
 
-### CI
-
-These files are used by [PAPR](https://github.com/projectatomic/papr),
-It is very similar in workflow to Travis, with the test
-environment and test scripts defined in a YAML file.
-
-```
-.
-├── .papr.yml
-├── .papr.sh
-└── .papr.inventory
-├── .papr.all-in-one.inventory
-└── .papr-master-ha.inventory
-```
