@@ -1,0 +1,11 @@
+---
+- name: setup firewall
+  import_tasks: firewall.yml
+- name: Deploy aci
+  shell: oc apply -f {{ aci_deployment_yaml_file }}
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  run_once: True
+- name: Run kube proxy, needed for ACI
+  import_role:
+     name: kube_proxy_and_dns
+  run_once: True

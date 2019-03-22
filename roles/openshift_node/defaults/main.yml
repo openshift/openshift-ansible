@@ -146,6 +146,9 @@ openshift_node_use_contiv: "{{ openshift_node_use_contiv_default }}"
 openshift_node_use_kuryr_default: "{{ openshift_use_kuryr | default(False) }}"
 openshift_node_use_kuryr: "{{ openshift_node_use_kuryr_default }}"
 
+openshift_node_use_aci_default: "{{ openshift_use_aci | default(False) }}"
+openshift_node_use_aci: "{{ openshift_node_use_aci_default }}"
+
 openshift_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
 openshift_node_data_dir: "{{ openshift_node_data_dir_default }}"
 

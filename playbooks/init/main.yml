@@ -37,6 +37,9 @@
 - import_playbook: sanity_checks.yml
   when: not (skip_sanity_checks | default(False))
 
+- import_playbook: validate_aci_params.yml
+  when: openshift_use_aci | default(false) | bool
+
 - name: Initialization Checkpoint End
   hosts: all
   gather_facts: false

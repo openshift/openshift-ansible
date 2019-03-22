@@ -48,6 +48,9 @@
     when:
     - l_nodes_to_join|length > 0
 
+  vars:
+    openshift_node_scale_up_group: "oo_nodes_use_calico:oo_nodes_use_aci"
+
 - name: Ensure any inventory labels are applied to the nodes
   hosts: oo_nodes_to_config
   vars:
@@ -62,6 +65,10 @@
   tasks:
   - group_by:
       key: oo_nodes_use_{{ (openshift_use_calico | default(False)) | ternary('calico','nothing') }}
+    changed_when: False
+  # Create group for aci nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_use_aci | default(False)) | ternary('aci','nothing') }}
     changed_when: False
 
 - name: Nuage Node Configuration
@@ -83,6 +90,12 @@
   roles:
   - role: nsx_node
     when: openshift_use_nsx | default(false) | bool
+
+- name: Configure Aci node
+  hosts: oo_nodes_use_aci
+  roles:
+  - role: aci
+    when: openshift_use_aci | default(false) | bool
 
 - name: Node Join Checkpoint End
   hosts: all
