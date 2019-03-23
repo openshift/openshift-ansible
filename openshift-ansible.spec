@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.74
+Version:        3.9.75
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Mar 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.75-1
+- 
+
 * Tue Mar 19 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.74-1
 - Bug 1689149 - adding secret names to SA for whitelisting
   (ewolinet@redhat.com)
