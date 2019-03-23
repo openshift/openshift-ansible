@@ -58,6 +58,14 @@
   when:
     - openshift_logging_kibana_image_pull_secret == ''
 
+- name: Create Kibana service account auth delegator clusterrolebinding
+  oc_adm_policy_user:
+    state: present
+    namespace: "{{ openshift_logging_namespace }}"
+    resource_kind: cluster-role
+    resource_name: system:auth-delegator
+    user: "system:serviceaccount:{{ openshift_logging_namespace}}:aggregated-logging-kibana"
+
 - set_fact:
     kibana_name: "{{ 'logging-kibana' ~ ( (openshift_logging_kibana_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
     kibana_component: "{{ 'kibana' ~ ( (openshift_logging_kibana_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"

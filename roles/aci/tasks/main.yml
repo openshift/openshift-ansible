@@ -7,5 +7,5 @@
   run_once: True
 - name: Run kube proxy, needed for ACI
   import_role:
-     name: kube_proxy_and_dns
+    name: kube_proxy_and_dns
   run_once: True
