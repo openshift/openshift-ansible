@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.99
+Version:        3.11.100
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Mar 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.100-1
+- Modify lib_utils_oo_oreg_image filter to work against Satellite url pattern
+  (bysnupy@hotmail.com)
+
 * Thu Mar 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.99-1
 - remove dash causing syntax error in kibana install role
   (marriott_robert@bah.com)
