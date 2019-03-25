@@ -3,7 +3,7 @@
   k8s:
     kubeconfig: "{{ kubeconfig_path }}"
     kind: Namespace
-    name: openshift-ssh-bastion
+    name: byoh-ssh-bastion
     state: present
 
 - name: Create ssh bastion keys secret
@@ -14,7 +14,7 @@
       kind: Secret
       metadata:
         name: ssh-host-keys
-        namespace: openshift-ssh-bastion
+        namespace: byoh-ssh-bastion
       data:
         ssh_host_rsa_key: "{{ lookup('file', '../../inventory/dynamic/injected/ssh-privatekey') | b64encode }}"
         sshd_config: "{{ lookup('file', 'files/sshd_config') | b64encode }}"
@@ -58,7 +58,7 @@
 - name: Wait for ssh bastion deployment to rollout
   k8s_facts:
     kubeconfig: "{{ kubeconfig_path }}"
-    namespace: openshift-ssh-bastion
+    namespace: byoh-ssh-bastion
     kind: Deployment
     name: ssh-bastion
   register: k8s_result
@@ -74,7 +74,7 @@
 - name: Get ssh bastion address
   k8s_facts:
     kubeconfig: "{{ kubeconfig_path }}"
-    namespace: openshift-ssh-bastion
+    namespace: byoh-ssh-bastion
     kind: Service
     name: ssh-bastion
   register: k8s_result
