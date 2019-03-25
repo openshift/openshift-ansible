@@ -1,4 +1,14 @@
 ---
+- name: Backup node config and atomic-openshift service
+  copy:
+    src: "{{ item }}"
+    dest: "{{ item | regex_replace('[.]', '-') }}.bak-{{ ansible_date_time.iso8601_basic_short }}"
+    remote_src: yes
+  with_items:
+  - "{{ openshift.common.config_base }}/node/node-config.yaml"
+  - /etc/systemd/system/atomic-openshift-node.service
+  failed_when: false
+
 - name: Update oreg value
   yedit:
     src: "{{ openshift.common.config_base }}/node/node-config.yaml"

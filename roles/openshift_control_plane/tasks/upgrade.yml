@@ -142,6 +142,16 @@
     state: absent
   when: not openshift_is_atomic | bool
 
+- name: Backup atomic-openshift systemd services
+  copy:
+    src: "{{ item }}"
+    dest: "{{ item | regex_replace('[.]', '-') }}.bak-{{ ansible_date_time.iso8601_basic_short }}"
+    remote_src: yes
+  with_items:
+  - /etc/systemd/system/atomic-openshift-master.service
+  - /etc/systemd/system/atomic-openshift-node.service
+  failed_when: false
+
 - name: Remove old service information
   file:
     path: "{{ item }}"
