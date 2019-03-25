@@ -36,6 +36,8 @@ spec:
           value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
         envFrom:
         - configMapRef:
+            name: env
+        - configMapRef:
             name: contrail-configdb-config
         volumeMounts:
         - mountPath: /host/usr/bin
