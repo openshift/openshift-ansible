@@ -1,0 +1,7 @@
+---
+# defaults file for openshift_noobaa
+noobaa_namespace: noobaa
+noobaa_min_cpu: "500m"
+noobaa_min_memory: "1Gi"
+noobaa_max_cpu: "4"
+noobaa_max_memory: "8Gi"

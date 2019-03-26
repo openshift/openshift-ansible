@@ -1,0 +1,166 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: openshift-noobaa
+  labels:
+    app: openshift-noobaa
+  annotations:
+    description: noobaa server template
+    tags: noobaa
+objects:
+
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: noobaa-account
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    creationTimestamp: null
+    name: noobaa-role
+  rules:
+    - apiGroups:
+        - apps
+      resources:
+        - statefulsets
+      verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: noobaa-role-binding
+  subjects:
+    - kind: ServiceAccount
+      name: noobaa-account
+  roleRef:
+    kind: Role
+    name: noobaa-role
+    apiGroup: rbac.authorization.k8s.io
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: s3
+    labels:
+      app: noobaa-server
+  spec:
+    type: LoadBalancer
+    ports:
+      - port: 80
+        targetPort: 6001
+        name: s3
+      - port: 443
+        targetPort: 6443
+        name: s3-https
+    selector:
+      noobaa-s3: "true"
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: noobaa-mgmt
+    labels:
+      app: noobaa-server
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/scheme: http
+      prometheus.io/port: "8080"
+  spec:
+    type: LoadBalancer
+    ports:
+      - port: 8080
+        name: mgmt
+      - port: 8443
+        name: mgmt-https
+      - port: 80
+        targetPort: 6001
+        name: s3
+      - port: 443
+        targetPort: 6443
+        name: s3-https
+    selector:
+      noobaa-mgmt: "true"
+
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    name: noobaa-server
+  spec:
+    selector:
+      matchLabels:
+        app: noobaa-server
+    serviceName: noobaa-mgmt
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: noobaa-server
+          noobaa-s3: "true"
+          noobaa-mgmt: "true"
+      spec:
+        containers:
+          - name: noobaa-server
+            image: noobaaimages.azurecr.io/noobaa/nbserver:latest
+            imagePullPolicy: IfNotPresent
+            resources:
+              # https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+              requests:
+                cpu: ${noobaa_min_cpu}
+                memory: ${noobaa_min_memory}
+              limits:
+                cpu: ${noobaa_max_cpu}
+                memory: ${noobaa_max_memory}
+            ports:
+              - containerPort: 80
+              - containerPort: 443
+              - containerPort: 8080
+              - containerPort: 8443
+              - containerPort: 8444
+              - containerPort: 60100
+            volumeMounts:
+              - mountPath: /data
+                name: datadir
+              - mountPath: /log
+                name: logdir
+            env:
+              - name: CONTAINER_PLATFORM
+                value: KUBERNETES
+        serviceAccountName: noobaa-account
+        imagePullSecrets:
+          - name: noobaaimages.azurecr.io
+
+    volumeClaimTemplates:
+      # this will provision a dynamic persistent volume (volume is automatically provisioned by a provisioner)
+      # in minikube it is provisioned as hostPath volume under hosts /tmp which is not persistent between
+      # minkube restarts. if we want it to be persistent between restarts we need to statically provision a
+      # volume according to this https://kubernetes.io/docs/setup/minikube/#persistent-volumes
+      - metadata:
+          name: logdir
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+      - metadata:
+          name: datadir
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+parameters:
+- name: noobaa_min_cpu
+  displayName: Minimum cpu cores allocation for NooBaa container
+  required: True
+- name: noobaa_max_cpu
+  displayName: Maximum cpu cores allocation for NooBaa container
+  required: True
+- name: noobaa_min_memory
+  displayName: Minimum memory allocation for NooBaa container
+  required: True
+- name: noobaa_max_memory
+  displayName: Maximum memory allocation for NooBaa container
+  required: True

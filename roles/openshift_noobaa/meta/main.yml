@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Evgeniy Belyi <jeniawhite92@gmail.com>
+  description: Deploy OpenShift NooBaa
+  company: Red Hat, Inc.
+  license: Apache License, Version 2.0
+  min_ansible_version: 2.4
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - openshift
+dependencies:
+- role: lib_openshift
+- role: openshift_facts

@@ -1,0 +1,6 @@
+---
+
+- name: Remove NooBaa data
+  command: >
+    {{ openshift_client_binary }} -n {{ noobaa_namespace }} --config={{ tempdir }}/admin.kubeconfig
+    delete --ignore-not-found --all pvc

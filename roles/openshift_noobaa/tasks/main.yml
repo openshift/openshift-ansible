@@ -1,0 +1,34 @@
+---
+
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-noobaa-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+  check_mode: no
+
+- set_fact:
+    tempdir: "{{ mktemp.stdout }}"
+
+- name: Copy the admin client config
+  command: >
+    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ tempdir }}/admin.kubeconfig
+  changed_when: False
+  check_mode: no
+
+- name: Remove NooBaa components
+  command: >
+    {{ openshift_client_binary }} -n {{ noobaa_namespace }} --config={{ tempdir }}/admin.kubeconfig
+    delete --ignore-not-found --all all,sa,secrets,templates,roles,rolebindings
+
+- include_tasks: install.yml
+  when: openshift_noobaa_install | default(true) | bool
+
+- include_tasks: uninstall.yml
+  when: openshift_noobaa_install is defined and not openshift_noobaa_install | default(false) | bool
+
+- name: Delete temp directory
+  file:
+    name: "{{ tempdir }}"
+    state: absent
+  changed_when: False
+  check_mode: no

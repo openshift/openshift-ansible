@@ -1,0 +1,33 @@
+---
+
+- name: Ensure openshift-noobaa project exists
+  oc_project:
+    name: "{{ noobaa_namespace }}"
+    state: present
+    node_selector:
+    - ""
+
+- name: Copy NooBaa template file
+  copy:
+    src: "noobaa-template.yml"
+    dest: "{{ tempdir }}/noobaa-template.yml"
+
+- name: Create NooBaa template
+  oc_obj:
+    namespace: "{{ noobaa_namespace }}"
+    kind: template
+    name: "openshift-noobaa"
+    state: present
+    files:
+    - "{{ tempdir }}/noobaa-template.yml"
+
+- name: Deploy NooBaa server
+  oc_process:
+    namespace: "{{ noobaa_namespace }}"
+    template_name: "openshift-noobaa"
+    create: True
+    params:
+      min_cpu: "{{ min_cpu }}"
+      max_cpu: "{{ max_cpu }}"
+      min_memory: "{{ min_memory }}"
+      max_memory: "{{ max_memory }}"
