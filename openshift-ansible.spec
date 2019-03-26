@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.100
+Version:        3.11.101
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Mar 26 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.101-1
+- Update examples-sync.sh to use XPAAS_VERSION ose-v1.4.18 (ken@zaptillion.net)
+- Update EAP 7.1 and 6.4 imagestreams and templates (ken@zaptillion.net)
+- Teardown: remove security using cluster ID tag (vrutkovs@redhat.com)
+
 * Sun Mar 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.100-1
 - Modify lib_utils_oo_oreg_image filter to work against Satellite url pattern
   (bysnupy@hotmail.com)
