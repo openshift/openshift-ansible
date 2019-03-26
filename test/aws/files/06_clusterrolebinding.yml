@@ -11,4 +11,4 @@ roleRef:
 subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: User
-  name: system:serviceaccount:openshift-ssh-bastion:ssh-bastion
+  name: system:serviceaccount:byoh-ssh-bastion:ssh-bastion
