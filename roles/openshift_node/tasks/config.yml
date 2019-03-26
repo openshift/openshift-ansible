@@ -5,7 +5,6 @@
 # /etc/fstab and runs swapoff -a, if necessary.
 - name: Disable swap
   swapoff: {}
-  when: openshift_disable_swap | default(true) | bool
 
 # The atomic-openshift-node service will set this parameter on
 # startup, but if the network service is restarted this setting is
