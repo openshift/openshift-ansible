@@ -46,7 +46,7 @@ spec:
           set -euo pipefail
 
           # if another process is listening on the cni-server socket, wait until it exits
-          trap 'kill $(jobs -p); exit 0' TERM
+          trap 'kill $(jobs -p); rm -Rf /etc/cni/net.d/80-openshift-network.conf ; exit 0' TERM
           retries=0
           while true; do
             if echo 'test' | socat - UNIX-CONNECT:/var/run/openshift-sdn/cni-server.sock >/dev/null; then
@@ -167,7 +167,11 @@ spec:
         #     path: /healthz
         #     port: 10256
         #     scheme: HTTP
+        # force node to be notready when sdn is gone.
         lifecycle:
+          preStop:
+            exec:
+              command: ["rm","-Rf","/etc/cni/net.d/80-openshift-network.conf", "/host/opt/cni/bin/openshift-sdn"]
 
       volumes:
       # In bootstrap mode, the host config contains information not easily available
