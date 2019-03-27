@@ -1,6 +1,6 @@
 # Hooks
 
-The ansible installer allows for operators to execute custom tasks during
+OpenShift Ansible allows for operators to execute custom tasks during
 specific operations through a system called hooks. Hooks allow operators to
 provide files defining tasks to execute before and/or after specific areas
 during installations and upgrades. This can be very helpful to validate
@@ -16,21 +16,17 @@ need to be updated to meet the new standard.
 
 ## Using Hooks
 
-Hooks are defined in the ``hosts`` inventory file under the ``OSEv3:vars``
+Hooks are defined in the ``hosts`` inventory file under the ``nodes:vars``
 section.
 
 Each hook should point to a yaml file which defines Ansible tasks. This file
 will be used as an include meaning that the file can not be a playbook but
 a set of tasks. Best practice suggests using absolute paths to the hook file to avoid any ambiguity.
 
-### Example
+### Example inventory variables
 ```ini
-[OSEv3:vars]
+[nodes:vars]
 # <snip>
-openshift_master_upgrade_pre_hook=/usr/share/custom/pre_master.yml
-openshift_master_upgrade_hook=/usr/share/custom/master.yml
-openshift_master_upgrade_post_hook=/usr/share/custom/post_master.yml
-
 openshift_node_upgrade_pre_hook=/usr/share/custom/pre_node.yml
 openshift_node_upgrade_hook=/usr/share/custom/node.yml
 openshift_node_upgrade_post_hook=/usr/share/custom/post_node.yml
@@ -40,38 +36,23 @@ openshift_node_upgrade_post_hook=/usr/share/custom/post_node.yml
 Hook files must be a yaml formatted file that defines a set of Ansible tasks.
 The file may **not** be a playbook.
 
-### Example
+### Example hook task file
 ```yaml
+
 ---
 # Trivial example forcing an operator to ack the start of an upgrade
-# file=/usr/share/custom/pre_master.yml
+# file=/usr/share/custom/pre_node.yml
 
-- name: note the start of a master upgrade
+- name: note the start of a node upgrade
   debug:
-      msg: "Master upgrade of {{ inventory_hostname }} is about to start"
+      msg: "Node upgrade of {{ inventory_hostname }} is about to start"
 
 - name: require an operator agree to start an upgrade
   pause:
-      prompt: "Hit enter to start the master upgrade"
+      prompt: "Hit enter to start the node upgrade"
 ```
 
-## Upgrade Hooks
-
-### openshift_master_upgrade_pre_hook
-- Runs **before** each master is upgraded.
-- This hook runs against **each master** in serial.
-- If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
-
-### openshift_master_upgrade_hook
-- Runs **after** each master is upgraded but **before** it's service/system restart.
-- This hook runs against **each master** in serial.
-- If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
-
-
-### openshift_master_upgrade_post_hook
-- Runs **after** each master is upgraded and has had it's service/system restart.
-- This hook runs against **each master** in serial.
-- If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
+## Available Upgrade Hooks
 
 ### openshift_node_upgrade_pre_hook
 - Runs **before** each node is upgraded.
@@ -79,7 +60,7 @@ The file may **not** be a playbook.
 - If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
 
 ### openshift_node_upgrade_hook
-- Runs **after** each node is upgraded but **before** it's marked schedulable again..
+- Runs **after** each node is upgraded but **before** it's marked schedulable again.
 - This hook runs against **each node** in serial.
 - If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
 
