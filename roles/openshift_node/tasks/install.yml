@@ -1,21 +1,17 @@
 ---
 - name: Install openshift support packages
   package:
-    name: "{{ openshift_node_install_packages | join(',') }}"
+    name: "{{ openshift_node_support_packages | join(',') }}"
     update_cache: true
   async: 3600
   poll: 30
 
 - name: Install openshift packages
   package:
-    name: "{{ l_node_packages | join(',') }}"
+    name: "{{ openshift_node_packages | join(',') }}"
+    state: "{{ openshift_node_package_state }}"
   async: 3600
   poll: 30
-  vars:
-    l_node_packages:
-    - cri-o
-    - openshift-clients
-    - openshift-hyperkube
 
 - name: Enable the CRI-O service
   systemd:
