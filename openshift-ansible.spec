@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.131
+Version:        3.10.132
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Mar 27 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.132-1
+- Teardown: remove security using cluster ID tag (vrutkovs@redhat.com)
+- Backup node-config and atomic-openshift services. (padillon@redhat.com)
+
 * Mon Mar 25 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.131-1
 - 
 
