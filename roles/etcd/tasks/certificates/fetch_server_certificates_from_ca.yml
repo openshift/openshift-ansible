@@ -5,6 +5,7 @@
     state: present
   when:
   - not etcd_is_atomic | bool
+  - not inventory_hostname in groups['oo_masters']
   register: result
   until: result is succeeded
 
