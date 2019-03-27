@@ -172,7 +172,7 @@ objects:
               cpu: 20m
               memory: 50Mi
         - name: kube-rbac-proxy
-          image: quay.io/coreos/kube-rbac-proxy:v0.3.0
+          image: quay.io/coreos/kube-rbac-proxy:v0.4.1
           args:
           - "--secure-listen-address=:8081"
           - "--upstream=http://127.0.0.1:8080/"
