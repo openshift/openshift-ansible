@@ -11,3 +11,9 @@ r_aci_node_os_firewall_allow:
   port: 53/tcp
 - service: dnsu
   port: 53/udp
+
+annotate_namespace_list:
+- openshift-console
+- openshift-monitoring
+- openshift-web-console
+- kube-service-catalog
