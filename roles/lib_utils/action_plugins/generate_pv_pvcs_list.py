@@ -32,7 +32,7 @@ class ActionModule(ActionBase):
 
     def build_pv_nfs(self, varname=None):
         """Build pv dictionary for nfs storage type"""
-        host = self.task_vars.get(str(varname) + '_host')
+        host = self.get_templated(str(varname) + '_host')
         if host:
             self._templar.template(host)
         elif host is None:
