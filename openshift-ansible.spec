@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.101
+Version:        3.11.102
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Mar 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.102-1
+- bz1690900: no longer install etcd on masters (jstuever@redhat.com)
+- Wait for ServiceMonitor CRD to be created should have configurable retries
+  and delays (vrutkovs@redhat.com)
+- [release-3.11] Do not include enterprise registry unless available in
+  oreg_url (jcallen@redhat.com)
+
 * Tue Mar 26 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.101-1
 - Update examples-sync.sh to use XPAAS_VERSION ose-v1.4.18 (ken@zaptillion.net)
 - Update EAP 7.1 and 6.4 imagestreams and templates (ken@zaptillion.net)
