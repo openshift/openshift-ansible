@@ -680,6 +680,10 @@ debug_level=2
 # openshift_cluster_monitoring_operator_prometheus_storage_class_name=""
 # openshift_cluster_monitoring_operator_alertmanager_storage_class_name=""
 
+# Update the time to wait for CRD to be creating by setting
+# openshift_cluster_monitoring_operator_crd_retries=30
+# openshift_cluster_monitoring_operator_crd_delay=30
+
 
 # Logging deployment
 #

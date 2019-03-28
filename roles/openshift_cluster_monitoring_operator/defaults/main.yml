@@ -50,6 +50,9 @@ openshift_cluster_monitoring_operator_alertmanager_storage_enabled: false
 openshift_cluster_monitoring_operator_alertmanager_storage_class_name: ""
 openshift_cluster_monitoring_operator_alertmanager_storage_capacity: "2Gi"
 
+openshift_cluster_monitoring_operator_crd_retries: 30
+openshift_cluster_monitoring_operator_crd_delay: 30
+
 openshift_cluster_monitoring_operator_cluster_id: "{{ openshift_clusterid | default(openshift_master_cluster_public_hostname, true) | default(openshift_master_cluster_hostname, true) | default('openshift', true) }}"
 
 openshift_cluster_monitoring_operator_node_selector: "{{ openshift_hosted_infra_selector | default('node-role.kubernetes.io/infra=true') | map_from_pairs }}"
