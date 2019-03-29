@@ -7,7 +7,7 @@ items:
   kind: PersistentVolume
   metadata:
     name: "{{ volume.name }}"
-{% if volume.annotations %}
+{% if volume.annotations is defined %}
     annotations:
 {% for annotation in volume.annotations %}
       {{ annotation }}
