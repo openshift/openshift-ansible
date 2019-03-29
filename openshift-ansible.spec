@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.133
+Version:        3.10.134
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,14 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Mar 29 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.134-1
+- Updating OWNERS (jcallen@redhat.com)
+- Fixed "AnsibleUndefinedVariable: 'dict object' has no attribute
+  'annotations'" error. (fcarrus@redhat.com)
+- Re-apply tuned profile during upgrade (rteague@redhat.com)
+- Change the example docker_version for 3.9 and higher
+  (gabriel.mainberger@vshn.net)
+
 * Thu Mar 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.133-1
 - 
 
