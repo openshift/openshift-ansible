@@ -27,10 +27,7 @@
       group: root
       mode: 0644
   - name: Initialize openshift repos
-    import_role:
-      name: openshift_repos
-    vars:
-      openshift_version: "4.0"
+    import_tasks: additional_repos.yml
 
 - import_playbook: ../../playbooks/scaleup.yml
   vars:
