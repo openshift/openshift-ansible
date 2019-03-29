@@ -5,6 +5,7 @@ approvers:
   - vrutkovs
   - jstuever
   - patrickdillon
+  - jcpowermac
 # review == this code is good /lgtm
 reviewers:
   - mtnbikenc
@@ -12,3 +13,4 @@ reviewers:
   - vrutkovs
   - jstuever
   - patrickdillon
+  - jcpowermac
