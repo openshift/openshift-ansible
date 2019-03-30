@@ -24,6 +24,9 @@
 - name: Approve any pending CSR requests from inventory nodes
   hosts: oo_first_master
   gather_facts: no
+  vars:
+    openshift_node_scale_up_group: "oo_nodes_use_calico:oo_nodes_use_aci"
+
   tasks:
   - name: Dump all candidate bootstrap hostnames
     debug:
@@ -63,6 +66,10 @@
   - group_by:
       key: oo_nodes_use_{{ (openshift_use_calico | default(False)) | ternary('calico','nothing') }}
     changed_when: False
+  # Create group for aci nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_use_aci | default(False)) | ternary('aci','nothing') }}
+    changed_when: False
 
 - name: Nuage Node Configuration
   hosts: oo_nodes_to_config
@@ -83,6 +90,12 @@
   roles:
   - role: nsx_node
     when: openshift_use_nsx | default(false) | bool
+
+- name: Configure Aci node
+  hosts: oo_nodes_use_aci
+  roles:
+  - role: aci
+    when: openshift_use_aci | default(false) | bool
 
 - name: Node Join Checkpoint End
   hosts: all

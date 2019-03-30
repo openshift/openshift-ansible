@@ -85,6 +85,9 @@
     when:
     - openshift_use_nsx | default(false) | bool
     - inventory_hostname == groups.oo_first_master.0
+  - role: aci
+    when:
+    - openshift_use_aci | default(false) | bool
   tasks:
   - import_role:
       name: kuryr

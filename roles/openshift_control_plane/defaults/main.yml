@@ -104,6 +104,9 @@ r_openshift_master_use_contiv: "{{ r_openshift_master_use_contiv_default }}"
 r_openshift_master_use_kuryr_default: "{{ openshift_use_kuryr | default(False) }}"
 r_openshift_master_use_kuryr: "{{ r_openshift_master_use_kuryr_default }}"
 
+r_openshift_master_use_aci_default: "{{ openshift_use_aci | default(False) }}"
+r_openshift_master_use_aci: "{{ r_openshift_master_use_aci_default }}"
+
 r_openshift_master_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
 r_openshift_master_data_dir: "{{ r_openshift_master_data_dir_default }}"
 
