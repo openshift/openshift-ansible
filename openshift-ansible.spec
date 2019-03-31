@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.102
+Version:        3.11.103
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Mar 31 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.103-1
+- Linting fixes in playbooks and roles (vikash.kumar@oneconvergence.com)
+- Updating OWNERS (jcallen@redhat.com)
+- Remove papr test files (rteague@redhat.com)
+- Re-apply tuned profile during upgrade (rteague@redhat.com)
+- lib_utils to parse *_storage_host variables with get_templated
+  (jstuever@redhat.com)
+- Cisco ACI CNI Plugin support (sumitnaiksatam@gmail.com)
+
 * Thu Mar 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.102-1
 - bz1690900: no longer install etcd on masters (jstuever@redhat.com)
 - Wait for ServiceMonitor CRD to be created should have configurable retries
