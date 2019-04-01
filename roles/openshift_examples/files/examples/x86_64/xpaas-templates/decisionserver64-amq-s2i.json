@@ -5,19 +5,20 @@
         "annotations": {
             "iconClass": "icon-decisionserver",
             "tags": "decisionserver,jboss",
-            "version": "1.4.14",
+            "version": "1.4.17",
             "openshift.io/display-name": "JBoss BRMS 6.4 decision server + A-MQ (with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example BRMS decision server A-MQ application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
             "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss BRMS 6.4 decision server with A-MQ application, including a build configuration and application deployment configuration.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-brms/",
-            "template.openshift.io/support-url": "https://access.redhat.com"
+            "template.openshift.io/support-url": "https://access.redhat.com",
+            "template.openshift.io/bindable": "false"
         },
         "name": "decisionserver64-amq-s2i"
     },
     "labels": {
         "template": "decisionserver64-amq-s2i",
-        "xpaas": "1.4.14"
+        "xpaas": "1.4.17"
     },
     "message": "A new BRMS/A-MQ application with SSL support has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}. For accessing the A-MQ service use the credentials ${MQ_USERNAME}/${MQ_PASSWORD}. Please be sure to create the secret named \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
     "parameters": [
@@ -25,7 +26,7 @@
             "displayName": "KIE Container Deployment",
             "description": "The KIE Container deployment configuration in format: containerId=groupId:artifactId:version|c2=g2:a2:v2",
             "name": "KIE_CONTAINER_DEPLOYMENT",
-            "value": "decisionserver-hellorules=org.openshift.quickstarts:decisionserver-hellorules:1.3.0.Final",
+            "value": "decisionserver-hellorules=org.openshift.quickstarts:decisionserver-hellorules:1.4.0.Final",
             "required": false
         },
         {
@@ -96,7 +97,7 @@
             "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "1.3",
+            "value": "1.4",
             "required": false
         },
         {
@@ -223,12 +224,14 @@
             "required": false
         },
         {
+            "displayName": "List of directories from which archives will be copied into the deployment folder.",
             "description": "List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.",
             "name": "ARTIFACT_DIR",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Container memory limit",
             "description": "Container memory limit",
             "name": "MEMORY_LIMIT",
             "value": "1Gi",
@@ -318,7 +321,8 @@
                 "ports": [
                     {
                         "name": "mesh",
-                        "port": 61616
+                        "port": 61616,
+                        "targetPort": 6166
                     }
                 ],
                 "selector": {
@@ -396,6 +400,9 @@
                 "name": "${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "template.alpha.openshift.io/wait-for-ready": "true"
                 }
             },
             "spec": {
@@ -428,7 +435,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-decisionserver64-openshift:1.3"
+                            "name": "jboss-decisionserver64-openshift:1.5"
                         }
                     }
                 },
@@ -467,7 +474,11 @@
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
-                    "application": "${APPLICATION_NAME}"
+                    "application": "${APPLICATION_NAME}",
+                    "service": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "template.alpha.openshift.io/wait-for-ready": "true"
                 }
             },
             "spec": {
@@ -649,7 +660,11 @@
             "metadata": {
                 "name": "${APPLICATION_NAME}-amq",
                 "labels": {
-                    "application": "${APPLICATION_NAME}"
+                    "application": "${APPLICATION_NAME}",
+                    "service": "${APPLICATION_NAME}-amq"
+                },
+                "annotations": {
+                    "template.alpha.openshift.io/wait-for-ready": "true"
                 }
             },
             "spec": {
@@ -667,7 +682,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-63:1.3"
+                                "name": "jboss-amq-63:1.4"
                             }
                         }
                     },

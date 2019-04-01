@@ -6,14 +6,19 @@
             "description": "Application template for Red Hat JBoss BRMS 6.4 decision server applications built using S2I.",
             "iconClass": "icon-decisionserver",
             "tags": "decisionserver,jboss,xpaas",
-            "version": "1.4.14",
-            "openshift.io/display-name": "Red Hat JBoss BRMS 6.4 decision server (no https)"
+            "version": "1.4.17",
+            "openshift.io/display-name": "Red Hat JBoss BRMS 6.4 decision server (no https)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss BRMS 6.4 decision server, including a build configuration and application deployment configuration.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-brms/",
+            "template.openshift.io/support-url": "https://access.redhat.com",
+            "template.openshift.io/bindable": "false"
         },
         "name": "decisionserver64-basic-s2i"
     },
     "labels": {
         "template": "decisionserver64-basic-s2i",
-        "xpaas": "1.4.14"
+        "xpaas": "1.4.17"
     },
     "message": "A new BRMS application has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}.",
     "parameters": [
@@ -21,7 +26,7 @@
             "displayName": "KIE Container Deployment",
             "description": "The KIE Container deployment configuration in format: containerId=groupId:artifactId:version|c2=g2:a2:v2",
             "name": "KIE_CONTAINER_DEPLOYMENT",
-            "value": "decisionserver-hellorules=org.openshift.quickstarts:decisionserver-hellorules:1.3.0.Final",
+            "value": "decisionserver-hellorules=org.openshift.quickstarts:decisionserver-hellorules:1.4.0.Final",
             "required": false
         },
         {
@@ -64,7 +69,7 @@
             "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "1.3",
+            "value": "1.4",
             "required": false
         },
         {
@@ -127,12 +132,14 @@
             "required": false
         },
         {
+            "displayName": "List of directories from which archives will be copied into the deployment folder.",
             "description": "List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.",
             "name": "ARTIFACT_DIR",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Container memory limit",
             "description": "Container memory limit",
             "name": "MEMORY_LIMIT",
             "value": "1Gi",
@@ -201,6 +208,9 @@
                 "name": "${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "template.alpha.openshift.io/wait-for-ready": "true"
                 }
             },
             "spec": {
@@ -233,7 +243,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-decisionserver64-openshift:1.3"
+                            "name": "jboss-decisionserver64-openshift:1.5"
                         }
                     }
                 },
@@ -272,7 +282,11 @@
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
-                    "application": "${APPLICATION_NAME}"
+                    "application": "${APPLICATION_NAME}",
+                    "service": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "template.alpha.openshift.io/wait-for-ready": "true"
                 }
             },
             "spec": {
