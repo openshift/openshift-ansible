@@ -4,6 +4,7 @@
       'name':         '{{ [item.name, iter, ".", openshift_ovirt_dns_zone] | join }}',
       'host_name':    '{{ (item.empty_hostname | default(True)) | ternary('', [item.name, iter, ".", openshift_ovirt_dns_zone] | join) }}',
       'description':  '{{ item.description | default('') }}',
+      {%- if item.nics is defined and item.nics[item["name"] + iter | string ] is defined -%} 'nics': {{ item.nics[item["name"] + iter | string ] }}, {%- endif -%}
       {%- if ovirt_admin | default(True) -%}
       'tag':          '{{ ["openshift_", item.profile] | join }}',
       {%- endif -%}

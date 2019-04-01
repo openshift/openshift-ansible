@@ -8,7 +8,7 @@
 
 - name: Create virtual machine list fact
   set_fact:
-    vms: "{{ lookup('template', './vms.j2') }}"
+    vms: "{{ lookup('template', 'vms.j2') }}"
   tags:
     - openshift_ovirt
 
