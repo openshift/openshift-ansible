@@ -22,6 +22,10 @@
         state: absent
         wait: yes
       with_items: "{{ ec2.instances }}"
+      register: remove_instance
+      until: remove_instance | success
+      retries: 5
+      delay: 10
 
     - name: Rename VMs
       ec2_tag:
@@ -33,6 +37,10 @@
       when:
         - aws_use_auto_terminator | default(true)
         - "'-terminate' not in item.tags.Name"
+      register: rename_instance
+      until: rename_instance | success
+      retries: 5
+      delay: 10
 
     - when: not aws_use_auto_terminator | default(true)
       block:
@@ -48,3 +56,7 @@
             state: absent
             region: "{{ aws_region }}"
           with_items: "{{ ec2_groups.security_groups }}"
+          register: delete_sg
+          until: delete_sg | success
+          retries: 5
+          delay: 10
