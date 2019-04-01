@@ -108,8 +108,6 @@ spec:
             - --tls-key=/secret/server-key
             - -pass-access-token
             - -skip-provider-button
-            - '-openshift-sar={"resource": "selfsubjectaccessreviews", "verb": "create", "group": "authorization.k8s.io"}'
-            - '-openshift-delegate-urls={"/": {"resource": "selfsubjectaccessreviews", "verb": "create", "group": "authorization.k8s.io"}}'
 {% if (kibana_proxy_memory_limit is defined and kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "") or (kibana_proxy_cpu_limit is defined and kibana_proxy_cpu_limit is not none and kibana_proxy_cpu_limit != "") or (kibana_proxy_cpu_request is defined and kibana_proxy_cpu_request is not none and kibana_proxy_cpu_request != "") %}
           resources:
 {%   if (kibana_proxy_memory_limit is defined and kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "") or (kibana_proxy_cpu_limit is defined and kibana_proxy_cpu_limit is not none and kibana_proxy_cpu_limit != "") %}
