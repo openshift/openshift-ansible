@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.134
+Version:        3.10.135
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Apr 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.135-1
+- Update kube-rbac-proxy to v0.4.1 (vrutkovs@redhat.com)
+
 * Fri Mar 29 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.134-1
 - Updating OWNERS (jcallen@redhat.com)
 - Fixed "AnsibleUndefinedVariable: 'dict object' has no attribute
