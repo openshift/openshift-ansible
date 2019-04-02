@@ -66,4 +66,4 @@
   when: openshift_cluster_autoscaler_install | default(false) | bool
 
 - import_playbook: ../../openshift-noobaa/private/config.yml
-  when: openshift_noobaa_install | default(true) | bool
+  when: openshift_noobaa_install | default(false) | bool
