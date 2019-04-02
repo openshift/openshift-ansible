@@ -49,24 +49,20 @@
     dest: "{{ tempfile.path }}/pull-secret.json"
 
 - name: Get release image
-  k8s_facts:
-    kubeconfig: "{{ openshift_kubeconfig_path }}"
-    kind: ClusterVersion
-    name: version
+  command: >
+    oc get clusterversion
+    --config={{ openshift_kubeconfig_path }}
+    --output=jsonpath='{.items[0].status.desired.image}'
   delegate_to: localhost
-  register: clusterversion
+  register: oc_get
   until:
-  - clusterversion.resources is defined
-  - clusterversion.resources | length > 0
-  - clusterversion.resources[0].status is defined
-  - clusterversion.resources[0].status.desired is defined
-  - clusterversion.resources[0].status.desired.image is defined
+  - oc_get.stdout != ''
   retries: 36
   delay: 5
 
 - name: Set openshift_release_image fact
   set_fact:
-    openshift_release_image: "{{ clusterversion.resources[0].status.desired.image }}"
+    openshift_release_image: "{{ oc_get.stdout }}"
 
 - name: Pull release image
   command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ openshift_release_image }}"
