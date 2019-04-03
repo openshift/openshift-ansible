@@ -24,8 +24,6 @@ tracks our current work **in development**.
 Requirements:
 
 - Ansible >= 2.7.8
-- pyOpenSSL
-- python2-openshift
 
 # Quickstart
 
