@@ -8,6 +8,6 @@
   when:
     - openshift_deployment_type == 'openshift-enterprise'
     - openshift_docker_ent_reg != ''
-    - openshift_docker_ent_reg in oreg_url
+    - openshift_docker_ent_reg in oreg_url | default('')
     - openshift_docker_ent_reg not in l2_docker_additional_registries
     - not openshift_use_crio_only | bool
