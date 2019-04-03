@@ -1,0 +1,19 @@
+---
+r_aci_node_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_aci_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
+
+r_aci_node_os_firewall_allow:
+- service: opflexu
+  port: 8472/udp
+- service: opflex
+  port: 8472/tcp
+- service: dns
+  port: 53/tcp
+- service: dnsu
+  port: 53/udp
+
+annotate_namespace_list:
+- openshift-console
+- openshift-monitoring
+- openshift-web-console
+- kube-service-catalog
