@@ -1,4 +1,23 @@
+[all:vars]
+# SSH user, this user should allow ssh based auth without requiring a
+# password. If using ssh key based auth, then the key should be managed by an
+# ssh agent.
+ansible_user=root
+
+# If ansible_user is not root, ansible_become must be set to true and the
+# user must be configured for passwordless sudo
+#ansible_become=True
+
+###############################################################################
+# Required configuration variables                                            #
+###############################################################################
+openshift_kubeconfig_path="~/.kube/config"
+openshift_pull_secret_path="~/pull-secret.txt"
+
+# For running RHEL worker upgrades
+[workers]
+mycluster-worker-[1:3].example.com
+
+# For running RHEL worker scaleup
 [new_workers]
-mycluster-worker-0.example.com
-mycluster-worker-1.example.com
-mycluster-worker-2.example.com
+mycluster-worker-[4:6].example.com
