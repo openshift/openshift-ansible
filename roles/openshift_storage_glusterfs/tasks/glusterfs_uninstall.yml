@@ -42,6 +42,8 @@
     name: "glusterfs-{{ glusterfs_name }}"
   - kind: storageclass
     name: "glusterfs-{{ glusterfs_name }}"
+  - kind: storageclass
+    name: "glusterfs-{{ glusterfs_name }}-block"
 
 - name: Unlabel GlusterFS nodes
   oc_label:
