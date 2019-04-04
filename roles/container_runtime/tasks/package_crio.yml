@@ -61,7 +61,7 @@
   yedit:
     src: /etc/crictl.yaml
     key: runtime-endpoint
-    value: "{{ openshift_crio_var_sock }}"
+    value: "unix://{{ openshift_crio_var_sock }}"
 
 - name: Ensure CNI configuration directory exists
   file:

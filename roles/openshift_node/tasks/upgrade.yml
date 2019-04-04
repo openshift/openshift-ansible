@@ -59,7 +59,7 @@
   yedit:
     src: /etc/crictl.yaml
     key: runtime-endpoint
-    value: "{{ openshift_crio_var_sock }}"
+    value: "unix://{{ openshift_crio_var_sock }}"
   when:
   - openshift_use_crio | default(False) | bool
 
