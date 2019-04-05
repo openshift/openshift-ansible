@@ -14,6 +14,8 @@
 - import_playbook: openshift-master/private/restart.yml
 
 - import_playbook: openshift-node/private/restart.yml
+  vars:
+    openshift_node_restart_docker_required: False
 
 - import_playbook: openshift-hosted/private/redeploy-router-certificates.yml
   when: openshift_hosted_manage_router | default(true) | bool
