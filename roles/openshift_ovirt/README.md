@@ -37,6 +37,7 @@ The `openshift_ovirt_vm_manifest` variable can contain following attributes
 
 | Name      | Type | Default value |                                                                                                                 |
 |-----------|------|---------------|-----------------------------------------------------------------------------------------------------------------|
+| nics      | Dict | UNDEF         | Corresoponds to 'nics' section in oVirt.vm-infra module. Lets you set a nic `name`, 'network`, `interface`, and `mac_address`. |
 | nic_mode  | Dict | UNDEF         | If you define this variable means that the interface on the VM will have static address instead of dynamic one. |
 | empty_hostname  | Bool | True   | If True, the VM's Hostname will remain empty in cloud-init, and will relays the VM's hostname on DHCP name. |
 | ovirt_admin  | Bool | True   | If False, the role will not try to add tags to the created vms and also avoid to get into affinity groups. This way the role could be executed without admin rights |
@@ -51,6 +52,18 @@ Below `nic_mode` we can find this other parameters
 | nic_on_boot     | Bool   | True          | The interface will be up on boot.        |
 | nic_name        | String | 'eth0'        | The Interface name for the vm.           |
 | dns_servers     | String | UNDEF         | The DNS set on the VM.                   |
+
+
+`nics` parameters reffer to the oVirt.vm-infra ['nics' role parameters](https://github.com/oVirt/ovirt-ansible-vm-infra/blob/master/README.md):
+
+| Name               | Default value  |                                              |
+|--------------------|----------------|----------------------------------------------|
+| name               | UNDEF          | The name of the network interface.           |
+| interface          | UNDEF          | Type of the network interface.               |
+| mac_address        | UNDEF          | Custom MAC address of the network interface, by default it's obtained from MAC pool. |
+| network            | UNDEF          | Logical network which the VM network interface should use. If network is not specified, then Empty network is used. |
+| profile            | UNDEF          | Virtual network interface profile to be attached to VM network interface. |
+
 
 
 ## Examples
@@ -112,16 +125,16 @@ openshift_ovirt_vm_manifest:
 
 
 - **openshift_ovirt_vm_manifest with static IPs**
-```
+```yaml
 openshift_ovirt_vm_manifest:
 #######################################
 # Multiple Node Static Ip addresses
 #######################################
-- name: 'master'
-  count: 3
-  profile: 'master'
-  empty_hostname: True
-  nic_mode:
+  - name: 'master'
+    count: 3
+    profile: 'master'
+    empty_hostname: True
+    nic_mode:
       # This must fit the same name as this kind of vms. (e.g) if the name is test, this must be test0
       master0:
         nic_ip_address: '192.168.123.160'
@@ -143,10 +156,10 @@ openshift_ovirt_vm_manifest:
         nic_gateway: '192.168.123.1'
         nic_on_boot: True
         dns_servers: "192.168.1.100"
-- name: 'infra'
-  count: 2
-  profile: 'node'
-  nic_mode:
+  - name: 'infra'
+    count: 2
+    profile: 'node'
+    nic_mode:
       infra0:
         nic_ip_address: '192.168.123.163'
         nic_netmask: '255.255.255.0'
@@ -163,24 +176,42 @@ openshift_ovirt_vm_manifest:
 ################################################
 # Multiple/Single Node Dynamic Ip addresses
 ################################################
-- name: 'compute'
-  count: 2
-  profile: 'node'
+  - name: 'compute'
+    count: 2
+    profile: 'node'
 
 ######################################
 # Single Node Static Ip addresses
 ######################################
-- name: 'lb'
-  count: 1
-  profile: 'node_vm'
-  nic_mode:
-      lb:
+  - name: 'lb'
+    count: 1
+    profile: 'node_vm'
+    nic_mode:
+      lb0:
         nic_ip_address: '192.168.123.170'
         nic_netmask: '255.255.255.0'
         nic_gateway: '192.168.123.1'
         dns_servers: "192.168.1.100"
 ```
 
+### Setting Mac addresses for 3 masters
+
+```yaml
+openshift_ovirt_vm_manifest:
+  - name: 'master'
+    count: 3
+    profile: 'master'
+    nics:
+      master0:
+        - name: nic1
+          mac_address: 56:3f:24:a7:00:10
+      master1:
+        - name: nic1
+          mac_address: 56:3f:24:a7:00:20
+      master2:
+        - name: nic1
+          mac_address: 56:3f:24:a7:00:30
+```
 ### Playbook
 
 ```
