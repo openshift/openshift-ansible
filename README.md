@@ -15,53 +15,56 @@ Installation of OpenShift 4.x uses a command-line installation wizard instead of
 Ansible playbooks.  Learn more about the OpenShift Installer in this
 [overview](https://github.com/openshift/installer/blob/master/docs/user/overview.md#installer-overview).
 
-For OpenShift 4.x, this repo only provides playbooks necessary for scaling up an
-existing 4.x cluster with RHEL hosts.
+For OpenShift 4.x, this repo only provides playbooks necessary for scaling up or
+upgrading RHEL hosts in an existing 4.x cluster.
 
 The [master branch](https://github.com/openshift/openshift-ansible/tree/master)
 tracks our current work **in development**.
 
-Requirements:
+Requirements: (localhost)
 
 - Ansible >= 2.7.8
+- OpenShift Client (oc)
 
 # Quickstart
 
 ## Install an OpenShift 4.x cluster
 Install a cluster using the [OpenShift Installer](https://www.github.com/openshift/installer).
 
-## Inventory
-Create an inventory file with the `new_workers` group to identify the hosts which
-should be added to the cluster.
-```yaml
+## Create an Ansible Inventory
+Create an inventory file with the appropriate groups and variables defined.
+An example inventory can be found in [inventory/hosts.example](inventory/hosts.example).
 
----
-[new_workers]
-mycluster-worker-0.example.com
-mycluster-worker-1.example.com
-mycluster-worker-2.example.com
-```
+Required variables include:
 
-## Run the scaleup playbook
+- `openshift_kubeconfig_path` - Path to the kubeconfig for the cluster
+- `openshift_pull_secret_path` - Path to the pull secret to the image registry
+
+## Run the RHEL node scaleup playbook
 
 ```bash
-ansible-playbook playbooks/openshift_node/scaleup.yml
+cd openshift-ansible
+ansible-playbook -i inventory/hosts playbooks/scaleup.yml
+```
+
+## Run the RHEL node upgrade playbook
+Custom tasks can be performed during upgrades at different stages of the upgrade.
+See the [hooks documentation](HOOKS.md) for more information.
+
+```bash
+cd openshift-ansible
+ansible-playbook -i inventory/hosts playbooks/upgrade.yml
 ```
 
 # Further reading
 
 ## Complete Production Installation Documentation:
-
-- [OpenShift Container Platform](https://docs.openshift.com/container-platform/3.11/install/running_install.html)
-- [OpenShift Origin](https://docs.okd.io/latest/install/index.html)
+- [OpenShift Container Platform](https://docs.openshift.com)
+- [OpenShift Origin](https://docs.okd.io)
 
 ## Containerized OpenShift Ansible
 
 See [README_CONTAINER_IMAGE.md](README_CONTAINER_IMAGE.md) for information on how to package openshift-ansible as a container image.
-
-## Installer Hooks
-
-See the [hooks documentation](HOOKS.md).
 
 ## Contributing
 
