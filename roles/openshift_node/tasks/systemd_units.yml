@@ -5,6 +5,11 @@
     dest: /usr/local/bin/openshift-node
     mode: 0500
 
+- name: Install cni-cleanup file
+  template:
+    dest: "/usr/lib/tmpfiles.d/cleanup-cni.conf"
+    src: "cleanup-cni.j2"
+
 - name: Install Node service file
   template:
     dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
