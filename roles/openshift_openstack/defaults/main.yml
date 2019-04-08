@@ -150,14 +150,6 @@ openshift_openstack_master_secgroup_rules:
     port_range_max: 24224
   - direction: ingress
     protocol: tcp
-    port_range_min: 2224
-    port_range_max: 2224
-  - direction: ingress
-    protocol: udp
-    port_range_min: 5404
-    port_range_max: 5405
-  - direction: ingress
-    protocol: tcp
     port_range_min: 9090
     port_range_max: 9090
 openshift_openstack_etcd_secgroup_rules:
@@ -188,34 +180,9 @@ openshift_openstack_node_secgroup_rules:
     remote_mode: remote_group_id
   - direction: ingress
     protocol: udp
-    port_range_min: 10250
-    port_range_max: 10250
-    remote_mode: remote_group_id
-  - direction: ingress
-    protocol: tcp
-    port_range_min: 10255
-    port_range_max: 10255
-    remote_mode: remote_group_id
-  - direction: ingress
-    protocol: udp
-    port_range_min: 10255
-    port_range_max: 10255
-    remote_mode: remote_group_id
-  - direction: ingress
-    protocol: udp
     port_range_min: 4789
     port_range_max: 4789
     remote_mode: remote_group_id
-  - direction: ingress
-    protocol: tcp
-    port_range_min: 30000
-    port_range_max: 32767
-    remote_ip_prefix: "{{ openshift_openstack_node_ingress_cidr }}"
-  - direction: ingress
-    protocol: tcp
-    port_range_min: 30000
-    port_range_max: 32767
-    remote_ip_prefix: "{{ openshift_openstack_subnet_cidr }}"
 openshift_openstack_infra_secgroup_rules:
   - direction: ingress
     protocol: tcp

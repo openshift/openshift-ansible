@@ -1289,3 +1289,73 @@ acf2afc99b950       registry.redhat.io/openshift3/ose-node@sha256:3da731d733cd4d
 [openshift@app-node-0 ~]$ sudo docker ps
 sudo: docker: command not found
 ```
+
+## Opening Optional Ports
+There are certian optional and legacy features that require ports to be opened. The code provided in the following sections can be used to enable these features.
+
+### Metrics
+If you want to enable metrics in your openshift cluster, then port 10255 must be open on all nodes in the cluster. The following code should be added to openshift_openstack_node_secgroup_rules in main.yml.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 10255
+    port_range_max: 10255
+  - direction: ingress
+    protocol: udp
+    port_range_min: 10255
+    port_range_max: 10255
+```
+
+### Prometheus
+The following code to open ports for prometheus should also be added to the openshift_openstack_node_secgroup_rules section of main.yml.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 9100
+    port_range_max: 9100
+```
+
+### Elastic Search
+Add this to the openshift_openstack_node_secgroup_rules section of main.yml to enable elastic search.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 9200
+    port_range_max: 9200
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 9300
+    port_range_max: 9300
+```
+
+### Using Pacemaker HA
+If you choose to use Pacemaker to manage the HA system on the master nodes, the following changes should be made to the openshift_openstack_master_secgroup_rules section.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 2224
+    port_range_max: 2224
+  - direction: ingress
+    protocol: udp
+    port_range_min: 5404
+    port_range_max: 5405
+```
+
+The following Documentation may prove helpful as well:
+- https://docs.openshift.com/enterprise/3.1/architecture/infrastructure_components/kubernetes_infrastructure.html#high-availability-masters
+- https://docs.openshift.com/enterprise/3.1/install_config/upgrading/pacemaker_to_native_ha.html
+
+### Template Router
+If you are running a template router to expose your statistics, there are a few changes you need to make. First, add this to main.yml under the openshift_openstack_infra_secgroup_rules section.
+
+```
+  # Required when running template router to access statistics
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 1936
+    port_range_max: 1936
+```
