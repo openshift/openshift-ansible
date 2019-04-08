@@ -7,7 +7,7 @@
 
 - name: Install cni-cleanup file
   template:
-    dest: "/usr/lib/tmpfiles.d/cleanup-cni.conf"
+    dest: "/etc/tmpfiles.d/cleanup-cni.conf"
     src: "cleanup-cni.j2"
 
 - name: Install Node service file
