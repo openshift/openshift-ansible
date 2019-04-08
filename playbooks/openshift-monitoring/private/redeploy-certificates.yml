@@ -1,0 +1,125 @@
+---
+- name: Update monitoring certificates
+  hosts: oo_first_master
+  vars:
+  roles:
+  - lib_openshift
+  - openshift_facts
+  tasks:
+  - name: Remove TLS secret
+    oc_obj:
+      name: "{{ item }}"
+      kind: secret
+      state: absent
+      namespace: openshift-monitoring
+    with_items:
+    - alertmanager-main-tls
+    - grafana-tls
+    - kube-state-metrics-tls
+    - node-exporter-tls
+    - prometheus-k8s-tls
+
+  - name: Remove Prometheus pods
+    oc_obj:
+      selector: "app=prometheus"
+      kind: pod
+      state: absent
+      namespace: openshift-monitoring
+
+  - name: Verify that the Prometheus is running
+    oc_obj:
+      namespace: openshift-monitoring
+      kind: statefulset
+      state: list
+      name: prometheus-k8s
+    register: prometheus_ss
+    until:
+    - prometheus_ss.results.results[0].status.readyReplicas is defined
+    - prometheus_ss.results.results[0].status.readyReplicas > 0
+    retries: 60
+    delay: 10
+    changed_when: false
+
+  - name: Remove Alertmanager pods
+    oc_obj:
+      selector: "app=alertmanager"
+      kind: pod
+      state: absent
+      namespace: openshift-monitoring
+
+  - name: Verify that the Alertmanager is running
+    oc_obj:
+      namespace: openshift-monitoring
+      kind: statefulset
+      state: list
+      name: alertmanager-main
+    register: alertmanager_ss
+    until:
+    - alertmanager_ss.results.results[0].status.readyReplicas is defined
+    - alertmanager_ss.results.results[0].status.readyReplicas > 0
+    retries: 60
+    delay: 10
+    changed_when: false
+
+  - name: Remove kube-state-metrics pods
+    oc_obj:
+      selector: "app=kube-state-metrics"
+      kind: pod
+      state: absent
+      namespace: openshift-monitoring
+
+  - name: Verify that the Kube State Metrics is running
+    oc_obj:
+      namespace: openshift-monitoring
+      kind: deployment
+      state: list
+      name: kube-state-metrics
+    register: kube_state_metrics_deployment
+    until:
+    - kube_state_metrics_deployment.results.results[0].status.readyReplicas is defined
+    - kube_state_metrics_deployment.results.results[0].status.readyReplicas > 0
+    retries: 60
+    delay: 10
+    changed_when: false
+
+  - name: Remove grafana pods
+    oc_obj:
+      selector: "app=grafana"
+      kind: pod
+      state: absent
+      namespace: openshift-monitoring
+
+  - name: Verify that the Grafana is running
+    oc_obj:
+      namespace: openshift-monitoring
+      kind: deployment
+      state: list
+      name: grafana
+    register: grafana_deployment
+    until:
+    - grafana_deployment.results.results[0].status.readyReplicas is defined
+    - grafana_deployment.results.results[0].status.readyReplicas > 0
+    retries: 60
+    delay: 10
+    changed_when: false
+
+  - name: Remove node-exporter pods
+    oc_obj:
+      selector: "app=node-exporter"
+      kind: pod
+      state: absent
+      namespace: openshift-monitoring
+
+  - name: Verify that the node-exporter is running
+    oc_obj:
+      namespace: openshift-monitoring
+      kind: daemonset
+      state: list
+      name: node-exporter
+    register: node_exporter_ds
+    until:
+    - node_exporter_ds.results.results[0].status.numberReady is defined
+    - node_exporter_ds.results.results[0].status.numberReady > 0
+    retries: 60
+    delay: 10
+    changed_when: false
