@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.103
+Version:        3.11.104
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,38 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Apr 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.104-1
+- Change the cni-cleanup file path to /etc (gabriel.mainberger@vshn.net)
+- Backport of #10173 (egarcia@redhat.com)
+- openshift_ovirt: fix inventory creation of multi nodes (rgolan@redhat.com)
+- Update README.md (onurserdarosman@gmail.com)
+- Add playbooks to regenerate secrets for openshift-monitoring
+  (vrutkovs@redhat.com)
+- OLM: use olm_operator_version as a tag for Origin images
+  (vrutkovs@redhat.com)
+- tmpfile.d file clears the cni config on boot (pcameron@redhat.com)
+- BZ1695856 - redeploy certificates fails if use_crio_only (jcallen@redhat.com)
+- Option to add and annotate namespaces for openshift-service-catalog (apomitta
+  @apoorva-vm1.local.lan)
+- BZ1694106 - Update crictl.yaml runtime-endpoint config to resolve warning
+  (jcallen@redhat.com)
+- Remove block storageclass (crmarquesjc@gmail.com)
+- openshift_ovirt: Support setting mac_address in the manifest
+  (rgolan@redhat.com)
+- [KIECLOUD-110] - Update RHDM and RHPAM 7.30 templates on OCP and OSO service
+  catalog (fspolti@redhat.com)
+- [KIECLOUD-171] - Update Application templates and imagestreams on OCP for
+  RHDS and RHIPS (fspolti@redhat.com)
+- Revert "bug 1666674. Add Kibana sar and delegate url for auth-delegator"
+  (jcantril@redhat.com)
+- test/deprovision: retry attempts to destroy instances and SG
+  (vrutkovs@redhat.com)
+- Providing default oreg_url for validation (philippe@dellaert.org)
+- Update kube-rbac-proxy to v0.4.1 (vrutkovs@redhat.com)
+- ASB: use `${version}` in default image (vrutkovs@redhat.com)
+- Satellite image URL can be worked in example template image url replacement.
+  (bysnupy@hotmail.com)
+
 * Sun Mar 31 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.103-1
 - Linting fixes in playbooks and roles (vikash.kumar@oneconvergence.com)
 - Updating OWNERS (jcallen@redhat.com)
