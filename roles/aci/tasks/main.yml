@@ -19,15 +19,13 @@
   with_items: "{{ annotate_namespace_list }}"
   delegate_to: "{{ groups.oo_first_master.0 }}"
 - name: Get aci policy tenant name
-  shell: >
-    "grep -m1 'aci-policy-tenant' {{ aci_deployment_yaml_file }} |
-    awk -F '\"' '{print $4}'"
+  shell: grep -m1 'aci-policy-tenant' {{ aci_deployment_yaml_file }} | awk -F '\"' '{print $4}'
   register: tenant
   delegate_to: "{{ groups.oo_first_master.0 }}"
-- name: Annotate namespaces created
-  shell: >
-    "oc annotate namespace {{ item }}
-    opflex.cisco.com/endpoint-group='{\"policy-space\":\"{{ tenant.stdout }}\",
-    \"name\": \"kubernetes|kube-system\"}' --overwrite=True"
+- name: Annotate namespace created
+  command: >
+    oc annotate namespace {{ item }}
+    opflex.cisco.com/endpoint-group='{"policy-space":"{{ tenant.stdout }}", "name": "kubernetes|kube-system"}'
+    --overwrite=True
   with_items: "{{ annotate_namespace_list }}"
   delegate_to: "{{ groups.oo_first_master.0 }}"
