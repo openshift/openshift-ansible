@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.135
+Version:        3.10.136
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,17 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Apr 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.136-1
+- Dockerfile: lock azure-cli-core to 2.0.61 (vrutkovs@redhat.com)
+- Dockerfile: install python2-psutil (vrutkovs@redhat.com)
+- tmpfile.d file clears the cni config on boot (pcameron@redhat.com)
+- Backport version requirement plugin fixes (rteague@redhat.com)
+- ASB: use `${version}` in default image (vrutkovs@redhat.com)
+- BZ1695856 - redeploy certificates fails if use_crio_only (jcallen@redhat.com)
+- Cisco ACI CNI Plugin support (sumitnaiksatam@gmail.com)
+- test/deprovision: retry attempts to destroy instances and SG
+  (vrutkovs@redhat.com)
+
 * Mon Apr 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.135-1
 - Update kube-rbac-proxy to v0.4.1 (vrutkovs@redhat.com)
 
