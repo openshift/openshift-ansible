@@ -2,9 +2,7 @@
 approvers:
   - ironcladlou
   - joelsmith
-  - ingvagabund
 # review == this code is good /lgtm
 reviewers:
   - ironcladlou
   - joelsmith
-  - ingvagabund

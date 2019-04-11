@@ -3,10 +3,8 @@ approvers:
   - jcantrill
   - ewolinetz
   - richm
-  - wozniakjan
 # review == this code is good /lgtm
 reviewers:
   - jcantrill
   - ewolinetz
   - richm
-  - wozniakjan

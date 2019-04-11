@@ -1,8 +1,7 @@
-reviewers:
-- jim-minter
-- kwoodson
-- pweil-
 approvers:
-- jim-minter
-- kwoodson
-- pweil-
+  - jim-minter
+  - kwoodson
+  - pweil-
+reviewers:
+  - jim-minter
+  - kwoodson
