@@ -57,6 +57,12 @@
     src: crio.conf.j2
     backup: yes
 
+- name: Update crictl.yaml runtime-endpoint
+  yedit:
+    src: /etc/crictl.yaml
+    key: runtime-endpoint
+    value: "{% if not openshift_crio_var_sock.startswith('unix://') %}unix://{{ openshift_crio_var_sock}}{% else %}{{ openshift_crio_var_sock}}{% endif %}"
+
 - name: Ensure CNI configuration directory exists
   file:
     path: /etc/cni/net.d/
