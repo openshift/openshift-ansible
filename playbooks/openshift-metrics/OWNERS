@@ -2,15 +2,7 @@
 approvers:
   - ewolinetz
   - jcantrill
-  - michaelgugino
-  - mtnbikenc
-  - sdodson
-  - vrutkovs
 # review == this code is good /lgtm
 reviewers:
   - ewolinetz
   - jcantrill
-  - michaelgugino
-  - mtnbikenc
-  - sdodson
-  - vrutkovs
