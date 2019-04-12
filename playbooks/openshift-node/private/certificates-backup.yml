@@ -1,0 +1,18 @@
+---
+- name: Backup and remove node certificates
+  hosts: oo_nodes_to_config
+  any_errors_fatal: true
+  roles:
+  - openshift_facts
+  tasks:
+  - name: Backup node config directories
+    command: >
+      tar -czvf /etc/origin/node-cert-config-backup-{{ ansible_date_time.epoch }}.tgz
+      {{ openshift.common.config_base }}/node
+  - name: Remove generated certificates
+    file:
+      path: "{{ openshift.common.config_base }}/node/{{ item }}"
+      state: absent
+    with_items:
+    - certificates
+    - bootstrap.kubeconfig
