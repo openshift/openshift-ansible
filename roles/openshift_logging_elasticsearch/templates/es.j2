@@ -165,7 +165,6 @@ spec:
            - -client-id=system:serviceaccount:{{ openshift_logging_elasticsearch_namespace }}:aggregated-logging-elasticsearch
            - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
            - -cookie-secret={{ 16 | lib_utils_oo_random_word | b64encode }}
-           - -basic-auth-password={{ basic_auth_passwd }}
            - -upstream=https://localhost:9200
            - '-openshift-sar={"namespace": "{{ openshift_logging_elasticsearch_namespace}}", "verb": "view", "resource": "prometheus", "group": "metrics.openshift.io"}'
            - '-openshift-delegate-urls={"/": {"resource": "prometheus", "verb": "view", "group": "metrics.openshift.io", "namespace": "{{ openshift_logging_elasticsearch_namespace}}"}}'
@@ -173,6 +172,7 @@ spec:
            - --tls-key=/etc/tls/private/tls.key
            - -pass-access-token
            - -pass-user-headers
+           - -pass-user-bearer-token
           ports:
           - containerPort: 4443
             name: proxy
