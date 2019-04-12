@@ -73,4 +73,10 @@
   - openshift_facts:
       role: master
       local_facts:
+        api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
+        api_port: "{{ openshift_master_api_port }}"
+        controllers_port: "{{ openshift_master_controllers_port | default(None) }}"
+        console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
+        console_path: "{{ openshift_master_console_path | default(None) }}"
+        console_port: "{{ openshift_master_console_port | default(None) }}"
         ha: "{{ groups.oo_masters_to_config | length > 1 }}"
