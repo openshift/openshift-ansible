@@ -194,172 +194,172 @@ default_r_openshift_node_os_firewall_allow:
   cond: "{{ openshift_router_stats_port_enable | default(True) }}"
 - service: Contrail VRouter Agent Introspect
   port: 8085/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail VRouter Agent Metadata Proxy
   port: 8097/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail VRouter Agent Port IPC
   port: 9091/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail VRouter Agent NodeMgr
   port: 8102/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Redis Query Port
   port: 6379/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Database NodeMgr
   port: 8112/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Cassandra
   port: 9041/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Cassandra 2
   port: 9161/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Cassandra 3
   port: 7010/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Zookeeper 1
   port: 2181/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Zookeeper 2
   port: 43391/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Zookeeper 3
   port: 2888/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Zookeeper 4
   port: 3888/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail RabbitMQ
   port: 4369/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail RabbitMQ 2
   port: 25672/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail RabbitMQ 3
   port: 5672/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Controller Database NodeMgr
   port: 8103/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Kafka
   port: 9092/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Kafka 2
   port: 33994/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Cassandra 1
   port: 9042/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Cassandra 2
   port: 9160/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Cassandra 3
   port: 7000/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Zookeeper
   port: 2182/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Zookeeper 2
   port: 40799/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics HTTP Opserver
   port: 8090/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Zookeeper 3
   port: 4888/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Zookeeper 4
   port: 5888/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Opserver
   port: 8081/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics HTTP Collector
   port: 8089/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytic Collector
   port: 8086/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Collector Structured Syslog
   port: 3514/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Query Engine
   port: 8091/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Snmp Collector
   port: 5920/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Port Topology
   port: 5921/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics NodeMgr
   port: 8104/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Analytics Alarm Generator
   port: 5995/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Control XMPP
   port: 5269/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Control Control
   port: 8083/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Control DNS
   port: 8092/udp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Control DNS XMPP
   port: 8093/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Control NodeMgr
   port: 8101/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Control BGP
   port: 179/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config API server
   port: 8082/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config HTTP API server
   port: 8084/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Schema Transformer
   port: 8087/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Service Monitor
   port: 8088/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config Device Manager
   port: 8096/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config NodeMgr
   port: 8100/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Config API Backend
   port: 9100/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail WebUI
   port: 8143/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail WebUI 2
   port: 8180/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail WebUI Console
   port: 8080/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail KubeManager Introspect
   port: 8108/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: Contrail Openshift WebConsole
   port: 18443/tcp
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: skydns tcp 2 contrail_dns
   port: "53/tcp"
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 - service: skydns udp 2 contrail_dns
   port: "53/udp"
-  condition: "{{ openshift_node_use_contrail }}"
+  cond: "{{ openshift_node_use_contrail }}"
 # Allow multiple port ranges to be added to the role
 r_openshift_node_os_firewall_allow: "{{ default_r_openshift_node_os_firewall_allow | union(openshift_node_open_ports | default([])) }}"
 
