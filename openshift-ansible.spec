@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.76
+Version:        3.9.77
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Apr 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.77-1
+- Fix condition key for all opened ports by Contrail SDN
+  (steve.teuber@idealo.de)
+- Backport version requirement plugin fixes (rteague@redhat.com)
+- BZ1695856 - redeploy certificates fails if use_crio_only (jcallen@redhat.com)
+
 * Sat Mar 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.76-1
 - Updating OWNERS (jcallen@redhat.com)
 - Add support for environment variable IP_AUTODETECTION_METHOD
