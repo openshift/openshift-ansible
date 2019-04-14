@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.105
+Version:        3.11.106
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Apr 14 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.106-1
+- Fixes NotReady nodes after ca and certificate update (jcallen@redhat.com)
+- Ensure master vars are passed to openshift_facts on upgrade
+  (vrutkovs@redhat.com)
+- Console cert redeploy: rerun install (vrutkovs@redhat.com)
+
 * Thu Apr 11 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.105-1
 - Update roles/openshift_logging_elasticsearch/tasks/main.yaml
   (roignac@gmail.com)
