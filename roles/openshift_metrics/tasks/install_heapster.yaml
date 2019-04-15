@@ -23,7 +23,7 @@
   changed_when: no
 
 - set_fact:
-    heapster_sa_secrets: ["heapster-secrets"]
+    heapster_sa_secrets: ["heapster-secrets", "heapster-certs"]
 
 - set_fact:
     heapster_sa_secrets: "{{ heapster_sa_secrets + [item] }}"
