@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.137
+Version:        3.10.138
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Apr 15 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.138-1
+- Fixes NotReady nodes after ca and certificate update (jcallen@redhat.com)
+- Ensure master vars are passed to openshift_facts on upgrade
+  (vrutkovs@redhat.com)
+
 * Fri Apr 12 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.137-1
 - BZ1694106 - Update crictl.yaml runtime-endpoint config to resolve warning
   (jcallen@redhat.com)
