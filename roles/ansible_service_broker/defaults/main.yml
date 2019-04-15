@@ -20,3 +20,9 @@ ansible_service_broker_image_pull_policy: Always
 ansible_service_broker_sandbox_role: edit
 ansible_service_broker_auto_escalate: false
 ansible_service_broker_local_registry_whitelist: []
+# Secrets to be mounted for APBs. Format:
+# - title: Database credentials
+#   secret: db_creds
+#   apb_name: dh-rhscl-postgresql-apb
+# https://github.com/openshift/ansible-service-broker/blob/master/docs/config.md#secrets-configuration
+ansible_service_broker_secrets: []
