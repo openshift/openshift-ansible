@@ -30,6 +30,7 @@
       sslverify: "{{ item.sslverify | default(1) }}"
       sslclientkey: "{{ item.sslclientkey | default(omit) }}"
       sslclientcert: "{{ item.sslclientcert | default(omit) }}"
+      sslcacert: "{{ item.sslcacert | default(omit) }}"
       file: "{{ item.name }}"
       enabled: "{{ item.enabled | default('no')}}"
     with_items: "{{ openshift_additional_repos }}"
