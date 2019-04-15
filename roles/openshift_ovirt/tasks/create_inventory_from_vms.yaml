@@ -1,45 +1,48 @@
 ---
 - set_fact:
-    etcd_vms_count: '{{ openshift_ovirt_vm_manifest | selectattr("name", "match", "etcd") | map(attribute="count") | list | first }}'
+    etcd_vms_count: "{{ openshift_ovirt_vm_manifest | selectattr('name', 'match', 'etcd') | map(attribute='count') | list | first | d(0) }}"
 
-- name: Add master Vms to the master, nodes, and optionally etcd inventory groups
-  add_host:
-    groups: '{{ ["masters", "nodes"] + (etcd_vms_count | int == 0) | ternary(["etcd"], []) }}'
-    hostname: '{{ (item.name, (item.count > 1) | ternary((("[0:",item.count - 1 , "]") | join), "0"), ".", openshift_ovirt_dns_zone) | join }}'
+- name: Add master VMs to the master, nodes, and optionally etcd inventory groups
+  include_tasks: add_host.yaml
+  loop: "{{ openshift_ovirt_vm_manifest | flatten(levels=1) | selectattr('name', 'match', 'master') | list }}"
+  vars:
     openshift_node_group_name: node-config-master
-    openshift_schedulable: true
-  with_items: "{{ openshift_ovirt_vm_manifest }}"
-  when: item.count > 0 and item.name == 'master'
+    openshift_schedulable: True
+    hostgroups: "{{ ['masters', 'nodes'] + (etcd_vms_count | int == 0) | ternary(['etcd'], []) }}"
+  loop_control:
+    loop_var: outer_item
 
-- name: Add compute Vms to the nodes inventory group
-  add_host:
-    groups: nodes
-    hostname: '{{ (item.name, (item.count > 1) | ternary((("[0:",item.count - 1 , "]") | join), "0"), ".", openshift_ovirt_dns_zone) | join }}'
+- name: Add compute VMs to the nodes inventory group
+  include_tasks: add_host.yaml
+  loop: "{{ openshift_ovirt_vm_manifest | flatten(levels=1) | selectattr('name', 'match', 'compute') | list }}"
+  vars:
     openshift_node_group_name: node-config-compute
-    openshift_schedulable: true
-  with_items: "{{ openshift_ovirt_vm_manifest }}"
-  when: item.count > 0 and item.name == 'compute'
+    openshift_schedulable: True
+    hostgroups: nodes
+  loop_control:
+    loop_var: outer_item
 
-- name: Add infra Vms to the nodes inventory group
-  add_host:
-    groups: nodes
-    hostname: '{{ (item.name, (item.count > 1) | ternary((("[0:",item.count - 1 , "]") | join), "0"), ".", openshift_ovirt_dns_zone) | join }}'
+- name: Add infra VMs to the nodes inventory group
+  include_tasks: add_host.yaml
+  loop: "{{ openshift_ovirt_vm_manifest | flatten(levels=1) | selectattr('name', 'match', 'infra') | list }}"
+  vars:
     openshift_node_group_name: node-config-infra
-    openshift_schedulable: true
-  with_items: "{{ openshift_ovirt_vm_manifest }}"
-  when: item.count > 0 and item.name == 'infra'
+    openshift_schedulable: True
+    hostgroups: nodes
+  loop_control:
+    loop_var: outer_item
 
-- name: Add etcd Vms to the etcd inventory group
-  add_host:
-    hostname: '{{ (item.name, (item.count > 1) | ternary((("[0:",item.count - 1 , "]") | join), "0"), ".", openshift_ovirt_dns_zone) | join }}'
-    groups: etcd
-  with_items: "{{ openshift_ovirt_vm_manifest }}"
-  when: item.count > 0 and item.name == 'etcd'
+- name: Add etcd VMs to the etcd inventory group
+  include_tasks: add_host.yaml
+  loop: "{{ openshift_ovirt_vm_manifest | flatten(levels=1) | selectattr('name', 'match', 'etcd') | list }}"
+  vars:
+    hostgroups: etcd
+  loop_control:
+    loop_var: outer_item
 
-- name: Add load balancers Vms to the lb inventory group
-  add_host:
-    groups: lb
-    hostname: '{{ (item.name, (item.count > 1) | ternary((("[0:",item.count - 1 , "]") | join), "0"), ".", openshift_ovirt_dns_zone) | join }}'
-  with_items: "{{ openshift_ovirt_vm_manifest }}"
-  when: item.count > 0 and item.name == 'lb'
-...
+- include_tasks: add_host.yaml
+  loop: "{{ openshift_ovirt_vm_manifest | flatten(levels=1) | selectattr('name', 'match', 'lb') | list }}"
+  vars:
+    hostgroups: lb
+  loop_control:
+    loop_var: outer_item
