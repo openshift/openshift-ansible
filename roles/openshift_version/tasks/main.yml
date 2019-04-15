@@ -49,9 +49,9 @@
     when: openshift.common.deployment_type == 'origin'
     assert:
       that:
-      - "{{ openshift_image_tag|match('(^v?\\d+\\.\\d+\\.\\d+(-[\\w\\-\\.]*)?$)') }}"
+      - "{{ openshift_image_tag|match('(^v?\\d+\\.\\d+(\\.\\d+(-[\\w\\-\\.]*)?)?$)') }}"
       msg: |-
-        openshift_image_tag must be in the format v#.#.#[-optional.#]. Examples: v1.2.3, v3.5.1-alpha.1
+        openshift_image_tag must be in the format v#.#[.#[-optional.#]]. Examples: v3.7, v1.2.3, v3.5.1-alpha.1
         You specified openshift_image_tag={{ openshift_image_tag }}
 
   # Verifies that when the deployment type is openshift-enterprise the version:
