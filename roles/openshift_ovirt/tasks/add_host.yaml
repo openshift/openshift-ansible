@@ -1,0 +1,10 @@
+---
+# parameteric add host and loop using outer_item.count
+- add_host:
+    name: "{{ outer_item.name }}{{ idx }}.{{ openshift_ovirt_dns_zone }}"
+    groups: "{{ hostgroups }}"
+    openshift_node_group_name: "{{ openshift_node_group_name | d(None)}}"
+    openshift_schedulable: "{{ openshift_schedulable | d(None)}}"
+  loop: "{{ range(0, outer_item.count) | list }}"
+  loop_control:
+    index_var: idx
