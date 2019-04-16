@@ -54,7 +54,7 @@ class ActionModule(ActionBase):
 
             for other_var in other_vars.split('|'):
                 if other_var in facts:
-                    local_facts[param] = facts[other_var]
+                    local_facts[param] = self._templar.template(facts[other_var])
                     break
 
         if local_facts:
