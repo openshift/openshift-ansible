@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.106
+Version:        3.11.107
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Apr 16 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.107-1
+- openshift_ovirt: Fix hostname in the inventory groups (rgolan@redhat.com)
+- Fix serviceaccounts' secrets for Metrics (jmartisk@redhat.com)
+
 * Sun Apr 14 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.106-1
 - Fixes NotReady nodes after ca and certificate update (jcallen@redhat.com)
 - Ensure master vars are passed to openshift_facts on upgrade
