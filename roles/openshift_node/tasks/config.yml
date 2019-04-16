@@ -80,21 +80,11 @@
     vars:
       podman_flags: "--privileged --rm -ti {{ release_image_mcd.stdout }}"
       podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
-      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ tempfile.path }}/bootstrap.ign"
-    # MCD reboots the machine, run the task but do not wait for completion
-    register: manifest_apply
-    async: 900  # 15 minutes
-    poll: 0
+      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ tempfile.path }}/bootstrap.ign --skip-reboot"
 
-  # Wait for the host to come back
-  - wait_for_connection: {}
-
-  # If the job fails, the async job status will find rc != 1 and will fail here
-  # When the job is successful, Ansible does not update this job status due to
-  # the host rebooting
-  - name: Check manifest apply status
-    async_status:
-      jid: "{{ manifest_apply.ansible_job_id }}"
+  - name: Reboot the host and wait for it to come back
+    reboot:
+    #  reboot_timeout: 600  # default, 10 minutes
 
   rescue:
   - fail:
