@@ -21,6 +21,8 @@
       name: openshift_storage_glusterfs
       tasks_from: upgrade.yml
 
+- import_playbook: setup_nodes.yml
+
 - name: GlusterFS Upgrade Checkpoint End
   hosts: oo_all_hosts
   gather_facts: false
