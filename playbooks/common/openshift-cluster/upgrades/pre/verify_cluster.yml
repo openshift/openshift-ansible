@@ -72,6 +72,7 @@
 
   - openshift_facts:
       role: master
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         ha: "{{ groups.oo_masters_to_config | length > 1 }}"
 

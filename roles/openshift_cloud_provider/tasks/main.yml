@@ -2,6 +2,7 @@
 - name: Set cloud provider facts
   openshift_facts:
     role: cloudprovider
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
     local_facts:
       kind: "{{ openshift_cloudprovider_kind | default(None) }}"
 

@@ -5,6 +5,7 @@
 
 - name: Ensure OpenShift facts are loaded
   openshift_facts:
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
 
 - name: Ensure we use openshift_master_cluster_public_hostname if it is available
   set_fact:

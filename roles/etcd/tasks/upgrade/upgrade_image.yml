@@ -58,5 +58,6 @@
   # DEPENDENCY openshift_facts
   openshift_facts:
     role: etcd
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
     local_facts:
       etcd_image: "{{ new_etcd_image }}"

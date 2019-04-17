@@ -9,6 +9,7 @@
     when: openshift_rolling_restart_mode is defined and openshift_rolling_restart_mode not in ["services", "system"]
   - openshift_facts:
       role: "{{ item.role }}"
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts: "{{ item.local_facts }}"
     with_items:
     - role: common

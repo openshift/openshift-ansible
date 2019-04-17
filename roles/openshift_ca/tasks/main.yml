@@ -19,6 +19,7 @@
 
 - name: Reload generated facts
   openshift_facts:
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
   when:
   - hostvars[openshift_ca_host].install_result | default({'changed':false}) is changed
 

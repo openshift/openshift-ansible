@@ -26,7 +26,6 @@ from ansible.module_utils.six.moves import configparser
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
 # import module snippets
 from ansible.module_utils.basic import *  # noqa: F403
-from ansible.module_utils.facts import *  # noqa: F403
 from ansible.module_utils.urls import *  # noqa: F403
 from ansible.module_utils.six import iteritems, itervalues
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlunparse
@@ -1309,7 +1308,7 @@ class OpenShiftFacts(object):
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments,no-value-for-parameter
-    def __init__(self, role, filename, local_facts,
+    def __init__(self, role, filename, system_facts, local_facts,
                  additive_facts_to_overwrite=None):
         self.changed = False
         self.filename = filename
@@ -1318,18 +1317,7 @@ class OpenShiftFacts(object):
                 "Role %s is not supported by this module" % role
             )
         self.role = role
-
-        # Collect system facts and preface each fact with 'ansible_'.
-        try:
-            # pylint: disable=too-many-function-args,invalid-name
-            self.system_facts = ansible_facts(module, ['hardware', 'network', 'virtual', 'facter'])  # noqa: F405
-            additional_facts = {}
-            for (k, v) in self.system_facts.items():
-                additional_facts["ansible_%s" % k.replace('-', '_')] = v
-            self.system_facts.update(additional_facts)
-        except UnboundLocalError:
-            # ansible-2.2,2.3
-            self.system_facts = get_all_facts(module)['ansible_facts']  # noqa: F405
+        self.system_facts = system_facts
 
         self.facts = self.generate_facts(local_facts,
                                          additive_facts_to_overwrite)
@@ -1643,6 +1631,7 @@ def main():
         argument_spec=dict(
             role=dict(default='common', required=False,
                       choices=OpenShiftFacts.known_roles),
+            system_facts=dict(type='dict', required=True),
             local_facts=dict(default=None, type='dict', required=False),
             additive_facts_to_overwrite=dict(default=[], type='list', required=False),
         ),
@@ -1650,14 +1639,8 @@ def main():
         add_file_common_args=True,
     )
 
-    if not HAVE_DBUS:
-        module.fail_json(msg="This module requires dbus python bindings")  # noqa: F405
-
-    module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']  # noqa: F405
-    module.params['gather_timeout'] = 10  # noqa: F405
-    module.params['filter'] = '*'  # noqa: F405
-
     role = module.params['role']  # noqa: F405
+    system_facts = module.params['system_facts']
     local_facts = module.params['local_facts']  # noqa: F405
     additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']  # noqa: F405
 
@@ -1665,6 +1648,7 @@ def main():
 
     openshift_facts = OpenShiftFacts(role,
                                      fact_file,
+                                     system_facts,
                                      local_facts,
                                      additive_facts_to_overwrite)
 
