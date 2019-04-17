@@ -1,0 +1,11 @@
+---
+# Private role variables which cannot be overridden
+vars_openshift_facts_system_facts:
+  ansible_default_ipv4: "{{ vars.ansible_default_ipv4 }}"
+  ansible_nodename: "{{ vars.ansible_nodename }}"
+  ansible_fqdn: "{{ vars.ansible_fqdn }}"
+  ansible_product_name: "{{ vars.ansible_product_name }}"
+  ansible_product_version: "{{ vars.ansible_product_version }}"
+  ansible_virtualization_type: "{{ vars.ansible_virtualization_type }}"
+  ansible_virtualization_role: "{{ vars.ansible_virtualization_role }}"
+  ansible_system_vendor: "{{ vars.ansible_system_vendor }}"

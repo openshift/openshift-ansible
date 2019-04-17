@@ -48,6 +48,7 @@
 
   - openshift_facts:
       role: master
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         api_port: "{{ openshift_master_api_port }}"
         api_url: "{{ openshift_master_api_url | default(None) }}"

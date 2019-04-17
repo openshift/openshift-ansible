@@ -2,6 +2,7 @@
 - name: Gather node information
   openshift_facts:
     role: node
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
     local_facts:
       bootstrapped: true
 
