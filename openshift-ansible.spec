@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.139
+Version:        3.10.140
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Apr 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.140-1
+- 
+
 * Wed Apr 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.139-1
 - Add support for environment variable IP_AUTODETECTION_METHOD
   (steve.teuber@idealo.de)
