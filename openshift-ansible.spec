@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.77
+Version:        3.9.78
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.78-1
+- Fix serviceaccounts' secrets for Metrics (jmartisk@redhat.com)
+- Configure Ansible service broker secrets (simon.ruegg@vshn.ch)
+- Add configmap-generator templates (simaishi@redhat.com)
+- Adding sslcacert to additional repos (craig.munro@gmail.com)
+
 * Sat Apr 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.77-1
 - Fix condition key for all opened ports by Contrail SDN
   (steve.teuber@idealo.de)
