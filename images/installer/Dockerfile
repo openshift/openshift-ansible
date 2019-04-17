@@ -11,7 +11,7 @@ COPY images/installer/origin-extra-root /
 RUN INSTALL_PKGS="python-lxml pyOpenSSL python2-cryptography openssl python2-passlib httpd-tools openssh-clients origin-clients" \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
  && yum install -y java-1.8.0-openjdk-headless \
- && EPEL_PKGS="ansible python2-boto" \
+ && EPEL_PKGS="ansible-2.7.10 python2-boto" \
  && yum install -y epel-release \
  && yum install -y --setopt=tsflags=nodocs $EPEL_PKGS \
  && rpm -V $INSTALL_PKGS $EPEL_PKGS \
