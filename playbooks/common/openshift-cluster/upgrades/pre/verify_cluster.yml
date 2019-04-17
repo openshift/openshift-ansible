@@ -45,12 +45,18 @@
 
   # Need client package to check gluster health when upgrading from containerized.
   - name: Install openshift clients on first master
-    package:
-      name: "{{ openshift_service_type }}-clients{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-      state: present
+    command: "{{ ansible_pkg_mgr }} install -y {{ openshift_node_upgrade_rpm_list | join(' ')}}"
     register: result
     until: result is succeeded
-    retries: 3
+    failed_when:
+    - result.stdout is search(".*No package .* available.*") or result is failed
+    vars:
+      openshift_node_upgrade_rpm_list:
+      - "{{ openshift_service_type }}{{ openshift_pkg_version }}"
+      - "{{ openshift_service_type }}-clients{{ openshift_pkg_version }}"
+      - "{{ openshift_service_type }}-master{{ openshift_pkg_version }}"
+      - "{{ openshift_service_type }}-node{{ openshift_pkg_version }}"
+      - "{{ openshift_service_type }}-sdn-ovs{{ openshift_pkg_version }}"
     when: not openshift_is_atomic | bool
 
   # Ensure glusterfs clusters are healthy before starting an upgrade.
