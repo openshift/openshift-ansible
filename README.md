@@ -153,8 +153,9 @@ created for you automatically.
 
 ## Complete Production Installation Documentation:
 
-- [OpenShift Container Platform](https://docs.openshift.com/container-platform/3.11/install/running_install.html)
-- [OpenShift Origin](https://docs.okd.io/latest/install/index.html)
+- [OpenShift Container Platform](https://docs.openshift.com/container-platform/3.11/install/index.html)
+- [OKD](https://docs.okd.io/3.11/install/index.html) (formerly OpenShift Origin)
+
 
 ## Containerized OpenShift Ansible
 
