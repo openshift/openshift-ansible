@@ -97,8 +97,8 @@ sudo ansible-playbook -i inventory/hosts.localhost playbooks/deploy_cluster.yml
 
 ## Complete Production Installation Documentation:
 
-- [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
-- [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
+- [OpenShift Container Platform](https://docs.openshift.com/container-platform/3.9/install_config/install/planning.html)
+- [OpenShift Origin](https://docs.okd.io/3.9/install_config/install/planning.html)
 
 ## Containerized OpenShift Ansible
 
