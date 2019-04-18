@@ -21,3 +21,5 @@ openshift_master_admission_plugin_config:
         - key: images.openshift.io/deny-execution
           value: "true"
         skipOnResolutionFailure: true
+
+openshift_master_bind_addr_use_default_ipv4_address: false
