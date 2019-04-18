@@ -2,15 +2,7 @@
 approvers:
   - kwoodson
   - abutcher
-  - michaelgugino
-  - mtnbikenc
-  - sdodson
-  - vrutkovs
 # review == this code is good /lgtm
 reviewers:
   - kwoodson
   - abutcher
-  - michaelgugino
-  - mtnbikenc
-  - sdodson
-  - vrutkovs

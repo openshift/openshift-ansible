@@ -2,9 +2,7 @@
 approvers:
   - jarrpa
   - abutcher
-  - sdodson
 # review == this code is good /lgtm
 reviewers:
   - jarrpa
   - abutcher
-  - sdodson
