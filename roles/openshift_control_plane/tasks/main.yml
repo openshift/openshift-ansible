@@ -137,6 +137,7 @@
 - name: Set fact of all etcd host IPs
   openshift_facts:
     role: common
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
     local_facts:
       no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
 

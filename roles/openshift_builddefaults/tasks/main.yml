@@ -2,6 +2,7 @@
 - name: Set builddefaults
   openshift_facts:
     role: builddefaults
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
     # TODO: add ability to define builddefaults env vars sort of like this
     # may need to move the config generation to a filter however.
     local_facts:
@@ -15,5 +16,6 @@
 - name: Set builddefaults config structure
   openshift_facts:
     role: builddefaults
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
     local_facts:
       config: "{{ openshift_builddefaults_json | default(builddefaults_yaml) }}"
