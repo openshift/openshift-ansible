@@ -38,7 +38,7 @@
       public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
       logging_public_url: "{{ openshift_master_logging_public_url | default(None) }}"
       logout_url: "{{ openshift_master_logout_url | default(None) }}"
-      bind_addr: "{{ openshift_master_bind_addr | default(None) }}"
+      bind_addr: "{{ openshift_master_bind_addr | default(ansible_default_ipv4.address if openshift_master_bind_addr_use_default_ipv4_address else None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
       session_name: "{{ openshift_master_session_name | default(None) }}"
       ldap_ca: "{{ openshift_master_ldap_ca | default(lookup('file', openshift_master_ldap_ca_file) if openshift_master_ldap_ca_file is defined else None) }}"
