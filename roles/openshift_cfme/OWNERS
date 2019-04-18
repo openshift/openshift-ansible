@@ -2,11 +2,9 @@
 approvers:
   - jcantrill
   - ewolinetz
-  - sdodson
 # review == this code is good /lgtm
 reviewers:
   - jcantrill
   - ewolinetz
   - richm
-  - wozniakjan
   - zgalor

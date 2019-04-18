@@ -2,9 +2,7 @@
 approvers:
   - spadgett
   - jwforres
-  - sdodson
 # review == this code is good /lgtm
 reviewers:
   - spadgett
   - jwforres
-  - sdodson
