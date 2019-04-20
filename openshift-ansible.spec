@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.78
+Version:        3.9.79
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Apr 20 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.79-1
+- #10765 Update installation doc link for release-3.9
+  (nikolas.philips@baloise.ch)
+
 * Wed Apr 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.78-1
 - Fix serviceaccounts' secrets for Metrics (jmartisk@redhat.com)
 - Configure Ansible service broker secrets (simon.ruegg@vshn.ch)
