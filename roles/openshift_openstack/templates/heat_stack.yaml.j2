@@ -727,10 +727,12 @@ resources:
 {% if openshift_openstack_provider_network_name %}
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:         {{ openshift_openstack_provider_network_name }}
-{% elif openshift_openstack_node_network_id|default(false) %}
+{% else %}
+{% if openshift_openstack_node_network_id|default(false) %}
           net:         {{ openshift_openstack_node_network_id }}
 {% else %}
           net:         { get_resource: net }
+{% endif %}
 {% if openshift_openstack_node_subnet_name %}
           subnet:      {{ openshift_openstack_node_subnet_name }}
 {% else %}
