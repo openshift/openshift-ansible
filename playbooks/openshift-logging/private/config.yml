@@ -22,6 +22,7 @@
   - name: Gather Cluster facts
     openshift_facts:
       role: common
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         ip: "{{ openshift_ip | default(None) }}"
 

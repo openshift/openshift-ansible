@@ -28,9 +28,6 @@ from ansible.module_utils.urls import *  # noqa: F403
 from ansible.module_utils.six import iteritems, itervalues
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlunparse
 from ansible.module_utils._text import to_native
-from ansible.module_utils.facts.namespace import PrefixFactNamespace
-from ansible.module_utils.facts import default_collectors
-from ansible.module_utils.facts import ansible_collector
 
 
 DOCUMENTATION = '''
@@ -1021,7 +1018,7 @@ class OpenShiftFacts(object):
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments,no-value-for-parameter
-    def __init__(self, role, filename, local_facts,
+    def __init__(self, role, filename, system_facts, local_facts,
                  additive_facts_to_overwrite=None):
         self.changed = False
         self.filename = filename
@@ -1030,22 +1027,7 @@ class OpenShiftFacts(object):
                 "Role %s is not supported by this module" % role
             )
         self.role = role
-
-        # Collect system facts and preface each fact with 'ansible_'.
-        all_collector_classes = default_collectors.collectors
-
-        # add namespace and prefix
-        namespace = PrefixFactNamespace(
-            namespace_name='ansible',
-            prefix='ansible_'
-        )
-
-        fact_collector = ansible_collector.get_ansible_collector(
-            all_collector_classes=all_collector_classes,
-            namespace=namespace,
-        )
-
-        self.system_facts = fact_collector.collect(module=module)  # noqa: F405
+        self.system_facts = system_facts
 
         self.facts = self.generate_facts(local_facts,
                                          additive_facts_to_overwrite)
@@ -1276,6 +1258,7 @@ def main():
         argument_spec=dict(
             role=dict(default='common', required=False,
                       choices=OpenShiftFacts.known_roles),
+            system_facts=dict(type='dict', required=True),
             local_facts=dict(default=None, type='dict', required=False),
             additive_facts_to_overwrite=dict(default=[], type='list', required=False),
         ),
@@ -1284,6 +1267,7 @@ def main():
     )
 
     role = module.params['role']  # noqa: F405
+    system_facts = module.params['system_facts']
     local_facts = module.params['local_facts']  # noqa: F405
     additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']  # noqa: F405
 
@@ -1291,6 +1275,7 @@ def main():
 
     openshift_facts = OpenShiftFacts(role,
                                      fact_file,
+                                     system_facts,
                                      local_facts,
                                      additive_facts_to_overwrite)
 

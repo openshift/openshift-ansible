@@ -72,6 +72,7 @@
 
   - openshift_facts:
       role: master
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
         api_port: "{{ openshift_master_api_port }}"
