@@ -74,7 +74,8 @@ def find_playbooks():
     all_playbooks = set()
     included_playbooks = set()
 
-    exclude_dirs = ('adhoc', 'tasks')
+    # Skip cluster-operator playbooks, does not conform to user run playbooks
+    exclude_dirs = ('adhoc', 'tasks', 'cluster-operator')
     for yaml_file in find_files(
             os.path.join(os.getcwd(), 'playbooks'),
             exclude_dirs, None, r'^[^\.].*\.ya?ml$'):
