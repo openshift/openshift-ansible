@@ -70,3 +70,8 @@ volumeConfig:
   localQuota:
     perFSGroup: null
 volumeDirectory: {{ openshift_node_group_node_data_dir }}/openshift.local.volumes
+{% if (openshift_node_group_cloud_provider | default('', true) == 'azure') and
+      (openshift_kubelet_name_override | default('', true) != '') and
+      (not openshift_node_group_configmap | default(false) | bool) %}
+nodeName: {{ l_kubelet_node_name }}
+{% endif %}
