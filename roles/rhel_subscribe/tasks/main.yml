@@ -15,6 +15,11 @@
   register: rh_subscribed
   changed_when: False
 
+- import_tasks: satellite.yml
+  when:
+    - rhsub_server is defined
+    - "'not registered' in rh_subscribed.stdout"
+
 - name: Register host using user/password
   redhat_subscription:
     username: "{{ rhsub_user }}"
@@ -48,8 +53,3 @@
   register: openshift_pool_attached
   changed_when: "'Successfully attached a subscription' in openshift_pool_attached.stdout"
   when: rhsub_pool not in openshift_pool_attached.stdout
-
-- import_tasks: satellite.yml
-  when:
-    - rhsub_server is defined
-    - rhsub_server
