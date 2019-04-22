@@ -12,6 +12,8 @@
   template:
     src: node-config.yaml.j2
     dest: "{{ mktempout.stdout }}/node-config.yaml"
+  vars:
+    openshift_node_group_configmap: true
   when:
   - configout.results.results.0 == {}
   run_once: true
