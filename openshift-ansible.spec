@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.109
+Version:        3.11.110
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,20 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Apr 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.110-1
+- imageconfig playbook fails with undefined variables (jcallen@redhat.com)
+- Move modify_yaml test to appropriate directory (rteague@redhat.com)
+- glusterfs: Update iSCSI config as part of upgrade (jarrpa@redhat.com)
+- glusterfs: Update glusterfs-fuse package as part of upgrade
+  (jarrpa@redhat.com)
+- glusterfs: Only check for heketi pod when it may be missing
+  (jarrpa@redhat.com)
+- glusterfs: Minor fixes to upgrade playbook (jarrpa@redhat.com)
+- Add nodeName to node-config template for azure (jcallen@redhat.com)
+- Stop gathering Ansible facts in openshift_facts (rteague@redhat.com)
+- bug 1695903. Pass token from logging proxy to es for metrics
+  (jcantril@redhat.com)
+
 * Sun Apr 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.109-1
 - 
 
