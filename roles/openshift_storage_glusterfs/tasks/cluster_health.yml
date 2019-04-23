@@ -1,9 +1,27 @@
 ---
+# according to bz-1649795 the oc client may not be in the path
+# when run as sudo, this task confirms the client is available
+# or tries to set the appropriate value
+- name: Check that oc client binary is available
+  include_tasks: oc_client_check.yml
+  vars:
+    path: "{{ item }}"
+  with_items:
+  - "{{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }}"
+  - oc
+  - /usr/bin/oc
+  - /usr/local/bin/oc
+
+- name: Ensure oc client binary was found
+  fail:
+    msg: "The oc client binary could not be found. It is required to run GlusterFS health checks."
+  when: oc_bin_path is undefined
+
 # glusterfs_check_containerized is a custom module defined at
 # lib_utils/library/glusterfs_check_containerized.py
 - name: Check for GlusterFS cluster health
   glusterfs_check_containerized:
-    oc_bin: "{{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }}"
+    oc_bin: "{{ oc_bin_path }}"
     oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
     oc_namespace: "{{ glusterfs_namespace }}"
     cluster_name: "{{ glusterfs_name }}"

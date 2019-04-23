@@ -1,0 +1,11 @@
+---
+- name: Test oc client path
+  command: "{{ path }} version"
+  register: binary_check
+  failed_when: false
+  when: oc_bin_path is undefined
+
+- name: Set oc_bin_path when client is found
+  set_fact:
+    oc_bin_path: "{{ path }}"
+  when: binary_check is changed

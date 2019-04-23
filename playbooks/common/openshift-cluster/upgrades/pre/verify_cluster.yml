@@ -43,16 +43,6 @@
     - openshift_release is defined
     - not (openshift_release is version_compare(openshift_upgrade_target ,'='))
 
-  # Need client package to check gluster health when upgrading from containerized.
-  - name: Install openshift clients on first master
-    package:
-      name: "{{ openshift_service_type }}-clients{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-      state: present
-    register: result
-    until: result is succeeded
-    retries: 3
-    when: not openshift_is_atomic | bool
-
   # Ensure glusterfs clusters are healthy before starting an upgrade.
   - import_role:
       name: openshift_storage_glusterfs
