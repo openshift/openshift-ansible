@@ -8,6 +8,9 @@ openshift_cli_image_dict:
 repoquery_cmd: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0', 'repoquery --plugins') }}"
 repoquery_installed: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed', 'repoquery --plugins --installed') }}"
 
+openshift_use_crio: False
+openshift_use_crio_only: False
+
 openshift_cli_image: "{{ osm_image | default(openshift_cli_image_dict[openshift_deployment_type]) }}"
 
 # osm_default_subdomain is an old migrated fact, can probably be removed.
