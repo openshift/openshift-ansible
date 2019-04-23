@@ -22,7 +22,7 @@ openshift_node_support_packages:
   - irqbalance
   - microcode_ctl
   - systemd
-  - systemd-journal-gateway
+  #- systemd-journal-gateway
   #- rpm-ostree
   #- nss-altfiles
   - selinux-policy-targeted
