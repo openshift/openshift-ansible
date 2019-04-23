@@ -10,7 +10,7 @@
       state: present
     register: result
     until: result is succeeded
-    when: not (openshift_is_atomic | bool)
+    when: not (openshift_is_atomic | default(false, true) | bool)
     vars:
       pkg_list:
       - atomic
