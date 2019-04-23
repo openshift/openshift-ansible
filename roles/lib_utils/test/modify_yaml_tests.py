@@ -5,7 +5,8 @@ import os
 import sys
 import unittest
 
-sys.path = [os.path.abspath(os.path.dirname(__file__) + "/../../library/")] + sys.path
+MODULE_PATH = os.path.realpath(os.path.join(__file__, os.pardir, os.pardir, 'library'))
+sys.path.insert(1, MODULE_PATH)
 
 # pylint: disable=import-error
 from modify_yaml import set_key  # noqa: E402
