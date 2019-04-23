@@ -15,6 +15,7 @@
     heketi_pod_results: "{{ deploy_heketi_pod_check.results.results[0]['items'] }}"
     heketi_pod_results_count: "{{ heketi_pod_results | count }}"
     heketi_pod_results_ready_count: "{{ heketi_pod_results | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count }}"
+  when: glusterfs_heketi_deploy_is_missing
 
 - name: Check for existing heketi pod
   oc_obj:
@@ -32,6 +33,7 @@
     heketi_pod_results: "{{ heketi_pod_check.results.results[0]['items'] }}"
     heketi_pod_results_count: "{{ heketi_pod_results | count }}"
     heketi_pod_results_ready_count: "{{ heketi_pod_results | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count }}"
+  when: glusterfs_heketi_is_missing
 
 - import_tasks: heketi_set_cli.yml
   vars:
