@@ -168,6 +168,8 @@ spec:
         #     port: 10256
         #     scheme: HTTP
         # force node to be notready when sdn is gone.
+        tolerations:
+        - operator: "Exists"
         lifecycle:
           preStop:
             exec:
