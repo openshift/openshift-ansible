@@ -20,7 +20,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
     # to look for images available remotely without actually pulling them.
 
     # command for checking if remote registries have an image, without docker pull
-    skopeo_command = "{proxyvars} timeout 10 skopeo inspect --tls-verify={tls} {creds} docker://{image}"
+    skopeo_command = "{proxyvars} timeout 30 skopeo --debug inspect --tls-verify={tls} {creds} docker://{image}"
     skopeo_example_command = "skopeo inspect [--tls-verify=false] [--creds=<user>:<pass>] docker://<registry>/<image>"
 
     def ensure_list(self, registry_param):
