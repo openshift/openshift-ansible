@@ -17,7 +17,8 @@
 # we want to also collect this for nodes so we can match group entries to nodes
 - name: Get common IP facts when necessary
   hosts: oo_nodes_to_config:!oo_masters
-  gather_facts: false
+  roles:
+  - openshift_facts
   tasks:
   - name: Gather Cluster facts
     openshift_facts:
@@ -28,7 +29,6 @@
 
 - name: Verify and collect ES hosts
   hosts: oo_first_master
-  gather_facts: false
   tasks:
   - when: openshift_logging_install_logging | default(false) | bool
     block:
@@ -95,7 +95,6 @@
 
 - name: Update vm.max_map_count for ES 5.x
   hosts: oo_elasticsearch_nodes
-  gather_facts: false
   tasks:
   - when: openshift_logging_install_logging | default(false) | bool
     block:
@@ -115,7 +114,6 @@
 
 - name: Remove created 99-elasticsearch sysctl
   hosts: all
-  gather_facts: false
   tasks:
   - when: not openshift_logging_install_logging | default(false) | bool
     file:
