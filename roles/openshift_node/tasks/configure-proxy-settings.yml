@@ -1,6 +1,7 @@
 ---
 - openshift_facts:
     role: master
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
     local_facts:
       cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
 
