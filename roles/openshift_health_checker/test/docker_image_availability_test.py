@@ -17,9 +17,9 @@ def test_is_available_skopeo_image():
     with patch.object(DockerImageAvailability, 'execute_module_with_retries') as m1:
         m1.return_value = result
         assert dia.is_available_skopeo_image('registry.redhat.io/openshift3/ose-pod') is True
-        m1.assert_called_with('command', {'_uses_shell': True, '_raw_params': ' timeout 10 skopeo inspect --tls-verify=true  docker://registry.redhat.io/openshift3/ose-pod'})
+        m1.assert_called_with('command', {'_uses_shell': True, '_raw_params': ' timeout 30 skopeo --debug inspect --tls-verify=true  docker://registry.redhat.io/openshift3/ose-pod'})
         assert dia.is_available_skopeo_image('insecure.redhat.io/openshift3/ose-pod') is True
-        m1.assert_called_with('command', {'_uses_shell': True, '_raw_params': ' timeout 10 skopeo inspect --tls-verify=false  docker://insecure.redhat.io/openshift3/ose-pod'})
+        m1.assert_called_with('command', {'_uses_shell': True, '_raw_params': ' timeout 30 skopeo --debug inspect --tls-verify=false  docker://insecure.redhat.io/openshift3/ose-pod'})
 
     # test auth
     task_vars = {'oreg_auth_user': 'test_user', 'oreg_auth_password': 'test_pass'}
@@ -27,7 +27,7 @@ def test_is_available_skopeo_image():
     with patch.object(DockerImageAvailability, 'execute_module_with_retries') as m1:
         m1.return_value = result
         assert dia.is_available_skopeo_image('registry.redhat.io/openshift3/ose-pod') is True
-        m1.assert_called_with('command', {'_uses_shell': True, '_raw_params': ' timeout 10 skopeo inspect --tls-verify=true --creds=test_user:test_pass docker://registry.redhat.io/openshift3/ose-pod'})
+        m1.assert_called_with('command', {'_uses_shell': True, '_raw_params': ' timeout 30 skopeo --debug inspect --tls-verify=true --creds=test_user:test_pass docker://registry.redhat.io/openshift3/ose-pod'})
 
 
 def test_available_images():
