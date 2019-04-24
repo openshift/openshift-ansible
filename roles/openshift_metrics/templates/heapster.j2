@@ -40,7 +40,7 @@ spec:
         - "--tls_client_ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
         - "--allowed_users=%allowed_users%"
         - "--metric_resolution={{openshift_metrics_resolution}}"
-{% if not openshift_metrics_heapster_standalone %}
+{% if not openshift_metrics_heapster_standalone | bool %}
         - "--wrapper.username_file=/hawkular-account/hawkular-metrics.username"
         - "--wrapper.password_file=/hawkular-account/hawkular-metrics.password"
         - "--wrapper.endpoint_check=https://hawkular-metrics:443/hawkular/metrics/status"
@@ -83,7 +83,7 @@ spec:
           mountPath: "/secrets"
         - name: heapster-certs
           mountPath: "/heapster-certs"
-{% if not openshift_metrics_heapster_standalone %}
+{% if not openshift_metrics_heapster_standalone | bool %}
         - name: hawkular-metrics-certs
           mountPath: "/hawkular-metrics-certs"
         - name: hawkular-metrics-account
@@ -100,7 +100,7 @@ spec:
         - name: heapster-certs
           secret:
             secretName: heapster-certs
-{% if not openshift_metrics_heapster_standalone %}
+{% if not openshift_metrics_heapster_standalone | bool %}
         - name: hawkular-metrics-certs
           secret:
             secretName: hawkular-metrics-certs
