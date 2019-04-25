@@ -31,6 +31,7 @@
       when: openshift_portal_net is not defined
     - openshift_facts:
         role: common
+        system_facts: "{{ vars_openshift_facts_system_facts }}"
         local_facts:
           portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
     when:

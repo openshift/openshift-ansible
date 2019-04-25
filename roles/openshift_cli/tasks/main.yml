@@ -41,6 +41,7 @@
 
 - name: Reload facts to pick up installed OpenShift version
   openshift_facts:
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
 
 - name: Install bash completion for oc tools
   package: name=bash-completion state=present

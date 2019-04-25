@@ -9,6 +9,7 @@
   - name: Gather Cluster facts
     openshift_facts:
       role: common
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         deployment_type: "{{ openshift_deployment_type }}"
         deployment_subtype: "{{ openshift_deployment_subtype | default(None) }}"
@@ -26,6 +27,7 @@
   - name: Set fact of no_proxy_internal_hostnames
     openshift_facts:
       role: common
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         no_proxy_internal_hostnames: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_nodes_to_config']
                                              | union(groups['oo_masters_to_config'])
@@ -39,6 +41,7 @@
   - name: Initialize openshift.node.sdn_mtu
     openshift_facts:
       role: node
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
 

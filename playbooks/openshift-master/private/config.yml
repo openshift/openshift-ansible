@@ -41,6 +41,7 @@
   post_tasks:
   - openshift_facts:
       role: master
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         api_port: "{{ openshift_master_api_port | default(None) }}"
         api_url: "{{ openshift_master_api_url | default(None) }}"
@@ -63,6 +64,7 @@
   post_tasks:
   - openshift_facts:
       role: master
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(openshift.master.session_auth_secrets | default(None)) }}"
         session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(openshift.master.session_encryption_secrets | default(None)) }}"
@@ -144,6 +146,7 @@
   tasks:
   - openshift_facts:
       role: master
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
       local_facts:
         session_auth_secrets: "{{ g_session_auth_secrets }}"
         session_encryption_secrets: "{{ g_session_encryption_secrets }}"

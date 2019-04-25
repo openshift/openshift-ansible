@@ -46,6 +46,7 @@
 
 - name: Re-gather package dependent master facts
   openshift_facts:
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
 
 - name: Create config parent directory if it does not exist
   file:
@@ -158,6 +159,7 @@
 - name: Set fact of all etcd host IPs
   openshift_facts:
     role: common
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
     local_facts:
       no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
 
