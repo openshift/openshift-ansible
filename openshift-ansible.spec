@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.79
+Version:        3.9.80
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Apr 27 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.80-1
+- Move modify_yaml test to appropriate directory (rteague@redhat.com)
+- Stop gathering Ansible facts in openshift_facts (rteague@redhat.com)
+- Add crio defaults to openshift_facts (jcallen@redhat.com)
+- action_plugin_test: add necessary vars to support unittests in ansible 2.6
+  (vrutkovs@redhat.com)
+- Test using Ansible 2.7.10 (rteague@redhat.com)
+
 * Sat Apr 20 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.79-1
 - #10765 Update installation doc link for release-3.9
   (nikolas.philips@baloise.ch)
