@@ -488,7 +488,7 @@ resources:
         remote_ip_prefix: {{ openshift_openstack_subnet_cidr }}
 {% if openshift_kuryr_sg_driver|default('default') != 'namespace' %}
       - ethertype: IPv4
-        remote_mode: remote_group_id
+        remote_ip_prefix: {{ openshift_openstack_kuryr_pod_subnet_cidr }}
 {% endif %}
 {% endif %}
 
