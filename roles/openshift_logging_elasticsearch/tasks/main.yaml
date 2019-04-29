@@ -106,6 +106,15 @@
     resource_name: system:auth-delegator
     user: "system:serviceaccount:{{ openshift_logging_elasticsearch_namespace}}:aggregated-logging-elasticsearch"
 
+- oc_adm_policy_user:
+    state: present
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    resource_kind: scc
+    resource_name: hostmount-anyuid
+    user: "system:serviceaccount:{{ openshift_logging_elasticsearch_namespace}}:aggregated-logging-elasticsearch"
+  when:
+  - openshift_logging_elasticsearch_storage_type == "hostmount"
+
 # logging-metrics-reader role
 - template:
     src: "logging-metrics-role.j2"
@@ -450,6 +459,46 @@
     es_deploy_name: "{{ openshift_logging_elasticsearch_deployment_name }}"
   when: openshift_logging_elasticsearch_deployment_name != ""
 
+# label nodes for hostmount path
+- when:
+  - openshift_logging_elasticsearch_storage_type == "hostmount"
+  block:
+  - set_fact:
+      hostmount_node_selector: "{{ { openshift_logging_elasticsearch_hostmount_nodeselector_key : es_dc_index } }}"
+
+  - name: check if a node has already been allocated for dc
+    oc_obj:
+      state: list
+      kind: node
+      selector: "{{ hostmount_node_selector | map_to_pairs }}"
+    register: es_hostmount_selected_node
+
+  - when:
+    - "es_hostmount_selected_node['results']['results'][0]['items'] | default([]) | length == 0"
+    block:
+    - name: Retrieve list of schedulable es nodes that are not already allocated for another dc
+      oc_obj:
+        state: list
+        kind: node
+        selector: "{{ openshift_logging_elasticsearch_nodeselector | map_to_pairs }},{{ openshift_logging_elasticsearch_hostmount_nodeselector_key }} notin ({% for iter in range( openshift_logging_es_cluster_size | int ) -%}{{ iter }}{% if not loop.last %},{% endif %}{% endfor -%})"
+        field_selector: "spec.unschedulable!=true"
+      register: es_available_nodes
+
+    - name: "Ensure that has nodes for ES to run on"
+      assert:
+        that: "{{ es_available_nodes['results']['results'][0]['items'] | default([]) | length != 0 }}"
+        msg: |-
+          No schedulable nodes found matching node selector for elastic search.'
+
+    - name: label node where dc will be stick
+      oc_label:
+        name: "{{ es_available_nodes['results']['results'][0]['items'][0].metadata.name }}"
+        state: add
+        kind: node
+        labels: "{{ hostmount_node_selector | dict2items }}"
+      when:
+      - "es_available_nodes['results']['results'][0]['items'] | default([]) | length != 0"
+
 # DC
 - name: Set ES dc templates
   template:
@@ -464,7 +513,7 @@
     es_cpu_limit: "{{ openshift_logging_elasticsearch_cpu_limit | default('') }}"
     es_cpu_request: "{{ openshift_logging_elasticsearch_cpu_request | min_cpu(openshift_logging_elasticsearch_cpu_limit | default(none)) }}"
     es_memory_limit: "{{ openshift_logging_elasticsearch_memory_limit }}"
-    es_node_selector: "{{ openshift_logging_elasticsearch_nodeselector | default({}) }}"
+    es_node_selector: "{{ hostmount_node_selector if hostmount_node_selector is defined else openshift_logging_elasticsearch_nodeselector | default({}) }}"
     es_storage_groups: "{{ openshift_logging_elasticsearch_storage_group | default([]) }}"
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
