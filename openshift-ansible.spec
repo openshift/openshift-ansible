@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.110
+Version:        3.11.111
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,22 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Apr 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.111-1
+- Replace remote_group_id by remote_ip_prefix (ltomasbo@redhat.com)
+- openshift_node: Allow storage_plugin tasks to work through import_role
+  (jarrpa@redhat.com)
+- GlusterFS: Set max-op-version at end of upgrade (jarrpa@redhat.com)
+- GlusterFS: Fix old-style relabeling (jarrpa@redhat.com)
+- SDN: tolerate taints (vrutkovs@redhat.com)
+- Correct usage of openshift_facts (rteague@redhat.com)
+- Fix openshift_logging set_fact FAILED in python3 (wu-wenixang@outlook.com)
+- Removing quotes while executing few aci related shell commands
+  (Gaurav.Dalvi@users.noreply.github.com)
+- Correctly evaluate openshift_metrics_heapster_standalone variable if it is
+  'false' with small f (jmartisk@redhat.com)
+- Add --debug flag to skopeo inspect in image health check.
+  (padillon@redhat.com)
+
 * Tue Apr 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.110-1
 - imageconfig playbook fails with undefined variables (jcallen@redhat.com)
 - Move modify_yaml test to appropriate directory (rteague@redhat.com)
