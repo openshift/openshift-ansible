@@ -17,7 +17,7 @@ import mock
 # place class in our python path
 module_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-4]), 'library')  # noqa: E501
 sys.path.insert(0, module_path)
-from oc_adm_router import Router, locate_oc_binary  # noqa: E402
+from oc_adm_router import Router, RouterConfig, locate_oc_binary  # noqa: E402
 
 
 # pylint: disable=too-many-public-methods
@@ -751,6 +751,106 @@ class RouterTest(unittest.TestCase):
             mock.call(['oc', 'replace', '-f', mock.ANY, '-n', 'default'], None),
             mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),
             mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None)], True)
+
+    @mock.patch('oc_adm_router.locate_oc_binary')
+    @mock.patch('oc_adm_router.Utils._write')
+    @mock.patch('oc_adm_router.Utils.create_tmpfile_copy')
+    @mock.patch('oc_adm_router.Router._run')
+    def test_append_to_env(self, mock_cmd, mock_tmpfile_copy, mock_write, mock_oc_binary):
+        ''' Testing edits that append environment variables '''
+
+        mock_cmd.side_effect = [
+            (1, '', 'Error from server (NotFound): deploymentconfigs "router" not found'),
+            (1, '', 'Error from server (NotFound): service "router" not found'),
+            (1, '', 'Error from server (NotFound): serviceaccount "router" not found'),
+            (1, '', 'Error from server (NotFound): secret "router-certs" not found'),
+            (1, '', 'Error from server (NotFound): clusterrolebinding "router-router-role" not found'),
+            (0, RouterTest.dry_run, ''),
+        ]
+
+        mock_oc_binary.side_effect = [
+            'oc',
+        ]
+
+        router_options = {
+            'default_cert': {'value': None, 'include': False},
+            'cert_file': {'value': None, 'include': False},
+            'key_file': {'value': None, 'include': False},
+            'images': {'value': None, 'include': True},
+            'latest_images': {'value': None, 'include': True},
+            'labels': {'value': {"router": "router"}, 'include': True},
+            'ports': {'value': ['80:80', '443:443'], 'include': True},
+            'replicas': {'value': 2, 'include': True},
+            'selector': {'value': 'type=infra', 'include': True},
+            'service_account': {'value': 'router', 'include': True},
+            'router_type': {'value': None, 'include': False},
+            'host_network': {'value': None, 'include': True},
+            'extended_validation': {'value': True, 'include': False},
+            'external_host': {'value': None, 'include': True},
+            'external_host_vserver': {'value': None, 'include': True},
+            'external_host_insecure': {'value': False, 'include': True},
+            'external_host_partition_path': {'value': None, 'include': True},
+            'external_host_username': {'value': None, 'include': True},
+            'external_host_password': {'value': None, 'include': True},
+            'external_host_private_key': {'value': None, 'include': True},
+            'stats_user': {'value': None, 'include': True},
+            'stats_password': {'value': None, 'include': True},
+            'stats_port': {'value': None, 'include': True},
+            'cacert_file': {'value': None, 'include': False},
+            'edits': {
+                'value': [
+                    {
+                        "action": "append",
+                        "key": "spec.template.spec.containers[0].env",
+                        "value": {
+                            "name": "VARIABLE1",
+                            "value": "value in first edit"
+                        }
+                    },
+                    {
+                        "action": "append",
+                        "key": "spec.template.spec.containers[0].env",
+                        "value": {
+                            "name": "VARIABLE1",
+                            "value": "value in second edit"
+                        }
+                    },
+                    {
+                        "action": "append",
+                        "key": "spec.template.spec.containers[0].env",
+                        "value": {
+                            "name": "VARIABLE2",
+                            "value": "xyz"
+                        }
+                    },
+                    {
+                        "action": "append",
+                        "key": "spec.template.spec.containers[0].env",
+                        "value": {
+                            "name": "ROUTER_SUBDOMAIN",
+                            "value": "${name}-${namespace}.domain.tld"
+                        }
+                    }
+                ],
+                'include': False
+            },
+        }
+        router = Router(RouterConfig('router', 'default', '', router_options))
+        router.get()
+
+        dc = None
+        for item in router.prepared_router.items():
+            if item[0] == 'DeploymentConfig':
+                dc = item[1]['obj']
+        self.assertNotEqual(dc, None)
+
+        for var in ['ROUTER_SUBDOMAIN', 'VARIABLE1', 'VARIABLE2']:
+            matches = [env for env in dc.get_env_vars() if env['name'] == var]
+            self.assertEqual(1, len(matches),
+                             "expected to find {} 1 time, found it {} times: {}".format(var, len(matches), matches))
+
+        var = dc.get_env_var('VARIABLE1')
+        self.assertEqual(var['value'], 'value in second edit')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
