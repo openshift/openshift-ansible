@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.142
+Version:        3.10.143
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,24 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed May 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.143-1
+- Removing quotes while executing few aci related shell commands
+  (Gaurav.Dalvi@users.noreply.github.com)
+- SDN: tolerate taints (vrutkovs@redhat.com)
+- Correct usage of openshift_facts (rteague@redhat.com)
+- Fix openshift_logging set_fact FAILED in python3 (wu-wenixang@outlook.com)
+- Add --debug flag to skopeo inspect in image health check.
+  (padillon@redhat.com)
+- Move modify_yaml test to appropriate directory (rteague@redhat.com)
+- Fix ci tox, exlcude cluster-operator playbooks (rteague@redhat.com)
+- Fix ci tox, exlcude cluster-operator playbooks (rteague@redhat.com)
+- Stop gathering Ansible facts in openshift_facts (rteague@redhat.com)
+- action_plugin_test: add necessary vars to support unittests in ansible 2.6
+  (vrutkovs@redhat.com)
+- Test using Ansible 2.7.10 (rteague@redhat.com)
+- Remove early oc client install on upgrade. (padillon@redhat.com)
+- Make same timezone with running hosts (bysnupy@hotmail.com)
+
 * Mon Apr 22 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.142-1
 - Add nodeName to node-config template for azure (jcallen@redhat.com)
 
