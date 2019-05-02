@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.111
+Version:        3.11.112
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu May 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.112-1
+- Update Fuse templates with 7.3 release (antonin@stefanutti.fr)
+- Fix container registry block all not blocking all registries
+  (jcallen@redhat.com)
+- Fix typo in Cisco ACI roles (jbanerje@cisco.com)
+
 * Tue Apr 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.111-1
 - Replace remote_group_id by remote_ip_prefix (ltomasbo@redhat.com)
 - openshift_node: Allow storage_plugin tasks to work through import_role
