@@ -33,6 +33,10 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
+- import_role:
+    name: container_runtime
+    tasks_from: package_docker
+
 - name: Ensure cri-o is updated
   package:
     name: "{{ pkg_list | join (',') }}"

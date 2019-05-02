@@ -26,6 +26,7 @@
     state: present
   when:
   - not (openshift_is_atomic | bool)
+  - not (l_docker_upgrade | default(false) | bool)
   register: result
   until: result is succeeded
   vars:
