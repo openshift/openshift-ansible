@@ -3,58 +3,44 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.3 Camel + Drools with Spring Boot",
+      "openshift.io/display-name": "Red Hat Fuse 7.3 Camel REST DSL and 3Scale",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
-      "description": "Spring Boot, Camel and JBoss BRMS QuickStart. This example demonstrates how you can use Apache Camel and JBoss BRMS with Spring Boot on OpenShift. Camel routes, defined via Spring, are used to pass (insert) the Body of the message as a POJO to a Drools engine for execution. A Kie Server should be deployed and configured before running the application, more information about how to configure it can be found at https://github.com/fabric8-quickstarts/spring-boot-camel-drools/blob/spring-boot-camel-drools-1.0.0.fuse-730046-redhat-00002/README.md",
-      "tags": "quickstart,java,springboot,fis,jboss-fuse",
+      "description": "Spring Boot, Camel REST DSL and 3Scale QuickStart. This example demonstrates how to use Camel's REST DSL to expose a RESTful API and expose it to 3scale.",
+      "tags": "quickstart,java,springboot,fis,jboss-fuse,3scale",
       "iconClass": "icon-rh-integration",
       "version": "1.3"
     },
-    "name": "s2i-fuse73-spring-boot-camel-drools"
+    "name": "s2i-fuse73-spring-boot-camel-rest-3scale"
   },
   "labels": {
-    "template": "s2i-fuse73-spring-boot-camel-drools"
+    "template": "s2i-fuse73-spring-boot-camel-rest-3scale"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse73-spring-boot-camel-drools",
+      "value": "s2i-fuse73-spring-boot-camel-rest-3scale",
       "description": "The name assigned to the application."
     },
     {
       "name": "GIT_REPO",
       "displayName": "Git Repository URL",
       "required": true,
-      "value": "https://github.com/fabric8-quickstarts/spring-boot-camel-drools.git",
+      "value": "https://github.com/fabric8-quickstarts/spring-boot-camel-rest-3scale.git",
       "description": "The URL of the repository with your application source code."
     },
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-drools-1.0.0.fuse-730046-redhat-00002",
+      "value": "spring-boot-camel-rest-3scale-1.0.0.fuse-730046-redhat-00002",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
-      "name": "KIESERVER_SERVICE",
-      "displayName": "Decision Server Name",
-      "required": true,
-      "value": "kie-app",
-      "description": "Set this to the name of the Decision Server. You may need to create an instance before."
-    },
-    {
-      "name": "KIESERVER_USERNAME",
-      "displayName": "Decision Server Username",
-      "required": true,
-      "value": "kieserver",
-      "description": "The username used to authenticate with the Decision Server."
-    },
-    {
-      "name": "KIESERVER_PASSWORD",
-      "displayName": "Decision Server Password",
-      "required": true,
-      "description": "The password used to authenticate with the Decision Server."
+      "name": "SERVICE_NAME",
+      "displayName": "Service Name",
+      "value": "camel-rest-3scale",
+      "description": "Exposed service name."
     },
     {
       "name": "BUILDER_VERSION",
@@ -142,6 +128,59 @@
     }
   ],
   "objects": [
+    {
+      "apiVersion": "v1",
+      "kind": "Route",
+      "metadata": {
+        "labels": {
+          "component": "${APP_NAME}",
+          "provider": "s2i",
+          "app": "${APP_NAME}",
+          "version": "${APP_VERSION}",
+          "group": "quickstarts"
+        },
+        "name": "${SERVICE_NAME}-route"
+      },
+      "spec": {
+        "to": {
+          "kind": "Service",
+          "name": "${SERVICE_NAME}"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+        },
+        "labels": {
+          "component": "${APP_NAME}",
+          "provider": "s2i",
+          "app": "${APP_NAME}",
+          "version": "${APP_VERSION}",
+          "group": "quickstarts"
+        },
+        "name": "${SERVICE_NAME}"
+      },
+      "spec": {
+        "clusterIP": "None",
+        "deprecatedPublicIPs": [],
+        "ports": [
+          {
+            "port": 9411,
+            "protocol": "TCP",
+            "targetPort": 8080
+          }
+        ],
+        "selector": {
+          "app": "${APP_NAME}",
+          "component": "${APP_NAME}",
+          "provider": "s2i",
+          "group": "quickstarts"
+        }
+      }
+    },
     {
       "kind": "ImageStream",
       "apiVersion": "v1",
@@ -328,6 +367,10 @@
                 },
                 "ports": [
                   {
+                    "containerPort": 8080,
+                    "name": "http"
+                  },
+                  {
                     "containerPort": 8778,
                     "name": "jolokia"
                   }
@@ -339,15 +382,6 @@
                       "fieldPath" : "metadata.namespace"
                     }
                   }
-                }, {
-                  "name": "KIESERVER_SERVICE",
-                  "value": "${KIESERVER_SERVICE}"
-                }, {
-                  "name": "KIESERVER_USERNAME",
-                  "value": "${KIESERVER_USERNAME}"
-                }, {
-                  "name": "KIESERVER_PASSWORD",
-                  "value": "${KIESERVER_PASSWORD}"
                 } ],
                 "resources": {
                   "requests": {
