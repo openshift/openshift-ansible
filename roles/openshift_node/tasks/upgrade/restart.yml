@@ -29,22 +29,13 @@
   until: not (docker_start_result is failed)
   retries: 3
   delay: 30
-  when: not openshift_use_crio_only | bool
 
 - name: Restart cri-o
   service:
     name: cri-o
     state: started
+    enabled: true
   when: openshift_use_crio | bool
-
-# For atomic, container runtime needs to be operational before we can upgrade
-# node system container image.
-- name: Install node system container
-  import_tasks: ../node_system_container.yml
-  when: openshift_is_atomic | bool
-
-- import_tasks: ../config/configure-node-settings.yml
-- import_tasks: ../configure-proxy-settings.yml
 
 - name: Start node service
   service:
@@ -55,13 +46,56 @@
   register: node_service
   failed_when: false
 
-- name: Check status of node service
-  async_status:
-    jid: "{{ node_service.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
+- name: Approve the node
+  oc_csr_approve:
+    oc_bin: "{{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }}"
+    oc_conf: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    node_list:
+      - "{{ l_kubelet_node_name | lower }}"
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  register: node_upgrade_oc_csr_approve
   retries: 30
-  delay: 10
+  until: node_upgrade_oc_csr_approve is succeeded
+
+- name: "Addition: Validate atomic-openshift-node"
+  shell: |
+    systemctl status atomic-openshift-node
+    if [ $? -eq 0 ]; then
+      echo "Passed, no issues"
+    else
+      echo "Error, retry"
+      systemctl restart atomic-openshift-node
+      sleep 60
+      exit 1
+    fi
+  register: l_e_validate_anode
+  until: not l_e_validate_anode|failed
+  retries: 30
+  delay: 5
+
+- name: "Addition: atomic-openshift-node config"
+  shell: >
+    if [ ! -e /etc/origin/node/node-config.yaml ]; then systemctl restart atomic-openshift-node; sleep 60; exit 1; else echo "All good"; fi
+  register: l_e_restart_anode
+  until: not l_e_restart_anode|failed
+  retries: 30
+  delay: 5
+
+- name: "Addition: Restart atomic-openshift-node"
+  shell: if [ ! -e /etc/origin/node/node-config.yaml ]; then systemctl restart atomic-openshift-node; sleep 60; exit 1; else echo "All good"; fi
+  register: l_restart_anode
+  until: not l_restart_anode|failed
+  retries: 30
+  delay: 5
+
+# Removed to not interfere with above additions
+#- name: Check status of node service
+#  async_status:
+#    jid: "{{ node_service.ansible_job_id }}"
+#  register: job_result
+#  until: job_result.finished
+#  retries: 30
+#  delay: 10
 
 - name: Wait for master API to come back online
   wait_for:
