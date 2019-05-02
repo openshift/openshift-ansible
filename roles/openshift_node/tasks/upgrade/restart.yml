@@ -57,13 +57,45 @@
   retries: 30
   until: node_upgrade_oc_csr_approve is succeeded
 
-- name: Check status of node service
-  async_status:
-    jid: "{{ node_service.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
+- name: "Addition: Validate atomic-openshift-node"
+  shell: |
+    systemctl status atomic-openshift-node
+    if [ $? -eq 0 ]; then
+      echo "Passed, no issues"
+    else
+      echo "Error, retry"
+      systemctl restart atomic-openshift-node
+      sleep 60
+      exit 1
+    fi
+  register: l_e_validate_anode
+  until: not l_e_validate_anode|failed
   retries: 30
-  delay: 10
+  delay: 5
+
+- name: "Addition: atomic-openshift-node config"
+  shell: >
+    if [ ! -e /etc/origin/node/node-config.yaml ]; then systemctl restart atomic-openshift-node; sleep 60; exit 1; else echo "All good"; fi
+  register: l_e_restart_anode
+  until: not l_e_restart_anode|failed
+  retries: 30
+  delay: 5
+
+- name: "Addition: Restart atomic-openshift-node"
+  shell: if [ ! -e /etc/origin/node/node-config.yaml ]; then systemctl restart atomic-openshift-node; sleep 60; exit 1; else echo "All good"; fi
+  register: l_restart_anode
+  until: not l_restart_anode|failed
+  retries: 30
+  delay: 5
+
+# Removed to not interfere with above additions
+#- name: Check status of node service
+#  async_status:
+#    jid: "{{ node_service.ansible_job_id }}"
+#  register: job_result
+#  until: job_result.finished
+#  retries: 30
+#  delay: 10
 
 - name: Wait for master API to come back online
   wait_for:
