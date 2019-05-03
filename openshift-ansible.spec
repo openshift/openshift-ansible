@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.143
+Version:        3.10.144
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri May 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.144-1
+- Update Fuse templates with 7.3 release (antonin@stefanutti.fr)
+- Fix typo in Cisco ACI roles (jbanerje@cisco.com)
+
 * Wed May 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.143-1
 - Removing quotes while executing few aci related shell commands
   (Gaurav.Dalvi@users.noreply.github.com)
