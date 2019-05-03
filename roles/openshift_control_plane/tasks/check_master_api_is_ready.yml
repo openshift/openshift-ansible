@@ -55,8 +55,60 @@
 - name: Wait for /apis/servicecatalog.k8s.io/v1beta1 when registered
   command: >
     {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get --raw /apis/servicecatalog.k8s.io/v1beta1
+  ignore_errors: yes
   register: servicecatalog_api
   until: servicecatalog_api is succeeded
   retries: 30
   delay: 5
   when: servicecatalog_service_registration.rc == 0
+
+
+# Gather Service Catalog diagnostics when getting /apis/servicecatalog.k8s.io/v1beta1 fails
+- when: (servicecatalog_service_registration.rc == 0 and servicecatalog_api.rc != 0)
+  block:
+  - name: Verify that the Catalog API Server is running
+    command: >
+      curl --retry 5 --retry-delay 2 -k https://apiserver.kube-service-catalog.svc/healthz
+    args:
+      # Disables the following warning:
+      # Consider using get_url or uri module rather than running curl
+      warn: no
+    register: endpoint_health
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_health.stdout_lines }}"
+  - name: Check status in the kube-service-catalog namespace
+    command: >
+      {{ openshift_client_binary }} status --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-service-catalog
+    register: endpoint_status
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_status.stdout_lines }}"
+  - name: Describe the services in the kube-service-catalog namespace
+    command: >
+      {{ openshift_client_binary }} describe services --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-service-catalog
+    register: service_status
+    ignore_errors: true
+  - debug:
+      msg: "{{ service_status.stdout_lines }}"
+  - name: Get pods in the kube-service-catalog namespace
+    command: >
+      {{ openshift_client_binary }} get pods --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-service-catalog -o wide
+    register: endpoint_pods
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_pods.stdout_lines }}"
+  - name: Get events in the kube-service-catalog namespace
+    command: >
+      {{ openshift_client_binary }} get events --config={{ openshift.common.config_base }}/master/admin.kubeconfig --sort-by='.lastTimestamp' -n kube-service-catalog
+    register: endpoint_events
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_events.stdout_lines }}"
+  - name: One more try for /apis/servicecatalog.k8s.io/v1beta1
+    command: >
+      {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get --raw /apis/servicecatalog.k8s.io/v1beta1
+    register: servicecatalog_api
+    until: servicecatalog_api is succeeded
+    retries: 60
+    delay: 5
