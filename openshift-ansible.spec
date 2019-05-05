@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.112
+Version:        3.11.113
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun May 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.113-1
+- Remove myself from OWNERS due to pending absence (sdodson@redhat.com)
+
 * Thu May 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.112-1
 - Update Fuse templates with 7.3 release (antonin@stefanutti.fr)
 - Fix container registry block all not blocking all registries
