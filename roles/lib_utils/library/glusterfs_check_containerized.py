@@ -159,6 +159,21 @@ def check_volumes(module, oc_exec, pod_names):
             check_volume_health_info(module, oc_exec, pod_name, volume)
 
 
+def check_bricks_usage(module, oc_exec, pods):
+    """Checks usage of all bricks in cluster"""
+    for pod in pods:
+        call_args = oc_exec + ['exec', pod[0], '--', 'df', '-kh']
+        res = call_or_fail(module, call_args)
+        for line in res.split('\n'):
+            # Look for heketi-provisioned filesystems
+            if 'Filesystem' in line and '/var/lib/heketi' in line:
+                cols = line.split()
+                usage = int(cols[5].strip('%'))
+                # If a brick's disk usage is greater than 96%, fail
+                if usage > 96:
+                    fail(module, 'brick near capacity found on node {}: {}'.format(pod[0], line))
+
+
 def run_module():
     '''Run this module'''
     module_args = dict(
@@ -168,6 +183,7 @@ def run_module():
         cluster_name=dict(type='str', required=True),
         exclude_node=dict(type='str', required=True),
         target_nodes=dict(type='list', required=False),
+        check_bricks=dict(type='bool', required=False, default=False),
     )
     module = AnsibleModule(
         supports_check_mode=False,
@@ -179,6 +195,7 @@ def run_module():
     cluster_name = module.params['cluster_name']
     exclude_node = module.params['exclude_node']
     target_nodes = module.params['target_nodes']
+    check_bricks = module.params['check_bricks']
 
     oc_exec = [oc_bin, oc_conf, oc_namespace]
 
@@ -192,6 +209,9 @@ def run_module():
     pod_names = select_pods(module, pods, target_nodes)
 
     check_volumes(module, oc_exec, pod_names)
+
+    if check_bricks:
+        check_bricks_usage(module, oc_exec, pods)
 
     result = {'changed': False}
     module.exit_json(**result)

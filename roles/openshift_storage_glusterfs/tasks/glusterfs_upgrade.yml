@@ -1,4 +1,9 @@
 ---
+- import_tasks: cluster_health.yml
+  vars:
+    l_check_bricks: true
+  when: glusterfs_is_native
+
 - import_tasks: heketi_db_backup.yml
   when: glusterfs_heketi_is_native
 
