@@ -119,7 +119,7 @@ def test_get_valid_nodes():
         assert valid_nodes == ['fedora3.openshift.io']
 
 
-def test_select_pod():
+def test_select_pods():
     with patch('glusterfs_check_containerized.call_or_fail') as call_mock:
         module = DummyModule()
         oc_exec = []
@@ -127,11 +127,12 @@ def test_select_pod():
         valid_nodes = ["fedora2.openshift.io", "fedora3.openshift.io"]
         call_mock.return_value = POD_SELECT_STD_OUT
         # Should select first valid podname in call_or_fail output.
-        pod_name = glusterfs_check_containerized.select_pod(module, oc_exec, cluster_name, valid_nodes)
+        pods = glusterfs_check_containerized.get_pods(module, oc_exec, cluster_name, valid_nodes)
+        pod_name = glusterfs_check_containerized.select_pods(module, pods, '')[0]
         assert pod_name == 'glusterfs-storage-mp9nk'
         with pytest.raises(Exception) as err:
-            pod_name = glusterfs_check_containerized.select_pod(module, oc_exec, "does not exist", valid_nodes)
-        assert 'Exception: Unable to find suitable pod in get pods output' in str(err)
+            pods = glusterfs_check_containerized.get_pods(module, oc_exec, "does not exist", valid_nodes)
+        assert 'Exception: Unable to find pods' in str(err)
 
 
 def test_get_volume_list():
@@ -163,6 +164,6 @@ def test_check_volume_health_info():
 
 if __name__ == '__main__':
     test_get_valid_nodes()
-    test_select_pod()
+    test_select_pods()
     test_get_volume_list()
     test_check_volume_health_info()

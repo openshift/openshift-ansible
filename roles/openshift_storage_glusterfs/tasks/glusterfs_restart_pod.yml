@@ -30,3 +30,6 @@
 - import_tasks: wait_for_pods.yml
 
 - import_tasks: cluster_health.yml
+  vars:
+    l_node_names:
+    - "{{ restart_node.spec.nodeName }}"
