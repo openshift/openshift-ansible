@@ -1,4 +1,7 @@
 ---
+- import_tasks: heketi_db_backup.yml
+  when: glusterfs_heketi_is_native
+
 - import_tasks: heketi_get_key.yml
   when: glusterfs_heketi_admin_key is undefined
 
