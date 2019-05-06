@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.144
+Version:        3.10.145
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon May 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.145-1
+- 
+
 * Fri May 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.144-1
 - Update Fuse templates with 7.3 release (antonin@stefanutti.fr)
 - Fix typo in Cisco ACI roles (jbanerje@cisco.com)
