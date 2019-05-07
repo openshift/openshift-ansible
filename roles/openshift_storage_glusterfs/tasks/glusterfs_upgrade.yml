@@ -28,6 +28,9 @@
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 
+- set_fact:
+    glusterfs_heketi_is_missing: true
+
 - name: Delete other glusterfs resources
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
