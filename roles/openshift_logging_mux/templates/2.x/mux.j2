@@ -37,6 +37,10 @@ spec:
       - name: "mux"
         image: {{image}}
         imagePullPolicy: IfNotPresent
+{% if openshift_logging_mux_file_buffer_storage_type is defined and openshift_logging_mux_file_buffer_storage_type == 'hostmount' %}
+        securityContext:
+          privileged: true
+{% endif %}
 {% if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) or (mux_cpu_request is defined and mux_cpu_request is not none) %}
         resources:
 {%   if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) %}
