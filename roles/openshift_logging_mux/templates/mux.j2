@@ -37,6 +37,8 @@ spec:
       - name: "mux"
         image: {{image}}
         imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
 {% if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) or (mux_cpu_request is defined and mux_cpu_request is not none) %}
         resources:
 {%   if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) %}
@@ -200,7 +202,7 @@ spec:
           claimName: {{ openshift_logging_mux_file_buffer_pvc_name }}
 {% elif openshift_logging_mux_file_buffer_storage_type == 'hostmount' %}
         hostPath:
-          path: "/var/log/fluentd"
+          path: "/var/lib/fluentd"
 {% else %}
         emptydir: {}
 {% endif %}
