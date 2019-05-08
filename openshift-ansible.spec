@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.145
+Version:        3.10.146
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed May 08 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.146-1
+- Remove bash debug flag from 99-origin-dns.sh script (rteague@redhat.com)
+
 * Mon May 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.145-1
 - 
 
