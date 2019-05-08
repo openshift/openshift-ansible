@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # -*- mode: sh; sh-indentation: 2 -*-
 
 # This NetworkManager dispatcher script replicates the functionality of
