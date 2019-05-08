@@ -88,13 +88,29 @@ def get_valid_nodes(module, oc_exec, exclude_node):
     return valid_nodes
 
 
-def select_pod(module, oc_exec, cluster_name, valid_nodes):
-    """Select a pod to attempt to run gluster commands on"""
+def select_pods(module, pods, target_nodes):
+    """Select pods to attempt to run gluster commands on"""
+    pod_names = []
+    if target_nodes:
+        for target_node in target_nodes:
+            for pod in pods:
+                if target_node in pod[6]:
+                    pod_names.append(pod[0])
+            if not pod_names:
+                fail(module, 'no pod found on node {}'.format(target_node))
+    else:
+        pod_names.append(pods[0][0])
+
+    return pod_names
+
+
+def get_pods(module, oc_exec, cluster_name, valid_nodes):
+    """Get all cluster pods"""
     call_args = oc_exec + ['get', 'pods', '-owide']
     res = call_or_fail(module, call_args)
     # res is returned as a tab/space-separated list with headers.
     res_lines = res.split('\n')
-    pod_name = None
+    pods = []
     name_search = 'glusterfs-{}'.format(cluster_name)
     res_lines = list(filter(None, res.split('\n')))
 
@@ -104,14 +120,13 @@ def select_pod(module, oc_exec, cluster_name, valid_nodes):
             continue
         if name_search in fields[0]:
             if fields[2] == "Running" and fields[6] in valid_nodes:
-                pod_name = fields[0]
-                break
+                pods.append(fields)
 
-    if pod_name is None:
+    if not pods:
         fail(module,
-             "Unable to find suitable pod in get pods output: {}".format(res))
+             "Unable to find pods: {}".format(res))
     else:
-        return pod_name
+        return pods
 
 
 def get_volume_list(module, oc_exec, pod_name):
@@ -136,11 +151,27 @@ def check_volume_health_info(module, oc_exec, pod_name, volume):
                 fail(module, 'volume {} is not ready'.format(volume))
 
 
-def check_volumes(module, oc_exec, pod_name):
+def check_volumes(module, oc_exec, pod_names):
     """Check status of all volumes on cluster"""
-    volume_list = get_volume_list(module, oc_exec, pod_name)
-    for volume in volume_list:
-        check_volume_health_info(module, oc_exec, pod_name, volume)
+    for pod_name in pod_names:
+        volume_list = get_volume_list(module, oc_exec, pod_name)
+        for volume in volume_list:
+            check_volume_health_info(module, oc_exec, pod_name, volume)
+
+
+def check_bricks_usage(module, oc_exec, pods):
+    """Checks usage of all bricks in cluster"""
+    for pod in pods:
+        call_args = oc_exec + ['exec', pod[0], '--', 'df', '-kh']
+        res = call_or_fail(module, call_args)
+        for line in res.split('\n'):
+            # Look for heketi-provisioned filesystems
+            if 'Filesystem' in line and '/var/lib/heketi' in line:
+                cols = line.split()
+                usage = int(cols[5].strip('%'))
+                # If a brick's disk usage is greater than 96%, fail
+                if usage > 96:
+                    fail(module, 'brick near capacity found on node {}: {}'.format(pod[0], line))
 
 
 def run_module():
@@ -151,6 +182,8 @@ def run_module():
         oc_namespace=dict(type='str', required=True),
         cluster_name=dict(type='str', required=True),
         exclude_node=dict(type='str', required=True),
+        target_nodes=dict(type='list', required=False),
+        check_bricks=dict(type='bool', required=False, default=False),
     )
     module = AnsibleModule(
         supports_check_mode=False,
@@ -161,6 +194,8 @@ def run_module():
     oc_namespace = '--namespace={}'.format(module.params['oc_namespace'])
     cluster_name = module.params['cluster_name']
     exclude_node = module.params['exclude_node']
+    target_nodes = module.params['target_nodes']
+    check_bricks = module.params['check_bricks']
 
     oc_exec = [oc_bin, oc_conf, oc_namespace]
 
@@ -169,10 +204,14 @@ def run_module():
     # the pods might not actually be alive.
     valid_nodes = get_valid_nodes(module, [oc_bin, oc_conf], exclude_node)
 
-    # Need to find an alive pod to run gluster commands in.
-    pod_name = select_pod(module, oc_exec, cluster_name, valid_nodes)
+    # Need to find alive pods to run gluster commands in.
+    pods = get_pods(module, oc_exec, cluster_name, valid_nodes)
+    pod_names = select_pods(module, pods, target_nodes)
 
-    check_volumes(module, oc_exec, pod_name)
+    check_volumes(module, oc_exec, pod_names)
+
+    if check_bricks:
+        check_bricks_usage(module, oc_exec, pods)
 
     result = {'changed': False}
     module.exit_json(**result)
