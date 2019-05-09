@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.114
+Version:        3.11.115
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,16 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu May 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.115-1
+- Remove bash debug flag from 99-origin-dns.sh script (rteague@redhat.com)
+- BZ1702544 - Elasticsearch failed to start due to invalid cert date if hosts
+  have non-UTC timezone (nhosoi@redhat.com)
+- GlusterFS: Check brick usage before upgrade (jarrpa@redhat.com)
+- GlusterFS: Allow multiple nodes in cluster check (jarrpa@redhat.com)
+- GlusterFS: Backup heketi db on upgrade (jarrpa@redhat.com)
+- GlusterFS: Skip upgrade tasks when non-native (jarrpa@redhat.com)
+- GlusterFS: Mark heketi as missing after delete (jarrpa@redhat.com)
+
 * Tue May 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.114-1
 - 
 
