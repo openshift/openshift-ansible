@@ -10,3 +10,4 @@
     - openshift_docker_ent_reg != ''
     - openshift_docker_ent_reg not in l2_docker_additional_registries
     - not openshift_use_crio_only | bool
+    - ((oreg_url is not defined or oreg_url | default('') == '') or ('all' not in l2_docker_blocked_registries | default([])))
