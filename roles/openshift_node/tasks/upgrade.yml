@@ -1,0 +1,55 @@
+---
+- block:
+  - debug:
+      msg: "Running openshift_node_pre_cordon_hook {{ openshift_node_pre_cordon_hook }}"
+  - include_tasks: "{{ openshift_node_pre_cordon_hook }}"
+  when: openshift_node_pre_cordon_hook is defined
+
+- name: Cordon node prior to upgrade
+  command: >
+    oc adm cordon {{ item | lower }}
+    --config={{ openshift_node_kubeconfig_path }}
+  delegate_to: localhost
+  with_items: "{{ ansible_play_batch }}"
+
+- name: Drain node prior to upgrade
+  command: >
+    oc adm drain {{ item | lower }}
+    --config={{ openshift_node_kubeconfig_path }}
+    --force --delete-local-data --ignore-daemonsets
+  delegate_to: localhost
+  with_items: "{{ ansible_play_batch }}"
+
+# Run the openshift_node_pre_upgrade_hook if defined
+- block:
+  - debug:
+      msg: "Running node openshift_node_pre_upgrade_hook {{ openshift_node_pre_upgrade_hook }}"
+  - include_tasks: "{{ openshift_node_pre_upgrade_hook }}"
+  when: openshift_node_pre_upgrade_hook is defined
+
+# Upgrade Node
+- import_role:
+    name: openshift_node
+  vars:
+    openshift_node_package_state: latest
+
+# Run the openshift_node_pre_uncordon_hook if defined
+- block:
+  - debug:
+      msg: "Running openshift_node_pre_uncordon_hook {{ openshift_node_pre_uncordon_hook }}"
+  - include_tasks: "{{ openshift_node_pre_uncordon_hook }}"
+  when: openshift_node_pre_uncordon_hook is defined
+
+- name: Uncordon node after upgrade
+  command: >
+    oc adm uncordon {{ item | lower }}
+    --config={{ openshift_node_kubeconfig_path }}
+  delegate_to: localhost
+  with_items: "{{ ansible_play_batch }}"
+
+# Run the openshift_node_post_upgrade_hook if defined
+- block:
+  - debug:
+      msg: "Running node openshift_node_post_upgrade_hook {{ openshift_node_post_upgrade_hook }}"
+  - include_tasks: "{{ openshift_node_post_upgrade_hook }}"
+  when: openshift_node_post_upgrade_hook is defined

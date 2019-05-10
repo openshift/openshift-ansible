@@ -51,7 +51,7 @@
 - name: Get release image
   command: >
     oc get clusterversion
-    --config={{ openshift_kubeconfig_path }}
+    --config={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.items[0].status.desired.image}'
   delegate_to: localhost
   register: oc_get
