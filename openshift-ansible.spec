@@ -18,13 +18,7 @@ Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}
 BuildArch:      noarch
 
 Requires:      ansible >= 2.7.8
-Requires:      python2
-Requires:      python-six
-Requires:      tar
-Obsoletes:     %{name}-docs <= 4.0
-Obsoletes:     %{name}-playbooks <= 4.0
-Obsoletes:     %{name}-roles <= 4.0
-Requires:      python2-openshift
+Requires:      openshift-clients
 
 %description
 OpenShift RHEL Worker Management Ansible Playbooks
@@ -67,7 +61,7 @@ cp -rp test %{buildroot}%{_datadir}/ansible/%{name}/
 Summary:       Openshift and Atomic Enterprise Ansible Test Playbooks
 Requires:      %{name} = %{version}-%{release}
 Requires:      ansible = 2.7.10
-Requires:      python-boto3
+Requires:      python2-openshift
 Requires:      openssh-clients
 BuildArch:     noarch
 
