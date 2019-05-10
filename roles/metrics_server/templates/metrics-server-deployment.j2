@@ -21,6 +21,12 @@ spec:
     spec:
       priorityClassName: system-cluster-critical
       serviceAccountName: metrics-server
+{% if openshift_metrics_server_node_selector is iterable and openshift_metrics_server_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in openshift_metrics_server_node_selector.items() %}
+        {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
       containers:
       - name: metrics-server
         image: {{ openshift_metrics_server_image }}
