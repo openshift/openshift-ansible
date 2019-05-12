@@ -28,4 +28,6 @@
         labels:
           - key: node-role.kubernetes.io/compute
             value: 'true'
-      when: groups['oo_nodes_to_config'] | default([]) | union(groups['oo_nodes_to_bootstrap'] | default([])) | union(groups['oo_masters_to_config']) | length == 1
+      when:
+        - groups['oo_nodes_to_config'] | default([]) | union(groups['oo_nodes_to_bootstrap'] | default([])) | union(groups['oo_masters_to_config']) | length == 1
+        - groups['new_masters'] | default([]) | length == 0
