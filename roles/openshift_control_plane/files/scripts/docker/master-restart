@@ -10,6 +10,7 @@ fi
 types=( "atomic-openshift" "origin" )
 for type in "${types[@]}"; do
   if systemctl cat "${type}-master-${1}.service" &>/dev/null; then
+    echo "Stopping service ${type}-master-${1}.service"
     systemctl restart "${type}-master-${1}.service"
     exit 0
   fi
@@ -27,6 +28,7 @@ if [[ -z "${container}" ]]; then
   exit 0
 fi
 # Stop the pod
+echo "Stopping container ${container}"
 docker stop "${container}" --time 30 >/dev/null
 
 # Wait for child container to change state
