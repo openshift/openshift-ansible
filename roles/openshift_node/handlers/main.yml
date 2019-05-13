@@ -18,3 +18,22 @@
     state: restarted
   when:
   - (not skip_node_svc_handlers | default(False) | bool)
+
+- name: restart node service
+  service:
+    name: "{{ openshift_service_type }}-node"
+    state: restarted
+  async: 300
+  poll: 0
+  register: restart_node_service
+  failed_when: false
+  notify:
+  - check status of node service
+
+- name: check status of node service
+  async_status:
+    jid: "{{ restart_node_service.ansible_job_id }}"
+  register: restart_job_result
+  until: restart_job_result.finished
+  retries: 30
+  delay: 10
