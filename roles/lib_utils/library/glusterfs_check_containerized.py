@@ -161,17 +161,24 @@ def check_volumes(module, oc_exec, pod_names):
 
 def check_bricks_usage(module, oc_exec, pods):
     """Checks usage of all bricks in cluster"""
+    full_bricks = {}
+    failed = False
     for pod in pods:
+        full_bricks[pod[6]] = []
         call_args = oc_exec + ['exec', pod[0], '--', 'df', '-kh']
         res = call_or_fail(module, call_args)
         for line in res.split('\n'):
             # Look for heketi-provisioned filesystems
-            if 'Filesystem' in line and '/var/lib/heketi' in line:
+            if '/var/lib/heketi' in line:
                 cols = line.split()
-                usage = int(cols[5].strip('%'))
+                usage = int(cols[4].strip('%'))
                 # If a brick's disk usage is greater than 96%, fail
                 if usage > 96:
-                    fail(module, 'brick near capacity found on node {}: {}'.format(pod[0], line))
+                    full_bricks[pod[6]].append(cols[5])
+                    failed = True
+
+    if failed:
+        fail(module, 'bricks near capacity found: {}'.format(full_bricks))
 
 
 def run_module():
