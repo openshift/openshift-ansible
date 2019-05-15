@@ -27,11 +27,13 @@
   - include_tasks: "{{ openshift_node_pre_upgrade_hook }}"
   when: openshift_node_pre_upgrade_hook is defined
 
-# Upgrade Node
-- import_role:
-    name: openshift_node
+# Upgrade Node Packages
+- import_tasks: install.yml
   vars:
     openshift_node_package_state: latest
+
+# Apply machine config
+- import_tasks: apply_machine_config.yml
 
 # Run the openshift_node_pre_uncordon_hook if defined
 - block:
