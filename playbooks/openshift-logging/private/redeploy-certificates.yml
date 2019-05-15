@@ -1,0 +1,122 @@
+---
+- name: Logging Install Checkpoint Start
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Logging install 'In Progress'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_logging:
+          title: "Logging Install"
+          playbook: "playbooks/openshift-logging/config.yml"
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+
+- name: OpenShift Aggregated Logging
+  hosts: oo_first_master
+  tasks:
+
+  - include_role:
+      name: openshift_logging
+      tasks_from: discover_namespace.yaml
+
+  # make sure ES clusters are green first
+  - include_tasks: check_es_health.yaml
+    when: not skip_logging_health_sanity_check | default(false) | bool
+
+  - name: Create temp directory for doing work in
+    command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+    register: mktemp
+    changed_when: False
+    check_mode: no
+
+  - name: Create local temp directory for doing work in
+    local_action: command mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+    register: local_tmp
+    changed_when: False
+    check_mode: no
+    vars:
+      ansible_become: false
+
+  - find:
+      paths: "{{openshift.common.config_base}}/logging"
+      patterns: ".*.crt|.*.key|.*.jks|.*.csr|.*.pem|signing.conf|ca."
+      use_regex: yes
+    register: logging_certs_to_remove
+
+  - name: Removing prior certificates
+    file:
+      state: absent
+      path: "{{logging_cert}}"
+    with_items: "{{ logging_certs_to_remove.files | lib_utils_oo_list_of_dict_to_dict_from_key('path') }}"
+    loop_control:
+      loop_var: logging_cert
+
+  - name: Regenerating certificates
+    include_role:
+      name: openshift_logging
+      tasks_from: generate_certs.yaml
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging"
+
+  - name: Regenerating secrets
+    include_role:
+      name: "{{logging_role}}"
+      tasks_from: generate_secret.yaml
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    with_items:
+    - openshift_logging_elasticsearch
+    - openshift_logging_kibana
+    - openshift_logging_curator
+    - openshift_logging_fluentd
+    loop_control:
+      loop_var: logging_role
+
+  - name: Regenerating secrets
+    include_role:
+      name: openshift_logging_mux
+      tasks_from: generate_secret.yaml
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    when:
+    - openshift_logging_use_mux | default(False) | bool
+
+  # restart all components except curator since it is a cronjob
+  # fluentd and mux will automatically reload the remounted secret
+  - name: Restarting deployments
+    include_role:
+      name: "{{logging_role}}"
+      tasks_from: restart_pods.yaml
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    with_items:
+    - openshift_logging_elasticsearch
+    - openshift_logging_kibana
+    loop_control:
+      loop_var: logging_role
+
+  - name: Cleaning up local temp dir
+    local_action: file path="{{ local_tmp.stdout }}" state=absent
+    tags: logging_cleanup
+    changed_when: False
+    become: false
+
+  - name: Cleaning up temp dir
+    file:
+      path: "{{ mktemp.stdout }}"
+      state: absent
+    changed_when: False
+
+- name: Logging Install Checkpoint End
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Logging install 'Complete'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_logging:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

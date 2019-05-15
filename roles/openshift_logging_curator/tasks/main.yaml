@@ -48,18 +48,7 @@
     - openshift_logging_curator_image_pull_secret == ''
 
 # secret
-- name: Set Curator secret
-  oc_secret:
-    state: present
-    name: "logging-curator"
-    namespace: "{{ openshift_logging_namespace }}"
-    files:
-      - name: ca
-        path: "{{ generated_certs_dir }}/ca.crt"
-      - name: key
-        path: "{{ generated_certs_dir }}/system.logging.curator.key"
-      - name: cert
-        path: "{{ generated_certs_dir }}/system.logging.curator.crt"
+- include_tasks: generate_secret.yaml
 
 - set_fact:
     curator_name: "{{ 'logging-curator' ~ ( (openshift_logging_curator_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"

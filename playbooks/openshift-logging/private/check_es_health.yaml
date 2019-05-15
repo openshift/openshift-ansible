@@ -1,0 +1,67 @@
+---
+- command: >
+    {{ openshift_client_binary }}
+    get pod
+    -l component=es,provider=openshift
+    -n {{ openshift_logging_namespace }}
+    -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
+  register: _cluster_pods
+
+### Check for cluster state before making changes -- if its red, yellow or missing nodes then we don't want to continue
+- name: "Checking current health for logging-es cluster"
+  command: >
+    {{ openshift_client_binary }}
+    exec -c elasticsearch
+    {{ _cluster_pods.stdout.split(' ')[0] }}
+    -n {{ openshift_logging_namespace }} --
+    es_util --query=_cluster/health?pretty
+  register: _pod_status
+  when:
+    - _cluster_pods.stdout
+    - _cluster_pods.stdout.split(' ') | count > 0
+
+- when:
+    - _pod_status.stdout is defined
+    - (_pod_status.stdout | from_json)['status'] in ['yellow', 'red'] or (_pod_status.stdout | from_json)['number_of_nodes'] != _cluster_pods.stdout.split(' ') | count
+  block:
+    - name: Set Logging message to failed health check
+      run_once: true
+      set_stats:
+        data:
+          installer_phase_logging:
+            message: "Elasticsearch cluster logging-es was not in a 'green' state and will not continue due to risk of data loss. To skip cluster health check specify 'skip_logging_health_sanity_check=True' in your inventory."
+    - fail: msg="Elasticsearch cluster logging-es was not in a 'green' state and will not continue due to risk of data loss. To skip cluster health check specify 'skip_logging_health_sanity_check=True' in your inventory."
+
+# ops deployment
+- command: >
+    {{ openshift_client_binary }}
+    get pod
+    -l component=es-ops,provider=openshift
+    -n {{ openshift_logging_namespace }}
+    -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
+  register: _cluster_pods
+
+### Check for cluster state before making changes -- if its red, yellow or missing nodes then we don't want to continue
+- name: "Checking current health for logging-es-ops cluster"
+  command: >
+    {{ openshift_client_binary }}
+    exec -c elasticsearch
+    {{ _cluster_pods.stdout.split(' ')[0] }}
+    -n {{ openshift_logging_namespace }} --
+    es_util --query=_cluster/health?pretty
+  register: _pod_status
+  when:
+    - _cluster_pods.stdout
+    - _cluster_pods.stdout.split(' ') | count > 0
+
+- when:
+    - _pod_status.stdout is defined
+    - (_pod_status.stdout | from_json)['status'] in ['yellow', 'red'] or (_pod_status.stdout | from_json)['number_of_nodes'] != _cluster_pods.stdout.split(' ') | count
+  block:
+    - name: Set Logging message to failed health check
+      run_once: true
+      set_stats:
+        data:
+          installer_phase_logging:
+            message: "Elasticsearch cluster logging-es-ops was not in a 'green' state and will not continue due to risk of data loss. To skip cluster health check specify 'skip_logging_health_sanity_check=True' in your inventory."
+    - fail: msg="Elasticsearch cluster logging-es-ops was not in a 'green' state and will not continue due to risk of data loss. To skip cluster health check specify 'skip_logging_health_sanity_check=True' in your inventory."
