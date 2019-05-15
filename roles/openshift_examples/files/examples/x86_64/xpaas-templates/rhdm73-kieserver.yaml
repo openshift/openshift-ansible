@@ -5,7 +5,7 @@ metadata:
   annotations:
     iconClass: icon-jboss
     tags: rhdm,decisionserver,jboss,kieserver
-    version: "1.0"
+    version: "1.1"
     openshift.io/display-name: Red Hat Decision Manager 7.3 managed KIE Server
     openshift.io/provider-display-name: Red Hat, Inc.
     description: Application template for a managed KIE Server, for Red Hat Decision Manager 7.3
@@ -16,7 +16,7 @@ metadata:
   name: rhdm73-kieserver
 labels:
   template: rhdm73-kieserver
-  rhdm: "1.0"
+  rhdm: "1.1"
 message: |-
           A new Decision Manager KIE server application has been created in your project.
           The username/password for accessing the KIE server
@@ -31,10 +31,19 @@ parameters:
   name: APPLICATION_NAME
   value: myapp
   required: true
+- displayName: Maven mirror URL
+  description: Maven mirror that KIE server must use. If you configure a mirror, this mirror must contain all artifacts that are required for deploying your services.
+  name: MAVEN_MIRROR_URL
+  required: false
+- displayName: Maven mirror of
+  description: Maven mirror configuration for KIE server.
+  name: MAVEN_MIRROR_OF
+  value: "external:*"
+  required: false
 - displayName: Maven repository ID
-  description: The id to use for the maven repository, if set. Default is generated randomly.
+  description: "The id to use for the maven repository. If set, it can be excluded from the optionally configured mirror by adding it to MAVEN_MIRROR_OF. For example: external:*,!repo-rhdmcentr,!repo-custom. If MAVEN_MIRROR_URL is set but MAVEN_MIRROR_ID is not set, an id will be generated randomly, but won't be usable in MAVEN_MIRROR_OF."
   name: MAVEN_REPO_ID
-  example: my-repo-id
+  value: repo-custom
   required: false
 - displayName: Maven repository URL
   description: Fully qualified URL to a Maven repository or service.
@@ -50,7 +59,7 @@ parameters:
   name: MAVEN_REPO_PASSWORD
   required: false
 - displayName: Name of the Maven service hosted by Decision Central
-  description: The OpenShift service name for the optional decision central (for maven repo usage), if required
+  description: The OpenShift service name for the optional Decision Central (for maven repo usage), if required.
   name: DECISION_CENTRAL_MAVEN_SERVICE
   example: "myapp-rhdmcentr"
   required: false
@@ -65,23 +74,23 @@ parameters:
   example: "maven1!"
   required: false
 - displayName: KIE Admin User
-  description: KIE administrator username
+  description: KIE administrator username.
   name: KIE_ADMIN_USER
   value: adminUser
   required: false
 - displayName: KIE Admin Password
-  description: KIE administrator password
+  description: KIE administrator password.
   name: KIE_ADMIN_PWD
   from: "[a-zA-Z]{6}[0-9]{1}!"
   generate: expression
   required: false
 - displayName: KIE Server User
-  description: KIE server username (Sets the org.kie.server.user system property)
+  description: KIE server username. (Sets the org.kie.server.user system property)
   name: KIE_SERVER_USER
   value: executionUser
   required: false
 - displayName: KIE Server Password
-  description: KIE server password (Sets the org.kie.server.pwd system property)
+  description: KIE server password. (Sets the org.kie.server.pwd system property)
   name: KIE_SERVER_PWD
   from: "[a-zA-Z]{6}[0-9]{1}!"
   generate: expression
@@ -100,21 +109,21 @@ parameters:
   value: "rhdm73-kieserver-openshift"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.1".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
+  value: "1.1"
   required: true
 - displayName: KIE Server Controller User
-  description: KIE server controller username (Sets the org.kie.server.controller.user system property)
+  description: KIE server controller username. (Sets the org.kie.server.controller.user system property)
   name: KIE_SERVER_CONTROLLER_USER
   value: controllerUser
   required: false
 - displayName: KIE Server Controller Password
-  description: KIE server controller password (Sets the org.kie.server.controller.pwd system property)
+  description: KIE server controller password. (Sets the org.kie.server.controller.pwd system property)
   name: KIE_SERVER_CONTROLLER_PWD
   required: false
 - displayName: KIE Server Controller Token
-  description: KIE server controller token for bearer authentication (Sets the org.kie.server.controller.token system property)
+  description: KIE server controller token for bearer authentication. (Sets the org.kie.server.controller.token system property)
   name: KIE_SERVER_CONTROLLER_TOKEN
   required: false
 - displayName: KIE Server Controller Service
@@ -122,27 +131,27 @@ parameters:
   name: KIE_SERVER_CONTROLLER_SERVICE
   required: false
 - displayName: KIE Server Controller host
-  description: KIE server controller host (Used to set the org.kie.server.controller system property)
+  description: KIE server controller host. (Used to set the org.kie.server.controller system property)
   name: KIE_SERVER_CONTROLLER_HOST
   example: my-app-controller-ocpuser.os.example.com
   required: false
 - displayName: KIE Server Controller port
-  description: KIE server controller port (Used to set the org.kie.server.controller system property)
+  description: KIE server controller port. (Used to set the org.kie.server.controller system property)
   name: KIE_SERVER_CONTROLLER_PORT
   example: '8080'
   required: false
 - displayName: KIE Server Mode
-  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. (Sets the org.kie.server.mode system property)."
+  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. In production mode, you can not deploy SNAPSHOT versions of artifacts on the KIE server and can not change the version of an artifact in an existing container. (Sets the org.kie.server.mode system property)."
   name: KIE_SERVER_MODE
   value: "PRODUCTION"
   required: false
 - displayName: KIE MBeans
-  description: KIE server mbeans enabled/disabled (Sets the kie.mbeans and kie.scanner.mbeans system properties)
+  description: KIE server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
   name: KIE_MBEANS
   value: enabled
   required: false
 - displayName: Drools Server Filter Classes
-  description: KIE server class filtering (Sets the org.drools.server.filter.classes system property)
+  description: KIE server class filtering. (Sets the org.drools.server.filter.classes system property)
   name: DROOLS_SERVER_FILTER_CLASSES
   value: 'true'
   required: false
@@ -153,43 +162,43 @@ parameters:
   value: ''
   required: false
 - displayName: KIE Server Custom https Route Hostname
-  description: 'Custom hostname for https service route.  Leave blank for default
+  description: 'Custom hostname for https service route. Leave blank for default
     hostname, e.g.: secure-<application-name>-kieserver-<project>.<default-domain-suffix>'
   name: KIE_SERVER_HOSTNAME_HTTPS
   value: ''
   required: false
 - displayName: Use the secure route name to link application requests to KIE_SERVER_HOSTNAME_HTTPS vs KIE_SERVER_HOSTNAME_HTTP.
-  description: 'If true, will use secure-APPLICATION_NAME-kieserver vs. APPLICATION_NAME-kieserver as the route name.'
+  description: 'If true, the KIE server will use secure-<application-name>-kieserver vs. <application-name>-kieserver as the KIE server route endpoint for Decision Central to report. Therefore, Decision Central displays the secure link to the user.'
   name: KIE_SERVER_USE_SECURE_ROUTE_NAME
   value: 'false'
   required: false
 - displayName: KIE Server Keystore Secret Name
-  description: The name of the secret containing the keystore file
+  description: The name of the secret containing the keystore file.
   name: KIE_SERVER_HTTPS_SECRET
   example: kieserver-app-secret
   required: true
 - displayName: KIE Server Keystore Filename
-  description: The name of the keystore file within the secret
+  description: The name of the keystore file within the secret.
   name: KIE_SERVER_HTTPS_KEYSTORE
   value: keystore.jks
   required: false
 - displayName: KIE Server Certificate Name
-  description: The name associated with the server certificate
+  description: The name associated with the server certificate.
   name: KIE_SERVER_HTTPS_NAME
   value: jboss
   required: false
 - displayName: KIE Server Keystore Password
-  description: The password for the keystore and certificate
+  description: The password for the keystore and certificate.
   name: KIE_SERVER_HTTPS_PASSWORD
   value: mykeystorepass
   required: false
 - displayName: KIE Server Bypass Auth User
-  description: KIE server bypass auth user (Sets the org.kie.server.bypass.auth.user system property)
+  description: Allows the KIE server to bypass the authenticated user for task related operations e.g. queries. (Sets the org.kie.server.bypass.auth.user system property)
   name: KIE_SERVER_BYPASS_AUTH_USER
   value: 'false'
   required: false
 - displayName: KIE Server Container Memory Limit
-  description: KIE server Container memory limit
+  description: KIE server Container memory limit.
   name: KIE_SERVER_MEMORY_LIMIT
   value: 1Gi
   required: false
@@ -209,16 +218,16 @@ parameters:
   example: "LocalContainersStartupStrategy"
   required: false
 - displayName: RH-SSO URL
-  description: RH-SSO URL
+  description: RH-SSO URL.
   name: SSO_URL
   example: https://rh-sso.example.com/auth
   required: false
 - displayName: RH-SSO Realm name
-  description: RH-SSO Realm name
+  description: RH-SSO Realm name.
   name: SSO_REALM
   required: false
 - displayName: KIE Server RH-SSO Client name
-  description: KIE Server RH-SSO Client name
+  description: KIE Server RH-SSO Client name.
   name: KIE_SERVER_SSO_CLIENT
   required: false
 - displayName: KIE Server RH-SSO Client Secret
@@ -227,15 +236,15 @@ parameters:
   example: "252793ed-7118-4ca8-8dab-5622fa97d892"
   required: false
 - displayName: RH-SSO Realm Admin Username
-  description: RH-SSO Realm Admin Username used to create the Client if it doesn't exist
+  description: RH-SSO Realm Admin Username used to create the Client if it doesn't exist.
   name: SSO_USERNAME
   required: false
 - displayName: RH-SSO Realm Admin Password
-  description: RH-SSO Realm Admin Password used to create the Client
+  description: RH-SSO Realm Admin Password used to create the Client.
   name: SSO_PASSWORD
   required: false
 - displayName: RH-SSO Disable SSL Certificate Validation
-  description: RH-SSO Disable SSL Certificate Validation
+  description: RH-SSO Disable SSL Certificate Validation.
   name: SSO_DISABLE_SSL_CERTIFICATE_VALIDATION
   value: "false"
   required: false
@@ -245,17 +254,17 @@ parameters:
   value: preferred_username
   required: false
 - displayName: LDAP Endpoint
-  description: LDAP Endpoint to connect for authentication
+  description: LDAP Endpoint to connect for authentication.
   name: AUTH_LDAP_URL
   example: "ldap://myldap.example.com"
   required: false
 - displayName: LDAP Bind DN
-  description: Bind DN used for authentication
+  description: Bind DN used for authentication.
   name: AUTH_LDAP_BIND_DN
   example: "uid=admin,ou=users,ou=exmample,ou=com"
   required: false
 - displayName: LDAP Bind Credentials
-  description: LDAP Credentials used for authentication
+  description: LDAP Credentials used for authentication.
   name: AUTH_LDAP_BIND_CREDENTIAL
   example: "Password"
   required: false
@@ -322,7 +331,7 @@ parameters:
   example: "1"
   required: false
 - displayName: LDAP Default role
-  description: A role included for all authenticated users
+  description: A role included for all authenticated users.
   name: AUTH_LDAP_DEFAULT_ROLE
   example: "guest"
   required: false
@@ -561,8 +570,14 @@ objects:
             value: "${KIE_SERVER_PWD}"
           - name: KIE_SERVER_CONTAINER_DEPLOYMENT
             value: "${KIE_SERVER_CONTAINER_DEPLOYMENT}"
+          - name: MAVEN_MIRROR_URL
+            value: "${MAVEN_MIRROR_URL}"
+          - name: MAVEN_MIRROR_OF
+            value: "${MAVEN_MIRROR_OF}"
           - name: MAVEN_REPOS
             value: "RHDMCENTR,EXTERNAL"
+          - name: RHDMCENTR_MAVEN_REPO_ID
+            value: "repo-rhdmcentr"
           - name: RHDMCENTR_MAVEN_REPO_SERVICE
             value: "${DECISION_CENTRAL_MAVEN_SERVICE}"
           - name: RHDMCENTR_MAVEN_REPO_PATH

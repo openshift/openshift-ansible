@@ -27,6 +27,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm73-decisioncentral-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.3 - Decision Central image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.3
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm73-decisioncentral-openshift:1.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -48,6 +60,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm73-controller-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.3 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.3
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm73-controller-openshift:1.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -69,6 +93,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm73-kieserver-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.3 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.3
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm73-kieserver-openshift:1.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -90,6 +126,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7-tech-preview/rhdm73-decisioncentral-indexing-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.3 - Decision Central Indexing image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.3
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7-tech-preview/rhdm73-decisioncentral-indexing-openshift:1.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -111,3 +159,15 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7-tech-preview/rhdm73-optaweb-employee-rostering-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.3 - Business Optimizer OptaWeb Employee Rostering image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.3
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7-tech-preview/rhdm73-optaweb-employee-rostering-openshift:1.1
