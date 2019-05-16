@@ -161,8 +161,6 @@ spec:
         #     port: 10256
         #     scheme: HTTP
         # force node to be notready when sdn is gone.
-        tolerations:
-        - operator: "Exists"
         lifecycle:
           preStop:
             exec:
@@ -207,3 +205,5 @@ spec:
       - name: host-var-lib-cni-networks-openshift-sdn
         hostPath:
           path: /var/lib/cni/networks/openshift-sdn
+      tolerations:
+      - operator: "Exists"
