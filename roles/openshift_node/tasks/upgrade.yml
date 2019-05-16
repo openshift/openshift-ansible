@@ -5,6 +5,7 @@
   - include_tasks: "{{ openshift_node_pre_cordon_hook }}"
   when: openshift_node_pre_cordon_hook is defined
 
+# just a test
 - name: Cordon node prior to upgrade
   command: >
     oc adm cordon {{ item | lower }}
