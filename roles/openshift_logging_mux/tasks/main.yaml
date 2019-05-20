@@ -118,20 +118,7 @@
       secure-forward.conf: "{{ tempdir }}/secure-forward-mux.conf"
 
 # create Mux secret
-- name: Set logging-mux secret
-  oc_secret:
-    state: present
-    name: logging-mux
-    namespace: "{{ openshift_logging_mux_namespace }}"
-    files:
-      - name: ca
-        path: "{{ generated_certs_dir }}/ca.crt"
-      - name: key
-        path: "{{ generated_certs_dir }}/system.logging.mux.key"
-      - name: cert
-        path: "{{ generated_certs_dir }}/system.logging.mux.crt"
-      - name: shared_key
-        path: "{{ generated_certs_dir }}/mux_shared_key"
+- include_tasks: generate_secret.yaml
 
 # services
 - name: Set logging-mux service for external communication

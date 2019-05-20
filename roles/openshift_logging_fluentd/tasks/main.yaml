@@ -131,27 +131,7 @@
       secure-forward.conf: "{{ tempdir }}/secure-forward.conf"
 
 # create Fluentd secret
-# if we don't provide a location for provided certs then we use from generated_certs_dir
-# ops will use the same certs as non-ops by default
-# TODO: add aggregation secrets if necessary
-- name: Set logging-fluentd secret
-  oc_secret:
-    state: present
-    name: logging-fluentd
-    namespace: "{{ openshift_logging_fluentd_namespace }}"
-    files:
-      - name: ca
-        path: "{{ openshift_logging_fluentd_ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
-      - name: key
-        path: "{{ openshift_logging_fluentd_key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
-      - name: cert
-        path: "{{ openshift_logging_fluentd_cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
-      - name: ops-ca
-        path: "{{ openshift_logging_fluentd_ops_ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
-      - name: ops-key
-        path: "{{ openshift_logging_fluentd_ops_key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
-      - name: ops-cert
-        path: "{{ openshift_logging_fluentd_ops_cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
+- include_tasks: generate_secret.yaml
 
 - name: Copy cluster-logging priority class definition
   copy:

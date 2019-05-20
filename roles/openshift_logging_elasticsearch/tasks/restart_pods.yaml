@@ -1,0 +1,8 @@
+---
+# delete the current Elasticsearch pods so the new secret can be picked up
+- name: delete pods
+  oc_obj:
+    state: absent
+    kind: pods
+    namespace: "{{ openshift_logging_namespace }}"
+    selector: "provider=openshift,logging-infra=elasticsearch"
