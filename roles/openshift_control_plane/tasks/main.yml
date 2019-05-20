@@ -62,6 +62,17 @@
   - openshift.master.audit_config.auditFilePath is defined
   - '"/var/log/origin" in openshift.master.audit_config.auditFilePath'
 
+- name: Copy openshift audit policy file
+  copy:
+    src: "{{ openshift.master.audit_policyfile }}"
+    dest: "{{ openshift.master.audit_config.policyFile }}"
+    mode: 0644
+  when:
+  - openshift.master.audit_config is defined
+  - openshift.master.audit_policyfile is defined
+  - openshift.master.audit_config.policyFile is defined
+  - '"/etc/origin/master" in openshift.master.audit_config.policyFile'
+
 - name: Create the policy file if it does not already exist
   command: >
     {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig

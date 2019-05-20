@@ -55,6 +55,7 @@
       image_policy_config: "{{ openshift_master_image_policy_config | default(None) }}"
       image_policy_allowed_registries_for_import: "{{ openshift_master_image_policy_allowed_registries_for_import | default(None) }}"
       audit_config: "{{ openshift_master_audit_config | default(None) }}"
+      audit_policyfile: "{{ openshift_master_audit_policyfile | default(None) }}"
 
 - name: Determine if scheduler config present
   stat:
