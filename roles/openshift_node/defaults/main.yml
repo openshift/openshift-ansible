@@ -1,6 +1,4 @@
 ---
-openshift_pull_secret_path: '~/pull-secret.txt'
-
 openshift_node_machineconfigpool: 'worker'
 openshift_node_tls_verify: false
 
