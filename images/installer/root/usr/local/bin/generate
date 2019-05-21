@@ -181,8 +181,6 @@ class Host:
             info += self.hostname + " "
         elif self.ip_addr:
             info += self.ip_addr + " "
-        if self.ip_addr:
-            info += "openshift_ip=" + self.ip_addr + " "
         if self.public_ip_addr:
             info += "openshift_public_ip=" + self.public_ip_addr + " "
         if self.hostname:

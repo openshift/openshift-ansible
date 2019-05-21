@@ -90,7 +90,6 @@ def _get_hostvars(server, docker_storage_mountpoints):
     # TODO(shadower): what about multiple networks?
     if server.private_v4:
         hostvars['private_v4'] = server.private_v4
-        hostvars['openshift_ip'] = server.private_v4
 
     hostvars['openshift_public_hostname'] = server.name
 

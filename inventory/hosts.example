@@ -817,11 +817,6 @@ debug_level=2
 # configure how often node iptables rules are refreshed
 #openshift_node_iptables_sync_period=5s
 
-# Configure nodeIP in the node config
-# This is needed in cases where node traffic is desired to go over an
-# interface other than the default network interface.
-#openshift_set_node_ip=True
-
 #openshift_node_kubelet_args is deprecated, use node config edits instead
 
 # Configure logrotate scripts
