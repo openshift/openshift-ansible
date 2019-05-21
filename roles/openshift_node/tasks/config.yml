@@ -9,7 +9,8 @@
 # The atomic-openshift-node service will set this parameter on
 # startup, but if the network service is restarted this setting is
 # lost. Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1372388
-- sysctl:
+- name: Enable IP Forwarding
+  sysctl:
     name: net.ipv4.ip_forward
     value: 1
     sysctl_file: "/etc/sysctl.d/99-openshift.conf"
@@ -21,10 +22,10 @@
     state: yes
     persistent: yes
 
-- name: create temp directory
+- name: Create temp directory
   tempfile:
     state: directory
-  register: tempfile
+  register: temp_dir
 
 - name: Wait for bootstrap endpoint to show up
   uri:
@@ -40,15 +41,28 @@
 - name: Fetch bootstrap ignition file locally
   uri:
     url: "{{ openshift_node_bootstrap_endpoint }}"
-    dest: "{{ tempfile.path }}/bootstrap.ign"
+    dest: "{{ temp_dir.path }}/bootstrap.ign"
     validate_certs: false
 
-- name: Copy pull secret in the directory
-  copy:
-    src: "{{ openshift_pull_secret_path }}"
-    dest: "{{ tempfile.path }}/pull-secret.json"
+- name: Get cluster pull-secret
+  command: >
+    oc get secret pull-secret
+    --config={{ openshift_node_kubeconfig_path }}
+    --namespace=openshift-config
+    --output=jsonpath='{.data.\.dockerconfigjson}'
+  delegate_to: localhost
+  register: oc_get
+  until:
+  - oc_get.stdout != ''
+  retries: 36
+  delay: 5
 
-- name: Get release image
+- name: Write pull-secret to file
+  copy:
+    content: "{{ oc_get.stdout | b64decode }}"
+    dest: "{{ temp_dir.path }}/pull-secret.json"
+
+- name: Get cluster release image
   command: >
     oc get clusterversion
     --config={{ openshift_node_kubeconfig_path }}
@@ -60,27 +74,32 @@
   retries: 36
   delay: 5
 
-- name: Set openshift_release_image fact
+- name: Set l_release_image fact
   set_fact:
-    openshift_release_image: "{{ oc_get.stdout }}"
+    l_release_image: "{{ oc_get.stdout }}"
 
 - name: Pull release image
-  command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ openshift_release_image }}"
+  command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ l_release_image }}"
 
 - name: Get machine controller daemon image from release image
-  command: "podman run --rm {{ openshift_release_image }} image machine-config-daemon"
+  command: "podman run --rm {{ l_release_image }} image machine-config-daemon"
   register: release_image_mcd
 
 - block:
   - name: Pull MCD image
-    command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ release_image_mcd.stdout }}"
+    command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ release_image_mcd.stdout }}"
 
   - name: Apply ignition manifest
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
     vars:
       podman_flags: "--privileged --rm -ti {{ release_image_mcd.stdout }}"
       podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
-      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ tempfile.path }}/bootstrap.ign --skip-reboot"
+      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ temp_dir.path }}/bootstrap.ign --skip-reboot"
+
+  - name: Remove temp directory
+    file:
+      path: "{{ temp_dir.path }}"
+      state: absent
 
   - name: Reboot the host and wait for it to come back
     reboot:

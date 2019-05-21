@@ -12,7 +12,6 @@ ansible_user=root
 # Required configuration variables                                            #
 ###############################################################################
 openshift_kubeconfig_path="~/.kube/config"
-openshift_pull_secret_path="~/pull-secret.txt"
 
 # For running RHEL worker upgrades
 [workers]
