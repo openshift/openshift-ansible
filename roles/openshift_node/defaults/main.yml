@@ -1,4 +1,5 @@
 ---
+openshift_node_active_nodes: []
 openshift_node_machineconfigpool: 'worker'
 openshift_node_tls_verify: false
 

@@ -1,0 +1,34 @@
+---
+# This task file is run with import_role for localhost from scaleup.yml
+
+- name: Ensure [new_workers] group is populated
+  fail:
+    msg: >
+      Detected no [new_workers] in inventory. Please add hosts to the
+      [new_workers] host group to add nodes.
+  when: groups.new_workers | default([]) | length == 0
+
+- name: Get cluster nodes
+  command: >
+    oc get nodes
+    --config={{ openshift_node_kubeconfig_path }}
+    --output=name
+  register: oc_get
+  until:
+  - oc_get.stdout != ''
+  retries: 36
+  delay: 5
+
+- name: Check for nodes which are already part of the cluster
+  set_fact:
+    openshift_node_active_nodes: "{{ openshift_node_active_nodes + [ item ] }}"
+  when: "item in oc_get.stdout"
+  loop: "{{ groups.new_workers }}"
+
+- name: Fail if new_workers group contains active nodes
+  fail:
+    msg: >
+      Detected active nodes in [new_workers] group.
+      Please move these nodes to the [workers] group.
+      {{ openshift_node_active_nodes | join(', ') }}
+  when: openshift_node_active_nodes | length > 0
