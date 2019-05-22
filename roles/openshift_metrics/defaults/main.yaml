@@ -31,6 +31,8 @@ openshift_metrics_cassandra_requests_cpu: null
 openshift_metrics_cassandra_nodeselector: ""
 openshift_metrics_cassandra_storage_group: 65534
 openshift_metrics_cassandra_take_snapshot: False
+openshift_metrics_cassandra_readprobe_initialdelay: null
+openshift_metrics_cassandra_readprobe_timeout: 10
 
 openshift_metrics_heapster_standalone: False
 openshift_metrics_heapster_limits_memory: 3.75G
