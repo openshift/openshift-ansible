@@ -58,6 +58,7 @@ STORAGE_KIND_TUPLE = (
 
 REMOVED_VARIABLES = (
     # TODO(michaelgugino): Remove these in 3.11
+    ('openshift_set_node_ip', 'Deprecated: see documentation.'),
     ('openshift_metrics_image_prefix', 'openshift_metrics_<component>_image'),
     ('openshift_metrics_image_version', 'openshift_metrics_<component>_image'),
     ('openshift_grafana_proxy_image_prefix', 'openshift_grafana_proxy_image'),
