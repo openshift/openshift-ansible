@@ -16,7 +16,7 @@
     calico_etcd_ca_cert_file: "/etc/origin/master/master.etcd-ca.crt"
     calico_etcd_cert_file: "/etc/origin/master/master.etcd-client.crt"
     calico_etcd_key_file: "/etc/origin/master/master.etcd-client.key"
-    calico_etcd_endpoints: "{{ hostvars[groups.oo_first_master.0].openshift_master_etcd_urls | join(',') }}"
+    calico_etcd_endpoints: "{{ openshift_master_etcd_urls | join(',') }}"
 
 - name: Calico Node | Error if no certs set.
   fail:
