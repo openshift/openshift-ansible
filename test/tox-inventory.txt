@@ -1,2 +1,3 @@
-[new_workers]
 localhost
+[new_workers]
+[workers]
