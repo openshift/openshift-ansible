@@ -6,7 +6,8 @@
   roles:
   - openshift_facts
   tasks:
-  - openshift_facts: {}
+  - openshift_facts:
+      system_facts: "{{ vars_openshift_facts_system_facts }}"
     register: result
   - debug:
       var: result
