@@ -2859,6 +2859,11 @@ class Router(OpenShiftCLI):
                                                             edit.get('index', None),
                                                             edit.get('curr_value', None)))
             if edit['action'] == 'append':
+                if edit['key'] == deploymentconfig.env_path \
+                   and isinstance(edit['value'], dict) \
+                   and 'name' in edit['value'] \
+                   and deploymentconfig.exists_env_key(edit['value']['name']):
+                    deploymentconfig.delete_env_var(edit['value']['name'])
                 edit_results.append(deploymentconfig.append(edit['key'],
                                                             edit['value']))
 
