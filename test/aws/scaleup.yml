@@ -89,7 +89,7 @@
     - name: Get kubelet logs
       command: journalctl --no-pager -u kubelet
       register: kubelet_logs
-      ignore_errors: tru
+      ignore_errors: true
     - debug:
         var: crictl_logs_output
     - debug:
