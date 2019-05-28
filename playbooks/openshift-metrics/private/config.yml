@@ -27,6 +27,20 @@
       tasks_from: update_master_config.yaml
     when: not openshift.common.version_gte_3_9
 
+# Workaround:
+# When using cri-o networking metrics do
+# not appear unless the -node.service is restarted
+# BZ(s):
+# https://bugzilla.redhat.com/show_bug.cgi?id=1646886
+# https://bugzilla.redhat.com/show_bug.cgi?id=1631300
+# https://bugzilla.redhat.com/show_bug.cgi?id=1649984
+# https://bugzilla.redhat.com/show_bug.cgi?id=1647707
+- import_playbook: ../../openshift-node/private/restart.yml
+  when: openshift_use_crio | default(false) | bool
+  vars:
+    openshift_node_restart_docker_required: False
+    openshift_node_restart_drain: True
+
 - name: Metrics Install Checkpoint End
   hosts: all
   gather_facts: false

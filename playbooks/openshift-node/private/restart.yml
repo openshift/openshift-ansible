@@ -8,6 +8,37 @@
   - openshift_facts
 
   tasks:
+  - name: Mark node unschedulable
+    oc_adm_manage_node:
+      node: "{{ openshift.node.nodename | lower }}"
+      schedulable: False
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    retries: 10
+    delay: 5
+    register: node_unschedulable
+    until: node_unschedulable is succeeded
+    when:
+    - inventory_hostname in groups.oo_nodes_to_config
+    - openshift_node_restart_drain | default(false) | bool
+
+  - name: Drain Node for Kubelet restart
+    command: >
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --force --delete-local-data --ignore-daemonsets
+      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when:
+    - inventory_hostname in groups.oo_nodes_to_config
+    - openshift_node_restart_drain | default(false) | bool
+    register: l_drain_result
+    until: not (l_drain_result is failed)
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
+    delay: 5
+    failed_when:
+    - l_drain_result is failed
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
+
   - name: Restart docker
     service:
       name: docker
@@ -74,3 +105,16 @@
     # Give the node three minutes to come back online.
     retries: 24
     delay: 5
+
+  - name: Set node schedulability
+    oc_adm_manage_node:
+      node: "{{ openshift.node.nodename | lower }}"
+      schedulable: True
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    retries: 10
+    delay: 5
+    register: node_schedulable
+    until: node_schedulable is succeeded
+    when:
+    - node_unschedulable is changed
+    - openshift_node_restart_drain | default(false) | bool
