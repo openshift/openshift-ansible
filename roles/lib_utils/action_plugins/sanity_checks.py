@@ -61,6 +61,7 @@ IMAGE_POLICY_CONFIG_VAR = "openshift_master_image_policy_config"
 ALLOWED_REGISTRIES_VAR = "openshift_master_image_policy_allowed_registries_for_import"
 
 REMOVED_VARIABLES = (
+    ('openshift_set_node_ip', 'Deprecated: see documentation.'),
     ('openshift_hostname', 'Removed: See documentation'),
     # TODO(michaelgugino): Remove in 3.12
     ('oreg_auth_credentials_replace', 'Removed: Credentials are now always updated'),

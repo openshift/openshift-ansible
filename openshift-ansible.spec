@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.110
+Version:        3.11.115
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,44 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu May 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.115-1
+- Remove bash debug flag from 99-origin-dns.sh script (rteague@redhat.com)
+- BZ1702544 - Elasticsearch failed to start due to invalid cert date if hosts
+  have non-UTC timezone (nhosoi@redhat.com)
+- GlusterFS: Check brick usage before upgrade (jarrpa@redhat.com)
+- GlusterFS: Allow multiple nodes in cluster check (jarrpa@redhat.com)
+- GlusterFS: Backup heketi db on upgrade (jarrpa@redhat.com)
+- GlusterFS: Skip upgrade tasks when non-native (jarrpa@redhat.com)
+- GlusterFS: Mark heketi as missing after delete (jarrpa@redhat.com)
+
+* Tue May 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.114-1
+- 
+
+* Sun May 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.113-1
+- Remove myself from OWNERS due to pending absence (sdodson@redhat.com)
+
+* Thu May 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.112-1
+- Update Fuse templates with 7.3 release (antonin@stefanutti.fr)
+- Fix container registry block all not blocking all registries
+  (jcallen@redhat.com)
+- Fix typo in Cisco ACI roles (jbanerje@cisco.com)
+
+* Tue Apr 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.111-1
+- Replace remote_group_id by remote_ip_prefix (ltomasbo@redhat.com)
+- openshift_node: Allow storage_plugin tasks to work through import_role
+  (jarrpa@redhat.com)
+- GlusterFS: Set max-op-version at end of upgrade (jarrpa@redhat.com)
+- GlusterFS: Fix old-style relabeling (jarrpa@redhat.com)
+- SDN: tolerate taints (vrutkovs@redhat.com)
+- Correct usage of openshift_facts (rteague@redhat.com)
+- Fix openshift_logging set_fact FAILED in python3 (wu-wenixang@outlook.com)
+- Removing quotes while executing few aci related shell commands
+  (Gaurav.Dalvi@users.noreply.github.com)
+- Correctly evaluate openshift_metrics_heapster_standalone variable if it is
+  'false' with small f (jmartisk@redhat.com)
+- Add --debug flag to skopeo inspect in image health check.
+  (padillon@redhat.com)
+
 * Tue Apr 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.110-1
 - imageconfig playbook fails with undefined variables (jcallen@redhat.com)
 - Move modify_yaml test to appropriate directory (rteague@redhat.com)

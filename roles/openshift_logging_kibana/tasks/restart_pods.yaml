@@ -1,0 +1,10 @@
+---
+# delete the current Kibana pods so the new secret can be picked up
+- name: delete pods
+  oc_obj:
+    state: absent
+    kind: pods
+    namespace: "{{ openshift_logging_namespace }}"
+    selector: "provider=openshift,logging-infra=kibana"
+
+# wait for them all to come back up?

@@ -4,7 +4,7 @@
 ##  logging_patch takes the paths of two files to compare and also a list of
 ##  variables whose line we exclude from the diffs.
 ##  We then patch the new configmap file so that we can build a configmap
-##  using that file later. We then use oc apply to idempotenly modify any
+##  using that file later. We then use oc apply to idempotently modify any
 ##  existing configmap.
 
 ## The following variables are expected to be provided when including this task:

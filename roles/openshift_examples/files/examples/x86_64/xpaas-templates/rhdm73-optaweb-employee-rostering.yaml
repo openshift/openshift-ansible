@@ -5,7 +5,7 @@ metadata:
   annotations:
     iconClass: icon-jboss
     tags: rhdm,decisionserver,jboss,optaweb,employee-rostering,postgresql
-    version: "1.0"
+    version: "1.1"
     openshift.io/display-name: Red Hat Decision Manager 7.3 Business Optimizer Employee Rostering with a PostgreSQL database
     openshift.io/provider-display-name: Red Hat, Inc.
     description: Application template for a Optaweb Employee Rostering with a PostgreSQL database, for Red Hat Decision Manager 7.3
@@ -16,7 +16,7 @@ metadata:
   name: rhdm73-optaweb-employee-rostering
 labels:
   template: rhdm73-optaweb-employee-rostering
-  rhdm: "1.0"
+  rhdm: "1.1"
 message: |-
           A new Decision Manager Optaweb employee rostering application have been created in your project.
 
@@ -52,9 +52,9 @@ parameters:
   value: "rhdm73-optaweb-employee-rostering-openshift"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.1".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
+  value: "1.1"
   required: true
 - displayName: Optaweb Employee Rostering Persistence Datasource
   description: Optaweb employee rostering persistence datasource (Sets the org.optaweb.employeerostering.persistence.datasource system property)

@@ -5,7 +5,7 @@ metadata:
   annotations:
     iconClass: icon-jboss
     tags: rhdm,decisionserver,jboss,trial
-    version: "1.0"
+    version: "1.1"
     openshift.io/display-name: Red Hat Decision Manager 7.3 ephemeral trial environment
     openshift.io/provider-display-name: Red Hat, Inc.
     description: Application template for an ephemeral authoring and testing environment, for Red Hat Decision Manager 7.3
@@ -16,7 +16,7 @@ metadata:
   name: rhdm73-trial-ephemeral
 labels:
   template: rhdm73-trial-ephemeral
-  rhdm: "1.0"
+  rhdm: "1.1"
 message: |-
           A new Decision Manager trial environment has been created.
           The username/password for accessing the Decision Central interface is
@@ -37,42 +37,42 @@ parameters:
   value: myapp
   required: true
 - displayName: Default Password
-  description: Default password used for multiple components for user convenience in this trial environment
+  description: Default password used for multiple components for user convenience in this trial environment.
   name: DEFAULT_PASSWORD
   value: RedHat
   required: true
 - displayName: KIE Admin User
-  description: KIE administrator username
+  description: KIE administrator username.
   name: KIE_ADMIN_USER
   value: adminUser
   required: false
 - displayName: KIE Server User
-  description: KIE server username (Sets the org.kie.server.user system property)
+  description: KIE server username. (Sets the org.kie.server.user system property)
   name: KIE_SERVER_USER
   value: executionUser
   required: false
 - displayName: KIE Server Bypass Auth User
-  description: KIE server bypass auth user (Sets the org.kie.server.bypass.auth.user system property)
+  description: Allows the KIE server to bypass the authenticated user for task related operations e.g. queries. (Sets the org.kie.server.bypass.auth.user system property)
   name: KIE_SERVER_BYPASS_AUTH_USER
   value: 'false'
   required: false
 - displayName: KIE Server Controller User
-  description: KIE server controller username (Sets the org.kie.server.controller.user system property)
+  description: KIE server controller username. (Sets the org.kie.server.controller.user system property)
   name: KIE_SERVER_CONTROLLER_USER
   value: controllerUser
   required: false
 - displayName: KIE Server Mode
-  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. (Sets the org.kie.server.mode system property)."
+  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. In production mode, you can not deploy SNAPSHOT versions of artifacts on the KIE server and can not change the version of an artifact in an existing container. (Sets the org.kie.server.mode system property)."
   name: KIE_SERVER_MODE
   value: "DEVELOPMENT"
   required: false
 - displayName: KIE MBeans
-  description: KIE server mbeans enabled/disabled (Sets the kie.mbeans and kie.scanner.mbeans system properties)
+  description: KIE server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
   name: KIE_MBEANS
   value: enabled
   required: false
 - displayName: Drools Server Filter Classes
-  description: KIE server class filtering (Sets the org.drools.server.filter.classes system property)
+  description: KIE server class filtering. (Sets the org.drools.server.filter.classes system property)
   name: DROOLS_SERVER_FILTER_CLASSES
   value: 'true'
   required: false
@@ -83,27 +83,27 @@ parameters:
   value: ''
   required: false
 - displayName: KIE Server Access-Control-Allow-Origin response header
-  description: Sets the Access-Control-Allow-Origin response header value in the KIE Server (useful for CORS support)
+  description: Sets the Access-Control-Allow-Origin response header value in the KIE Server (useful for CORS support).
   name: KIE_SERVER_ACCESS_CONTROL_ALLOW_ORIGIN
   value: "*"
   required: false
 - displayName: KIE Server Access-Control-Allow-Methods response header
-  description: Sets the Access-Control-Allow-Methods response header value in the KIE Server (useful for CORS support)
+  description: Sets the Access-Control-Allow-Methods response header value in the KIE Server (useful for CORS support).
   name: KIE_SERVER_ACCESS_CONTROL_ALLOW_METHODS
   value: "GET, POST, OPTIONS, PUT"
   required: false
 - displayName: KIE Server Access-Control-Allow-Headers response header
-  description: Sets the Access-Control-Allow-Headers response header value in the KIE Server (useful for CORS support)
+  description: Sets the Access-Control-Allow-Headers response header value in the KIE Server (useful for CORS support).
   name: KIE_SERVER_ACCESS_CONTROL_ALLOW_HEADERS
   value: "Accept, Authorization, Content-Type, X-Requested-With"
   required: false
 - displayName: KIE Server Access-Control-Allow-Credentials response header
-  description: Sets the Access-Control-Allow-Credentials response header value in the KIE Server (useful for CORS support)
+  description: Sets the Access-Control-Allow-Credentials response header value in the KIE Server (useful for CORS support).
   name: KIE_SERVER_ACCESS_CONTROL_ALLOW_CREDENTIALS
   value: "true"
   required: false
 - displayName: KIE Server Access-Control-Max-Age response header
-  description: Sets the Access-Control-Max-Age response header value in the KIE Server (useful for CORS support)
+  description: Sets the Access-Control-Max-Age response header value in the KIE Server (useful for CORS support).
   name: KIE_SERVER_ACCESS_CONTROL_MAX_AGE
   value: "1"
   required: false
@@ -127,9 +127,9 @@ parameters:
   value: "rhdm73-kieserver-openshift"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.1".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
+  value: "1.1"
   required: true
 - displayName: KIE Server Container Deployment
   description: 'KIE Server Container deployment configuration in format: containerId=groupId:artifactId:version|c2=g2:a2:v2'
@@ -139,7 +139,7 @@ parameters:
 - displayName: Maven repository ID
   description: The id to use for the maven repository, if set. Default is generated randomly.
   name: MAVEN_REPO_ID
-  example: my-repo-id
+  value: repo-custom
   required: false
 - displayName: Maven repository URL
   description: Fully qualified URL to a Maven repository or service.
@@ -165,52 +165,52 @@ parameters:
   example: /opt/eap/standalone/data/kie/git/hooks
   required: false
 - displayName: Decision Central Container Memory Limit
-  description: Decision Central Container memory limit
+  description: Decision Central Container memory limit.
   name: DECISION_CENTRAL_MEMORY_LIMIT
   value: 2Gi
   required: false
 - displayName: KIE Server Container Memory Limit
-  description: KIE server Container memory limit
+  description: KIE server Container memory limit.
   name: KIE_SERVER_MEMORY_LIMIT
   value: 1Gi
   required: false
 - displayName: RH-SSO URL
-  description: RH-SSO URL
+  description: RH-SSO URL.
   name: SSO_URL
   example: https://rh-sso.example.com/auth
   required: false
 - displayName: RH-SSO Realm name
-  description: RH-SSO Realm name
+  description: RH-SSO Realm name.
   name: SSO_REALM
   required: false
 - displayName: Decision Central RH-SSO Client name
-  description: Decision Central RH-SSO Client name
+  description: Decision Central RH-SSO Client name.
   name: DECISION_CENTRAL_SSO_CLIENT
   required: false
 - displayName: Decision Central RH-SSO Client Secret
-  description: Decision Central RH-SSO Client Secret
+  description: Decision Central RH-SSO Client Secret.
   name: DECISION_CENTRAL_SSO_SECRET
   example: "252793ed-7118-4ca8-8dab-5622fa97d892"
   required: false
 - displayName: KIE Server RH-SSO Client name
-  description: KIE Server RH-SSO Client name
+  description: KIE Server RH-SSO Client name.
   name: KIE_SERVER_SSO_CLIENT
   required: false
 - displayName: KIE Server RH-SSO Client Secret
-  description: KIE Server RH-SSO Client Secret
+  description: KIE Server RH-SSO Client Secret.
   name: KIE_SERVER_SSO_SECRET
   example: "252793ed-7118-4ca8-8dab-5622fa97d892"
   required: false
 - displayName: RH-SSO Realm Admin Username
-  description: RH-SSO Realm Admin Username used to create the Client if it doesn't exist
+  description: RH-SSO Realm Admin Username used to create the Client if it doesn't exist.
   name: SSO_USERNAME
   required: false
 - displayName: RH-SSO Realm Admin Password
-  description: RH-SSO Realm Admin Password used to create the Client
+  description: RH-SSO Realm Admin Password used to create the Client.
   name: SSO_PASSWORD
   required: false
 - displayName: RH-SSO Disable SSL Certificate Validation
-  description: RH-SSO Disable SSL Certificate Validation
+  description: RH-SSO Disable SSL Certificate Validation.
   name: SSO_DISABLE_SSL_CERTIFICATE_VALIDATION
   value: "false"
   required: false
@@ -220,17 +220,17 @@ parameters:
   value: preferred_username
   required: false
 - displayName: LDAP Endpoint
-  description: LDAP Endpoint to connect for authentication
+  description: LDAP Endpoint to connect for authentication.
   name: AUTH_LDAP_URL
   example: "ldap://myldap.example.com"
   required: false
 - displayName: LDAP Bind DN
-  description: Bind DN used for authentication
+  description: Bind DN used for authentication.
   name: AUTH_LDAP_BIND_DN
   example: "uid=admin,ou=users,ou=exmample,ou=com"
   required: false
 - displayName: LDAP Bind Credentials
-  description: LDAP Credentials used for authentication
+  description: LDAP Credentials used for authentication.
   name: AUTH_LDAP_BIND_CREDENTIAL
   example: "Password"
   required: false
@@ -297,7 +297,7 @@ parameters:
   example: "1"
   required: false
 - displayName: LDAP Default role
-  description: A role included for all authenticated users
+  description: A role included for all authenticated users.
   name: AUTH_LDAP_DEFAULT_ROLE
   example: "guest"
   required: false
@@ -321,7 +321,7 @@ parameters:
   name: AUTH_LDAP_REFERRAL_USER_ATTRIBUTE_ID_TO_CHECK
   required: false
 - displayName: RoleMapping rolesProperties file path
-  description: When present, the RoleMapping Login Module will be configured to use the provided file. This property defines the fully-qualified file path and name of a properties file or resource which maps roles to replacement roles. The format is original_role=role1,role2,role3
+  description: When present, the RoleMapping Login Module will be configured to use the provided file. This parameter defines the fully-qualified file path and name of a properties file or resource which maps roles to replacement roles. The format is original_role=role1,role2,role3
   name: AUTH_ROLE_MAPPER_ROLES_PROPERTIES
   required: false
 - displayName: RoleMapping replaceRole property
@@ -683,6 +683,8 @@ objects:
             value: "${KIE_SERVER_CONTAINER_DEPLOYMENT}"
           - name: MAVEN_REPOS
             value: "RHDMCENTR,EXTERNAL"
+          - name: RHDMCENTR_MAVEN_REPO_ID
+            value: "repo-rhdmcentr"
           - name: RHDMCENTR_MAVEN_REPO_SERVICE
             value: "${APPLICATION_NAME}-rhdmcentr"
           - name: RHDMCENTR_MAVEN_REPO_PATH

@@ -12,6 +12,7 @@ function generate_JKS_chain() {
     CERT_NAMES=${3:-$NODE_NAME}
     ks_pass=${KS_PASS:-kspass}
     ts_pass=${TS_PASS:-tspass}
+    startdate="$( date -u +'%Y/%m/%d %H:%M:%S' )"
     rm -rf $NODE_NAME
 
     extension_names=""
@@ -33,6 +34,7 @@ function generate_JKS_chain() {
         -keyalg    RSA \
         -keysize   2048 \
         -validity  712 \
+        -startdate "$startdate" \
         -dname "CN=$NODE_NAME, OU=OpenShift, O=Logging" \
         -ext san=dns:localhost,ip:127.0.0.1"${extension_names}"
 
@@ -83,6 +85,7 @@ function generate_JKS_client_cert() {
     ks_pass=${KS_PASS:-kspass}
     ts_pass=${TS_PASS:-tspass}
     dir=${SCRATCH_DIR:-_output}  # for writing files to bundle into secrets
+    startdate="$( date -u +'%Y/%m/%d %H:%M:%S' )"
 
     echo Generating keystore and certificate for node ${NODE_NAME}
 
@@ -92,6 +95,7 @@ function generate_JKS_client_cert() {
         -keyalg    RSA \
         -keysize   2048 \
         -validity  712 \
+        -startdate "$startdate" \
         -keypass $ks_pass \
         -storepass $ks_pass \
         -dname "CN=$NODE_NAME, OU=OpenShift, O=Logging"
