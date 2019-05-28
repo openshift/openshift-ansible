@@ -8,6 +8,11 @@
     -n {{ openshift_logging_elasticsearch_namespace }}
     -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
   register: _cluster_pods
+  retries: "{{ __elasticsearch_ready_retries }}"
+  delay: 5
+  until:
+  - _cluster_pods.stdout is defined
+  - _cluster_pods.stdout == "" or _cluster_pods.stdout.split(' ') | count == openshift_logging_es_cluster_size
 
 # make a temp dir for admin certs
 - command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
@@ -32,49 +37,56 @@
     --key {{ _logging_handler_tempdir.stdout }}/admin-key
     https://logging-{{ _cluster_component }}.{{ openshift_logging_elasticsearch_namespace }}.svc:9200/_cluster/health?pretty
   register: _pod_status
+  until:
+  - _pod_status.rc == 0
+  - _pod_status.stdout is defined
+  - (_pod_status.stdout | from_json)['status'] == 'green'
+  - (_pod_status.stdout | from_json)['number_of_nodes'] == _cluster_pods.stdout.split(' ') | count
+  retries: "{{ __elasticsearch_ready_retries }}"
+  delay: 10
   when:
-    - _cluster_pods.stdout
-    - _cluster_pods.stdout.split(' ') | count > 0
+  - _cluster_pods.stdout
+  - _cluster_pods.stdout.split(' ') | count > 0
 
 - when:
-    - _pod_status.stdout is defined
-    - (_pod_status.stdout | from_json)['status'] in ['yellow', 'red'] or (_pod_status.stdout | from_json)['number_of_nodes'] != _cluster_pods.stdout.split(' ') | count
+  - _pod_status.stdout is defined
+  - (_pod_status.stdout | from_json)['status'] in ['yellow', 'red'] or (_pod_status.stdout | from_json)['number_of_nodes'] != _cluster_pods.stdout.split(' ') | count
   block:
-    - name: Set Logging message to manually restart
-      run_once: true
-      set_stats:
-        data:
-          installer_phase_logging:
-            message: "Elasticsearch cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} restart of cluster logging."
+  - name: Set Logging message to manually restart
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_logging:
+          message: "Elasticsearch cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} restart of cluster logging."
 
-    - debug: msg="Elasticsearch cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} restart of cluster logging."
+  - debug: msg="Elasticsearch cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} restart of cluster logging."
 
 - when: _pod_status.stdout is undefined or ( (_pod_status.stdout | from_json)['status'] in ['green'] and (_pod_status.stdout | from_json)['number_of_nodes'] == _cluster_pods.stdout.split(' ') | count )
   block:
-    - command: >
-        {{ openshift_client_binary }}
-        --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-        get dc
-        -l component={{ _cluster_component }},provider=openshift
-        -n {{ openshift_logging_elasticsearch_namespace }}
-        -o jsonpath={.items[*].metadata.name}
-      register: _cluster_dcs
+  - command: >
+      {{ openshift_client_binary }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      get dc
+      -l component={{ _cluster_component }},provider=openshift
+      -n {{ openshift_logging_elasticsearch_namespace }}
+      -o jsonpath={.items[*].metadata.name}
+    register: _cluster_dcs
 
-    ## restart all dcs for full restart
-    - name: "Performing full cluster restart for {{ _cluster_component }} cluster"
-      include_tasks: full_cluster_restart.yml
-      vars:
-        logging_restart_cluster_dcs: "{{ _cluster_dcs.stdout }}"
-      when:
-        - full_restart_cluster | bool
+  ## restart all dcs for full restart
+  - name: "Performing full cluster restart for {{ _cluster_component }} cluster"
+    include_tasks: full_cluster_restart.yml
+    vars:
+      logging_restart_cluster_dcs: "{{ _cluster_dcs.stdout }}"
+    when:
+    - full_restart_cluster | bool
 
-    ## restart the node if it's dc is in the list of nodes to restart
-    - name: "Performing rolling restart for Elasticsearch cluster {{ _cluster_component }} cluster"
-      include_tasks: rolling_cluster_restart.yml
-      vars:
-        logging_restart_cluster_dcs: "{{ _restart_logging_nodes | intersect(_cluster_dcs.stdout) }}"
-      when:
-        - not full_restart_cluster | bool
+  ## restart the node if it's dc is in the list of nodes to restart
+  - name: "Performing rolling restart for Elasticsearch cluster {{ _cluster_component }} cluster"
+    include_tasks: rolling_cluster_restart.yml
+    vars:
+      logging_restart_cluster_dcs: "{{ _restart_logging_nodes | intersect(_cluster_dcs.stdout) }}"
+    when:
+    - not full_restart_cluster | bool
 
 # remove temp dir
 - name: Cleaning up temp dir
