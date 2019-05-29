@@ -61,7 +61,7 @@ Install base dependencies:
 
 Requirements:
 
-- Ansible >= 2.6, Ansible 2.7 is supported
+- Ansible >= 2.6, Ansible 2.8 is not supported
 - Jinja >= 2.7
 - pyOpenSSL
 - python-lxml
