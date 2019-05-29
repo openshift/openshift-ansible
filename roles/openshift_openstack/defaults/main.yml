@@ -46,6 +46,7 @@ openshift_openstack_infra_floating_ip: true
 openshift_openstack_compute_floating_ip: true
 openshift_openstack_etcd_floating_ip: true
 openshift_openstack_load_balancer_floating_ip: true
+openshift_openstack_cns_floating_ip: true
 openshift_openstack_heat_template_version: pike
 openshift_openstack_clusterid: openshift
 openshift_openstack_stack_name: "openshift-cluster"

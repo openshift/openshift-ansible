@@ -47,6 +47,7 @@ In `inventory/group_vars/all.yml`:
   * `openshift_openstack_etcd_floating_ip` Assign floating IP to etcd nodes (if any). Defaults to `True`.
   * `openshift_openstack_infra_floating_ip` Assign floating IP to infra nodes. Defaults to `True`.
   * `openshift_openstack_compute_floating_ip` Assign floating IP to app nodes. Defaults to `True`.
+  * `openshift_openstack_cns_floating_ip` Assign floating IP to cns nodes. Defaults to `True`.
 * Role Images
   * `openshift_openstack_default_image_name` OpenStack image used by all VMs, unless a particular role image name is specified.
   * `openshift_openstack_master_image_name`
@@ -479,7 +480,7 @@ $ ssh centos@172.24.4.10
 ### openshift-ansible Configuration
 
 In addition to the rest of openshift-ansible configuration, we will need to
-specify the node subnet, the routerand that we do not want any floating IP
+specify the node subnet, the router and that we do not want any floating IP
 addresses.
 
 You must do this from inside the "bastion" host created in the previous step.
@@ -492,6 +493,7 @@ openshift_openstack_node_subnet_name: openshift
 openshift_openstack_master_floating_ip: false
 openshift_openstack_infra_floating_ip: false
 openshift_openstack_compute_floating_ip: false
+openshift_openstack_cns_floating_ip: false
 openshift_openstack_load_balancer_floating_ip: false
 ```
 

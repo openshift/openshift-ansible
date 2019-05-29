@@ -1101,8 +1101,13 @@ resources:
             - { get_resource: pod_access_sg }
 {% endif %}
 {% endif %}
-{% if not openshift_openstack_provider_network_name %}
-          floating_network: {{ openshift_openstack_external_network_name }}
+          floating_network:
+            if:
+              - no_floating
+              - ''
+              - {{ openshift_openstack_external_network_name }}
+{% if openshift_openstack_provider_network_name or not openshift_openstack_cns_floating_ip | default(True) | bool %}
+          attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_cns_volume_size }}
 {% if not openshift_openstack_provider_network_name and not openshift_openstack_node_subnet_name  %}
