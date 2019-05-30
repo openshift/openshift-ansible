@@ -1,0 +1,3 @@
+---
+- name: Sanitize Schema Transformer process.
+  include_tasks: schema_transformer_sanity.yaml

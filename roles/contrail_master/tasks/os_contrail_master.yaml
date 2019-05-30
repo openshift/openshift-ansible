@@ -1,0 +1,109 @@
+---
+- name: Create the get IP file to convert hostname to ip
+  template:
+    src: getIp.j2
+    dest: /tmp/getIp.py
+    owner: root
+    mode: 0644
+  run_once: True
+
+- set_fact:
+    api_vip: "{{ groups.lb.0 | ipaddr }}"
+  when: groups.lb is defined
+  run_once: True
+
+- set_fact:
+    api_vip: "{{ openshift_master_cluster_public_hostname }}"
+  when: openshift_master_cluster_public_hostname is defined
+  run_once: True
+
+- set_fact:
+    api_vip: "{{ groups.masters.0 }}"
+  when: api_vip is not defined
+  run_once: True
+
+- name: validate api_vip hostname or ip
+  command: python /tmp/getIp.py {{ api_vip }}
+  register: api_vip_result
+  run_once: True
+
+- name: set api_vip
+  set_fact:
+    api_vip: "{{ api_vip_result.stdout }}"
+  when: api_vip_result is success
+  run_once: True
+
+- name: Create the contrail namespace template file
+  template:
+    src: contrail-namespace.j2
+    dest: /tmp/contrail-namespace.yaml
+    owner: root
+    mode: 0644
+  run_once: True
+
+- name: Create the contrail-system namespace
+  oc_project:
+    state: present
+    name: "contrail-system"
+  run_once: True
+
+- name: Create the contrail template files
+  template:
+    src: "{{ item }}-5.j2"
+    dest: "/tmp/{{ item }}.yaml"
+    owner: root
+    mode: 0644
+  run_once: True
+  with_items:
+    - "contrail-image-downloader"
+    - "contrail-infra-vars"
+    - "contrail-agent"
+    - "contrail-analytics"
+    - "contrail-analytics-alarm"
+    - "contrail-analytics-db"
+    - "contrail-analytics-snmp"
+    - "contrail-config-db"
+    - "contrail-control-config"
+    - "contrail-ext-redis"
+    - "contrail-kube-manager"
+    - "contrail-webui"
+
+- name: Copy the wait for POD script to master node
+  template:
+    src: wait_for_pod.j2
+    dest: /tmp/wait_for_pod.sh
+    owner: root
+    mode: 0777
+  run_once: true
+
+- name: Give privileged access to default service account of contrail-system namespace
+  oc_adm_policy_user:
+    user: system:serviceaccount:contrail-system:default
+    resource_kind: scc
+    resource_name: privileged
+    state: present
+  run_once: True
+
+- name: Create Contrail registry secret
+  command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n contrail-system"
+  run_once: True
+  when: contrail_registry_username is defined
+  ignore_errors: True
+
+- name: Starting the contrail components on required nodes
+  command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
+  run_once: True
+  ignore_errors: True
+  with_items:
+    - "contrail-image-downloader"
+    - "contrail-infra-vars"
+    - "contrail-agent"
+    - "contrail-analytics"
+    - "contrail-analytics-alarm"
+    - "contrail-analytics-db"
+    - "contrail-analytics-snmp"
+    - "contrail-config-db"
+    - "contrail-control-config"
+    - "contrail-ext-redis"
+    - "contrail-kube-manager"
+    - "contrail-webui"

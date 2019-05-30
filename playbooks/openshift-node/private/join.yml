@@ -97,6 +97,8 @@
   - role: aci
     when: openshift_use_aci | default(false) | bool
 
+- import_playbook: contrail_sanitize.yml
+
 - name: Node Join Checkpoint End
   hosts: all
   gather_facts: false

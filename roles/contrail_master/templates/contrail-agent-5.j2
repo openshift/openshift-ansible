@@ -1,0 +1,277 @@
+# This file contains the contrail agent components.
+# This component will be installed as DaemonSet on all nodes
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-env
+  namespace: contrail-system
+data:
+  AAA_MODE: {{ aaa_mode }}
+  ANALYTICS_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ANALYTICSDB_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  AUTH_MODE: {{ auth_mode }}
+  CLOUD_ORCHESTRATOR: {{ cloud_orchestrator }}
+  CONFIG_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONFIGDB_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONTROL_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONTROLLER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  KAFKA_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  LOG_LEVEL: {{ log_level }}
+  METADATA_PROXY_SECRET: {{ metadata_proxy_secret }}
+  PHYSICAL_INTERFACE: {{ vrouter_physical_interface | default('') }}
+  RABBITMQ_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port }}"
+  DNS_SERVER_PORT: "{{ dns_server_port | default('9053') }}"
+  REDIS_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  VROUTER_GATEWAY: {{ vrouter_gateway }}
+  WEBUI_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ZOOKEEPER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ANALYTICS_SNMP_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ANALYTICS_ALARM_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ANALYTICSDB_PORT: "9163"
+  ANALYTICSDB_CQL_PORT: "9045"
+  CONFIGDB_PORT: "9164"
+  CONFIGDB_CQL_PORT: "9044"
+  ANALYTICSDB_ENABLE: "true"
+  ANALYTICS_ALARM_ENABLE: "true"
+  ANALYTICS_SNMP_ENABLE: "true"
+  ANALYTICS_SNMP_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ANALYTICS_ALARM_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-nodemgr-config
+  namespace: contrail-system
+data:
+  DOCKER_HOST: "unix://mnt/docker.sock"
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-agent
+  namespace: contrail-system
+  labels:
+    app: contrail-agent
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-agent
+    spec:
+      automountServiceAccountToken: false
+      hostNetwork: true
+      initContainers:
+      - name: kubernetes-entrypoint-init
+        image: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        command:
+        - kubernetes-entrypoint
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        #- name: INTERFACE_NAME
+        #  value: eth0
+        - name: DEPENDENCY_SERVICE
+        - name: DEPENDENCY_JOBS
+        - name: DEPENDENCY_DAEMONSET
+          value: contrail-controller-config
+        - name: DEPENDENCY_CONTAINER
+        - name: COMMAND
+          value: echo done
+        volumeMounts:
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          name: pod-secret
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        env:
+        - name: CONFIGURE_IPTABLES
+          value: "true"
+        - name: IPTABLES_CHAIN
+          value: "OS_FIREWALL_ALLOW"
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        - name: NODE_TYPE
+          value: "vrouter"
+        envFrom:
+        - configMapRef:
+            name: agent-env
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+      - name: contrail-download-contrail-status-image
+        image: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-contrail-kubernetes-cni-init-image
+        image: "{{ contrail_registry }}/contrail-kubernetes-cni-init:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-contrail-vrouter-agent-image
+        image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-contrail-nodemgr-image
+        image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-vrouter-kernel-init
+        image: "{{ contrail_registry }}/contrail-vrouter-kernel-init:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: agent-env
+        volumeMounts:
+        - mountPath: /usr/src
+          name: usr-src
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /etc/sysconfig/network-scripts
+          name: network-scripts
+        - mountPath: /host/bin
+          name: host-bin
+      - name: contrail-kubernetes-cni-init
+        image: "{{ contrail_registry }}/contrail-kubernetes-cni-init:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: agent-env
+        volumeMounts:
+        - mountPath: /var/lib/contrail
+          name: var-lib-contrail
+        - mountPath: /host/etc_cni
+          name: etc-cni
+        - mountPath: /host/opt_cni_bin
+          name: opt-cni-bin
+        - mountPath: /host/log_cni
+          name: var-log-contrail-cni
+        - mountPath: /var/log/contrail
+          name: agent-logs
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+      containers:
+      - name: contrail-vrouter-agent
+        image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        # TODO: Priveleged mode is requied because w/o it the device /dev/net/tun
+        # is not present in the container. The mounting it into container
+        # doesnt help because of permissions are not enough syscalls,
+        # e.g. https://github.com/Juniper/contrail-controller/blob/master/src/vnsw/agent/contrail/linux/pkt0_interface.cc: 48.
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: agent-env
+        volumeMounts:
+        - mountPath: /dev
+          name: dev
+        - mountPath: /etc/sysconfig/network-scripts
+          name: network-scripts
+        - mountPath: /host/bin
+          name: host-bin
+        - mountPath: /var/log/contrail
+          name: agent-logs
+        - mountPath: /usr/src
+          name: usr-src
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /var/lib/contrail
+          name: var-lib-contrail
+        - mountPath: /var/crashes
+          name: var-crashes
+        - mountPath: /etc/localtime
+          name: localtime
+      - name: contrail-agent-nodemgr
+        image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: agent-env
+        - configMapRef:
+            name: agent-nodemgr-config
+        env:
+        - name: NODE_TYPE
+          value: vrouter
+# todo: there is type Socket in new kubernetes, it is possible to use full
+# path:
+# hostPath:
+#   path: /var/run/docker.sock and
+#   type: Socket
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: agent-logs
+        - mountPath: /mnt
+          name: docker-unix-socket
+        - mountPath: /etc/localtime
+          name: localtime
+      volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: network-scripts
+        hostPath:
+          path: /etc/sysconfig/network-scripts
+      - name: host-bin
+        hostPath:
+          path: /bin
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
+      - name: usr-src
+        hostPath:
+          path: /usr/src
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      - name: var-lib-contrail
+        hostPath:
+          path: /var/lib/contrail
+      - name: var-crashes
+        hostPath:
+          path: /var/contrail/crashes
+      - name: etc-cni
+        hostPath:
+          path: /etc/cni
+      - name: opt-cni-bin
+        hostPath:
+          path: /opt/cni/bin
+      - name: var-log-contrail-cni
+        hostPath:
+          path: /var/log/contrail/cni
+      - name: agent-logs
+        hostPath:
+          path: /var/log/contrail/agent
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
+      - name: pod-secret
+        secret:
+          secretName: contrail-kubernetes-token
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
+---

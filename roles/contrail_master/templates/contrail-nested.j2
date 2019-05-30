@@ -1,0 +1,196 @@
+# Configs section
+# Note: using ".." for ports, because in v1 there is a bug
+# which leads to an error
+# "..error unmarshaling JSON: json: cannot unmarshal number into Go value of type string.."
+# (https://github.com/kubernetes/kubernetes/issues/2763)
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: contrail
+  namespace: contrail-system
+---
+kind: ClusterRole
+apiVersion: v1
+metadata:
+  name: contrail
+  namespace: contrail-system
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: v1
+kind: ClusterRoleBinding
+metadata:
+  name: contrail
+roleRef:
+  name: contrail
+subjects:
+- kind: SystemUser
+  name: contrail-system:contrail
+- kind: ServiceAccount
+  name: contrail
+  namespace: contrail-system
+userNames:
+  - system:serviceaccount:contrail-system:contrail
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: contrail-kubernetes-token
+  namespace: contrail-system
+  annotations:
+    kubernetes.io/service-account.name: contrail
+type: kubernetes.io/service-account-token
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env
+  namespace: contrail-system
+data:
+  AUTH_MODE: {{ auth_mode }}
+  KEYSTONE_AUTH_HOST: {{ keystone_auth_host }}
+  KEYSTONE_AUTH_ADMIN_TENANT: "{{ keystone_auth_admin_tenant }}"
+  KEYSTONE_AUTH_ADMIN_USER: "{{ keystone_auth_admin_user }}"
+  KEYSTONE_AUTH_ADMIN_PASSWORD: "{{ keystone_auth_admin_password }}"
+  KEYSTONE_AUTH_ADMIN_PORT: "{{ keystone_auth_admin_port }}"
+  KEYSTONE_AUTH_URL_VERSION: "{{ keystone_auth_url_version }}"
+  CLOUD_ORCHESTRATOR: {{ cloud_orchestrator }}
+  CONTROLLER_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+{% if config_nodes is defined %}
+  CONFIG_NODES: {{ config_nodes.split() | ipaddr | join(',') }}
+{% else %}
+  CONFIG_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+{% endif %}
+{% if analytics_nodes is defined %}
+  ANALYTICS_NODES: {{ analytics_nodes.split() | ipaddr | join(',') }}
+{% else %}
+  ANALYTICS_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+{% endif %}
+  LOG_LEVEL: {{ log_level }}
+  RABBITMQ_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+  RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port | default('5672') }}"
+  ZOOKEEPER_SERVERS: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+  KUBEMANAGER_NESTED_MODE: "1"
+  K8S_TOKEN_FILE: "/tmp/serviceaccount/token"
+  KUBERNETES_CLUSTER_NAME: "{{ cluster_name | default('k8s') }}"
+  KUBERNETES_CLUSTER_PROJECT: "{{ cluster_project | default('{}') }}"
+  KUBERNETES_CLUSTER_NETWORK: "{{ cluster_network }}"
+  KUBERNETES_POD_SUBNETS: "{{ pod_subnets | default('10.32.0.0/12') }}"
+  KUBERNETES_IP_FABRIC_SUBNETS: "{{ ip_fabric_subnets | default('10.64.0.0/12') }}"
+  KUBERNETES_SERVICE_SUBNETS: "{{ service_subnets | default('10.96.0.0/12') }}"
+  KUBERNETES_IP_FABRIC_FORWARDING: "{{ ip_fabric_forwarding | default('false') }}"
+  KUBERNETES_IP_FABRIC_SNAT: "{{ ip_fabric_snat | default('false') }}"
+  KUBERNETES_PUBLIC_FIP_POOL: "{{ public_fip_pool | default('{}') }}"
+  KUBERNESTES_NESTED_VROUTER_VIP: {{ k8s_nested_vrouter_vip }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-manager-config
+  namespace: contrail-system
+data:
+  KUBERNETES_API_SERVER: {{ k8s_vip }}
+  KUBERNETES_API_SECURE_PORT: "{{ openshift_master_api_port | default(kubernetes_api_secure_port) }}"
+  K8S_TOKEN_FILE: "/tmp/serviceaccount/token"
+# Containers section
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-kube-manager
+  namespace: contrail-system
+  labels:
+    app: contrail-kube-manager
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-kube-manager
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/infra"
+                operator: Exists
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: contrail-kube-manager
+        image: "{{contrail_registry}}/contrail-kubernetes-kube-manager:{{contrail_container_tag}}"
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: kube-manager-config
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: kube-manager-logs
+        - mountPath: /tmp/serviceaccount
+          name: pod-secret
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
+      volumes:
+      - name: kube-manager-logs
+        hostPath:
+          path: /var/log/contrail/kube-manager
+      - name: pod-secret
+        secret:
+          secretName: contrail-kubernetes-token
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-kubernetes-cni-agent
+  namespace: contrail-system
+  labels:
+    app: contrail-kubernetes-cni-agent
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-agent
+    spec:
+      #Disable affinity for single node setup
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: contrail-kubernetes-cni-init
+        image: "{{contrail_registry}}/contrail-kubernetes-cni-init:{{contrail_container_tag}}"
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        volumeMounts:
+        - mountPath: /host/etc_cni
+          name: etc-cni
+        - mountPath: /host/opt_cni_bin
+          name: opt-cni-bin
+        - mountPath: /var/lib/contrail
+          name: var-lib-contrail
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
+      volumes:
+      - name: etc-cni
+        hostPath:
+          path: /etc/cni
+      - name: opt-cni-bin
+        hostPath:
+          path: /opt/cni/bin
+      - name: var-lib-contrail
+        hostPath:
+          path: /var/lib/contrail
+---
