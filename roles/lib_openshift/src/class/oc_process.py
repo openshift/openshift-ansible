@@ -136,7 +136,7 @@ class OCProcess(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {"failed": True, "msg" : api_rval}
 
-            return {"changed" : False, "results": api_rval, "state": state}
+            return {"changed": False, "module_results": api_rval, "state": state}
 
         elif state == 'present':
             if check_mode and params['create']:
@@ -158,9 +158,9 @@ class OCProcess(OpenShiftCLI):
                     return {"failed": True, "msg": api_rval}
 
                 if params['create']:
-                    return {"changed": True, "results": api_rval, "state": state}
+                    return {"changed": True, "module_results": api_rval, "state": state}
 
-                return {"changed": False, "results": api_rval, "state": state}
+                return {"changed": False, "module_results": api_rval, "state": state}
 
         # verify results
         update = False
@@ -175,10 +175,10 @@ class OCProcess(OpenShiftCLI):
                 update = True
 
         if not update:
-            return {"changed": update, "results": api_rval, "state": state}
+            return {"changed": update, "module_results": api_rval, "state": state}
 
         for cmd in rval:
             if cmd['returncode'] != 0:
                 return {"failed": True, "changed": update, "msg": rval, "state": state}
 
-        return {"changed": update, "results": rval, "state": state}
+        return {"changed": update, "module_results": rval, "state": state}

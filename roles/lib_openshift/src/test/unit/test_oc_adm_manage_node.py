@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc_adm_manage_node
 '''
@@ -103,9 +104,9 @@ class ManageNodeTest(unittest.TestCase):
         results = ManageNode.run_ansible(params, False)
 
         # returned a single node
-        self.assertTrue(len(results['results']['nodes']) == 1)
+        self.assertTrue(len(results['module_results']['nodes']) == 1)
         # returned 2 pods
-        self.assertTrue(len(results['results']['nodes']['ip-172-31-49-140.ec2.internal']) == 2)
+        self.assertTrue(len(results['module_results']['nodes']['ip-172-31-49-140.ec2.internal']) == 2)
 
     @mock.patch('oc_adm_manage_node.Utils.create_tmpfile_copy')
     @mock.patch('oc_adm_manage_node.ManageNode.openshift_cmd')
@@ -165,8 +166,8 @@ class ManageNodeTest(unittest.TestCase):
         results = ManageNode.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['nodes'][0]['name'], 'ip-172-31-49-140.ec2.internal')
-        self.assertEqual(results['results']['nodes'][0]['schedulable'], False)
+        self.assertEqual(results['module_results']['nodes'][0]['name'], 'ip-172-31-49-140.ec2.internal')
+        self.assertEqual(results['module_results']['nodes'][0]['schedulable'], False)
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')

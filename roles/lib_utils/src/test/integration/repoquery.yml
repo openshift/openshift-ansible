@@ -11,23 +11,23 @@
 
   - name: Set a real package version to be used later
     set_fact:
-      latest_available_bash_version: "{{ rq_out.results.versions.latest }}"
-      latest_available_full_bash_version: "{{ rq_out.results.versions.latest_full }}"
+      latest_available_bash_version: "{{ rq_out.module_results.versions.latest }}"
+      latest_available_full_bash_version: "{{ rq_out.module_results.versions.latest_full }}"
 
   - name: basic query test - Assert
     assert:
       that:
       - "rq_out.state == 'list'"
       - "rq_out.changed == False"
-      - "rq_out.results.returncode == 0"
-      - "rq_out.results.package_found == True"
-      - "rq_out.results.package_name == 'bash'"
-      - "rq_out.results.versions.available_versions | length == 1"
-      - "rq_out.results.versions.available_versions_full | length == 1"
-      - "rq_out.results.versions.latest is defined"
-      - "rq_out.results.versions.latest in rq_out.results.versions.available_versions"
-      - "rq_out.results.versions.latest_full is defined"
-      - "rq_out.results.versions.latest_full in rq_out.results.versions.available_versions_full"
+      - "rq_out.module_results.returncode == 0"
+      - "rq_out.module_results.package_found == True"
+      - "rq_out.module_results.package_name == 'bash'"
+      - "rq_out.module_results.versions.available_versions | length == 1"
+      - "rq_out.module_results.versions.available_versions_full | length == 1"
+      - "rq_out.module_results.versions.latest is defined"
+      - "rq_out.module_results.versions.latest in rq_out.module_results.versions.available_versions"
+      - "rq_out.module_results.versions.latest_full is defined"
+      - "rq_out.module_results.versions.latest_full in rq_out.module_results.versions.available_versions_full"
 
   - name: show_duplicates query test - Act
     repoquery:
@@ -40,15 +40,15 @@
       that:
       - "rq_out.state == 'list'"
       - "rq_out.changed == False"
-      - "rq_out.results.returncode == 0"
-      - "rq_out.results.package_found == True"
-      - "rq_out.results.package_name == 'bash'"
-      - "rq_out.results.versions.available_versions | length >= 1"
-      - "rq_out.results.versions.available_versions_full | length >= 1"
-      - "rq_out.results.versions.latest is defined"
-      - "rq_out.results.versions.latest in rq_out.results.versions.available_versions"
-      - "rq_out.results.versions.latest_full is defined"
-      - "rq_out.results.versions.latest_full in rq_out.results.versions.available_versions_full"
+      - "rq_out.module_results.returncode == 0"
+      - "rq_out.module_results.package_found == True"
+      - "rq_out.module_results.package_name == 'bash'"
+      - "rq_out.module_results.versions.available_versions | length >= 1"
+      - "rq_out.module_results.versions.available_versions_full | length >= 1"
+      - "rq_out.module_results.versions.latest is defined"
+      - "rq_out.module_results.versions.latest in rq_out.module_results.versions.available_versions"
+      - "rq_out.module_results.versions.latest_full is defined"
+      - "rq_out.module_results.versions.latest_full in rq_out.module_results.versions.available_versions_full"
 
   - name: show_duplicates verbose query test - Act
     repoquery:
@@ -62,16 +62,16 @@
       that:
       - "rq_out.state == 'list'"
       - "rq_out.changed == False"
-      - "rq_out.results.returncode == 0"
-      - "rq_out.results.package_found == True"
-      - "rq_out.results.package_name == 'bash'"
-      - "rq_out.results.raw_versions | length > 0"
-      - "rq_out.results.versions.available_versions | length > 0"
-      - "rq_out.results.versions.available_versions_full | length > 0"
-      - "rq_out.results.versions.latest is defined"
-      - "rq_out.results.versions.latest in rq_out.results.versions.available_versions"
-      - "rq_out.results.versions.latest_full is defined"
-      - "rq_out.results.versions.latest_full in rq_out.results.versions.available_versions_full"
+      - "rq_out.module_results.returncode == 0"
+      - "rq_out.module_results.package_found == True"
+      - "rq_out.module_results.package_name == 'bash'"
+      - "rq_out.module_results.raw_versions | length > 0"
+      - "rq_out.module_results.versions.available_versions | length > 0"
+      - "rq_out.module_results.versions.available_versions_full | length > 0"
+      - "rq_out.module_results.versions.latest is defined"
+      - "rq_out.module_results.versions.latest in rq_out.module_results.versions.available_versions"
+      - "rq_out.module_results.versions.latest_full is defined"
+      - "rq_out.module_results.versions.latest_full in rq_out.module_results.versions.available_versions_full"
 
   - name: query package does not exist query test - Act
     repoquery:
@@ -84,9 +84,9 @@
       that:
       - "rq_out.state == 'list'"
       - "rq_out.changed == False"
-      - "rq_out.results.returncode == 0"
-      - "rq_out.results.package_found == False"
-      - "rq_out.results.results == ''"
+      - "rq_out.module_results.returncode == 0"
+      - "rq_out.module_results.package_found == False"
+      - "rq_out.module_results.results == ''"
 
 
   - name: query match_version does not exist query test - Act
@@ -101,16 +101,16 @@
       that:
       - "rq_out.state == 'list'"
       - "rq_out.changed == False"
-      - "rq_out.results.returncode == 0"
-      - "rq_out.results.package_found == True"
-      - "rq_out.results.package_name == 'bash'"
-      - "rq_out.results.versions.matched_version_found == False"
-      - "rq_out.results.versions.available_versions | length > 0"
-      - "rq_out.results.versions.available_versions_full | length > 0"
-      - "rq_out.results.versions.latest is defined"
-      - "rq_out.results.versions.latest in rq_out.results.versions.available_versions"
-      - "rq_out.results.versions.latest_full is defined"
-      - "rq_out.results.versions.latest_full in rq_out.results.versions.available_versions_full"
+      - "rq_out.module_results.returncode == 0"
+      - "rq_out.module_results.package_found == True"
+      - "rq_out.module_results.package_name == 'bash'"
+      - "rq_out.module_results.versions.matched_version_found == False"
+      - "rq_out.module_results.versions.available_versions | length > 0"
+      - "rq_out.module_results.versions.available_versions_full | length > 0"
+      - "rq_out.module_results.versions.latest is defined"
+      - "rq_out.module_results.versions.latest in rq_out.module_results.versions.available_versions"
+      - "rq_out.module_results.versions.latest_full is defined"
+      - "rq_out.module_results.versions.latest_full in rq_out.module_results.versions.available_versions_full"
 
   - name: query match_version exists query test - Act
     repoquery:
@@ -124,13 +124,13 @@
       that:
       - "rq_out.state == 'list'"
       - "rq_out.changed == False"
-      - "rq_out.results.returncode == 0"
-      - "rq_out.results.package_found == True"
-      - "rq_out.results.package_name == 'bash'"
-      - "rq_out.results.versions.matched_version_found == True"
-      - "rq_out.results.versions.available_versions | length > 0"
-      - "rq_out.results.versions.available_versions_full | length > 0"
-      - "rq_out.results.versions.latest is defined"
-      - "rq_out.results.versions.latest in rq_out.results.versions.available_versions"
-      - "rq_out.results.versions.latest_full is defined"
-      - "rq_out.results.versions.latest_full in rq_out.results.versions.available_versions_full"
+      - "rq_out.module_results.returncode == 0"
+      - "rq_out.module_results.package_found == True"
+      - "rq_out.module_results.package_name == 'bash'"
+      - "rq_out.module_results.versions.matched_version_found == True"
+      - "rq_out.module_results.versions.available_versions | length > 0"
+      - "rq_out.module_results.versions.available_versions_full | length > 0"
+      - "rq_out.module_results.versions.latest is defined"
+      - "rq_out.module_results.versions.latest in rq_out.module_results.versions.available_versions"
+      - "rq_out.module_results.versions.latest_full is defined"
+      - "rq_out.module_results.versions.latest_full in rq_out.module_results.versions.available_versions_full"

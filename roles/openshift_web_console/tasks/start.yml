@@ -7,8 +7,8 @@
     name: webconsole
   register: console_deployment
   until:
-  - console_deployment.results.results[0].status.readyReplicas is defined
-  - console_deployment.results.results[0].status.readyReplicas > 0
+  - console_deployment.module_results.results[0].status.readyReplicas is defined
+  - console_deployment.module_results.results[0].status.readyReplicas > 0
   retries: 60
   delay: 10
   changed_when: false
@@ -16,7 +16,7 @@
   ignore_errors: yes
 
 # Log the result of `oc status`, `oc get pods`, `oc get events`, and `oc logs deployment/webconsole` for troubleshooting failures.
-- when: (console_deployment.results.results[0].status.readyReplicas is not defined) or (console_deployment.results.results[0].status.readyReplicas == 0)
+- when: (console_deployment.module_results.results[0].status.readyReplicas is not defined) or (console_deployment.module_results.results[0].status.readyReplicas == 0)
   block:
   - name: Check status in the openshift-web-console namespace
     command: >
@@ -47,7 +47,7 @@
   - debug:
       msg: "{{ endpoint_log.stdout_lines }}"
 
-- when: (console_deployment.results.results[0].status.readyReplicas is not defined) or (console_deployment.results.results[0].status.readyReplicas == 0)
+- when: (console_deployment.module_results.results[0].status.readyReplicas is not defined) or (console_deployment.module_results.results[0].status.readyReplicas == 0)
   block:
   - name: Report console errors
     fail:

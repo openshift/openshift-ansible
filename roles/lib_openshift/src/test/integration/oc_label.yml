@@ -5,7 +5,6 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
 
   vars:
   - def_namespace: default
@@ -28,7 +27,7 @@
 
   - name: Set the node to work with
     set_fact:
-      node_to_test: "{{ obj_out['results']['results'][0]['items'][0]['metadata']['name'] }}"
+      node_to_test: "{{ obj_out['module_results']['results'][0]['items'][0]['metadata']['name'] }}"
 
   - name: delete test labels (start from known starting position)
     oc_label:
@@ -49,9 +48,9 @@
     register: original_labels
   - name: assert that testlabel2 and testlabel3 test labels don't exist
     assert:
-      that: original_labels['results']['labels'][0]['testlabel2'] is not defined and
-            original_labels['results']['labels'][0]['testlabel3'] is not defined
-      msg: "{{ original_labels['results']['labels'] }}"
+      that: original_labels['module_results']['labels'][0]['testlabel2'] is not defined and
+            original_labels['module_results']['labels'][0]['testlabel3'] is not defined
+      msg: "{{ original_labels['module_results']['labels'] }}"
 
   - name: add label
     oc_label:
@@ -77,8 +76,8 @@
     register: label_out
   - name: assert that testlabel2 label actually added
     assert:
-      that: label_out['results']['labels'][0]['testlabel2'] is defined and
-            label_out['results']['labels'][0]['testlabel2'] == "yes"
+      that: label_out['module_results']['labels'][0]['testlabel2'] is defined and
+            label_out['module_results']['labels'][0]['testlabel2'] == "yes"
       msg: "{{ label_out }}"
 
   - name: test that re-adding does nothing
@@ -120,9 +119,9 @@
     register: label_out
   - name: assert that testlabel2 label actually modified
     assert:
-      that: label_out['results']['labels'][0]['testlabel2'] is defined and
-            label_out['results']['labels'][0]['testlabel2'] == "different"
-      msg: "{{ label_out['results']['labels'] }}"
+      that: label_out['module_results']['labels'][0]['testlabel2'] is defined and
+            label_out['module_results']['labels'][0]['testlabel2'] == "different"
+      msg: "{{ label_out['module_results']['labels'] }}"
 
   - name: delete non-existant label
     oc_label:
@@ -175,7 +174,7 @@
     register: label_out
   - name: assert label actually deleted
     assert:
-      that: label_out['results']['labels'][0]['testlabel2'] is not defined
+      that: label_out['module_results']['labels'][0]['testlabel2'] is not defined
       msg: "{{ label_out }}"
 
   - name: add two labels
@@ -204,11 +203,11 @@
     register: label_out
   - name: assert that both labels actually exist
     assert:
-      that: label_out['results']['labels'][0]['testlabel2'] is defined and
-            label_out['results']['labels'][0]['testlabel2'] == 'yes' and
-            label_out['results']['labels'][0]['testlabel3'] is defined and
-            label_out['results']['labels'][0]['testlabel3'] == 'yes'
-      msg: "{{ label_out['results']['labels'] }}"
+      that: label_out['module_results']['labels'][0]['testlabel2'] is defined and
+            label_out['module_results']['labels'][0]['testlabel2'] == 'yes' and
+            label_out['module_results']['labels'][0]['testlabel3'] is defined and
+            label_out['module_results']['labels'][0]['testlabel3'] == 'yes'
+      msg: "{{ label_out['module_results']['labels'] }}"
 
   - name: check whether two deletes work
     oc_label:
@@ -241,7 +240,7 @@
       msg: "{{ label_out }}"
 
   - set_fact:
-      original_labels_as_key_value_list: "{{ original_labels['results']['labels'][0] | label_dict_to_key_value_list }}"
+      original_labels_as_key_value_list: "{{ original_labels['module_results']['labels'][0] | label_dict_to_key_value_list }}"
 
   - name: check that present with original label list makes no changes
     oc_label:
@@ -278,9 +277,9 @@
     register: label_out
   - name: asssert that new label was actually added
     assert:
-      that: label_out['results']['labels'][0]['testlabel2'] is defined and
-            label_out['results']['labels'][0]['testlabel2'] == 'yes'
-      msg: "{{ label_out['results']['labels'] }}"
+      that: label_out['module_results']['labels'][0]['testlabel2'] is defined and
+            label_out['module_results']['labels'][0]['testlabel2'] == 'yes'
+      msg: "{{ label_out['module_results']['labels'] }}"
 
   - name: check that present with changed item makes changes
     oc_label:
@@ -304,9 +303,9 @@
     register: label_out
   - name: asssert that changed label was actually changed
     assert:
-      that: label_out['results']['labels'][0]['testlabel2'] is defined and
-            label_out['results']['labels'][0]['testlabel2'] == 'different'
-      msg: "{{ label_out['results']['labels'] }}"
+      that: label_out['module_results']['labels'][0]['testlabel2'] is defined and
+            label_out['module_results']['labels'][0]['testlabel2'] == 'different'
+      msg: "{{ label_out['module_results']['labels'] }}"
 
   - name: check that present with removed extra item makes changes
     oc_label:
@@ -330,5 +329,5 @@
     register: label_out
   - name: asssert that present-removed actually removed
     assert:
-      that: label_out['results']['labels'][0]['testlabel2'] is not defined
+      that: label_out['module_results']['labels'][0]['testlabel2'] is not defined
       msg: "{{ label_out }}"

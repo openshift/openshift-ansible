@@ -31,13 +31,13 @@
 - name: Get namespace annotations
   set_fact:
     openshift_metrics_namespace_annotations: >
-      {{ openshift_metrics_namespace_object.results.results[0].metadata.annotations }}
+      {{ openshift_metrics_namespace_object.module_results.results[0].metadata.annotations }}
   when:
   - openshift_metrics_namespace_object is defined
-  - openshift_metrics_namespace_object.results is defined
-  - openshift_metrics_namespace_object.results.results is defined
-  - openshift_metrics_namespace_object.results.results[0] is defined
-  - openshift_metrics_namespace_object.results.results[0].metadata is defined
+  - openshift_metrics_namespace_object.module_results is defined
+  - openshift_metrics_namespace_object.module_results.results is defined
+  - openshift_metrics_namespace_object.module_results.results[0] is defined
+  - openshift_metrics_namespace_object.module_results.results[0].metadata is defined
 
 - name: Get namespace fsGroup
   set_fact:

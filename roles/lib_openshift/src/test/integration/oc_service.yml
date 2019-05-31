@@ -3,7 +3,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
   - name: create the default registry service
     oc_service:
@@ -26,10 +26,10 @@
 
   - assert:
       that:
-      - "svc_out.results.results[0]['metadata']['name'] == 'test-registry'"
+      - "svc_out.module_results.results[0]['metadata']['name'] == 'test-registry'"
       - svc_out.changed
-      - "svc_out.results.results[0]['metadata']['labels']['component'] == 'test-registry'"
-      - "svc_out.results.results[0]['metadata']['labels']['infra'] == 'registry'"
+      - "svc_out.module_results.results[0]['metadata']['labels']['component'] == 'test-registry'"
+      - "svc_out.module_results.results[0]['metadata']['labels']['infra'] == 'registry'"
       msg: service create failed.
 
   # Test idempotent create
@@ -50,7 +50,7 @@
 
   - assert:
       that:
-      - "svc_out.results.results[0]['metadata']['name'] == 'test-registry'"
+      - "svc_out.module_results.results[0]['metadata']['name'] == 'test-registry'"
       - svc_out.changed == False
       msg: service create failed.  No changes expected
 
@@ -70,7 +70,7 @@
     register: svc_out
 
   - assert:
-      that: "svc_out.results.results[0]['metadata']['name'] == 'test-registry'"
+      that: "svc_out.module_results.results[0]['metadata']['name'] == 'test-registry'"
       msg: service create failed
 
   - name: oc_service
@@ -81,7 +81,7 @@
     register: svc_out
 
   - assert:
-      that: "svc_out.results.results[0]['metadata']['name'] == 'test-registry'"
+      that: "svc_out.module_results.results[0]['metadata']['name'] == 'test-registry'"
       msg: service create failed
 
   - name: create the default registry service
@@ -100,7 +100,7 @@
     register: svc_out
 
   - assert:
-      that: "svc_out.results.results[0]['spec']['ports'][0]['name'] == '9001-tcp'"
+      that: "svc_out.module_results.results[0]['spec']['ports'][0]['name'] == '9001-tcp'"
       msg: service update failed
 
   - name: oc delete service
@@ -113,8 +113,8 @@
 
   - assert:
       that:
-      - "svc_out.results['returncode'] == 0"
-      - "svc_out.results.results == ''"
+      - "svc_out.module_results['returncode'] == 0"
+      - "svc_out.module_results.results == ''"
       msg: service delete failed
 
   - name: oc get service
@@ -128,6 +128,6 @@
   - assert:
       that:
       - svc_out.changed == False
-      - svc_out.results.returncode == 0
-      - "'not found' in svc_out.results.stderr"
+      - svc_out.module_results.returncode == 0
+      - "'not found' in svc_out.module_results.stderr"
       msg: service get failed

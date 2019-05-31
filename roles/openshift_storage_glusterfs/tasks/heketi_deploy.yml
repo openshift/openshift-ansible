@@ -63,15 +63,15 @@
     selector: "glusterfs=heketi-{{ glusterfs_name }}-pod"
   register: heketi_pod_wait
   until:
-  - "heketi_pod_wait.results.results[0]['items'] | count > 0"
+  - "heketi_pod_wait.module_results.results[0]['items'] | count > 0"
   # Pod's 'Ready' status must be True
-  - "heketi_pod_wait.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+  - "heketi_pod_wait.module_results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 
 - import_tasks: heketi_set_cli.yml
   vars:
-    heketi_pod: "{{ heketi_pod_wait.results.results[0]['items'][0] }}"
+    heketi_pod: "{{ heketi_pod_wait.module_results.results[0]['items'][0] }}"
 
 - name: Set heketi deployed fact
   set_fact:

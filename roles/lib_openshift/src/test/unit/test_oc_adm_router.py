@@ -352,7 +352,7 @@ class RouterTest(unittest.TestCase):
         results = Router.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        for result in results['results']['results']:
+        for result in results['module_results']['results']:
             self.assertEqual(result['returncode'], 0)
 
         mock_cmd.assert_has_calls([
@@ -609,7 +609,7 @@ class RouterTest(unittest.TestCase):
         results = Router.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        for result in results['results']['results']:
+        for result in results['module_results']['results']:
             self.assertEqual(result['returncode'], 0)
 
         # Need any_order=True (second parameter to assert_has_calls)
@@ -732,7 +732,7 @@ class RouterTest(unittest.TestCase):
         results = Router.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        for result in results['results']['results']:
+        for result in results['module_results']['results']:
             self.assertEqual(result['returncode'], 0)
 
         # Need any_order=True (second parameter to assert_has_calls)

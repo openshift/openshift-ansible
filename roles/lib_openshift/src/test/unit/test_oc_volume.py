@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc volume
 '''
@@ -278,7 +279,7 @@ class OCVolumeTest(unittest.TestCase):
         results = OCVolume.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['results'][-1]['name'] == 'test-volume')
+        self.assertTrue(results['module_results']['results'][-1]['name'] == 'test-volume')
 
     @mock.patch('oc_volume.Utils.create_tmpfile_copy')
     @mock.patch('oc_volume.OCVolume._run')
@@ -522,7 +523,7 @@ class OCVolumeTest(unittest.TestCase):
         results = OCVolume.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['results'][-1]['name'] == 'configvol')
+        self.assertTrue(results['module_results']['results'][-1]['name'] == 'configvol')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')

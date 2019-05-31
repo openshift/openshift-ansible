@@ -3,7 +3,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
   - name: list oc scale for default router dc
     oc_scale:
@@ -28,7 +28,7 @@
       selector: router=router
     register: rcout
   - debug:
-      msg: "{{ rcout.results.results[0]['items'][-1]['metadata']['name'] }}"
+      msg: "{{ rcout.module_results.results[0]['items'][-1]['metadata']['name'] }}"
 
   - name: scale dc to 1
     oc_scale:
@@ -57,8 +57,9 @@
 
   - assert:
       that:
-      - "'results' in pods and 'results' in pods.results"
-      - "{{ pods.results.results[0]['items']|length }} == 1"
+      - pods.module_results is defined
+      - pods.module_results.results is defined
+      - pods.module_results.results[0]['items'] | length == 1
       msg: "Did not find 1 replica in scale results."
 
   - name: scale dc to 2
@@ -87,8 +88,9 @@
 
   - assert:
       that:
-      - "'results' in pods and 'results' in pods.results"
-      - "{{ pods.results.results[0]['items']|length }} == 2"
+      - pods.module_results is defined
+      - pods.module_results.results is defined
+      - pods.module_results.results[0]['items'] | length == 2
       msg: "Did not find 1 replica in scale results."
 
 

@@ -41,11 +41,11 @@
     kind: dc
   register: _dc_output
   until:
-    - _dc_output.results.results[0].status is defined
-    - _dc_output.results.results[0].status.readyReplicas is defined
-    - _dc_output.results.results[0].status.readyReplicas > 0
-    - _dc_output.results.results[0].status.updatedReplicas is defined
-    - _dc_output.results.results[0].status.updatedReplicas > 0
+    - _dc_output.module_results.results[0].status is defined
+    - _dc_output.module_results.results[0].status.readyReplicas is defined
+    - _dc_output.module_results.results[0].status.readyReplicas > 0
+    - _dc_output.module_results.results[0].status.updatedReplicas is defined
+    - _dc_output.module_results.results[0].status.updatedReplicas > 0
   retries: 60
   delay: 30
   failed_when: false

@@ -58,10 +58,10 @@ def test_check_master():
 
     task_vars = dict(
         group_names=['oo_masters_to_config'],
-        resources=dict(results=[
-            dict(item='nodes', results=dict(results=[dict(items=nodes)])),
-            dict(item='pods', results=dict(results=[dict(items={})])),
-            dict(item='services', results=dict(results=[dict(items={})]))
+        resources=dict(module_results=[
+            dict(item='nodes', module_results=dict(results=[dict(items=nodes)])),
+            dict(item='pods', module_results=dict(results=[dict(items={})])),
+            dict(item='services', module_results=dict(results=[dict(items={})]))
         ])
     )
 
@@ -156,9 +156,9 @@ def test_check_nodes():
 
     task_vars = dict(
         group_names=['oo_nodes_to_config'],
-        resources=dict(results=[
-            dict(item='nodes', results=dict(results=[dict(items=nodes)])),
-            dict(item='hostsubnets', results=dict(results=[dict(items=hostsubnets)]))
+        resources=dict(module_results=[
+            dict(item='nodes', module_results=dict(results=[dict(items=nodes)])),
+            dict(item='hostsubnets', module_results=dict(results=[dict(items=hostsubnets)]))
         ]),
         openshift=dict(node=dict(nodename='foo'))
     )
@@ -201,10 +201,10 @@ def test_resolve_address():
 def test_no_nodes():
     task_vars = dict(
         group_names=['oo_masters_to_config'],
-        resources=dict(results=[
-            dict(item='nodes', results=dict(results=[dict(items={})])),
-            dict(item='pods', results=dict(results=[dict(items={})])),
-            dict(item='services', results=dict(results=[dict(items={})]))
+        resources=dict(module_results=[
+            dict(item='nodes', module_results=dict(results=[dict(items={})])),
+            dict(item='pods', module_results=dict(results=[dict(items={})])),
+            dict(item='services', module_results=dict(results=[dict(items={})]))
         ])
     )
 

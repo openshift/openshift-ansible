@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc image
 '''
@@ -94,7 +95,7 @@ class OCImageTest(unittest.TestCase):
         results = OCImage.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertEquals(results['results']['results'][0]['metadata']['name'], 'oso-rhel7-zagg-web')
+        self.assertEquals(results['module_results']['results'][0]['metadata']['name'], 'oso-rhel7-zagg-web')
 
     @mock.patch('oc_image.Utils.create_tmpfile_copy')
     @mock.patch('oc_image.OCImage._run')
@@ -169,7 +170,7 @@ class OCImageTest(unittest.TestCase):
         results = OCImage.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['results'][0]['metadata']['name'] == 'oso-rhel7-zagg-web')
+        self.assertTrue(results['module_results']['results'][0]['metadata']['name'] == 'oso-rhel7-zagg-web')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')

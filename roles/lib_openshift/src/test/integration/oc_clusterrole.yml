@@ -3,9 +3,8 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
 
-  post_tasks:
+  tasks:
   - name: create a test project
     oc_project:
       name: test
@@ -43,8 +42,8 @@
   - name: assert clusterrole exists
     assert:
       that:
-      - croleout.results.results.metadata.name == 'operations'
-      - croleout.results.results.rules[0].resources[0] == 'persistentvolumes'
+      - croleout.module_results.results.metadata.name == 'operations'
+      - croleout.module_results.results.rules[0].resources[0] == 'persistentvolumes'
   ###### end create test ###########
 
   ###### update test ###########
@@ -81,10 +80,10 @@
   - name: assert clusterrole is updated
     assert:
       that:
-      - croleout.results.results.metadata.name == 'operations'
-      - "'persistentvolumes' in croleout.results.results.rules[0].resources"
-      - "'serviceaccounts' in croleout.results.results.rules[0].resources"
-      - "'services' in croleout.results.results.rules[0].resources"
+      - croleout.module_results.results.metadata.name == 'operations'
+      - "'persistentvolumes' in croleout.module_results.results.rules[0].resources"
+      - "'serviceaccounts' in croleout.module_results.results.rules[0].resources"
+      - "'services' in croleout.module_results.results.rules[0].resources"
   ###### end create test ###########
 
   ###### delete test ###########
@@ -103,4 +102,4 @@
 
   - name: assert operations does not exist
     assert:
-      that: "'\"operations\" not found' in croleout.results.stderr"
+      that: "'\"operations\" not found' in croleout.module_results.stderr"

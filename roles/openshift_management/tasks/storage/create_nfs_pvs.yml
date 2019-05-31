@@ -53,7 +53,7 @@
       PV_SIZE: "{{ openshift_management_app_pv_size }}"
       BASE_PATH: "{{ openshift_management_storage_nfs_base_dir }}"
       NFS_HOST: "{{ openshift_management_nfs_server }}"
-  when: miq_app_pv_check.results.results == [{}]
+  when: miq_app_pv_check.module_results.results == [{}]
 
 - name: Ensure the Management DB PV is created
   oc_process:
@@ -66,4 +66,4 @@
       NFS_HOST: "{{ openshift_management_nfs_server }}"
   when:
     - not __openshift_management_use_ext_db
-    - miq_db_pv_check.results.results == [{}]
+    - miq_db_pv_check.module_results.results == [{}]

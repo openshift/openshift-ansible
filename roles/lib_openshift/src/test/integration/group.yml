@@ -1,12 +1,9 @@
-#!/usr/bin/ansible-playbook
+#!/usr/bin/ansible-playbook --module-path=../../../library/
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
 
-  vars:
-
-  post_tasks:
+  tasks:
   - name: delete test group (so future tests work)
     oc_group:
       state: absent
@@ -30,7 +27,7 @@
   #- debug: var=group_out
   - name: assert group 'jgroup' (test group) does not exist
     assert:
-      that: group_out['results'][0] == {}
+      that: group_out['module_results'][0] == {}
 
   - name: get group list
     oc_group:
@@ -40,7 +37,7 @@
   #- debug: var=group_out
   - name: assert group 'jgroup2' (test group) does not exist
     assert:
-      that: group_out['results'][0] == {}
+      that: group_out['module_results'][0] == {}
 
   - name: get user list
     oc_user:
@@ -50,7 +47,7 @@
   #- debug: var=group_out
   - name: assert user 'jdiaz@redhat.com' (test user) does not exist
     assert:
-      that: group_out['results'][0] == {}
+      that: group_out['module_results'][0] == {}
 
   - name: create group
     oc_group:
@@ -70,7 +67,7 @@
   #- debug: var=group_out
   - name: assert group actually created
     assert:
-      that: group_out['results'][0]['metadata']['name'] == 'jgroup'
+      that: group_out['module_results'][0]['metadata']['name'] == 'jgroup'
 
   - name: re-add group
     oc_group:
@@ -100,7 +97,7 @@
     register: group_out
   - name: assert user in group
     assert:
-      that: group_out['results'][0]['users'][0] == 'jdiaz@redhat.com'
+      that: group_out['module_results'][0]['users'][0] == 'jdiaz@redhat.com'
 
   - name: add 2nd group
     oc_group:
@@ -127,7 +124,7 @@
   #- debug: var=group_out
   - name: assert user not present in previous group
     assert:
-      that: group_out['results'][0]['users'] == []
+      that: group_out['module_results'][0]['users'] == []
 
   - name: check jgroup2 user membership
     oc_group:
@@ -137,7 +134,7 @@
   #- debug: var=group_out
   - name: assert user present in new group
     assert:
-      that: group_out['results'][0]['users'][0] == 'jdiaz@redhat.com'
+      that: group_out['module_results'][0]['users'][0] == 'jdiaz@redhat.com'
 
   - name: multi-group membership
     oc_user:
@@ -160,7 +157,7 @@
   #- debug: var=group_out
   - name: assert user present in group
     assert:
-      that: group_out['results'][0]['users'][0] == 'jdiaz@redhat.com'
+      that: group_out['module_results'][0]['users'][0] == 'jdiaz@redhat.com'
 
   - name: check jgroup2 user membership
     oc_group:
@@ -170,7 +167,7 @@
   #- debug: var=group_out
   - name: assert user still present in group
     assert:
-      that: group_out['results'][0]['users'][0] == 'jdiaz@redhat.com'
+      that: group_out['module_results'][0]['users'][0] == 'jdiaz@redhat.com'
 
   - name: user delete (group cleanup)
     oc_user:
@@ -186,7 +183,7 @@
   #- debug: var=group_out
   - name: assert that group jgroup has no members
     assert:
-      that: group_out['results'][0]['users'] == []
+      that: group_out['module_results'][0]['users'] == []
 
   - name: get user list for jgroup2
     oc_group:
@@ -196,7 +193,7 @@
   #- debug: var=group_out
   - name: assert that group jgroup2 has no members
     assert:
-      that: group_out['results'][0]['users'] == []
+      that: group_out['module_results'][0]['users'] == []
 
   - name: user without groups defined
     oc_user:
@@ -216,7 +213,7 @@
   #- debug: var=group_out
   - name: assert user not present in group
     assert:
-      that: group_out['results'][0]['users'] == []
+      that: group_out['module_results'][0]['users'] == []
 
   - name: check jgroup2 user membership
     oc_group:
@@ -226,4 +223,4 @@
   #- debug: var=group_out
   - name: assert user not present in group
     assert:
-      that: group_out['results'][0]['users'] == []
+      that: group_out['module_results'][0]['users'] == []

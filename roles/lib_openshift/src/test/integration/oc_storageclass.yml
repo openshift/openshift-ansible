@@ -3,7 +3,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
   - name: create a storageclass
     oc_storageclass:
@@ -16,9 +16,9 @@
 
   - assert:
       that:
-      - "sc_out.results.results[0]['metadata']['name'] == 'testsc'"
+      - "sc_out.module_results.results[0]['metadata']['name'] == 'testsc'"
       - sc_out.changed
-      - "sc_out.results.results[0]['parameters']['type'] == 'gp2'"
+      - "sc_out.module_results.results[0]['parameters']['type'] == 'gp2'"
       msg: storageclass create failed.
 
   # Test idempotent create
@@ -32,7 +32,7 @@
 
   - assert:
       that:
-      - "sc_out.results.results[0]['metadata']['name'] == 'testsc'"
+      - "sc_out.module_results.results[0]['metadata']['name'] == 'testsc'"
       - sc_out.changed == False
       msg: storageclass create failed.  No changes expected
 
@@ -44,7 +44,7 @@
   - debug: var=sc_out
 
   - assert:
-      that: "sc_out.results[0]['metadata']['name'] == 'testsc'"
+      that: "sc_out.module_results[0]['metadata']['name'] == 'testsc'"
       msg: storageclass list failed
 
   - name: update the storageclass
@@ -60,15 +60,15 @@
     register: sc_out
 
   - assert:
-      that: "sc_out.results.results[0]['parameters']['encrypted'] == 'true'"
+      that: "sc_out.module_results.results[0]['parameters']['encrypted'] == 'true'"
       msg: storageclass update failed
 
   - assert:
-      that: "sc_out.results.results[0]['reclaimPolicy'] == 'Delete'"
+      that: "sc_out.module_results.results[0]['reclaimPolicy'] == 'Delete'"
       msg: storageclass update failed
 
   - assert:
-      that: "sc_out.results.results[0]['mountOptions'] == ['debug']"
+      that: "sc_out.module_results.results[0]['mountOptions'] == ['debug']"
       msg: storageclass update failed
 
   - name: oc delete storageclass
@@ -80,8 +80,8 @@
 
   - assert:
       that:
-      - "sc_out.results['returncode'] == 0"
-      - "sc_out.results.results == {}"
+      - "sc_out.module_results['returncode'] == 0"
+      - "sc_out.module_results.results == {}"
       msg: storageclass delete failed
 
   - name: oc get storageclass
@@ -94,5 +94,5 @@
   - assert:
       that:
       - sc_out.changed == False
-      - "sc_out.results == [{}]"
+      - "sc_out.module_results == [{}]"
       msg: storageclass get failed

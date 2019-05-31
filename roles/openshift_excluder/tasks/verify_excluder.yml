@@ -10,11 +10,11 @@
 - name: Fail when excluder package is not found
   fail:
     msg: "Package {{ excluder }} not found"
-  when: not repoquery_out.results.package_found
+  when: not repoquery_out.module_results.package_found
 
 - name: Set fact excluder_version
   set_fact:
-    excluder_version: "{{ repoquery_out.results.versions.available_versions.0 }}"
+    excluder_version: "{{ repoquery_out.module_results.versions.available_versions.0 }}"
 
 - name: "{{ excluder }} version detected"
   debug:

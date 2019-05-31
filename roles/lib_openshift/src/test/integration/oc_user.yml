@@ -5,7 +5,6 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
 
   vars:
     test_user: testuser@email.com
@@ -31,7 +30,7 @@
     register: user_out
   - name: "assert test user does not exist"
     assert:
-      that: user_out['results'][0] == {}
+      that: user_out['module_results'][0] == {}
       msg: "{{ user_out }}"
 
   - name: get all list
@@ -58,8 +57,8 @@
     register: user_out
   - name: assert user actually added
     assert:
-      that: user_out['results'][0]['metadata']['name'] == "{{ test_user }}" and
-            user_out['results'][0]['fullName'] == "{{ test_user_fullname }}"
+      that: user_out['module_results'][0]['metadata']['name'] == "{{ test_user }}" and
+            user_out['module_results'][0]['fullName'] == "{{ test_user_fullname }}"
       msg: "{{ user_out }}"
 
   - name: re-add test user
@@ -91,8 +90,8 @@
     register: user_out
   - name: assert modification successful
     assert:
-      that: user_out['results'][0]['metadata']['name'] == "{{ test_user }}" and
-            user_out['results'][0]['fullName'] == 'Something Different'
+      that: user_out['module_results'][0]['metadata']['name'] == "{{ test_user }}" and
+            user_out['module_results'][0]['fullName'] == 'Something Different'
       msg: "{{ user_out }}"
 
   - name: delete test user
@@ -112,7 +111,7 @@
     register: user_out
   - name: assert deletion successful
     assert:
-      that: user_out['results'][0] == {}
+      that: user_out['module_results'][0] == {}
       msg: "{{ user_out }}"
 
   - name: re-delete test user
@@ -142,7 +141,7 @@
     register: user_out
   - name: assert test group created
     assert:
-      that: user_out['results']['results'][0]['metadata']['name'] == "integration-test-group"
+      that: user_out['module_results']['results'][0]['metadata']['name'] == "integration-test-group"
       msg: "{{ user_out }}"
 
   - name: create user with group membership
@@ -161,7 +160,7 @@
     register: user_out
   - name: assert user group membership
     assert:
-      that: "'{{ test_user }}' in user_out['results']['results'][0]['users'][0]"
+      that: "'{{ test_user }}' in user_out['module_results']['results'][0]['users'][0]"
       msg: "{{ user_out }}"
 
   - name: delete second test group
@@ -196,8 +195,8 @@
     register: user_out
   - name: assert user member of above groups
     assert:
-      that: "'{{ test_user }}' in user_out['results'][0]['results']['results'][0]['users'] and \
-            '{{ test_user }}' in user_out['results'][1]['results']['results'][0]['users']"
+      that: "'{{ test_user }}' in user_out['module_results'][0]['results']['results'][0]['users'] and \
+            '{{ test_user }}' in user_out['module_results'][1]['results']['results'][0]['users']"
       msg: "{{ user_out }}"
 
   - name: update user with only one group
@@ -222,8 +221,8 @@
   - debug: var=user_out
   - name: assert proper user membership
     assert:
-      that: "'{{ test_user }}' not in user_out['results'][0]['results']['results'][0]['users'] and \
-             '{{ test_user }}' in user_out['results'][1]['results']['results'][0]['users']"
+      that: "'{{ test_user }}' not in user_out['module_results'][0]['results']['results'][0]['users'] and \
+             '{{ test_user }}' in user_out['module_results'][1]['results']['results'][0]['users']"
 
   - name: clean up test groups
     oc_obj:

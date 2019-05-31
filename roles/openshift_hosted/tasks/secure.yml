@@ -27,8 +27,8 @@
     signer_key: "/etc/origin/master/ca.key"
     signer_serial: "/etc/origin/master/ca.serial.txt"
     hostnames:
-    - "{{ docker_registry_service.results.clusterip }}"
-    - "{{ docker_registry_route.results[0].spec.host }}"
+    - "{{ docker_registry_service.module_results.clusterip }}"
+    - "{{ docker_registry_route.module_results[0].spec.host }}"
     - "{{ openshift_hosted_registry_name }}.default.svc"
     - "{{ openshift_hosted_registry_name }}.default.svc.{{ openshift_cluster_domain }}"
     - "{{ openshift_hosted_registry_routehost | default(False) }}"

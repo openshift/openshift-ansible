@@ -4,7 +4,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
   - name: get list of nodes
     oc_obj:
@@ -14,7 +14,7 @@
 
   - name: Set the node to work with
     set_fact:
-      node_to_test: "{{ obj_out['results']['results'][0]['items'][0]['metadata']['name'] }}"
+      node_to_test: "{{ obj_out['module_results']['results'][0]['items'][0]['metadata']['name'] }}"
 
   - name: list pods from a node
     oc_adm_manage_node:
@@ -25,7 +25,7 @@
   - debug: var=podout
 
   - assert:
-      that: "'{{ node_to_test }}' in podout.results.nodes"
+      that: "'{{ node_to_test }}' in podout.module_results.nodes"
       msg: Pod data was not returned
 
   - name: set node to unschedulable
@@ -38,7 +38,7 @@
 
   - name: assert that schedulable=False
     assert:
-      that: nodeout.results.nodes[0]['schedulable'] == False
+      that: nodeout.module_results.nodes[0]['schedulable'] == False
       msg: "{{ node_to_test }} schedulable set to True"
 
   - name: get node scheduable
@@ -53,7 +53,7 @@
 
   - name: assert that schedulable=False
     assert:
-      that: nodeout.results.results[0]['spec']['unschedulable']
+      that: nodeout.module_results.results[0]['spec']['unschedulable']
 
   - name: set node to schedulable
     oc_adm_manage_node:
@@ -65,5 +65,5 @@
 
   - name: assert that schedulable=False
     assert:
-      that: nodeout.results.nodes[0]['schedulable']
+      that: nodeout.module_results.nodes[0]['schedulable']
       msg: "{{ node_to_test }} schedulable set to False"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-  Generate the openshift-ansible/roles/lib_openshift_cli/library/ modules.
+  Generate the openshift-ansible/roles/lib_utils/library/ modules.
 '''
 
 import argparse
@@ -80,7 +80,7 @@ def generate(parts):
 
 def get_sources():
     '''return the path to the generate sources'''
-    return yaml.load(open(OPENSHIFT_ANSIBLE_SOURCES_PATH).read())
+    return yaml.load(open(OPENSHIFT_ANSIBLE_SOURCES_PATH).read(), Loader=yaml.FullLoader)
 
 
 def verify():

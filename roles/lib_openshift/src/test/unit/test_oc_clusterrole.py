@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc clusterrole
 '''
@@ -102,8 +103,8 @@ class OCClusterRoleTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
-        self.assertEqual(results['results']['results']['metadata']['name'], 'operations')
+        self.assertEqual(results['module_results']['returncode'], 0)
+        self.assertEqual(results['module_results']['results']['metadata']['name'], 'operations')
         self.assertEqual(results['state'], 'present')
 
         # Making sure our mock was called as we expected

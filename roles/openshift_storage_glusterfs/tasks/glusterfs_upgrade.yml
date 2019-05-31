@@ -32,7 +32,7 @@
     selector: "heketi"
   register: heketi_pod_wait
   until:
-  - "heketi_pod_wait.results.results[0]['items'] | count == 0"
+  - "heketi_pod_wait.module_results.results[0]['items'] | count == 0"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 
@@ -79,7 +79,7 @@
       kind: pod
       state: add
       labels: "[ { 'key': 'glusterfs', 'value': '{{ glusterfs_name }}'-pod } ]"
-    with_items: "{{ glusterfs_old_pods.results.results[0]['items'] | default([]) }}"
+    with_items: "{{ glusterfs_old_pods.module_results.results[0]['items'] | default([]) }}"
   when: glusterfs_is_native
 
 - import_tasks: glusterfs_common.yml
@@ -97,7 +97,7 @@
     set_fact:
       glusterfs_cli: "{{ glusterfs_pod_rsh }}gluster"
     vars:
-      glusterfs_pod_name: "{% if glusterfs_is_native %}{{ glusterfs_pods_get.results.results[0]['items'][0].metadata.name }}{% endif %}"
+      glusterfs_pod_name: "{% if glusterfs_is_native %}{{ glusterfs_pods_get.module_results.results[0]['items'][0].metadata.name }}{% endif %}"
       glusterfs_pod_rsh: "{% if glusterfs_is_native %}{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {{ glusterfs_pod_name }} {% endif %}"
 
   - name: Get cluster current op version

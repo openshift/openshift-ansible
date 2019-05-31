@@ -206,4 +206,4 @@ class ManageNode(OpenShiftCLI):
         if not results or results['returncode'] != 0:
             return {'failed': True, 'msg': results}
 
-        return {'changed': changed, 'results': results, 'state': "present"}
+        return {'changed': changed, 'module_results': results, 'state': "present"}

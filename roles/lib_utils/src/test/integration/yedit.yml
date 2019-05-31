@@ -9,14 +9,13 @@
 - hosts: localhost
   gather_facts: no
   vars:
-    test_file: kube-manager-test.yaml
-    test: test
+    test_file: "{{ './kube-manager-test.yaml' | realpath }}"
 
-  post_tasks:
+  tasks:
   - name: copy the kube-manager.yaml file so that we have a pristine copy each time
     copy:
       src: kube-manager.yaml
-      dest: "./{{ test_file }}"
+      dest: "{{ test_file }}"
     changed_when: False
 
   ####### add key to top level #####
@@ -35,8 +34,8 @@
 
   - name: Assert that key is at top level
     assert:
-      that: results.result == 'yedittest'
-      msg: 'Test: add a key to top level failed.  yedittest != [{{ results.result }}]'
+      that: results.module_results == 'yedittest'
+      msg: 'Test: add a key to top level failed.  yedittest != [{{ results.module_results }}]'
   ###### end add key to top level #####
 
   ###### modify multilevel key, value #####
@@ -57,8 +56,8 @@
 
   - name: Assert that key is as expected
     assert:
-      that: results.result == 'openshift-is-awesome'
-      msg: 'Test: multilevel key, value modification:  openshift-is-awesome != [{{ results.result }}]'
+      that: results.module_results == 'openshift-is-awesome'
+      msg: 'Test: multilevel key, value modification:  openshift-is-awesome != [{{ results.module_results }}]'
   ###### end modify multilevel key, value #####
 
   ###### test a string boolean #####
@@ -78,13 +77,13 @@
 
   - name: Assert that key is a string
     assert:
-      that: results.result == "true"
-      msg: "Test: boolean str:  'true' != [{{ results.result }}]"
+      that: results.module_results == "true"
+      msg: "Test: boolean str:  'true' != [{{ results.module_results }}]"
 
   - name: Assert that key is not bool
     assert:
-      that: results.result != true
-      msg: "Test: boolean str:  true != [{{ results.result }}]"
+      that: results.module_results != true
+      msg: "Test: boolean str:  true != [{{ results.module_results }}]"
   ###### end test boolean string #####
 
   ###### test array append #####
@@ -104,8 +103,8 @@
 
   - name: Assert that the last element in array is our value
     assert:
-      that: results.result[-1] == "--my-new-parameter=openshift"
-      msg: "Test: '--my-new-parameter=openshift' != [{{ results.result[-1] }}]"
+      that: results.module_results[-1] == "--my-new-parameter=openshift"
+      msg: "Test: '--my-new-parameter=openshift' != [{{ results.module_results[-1] }}]"
   ###### end test array append #####
 
   ###### test non-existing array append #####
@@ -125,8 +124,8 @@
 
   - name: Assert that the last element in array is our value
     assert:
-      that: results.result[-1] == "--my-new-parameter=openshift"
-      msg: "Test: '--my-new-parameter=openshift' != [{{ results.result[-1] }}]"
+      that: results.module_results[-1] == "--my-new-parameter=openshift"
+      msg: "Test: '--my-new-parameter=openshift' != [{{ results.module_results[-1] }}]"
   ###### end test non-existing array append #####
 
   ###### test array update modify #####
@@ -148,8 +147,8 @@
 
   - name: Assert that the element in array is our value
     assert:
-      that: results.result[5] == "--root-ca-file=/etc/k8s/ssl/my.pem"
-      msg: "Test: '--root-ca-file=/etc/k8s/ssl/my.pem' != [{{ results.result[5] }}]"
+      that: results.module_results[5] == "--root-ca-file=/etc/k8s/ssl/my.pem"
+      msg: "Test: '--root-ca-file=/etc/k8s/ssl/my.pem' != [{{ results.module_results[5] }}]"
   ###### end test array update modify#####
 
   ###### test dict create #####
@@ -168,8 +167,8 @@
 
   - name: Assert that the key was created
     assert:
-      that: results.result == "d"
-      msg: "Test: 'd' != [{{ results.result }}]"
+      that: results.module_results == "d"
+      msg: "Test: 'd' != [{{ results.module_results }}]"
   ###### end test dict create #####
 
   ###### test create dict value #####
@@ -191,8 +190,8 @@
 
   - name: Assert that the key was created
     assert:
-      that: results.result == "k"
-      msg: "Test: 'k' != [{{ results.result }}]"
+      that: results.module_results == "k"
+      msg: "Test: 'k' != [{{ results.module_results }}]"
   ###### end test dict create #####
 
   ###### test create list value #####
@@ -216,8 +215,8 @@
 
   - name: Assert that the key was created
     assert:
-      that: results.result == [1, 2, 3]
-      msg: "Test: '[1, 2, 3]' != [{{ results.result }}]"
+      that: results.module_results == [1, 2, 3]
+      msg: "Test: '[1, 2, 3]' != [{{ results.module_results }}]"
   ###### end test create list value #####
 
   ###### test create multiple list value #####
@@ -245,8 +244,8 @@
 
   - name: Assert that the key was created
     assert:
-      that: results.result == [1, 2, 3, 4]
-      msg: "Test: '[1, 2, 3, 4]' != [{{ results.result }}]"
+      that: results.module_results == [1, 2, 3, 4]
+      msg: "Test: '[1, 2, 3, 4]' != [{{ results.module_results }}]"
       ###### end test create multiple list value #####
 
   ###### test state absent on list item #####
@@ -260,8 +259,8 @@
   - debug: var=absentout
   - assert:
       that:
-      - absentout.result == ['oranges']
-      - absentout.result|length == 1
+      - absentout.module_results == ['oranges']
+      - absentout.module_results|length == 1
 
   - name: test state absent on a list item
     yedit:
@@ -273,20 +272,24 @@
   - debug: var=absentout
   - assert:
       that:
-      - absentout.result == ['oranges']
-      - absentout.result|length == 1
+      - absentout.module_results == ['oranges']
+      - absentout.module_results|length == 1
       ###### end test state absent on list item ####
 
 
   ###### test backup ext on filename #####
-  - name: test backup ext on file
+  - name: Set a random value
+    set_fact:
+      random_number: "{{ 100 | random }}"
+
+  - name: test provided backup ext (.orig) on file
     yedit:
       state: present
       src: "{{ test_file }}"
       key: test
       backup: true
       backup_ext: .orig
-      value: "{{ lookup('pipe', 'date +%s') }}"
+      value: "{{ random_number }}"
 
   - name: second call which should be noop
     yedit:
@@ -294,9 +297,15 @@
       src: "{{ test_file }}"
       key: test
       backup: true
-      value: "{{ lookup('pipe', 'date +%s') }}"
+      value: "{{ random_number }}"
+    register: yedit_noop
 
-  - name: stat file
+  - name: Assert that file was not modified
+    assert:
+      that:
+      - yedit_noop is not changed
+
+  - name: Stat backup file with .orig extension
     stat:
       path: "{{ test_file }}.orig"
       get_checksum: false
@@ -304,31 +313,50 @@
       get_mime: false
     register: statout
 
-  - assert:
+  - name: Assert that backup file with .orig extension exists
+    assert:
       that:
       - statout.stat.exists
 
   - name: set the date string for backup_ext
     set_fact:
-      date_str: "{{ lookup('pipe', 'date +%s') }}"
+      date_str: "{{ lookup('pipe', 'date +%Y%m%dT%H%M%S') }}"
 
-  - yedit:
+  - name: test backup file with default extension
+    yedit:
       state: present
       src: "{{ test_file }}"
       key: test
       backup: true
-      backup_ext: "{{ date_str }}"
-      value: "{{ lookup('pipe', 'date +%s') }}"
+      value: "{{ 100 | random }}"
 
-  - name: stat file
+  - name: Stat backup file with default extension
     stat:
-      path: "{{ test_file }}{{ date_str }}"
+      path: "{{ test_file }}.{{ date_str }}"
       get_checksum: false
       get_attributes: false
       get_mime: false
     register: statout
 
-  - assert:
+  - name: Assert that backup file with default extension exists
+    assert:
       that:
       - statout.stat.exists
       ###### end test state absent on list item ####
+
+
+  ###### Clean up test files
+  - name: Remove test file
+    file:
+      path: "{{ test_file }}"
+      state: absent
+
+  - name: Remove test file
+    file:
+      path: "{{ test_file }}.orig"
+      state: absent
+
+  - name: Remove test file
+    file:
+      path: "{{ test_file }}.{{ date_str }}"
+      state: absent

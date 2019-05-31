@@ -3,7 +3,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
   - name: create a project
     oc_project:
@@ -18,7 +18,7 @@
 
   - assert:
       that:
-      - "projout.results.results['metadata']['name'] == 'operations'"
+      - "projout.module_results.results['metadata']['name'] == 'operations'"
       - projout.changed
       msg: project create failed.
 
@@ -35,7 +35,7 @@
 
   - assert:
       that:
-      - "projout.results.results['metadata']['name'] == 'operations'"
+      - "projout.module_results.results['metadata']['name'] == 'operations'"
       - projout.changed == False
       msg: project create failed.
 
@@ -52,7 +52,7 @@
 
   - assert:
       that:
-      - "projout.results.results['metadata']['annotations']['openshift.io/display-name'] == 'operations project one'"
+      - "projout.module_results.results['metadata']['annotations']['openshift.io/display-name'] == 'operations project one'"
       - projout.changed == True
       msg: project create failed.
 
@@ -65,7 +65,7 @@
 
   - assert:
       that:
-      - "projout.results['metadata']['annotations']['openshift.io/display-name'] == 'operations project one'"
+      - "projout.module_results['metadata']['annotations']['openshift.io/display-name'] == 'operations project one'"
       - projout.changed == False
       - projout.state == 'list'
       msg: project list failed.

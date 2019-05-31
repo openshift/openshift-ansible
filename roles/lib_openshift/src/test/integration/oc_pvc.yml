@@ -3,7 +3,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
   - name: create pvc
     oc_pvc:
@@ -21,8 +21,8 @@
 
   - assert:
       that:
-      - pvcout.results.results[0]['metadata']['name'] == 'oc-pvc-create-test'
-      - pvcout.results.results[0]['spec']['storageClassName'] == 'my-storage-class-name'
-      - pvcout.results.results[0]['spec']['selector']['matchLabels']['foo'] == 'bar'
+      - pvcout.module_results.results[0]['metadata']['name'] == 'oc-pvc-create-test'
+      - pvcout.module_results.results[0]['spec']['storageClassName'] == 'my-storage-class-name'
+      - pvcout.module_results.results[0]['spec']['selector']['matchLabels']['foo'] == 'bar'
       - pvcout.changed
       msg: pvc create failed.

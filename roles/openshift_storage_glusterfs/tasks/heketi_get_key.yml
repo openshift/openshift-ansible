@@ -9,5 +9,5 @@
 
 - name: Set heketi admin key
   set_fact:
-    glusterfs_heketi_admin_key: "{{ (glusterfs_heketi_deployment_config.results.results[0].spec.template.spec.containers[0].env | selectattr('name', 'match', '^HEKETI_ADMIN_KEY$') | first).value }}"
-  when: glusterfs_heketi_deployment_config.results.results[0]
+    glusterfs_heketi_admin_key: "{{ (glusterfs_heketi_deployment_config.module_results.results[0].spec.template.spec.containers[0].env | selectattr('name', 'match', '^HEKETI_ADMIN_KEY$') | first).value }}"
+  when: glusterfs_heketi_deployment_config.module_results.results[0]

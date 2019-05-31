@@ -13,7 +13,7 @@
 - name: Delete kuryr LoadBalancers (cascading)
   os_lbaas_deletion:
     lbaas_annotation: "{{ item.metadata.annotations }}"
-  with_items: "{{ svc_output.results.results[0]['items'] if 'results' in svc_output else [] }}"
+  with_items: "{{ svc_output.module_results.results[0]['items'] if 'module_results' in svc_output else [] }}"
   when:
     - openshift_openstack_lbaasv2_provider == "Octavia"
     - not (item.metadata.name == "kubernetes")
@@ -40,7 +40,7 @@
 - name: Delete network policy security groups
   os_netpolicy_sg_deletion:
     sg_id: "{{ item.spec.securityGroupId }}"
-  with_items: "{{ knp_output.results.results[0]['items'] if 'results' in knp_output else []}}"
+  with_items: "{{ knp_output.module_results.results[0]['items'] if 'module_results' in knp_output else []}}"
   when:
     - openshift_use_kuryr|default(false) == true
     - openshift_kuryr_sg_driver|default("default") == 'policy'
@@ -63,7 +63,7 @@
     subnet_id: "{{ item.spec.subnetId }}"
     net_id: "{{ item.spec.netId }}"
     sg_id: "{{ item.spec.sgId }}"
-  with_items: "{{ knet_output.results.results[0]['items'] if 'results' in knet_output else [] }}"
+  with_items: "{{ knet_output.module_results.results[0]['items'] if 'module_results' in knet_output else [] }}"
   when:
     - openshift_use_kuryr|default(false) == true
     - openshift_kuryr_subnet_driver|default("default") == 'namespace'
@@ -75,7 +75,7 @@
     router_id: "{{ item.spec.routerId }}"
     subnet_id: "{{ item.spec.subnetId }}"
     net_id: "{{ item.spec.netId }}"
-  with_items: "{{ knet_output.results.results[0]['items'] if 'results' in knet_output else [] }}"
+  with_items: "{{ knet_output.module_results.results[0]['items'] if 'module_results' in knet_output else [] }}"
   when:
     - openshift_use_kuryr|default(false) == true
     - openshift_kuryr_subnet_driver|default("default") == 'namespace'

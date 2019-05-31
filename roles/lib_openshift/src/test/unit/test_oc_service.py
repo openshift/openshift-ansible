@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc service
 '''
@@ -107,7 +108,7 @@ class OCServiceTest(unittest.TestCase):
         results = OCService.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'router')
 
     @mock.patch('oc_service.Utils.create_tmpfile_copy')
     @mock.patch('oc_service.OCService._run')
@@ -197,8 +198,8 @@ class OCServiceTest(unittest.TestCase):
         results = OCService.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['returncode'] == 0)
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
+        self.assertTrue(results['module_results']['returncode'] == 0)
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'router')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -394,9 +395,9 @@ class OCServiceTest(unittest.TestCase):
         results = OCService.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['returncode'] == 0)
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
-        self.assertEqual(results['results']['results'][0]['metadata']['labels'], {"component": "some_component", "infra": "true"})
+        self.assertTrue(results['module_results']['returncode'] == 0)
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'router')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['labels'], {"component": "some_component", "infra": "true"})
 
     @mock.patch('oc_service.Utils.create_tmpfile_copy')
     @mock.patch('oc_service.OCService._run')
@@ -485,7 +486,7 @@ class OCServiceTest(unittest.TestCase):
         results = OCService.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['returncode'] == 0)
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
-        self.assertEqual(results['results']['results'][0]['metadata']['labels'], {"component": "some_component", "infra": "true"})
-        self.assertEqual(results['results']['results'][0]['spec']['externalIPs'], ["1.2.3.4", "5.6.7.8"])
+        self.assertTrue(results['module_results']['returncode'] == 0)
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'router')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['labels'], {"component": "some_component", "infra": "true"})
+        self.assertEqual(results['module_results']['results'][0]['spec']['externalIPs'], ["1.2.3.4", "5.6.7.8"])

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc group
 '''
@@ -59,7 +60,7 @@ class OCGroupTest(unittest.TestCase):
         results = OCGroup.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'acme')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'acme')
 
     @mock.patch('oc_group.Utils.create_tmpfile_copy')
     @mock.patch('oc_group.OCGroup._run')
@@ -141,8 +142,8 @@ class OCGroupTest(unittest.TestCase):
         results = OCGroup.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertEqual(results['results'][0]['metadata']['name'], 'acme')
-        self.assertEqual(results['results'][0]['users'][0], 'user1')
+        self.assertEqual(results['module_results'][0]['metadata']['name'], 'acme')
+        self.assertEqual(results['module_results'][0]['users'][0], 'user1')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')

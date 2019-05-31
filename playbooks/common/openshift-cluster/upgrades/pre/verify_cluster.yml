@@ -65,7 +65,7 @@
       msg: "The cluster must be migrated to etcd v3 prior to upgrading to 3.7. Please see https://docs.openshift.com/container-platform/3.7/install_config/upgrading/migrating_etcd.html"
     when:
     # assuming the master-config.yml is properly configured, i.e. the value is a list
-    - _storage_backend.result | default([], true) | length == 0 or _storage_backend.result[0] != "etcd3"
+    - _storage_backend.module_results | default([], true) | length == 0 or _storage_backend.module_results[0] != "etcd3"
 
   - debug:
       msg: "Storage backend is set to etcd3"

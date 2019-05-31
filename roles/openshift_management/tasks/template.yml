@@ -23,7 +23,7 @@
       name: "{{ __openshift_management_flavor }}"
     register: miq_server_check
 
-  - when: miq_server_check.results.results == [{}]
+  - when: miq_server_check.module_results.results == [{}]
     block:
     - name: Copy over Management Server template
       copy:
@@ -51,7 +51,7 @@
       name: "{{ __openshift_management_flavor }}-ext-db"
     register: miq_ext_db_server_check
 
-  - when: miq_ext_db_server_check.results.results == [{}]
+  - when: miq_ext_db_server_check.module_results.results == [{}]
     block:
     - name: Copy over Management Ext-DB Server template
       copy:
@@ -82,7 +82,7 @@
     name: "{{ __openshift_management_flavor }}-app-pv"
   register: miq_app_pv_check
 
-- when: miq_app_pv_check.results.results == [{}]
+- when: miq_app_pv_check.module_results.results == [{}]
   block:
   - name: Copy over Management App PV template
     copy:
@@ -111,7 +111,7 @@
       name: "{{ __openshift_management_flavor }}-db-pv"
     register: miq_db_pv_check
 
-  - when: miq_db_pv_check.results.results == [{}]
+  - when: miq_db_pv_check.module_results.results == [{}]
     block:
     - name: Copy over Management DB PV template
       copy:

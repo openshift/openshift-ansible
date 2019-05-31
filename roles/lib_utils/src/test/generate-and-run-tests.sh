@@ -5,7 +5,7 @@
 cd $(dirname $0)
 
 echo
-echo "Running lib_openshift generate"
+echo "Running lib_utils generate"
 echo "------------------------------"
 ../generate.py
 
@@ -36,7 +36,3 @@ for test in *.yml; do
     echo "Running $test..."
     ./$test -vvv
 done
-
-# Clean up this damn file
-# TODO: figure out why this is being written and clean it up.
-rm kube-manager-test.yaml

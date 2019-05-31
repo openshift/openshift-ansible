@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc serviceaccount
 '''
@@ -94,7 +95,7 @@ class OCServiceAccountTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
+        self.assertEqual(results['module_results']['returncode'], 0)
         self.assertEqual(results['state'], 'present')
 
         # Making sure our mock was called as we expected

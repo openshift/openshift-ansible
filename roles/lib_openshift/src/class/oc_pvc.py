@@ -103,7 +103,7 @@ class OCPVC(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval['results'], 'state': state}
+            return {'changed': False, 'module_results': api_rval['results'], 'state': state}
 
         ########
         # Delete
@@ -119,7 +119,7 @@ class OCPVC(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             return {'changed': False, 'state': state}
 
@@ -144,14 +144,14 @@ class OCPVC(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             ########
             # Update
             ########
             if oc_pvc.pvc.is_bound() or oc_pvc.pvc.get_volume_name():
                 api_rval['msg'] = '##### - This volume is currently bound.  Will not update - ####'
-                return {'changed': False, 'results': api_rval, 'state': state}
+                return {'changed': False, 'module_results': api_rval, 'state': state}
 
             if oc_pvc.needs_update():
                 api_rval = oc_pvc.update()
@@ -165,8 +165,8 @@ class OCPVC(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         return {'failed': True, 'msg': 'Unknown state passed. {}'.format(state)}

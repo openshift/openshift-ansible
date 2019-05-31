@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for repoquery
 '''
@@ -54,13 +55,13 @@ class RepoQueryTest(unittest.TestCase):
         # Assert
         self.assertEqual(results['state'], 'list')
         self.assertFalse(results['changed'])
-        self.assertTrue(results['results']['package_found'])
-        self.assertEqual(results['results']['returncode'], 0)
-        self.assertEqual(results['results']['package_name'], 'bash')
-        self.assertEqual(results['results']['versions'], {'latest_full': '4.2.46-21.el7_3',
-                                                          'available_versions': ['4.2.46'],
-                                                          'available_versions_full': ['4.2.46-21.el7_3'],
-                                                          'latest': '4.2.46'})
+        self.assertTrue(results['module_results']['package_found'])
+        self.assertEqual(results['module_results']['returncode'], 0)
+        self.assertEqual(results['module_results']['package_name'], 'bash')
+        self.assertEqual(results['module_results']['versions'], {'latest_full': '4.2.46-21.el7_3',
+                                                                 'available_versions': ['4.2.46'],
+                                                                 'available_versions_full': ['4.2.46-21.el7_3'],
+                                                                 'latest': '4.2.46'})
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([

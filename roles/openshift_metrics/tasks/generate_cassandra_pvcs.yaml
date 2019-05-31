@@ -7,11 +7,11 @@
     namespace: "{{ openshift_metrics_project }}"
   register: _metrics_pvc
 
-# _metrics_pvc.results.results | length > 0 returns a false positive
+# _metrics_pvc.module_results.results | length > 0 returns a false positive
 # so we check for the presence of 'stderr' to determine if the obj exists or not
 # the RC for existing and not existing is both 0
 - when:
-    - _metrics_pvc.results.stderr is defined
+    - _metrics_pvc.module_results.stderr is defined
   block:
     - name: generate hawkular-cassandra persistent volume claims
       template:

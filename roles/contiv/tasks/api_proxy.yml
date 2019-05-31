@@ -35,7 +35,7 @@
 - name: API proxy | Generate a self signed certificate for api proxy
   command: openssl req -new -nodes -x509 -subj "/C=US/ST=/L=/O=/CN=localhost" -days 3650 -keyout "{{ mktemp.stdout }}/key.pem" -out "{{ mktemp.stdout }}/cert.pem" -extensions v3_ca
   when: (contiv_api_proxy_cert is not defined or contiv_api_proxy_key is not defined)
-        and not existing_secret_volume.results.results[0]['items']
+        and not existing_secret_volume.module_results.results[0]['items']
   register: created_self_signed_cert
   delegate_to: "{{ groups.oo_masters_to_config.0 }}"
   run_once: true

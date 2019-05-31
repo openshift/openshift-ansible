@@ -3,12 +3,12 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   vars:
     template_name: mysql-ephemeral
     ns_name: test
 
-  post_tasks:
+  tasks:
   - name: get the mysql-ephemeral template
     oc_obj:
       name: mysql-ephemeral
@@ -23,7 +23,7 @@
       key: metadata.namespace
       value: test
       backup: false
-      content: "{{ mysqltempl.results.results[0] | to_yaml }}"
+      content: "{{ mysqltempl.module_results.results[0] | to_yaml }}"
 
   - name: create the test namespace
     oc_obj:
@@ -42,7 +42,6 @@
             finalizers:
             - openshift.io/origin
             - kubernetes
-    register: mysqltempl
 
   - name: create the mysql-ephemeral template
     oc_obj:
@@ -53,7 +52,6 @@
       files:
       - /tmp/mysql-template
       delete_after: True
-    register: mysqltempl
 
   - name: process mysql-ephemeral
     oc_process:
@@ -69,10 +67,10 @@
   - assert:
       that:
       - not procout.changed
-      - procout.results.results['items'][0]['metadata']['name'] == 'testdb'
-      - procout.results.results['items'][0]['kind'] == 'Service'
-      - procout.results.results['items'][1]['metadata']['name'] == 'testdb'
-      - procout.results.results['items'][1]['kind'] == 'DeploymentConfig'
+      - procout.module_results.results['items'][0]['metadata']['name'] == 'testdb'
+      - procout.module_results.results['items'][0]['kind'] == 'Service'
+      - procout.module_results.results['items'][1]['metadata']['name'] == 'testdb'
+      - procout.module_results.results['items'][1]['kind'] == 'DeploymentConfig'
       msg: process failed on template
 
   - name: remove namespace test
