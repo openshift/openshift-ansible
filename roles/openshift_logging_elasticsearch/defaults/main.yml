@@ -22,6 +22,7 @@ openshift_logging_elasticsearch_storage_type: "emptydir"
 
 # hostmount options
 openshift_logging_elasticsearch_hostmount_path: ""
+openshift_logging_elasticsearch_hostmount_nodeselector_key: "logging-es-node"
 
 # pvc options
 # the name of the PVC we will bind to -- create it if it does not exist

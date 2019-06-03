@@ -98,6 +98,9 @@
     openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name | default() }}"
     openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector if outer_item.0.nodeSelector | default(None) is none else outer_item.0.nodeSelector }}"
     openshift_logging_elasticsearch_storage_group: "{{ [openshift_logging_es_storage_group] if outer_item.0.storageGroups | default([]) | length == 0 else outer_item.0.storageGroups }}"
+
+    es_dc_index: "{{ outer_item.2 }}"
+
     _es_containers: "{{ outer_item.0.containers}}"
     _es_configmap: "{{ openshift_logging_facts | walk('elasticsearch#configmaps#logging-elasticsearch#elasticsearch.yml', '{}', delimiter='#') | from_yaml }}"
 
@@ -123,6 +126,8 @@
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type | default(default_elasticsearch_storage_type) }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
     openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name | default() }}"
+
+    es_dc_index: "{{ outer_item | int + openshift_logging_facts.elasticsearch.deploymentconfigs | count - 1 }}"
 
   with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
   loop_control:
