@@ -1,0 +1,36 @@
+---
+- name: Update template service broker certificates
+  hosts: oo_first_master
+  vars:
+    openshift_service_catalog_namespace: openshift-template-service-broker
+  roles:
+  - lib_openshift
+  - openshift_facts
+  tasks:
+  - name: Remove certificates secret
+    oc_obj:
+      name: apiserver-serving-cert
+      kind: secret
+      state: absent
+      namespace: "{{ openshift_service_catalog_namespace }}"
+
+  - name: Remove apiserver pods
+    oc_obj:
+      selector: "apiserver"
+      kind: pod
+      state: absent
+      namespace: "{{ openshift_service_catalog_namespace }}"
+
+  - name: Verify that the apiserver is running
+    oc_obj:
+      namespace: "{{ openshift_service_catalog_namespace }}"
+      kind: daemonset
+      state: list
+      name: apiserver
+    register: apiserver_ds
+    until:
+    - apiserver_ds.results.results[0].status.numberReady is defined
+    - apiserver_ds.results.results[0].status.numberReady > 0
+    retries: 60
+    delay: 10
+    changed_when: false

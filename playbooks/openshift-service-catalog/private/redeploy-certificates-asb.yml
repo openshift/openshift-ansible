@@ -1,0 +1,36 @@
+---
+- name: Update ansible service broker certificates
+  hosts: oo_first_master
+  vars:
+    openshift_service_catalog_namespace: openshift-ansible-service-broker
+  roles:
+  - lib_openshift
+  - openshift_facts
+  tasks:
+  - name: Remove certificates secret
+    oc_obj:
+      name: asb-tls
+      kind: secret
+      state: absent
+      namespace: "{{ openshift_service_catalog_namespace }}"
+
+  - name: Remove pods
+    oc_obj:
+      selector: "app=openshift-ansible-service-broker"
+      kind: pod
+      state: absent
+      namespace: "{{ openshift_service_catalog_namespace }}"
+
+  - name: Verify that running
+    oc_obj:
+      namespace: "{{ openshift_service_catalog_namespace }}"
+      kind: dc
+      state: list
+      name: asb
+    register: asb_dc
+    until:
+    - asb_dc.results.results[0].status.readyReplicas is defined
+    - asb_dc.results.results[0].status.readyReplicas > 0
+    retries: 60
+    delay: 10
+    changed_when: false
