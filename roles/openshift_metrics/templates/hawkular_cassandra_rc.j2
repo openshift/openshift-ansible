@@ -122,7 +122,7 @@ spec:
             - "/opt/apache-cassandra/bin/cassandra-docker-ready.sh"
           timeoutSeconds: {{openshift_metrics_cassandra_readprobe_timeout | default(10) | int}}
 {%      if openshift_metrics_cassandra_readprobe_initialdelay is not none %}
-          initialDelaySeconds: {{openshift_metrics_cassandra_readprobe_initialdelay}}
+          initialDelaySeconds: {{openshift_metrics_cassandra_readprobe_initialdelay | int}}
 {% endif %}
 
         lifecycle:
