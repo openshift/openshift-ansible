@@ -15,5 +15,5 @@
 
 - name: Enable the CRI-O service
   systemd:
-    name: "cri-o"
+    name: "crio"
     enabled: yes

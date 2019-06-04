@@ -84,7 +84,7 @@
       with_items: "{{ crictl_ps_output.stdout_lines }}"
       ignore_errors: true
     - name: Get crio logs
-      command: journalctl --no-pager -u cri-o
+      command: journalctl --no-pager -u crio
       register: crio_logs
       ignore_errors: true
     - name: Get kubelet logs
