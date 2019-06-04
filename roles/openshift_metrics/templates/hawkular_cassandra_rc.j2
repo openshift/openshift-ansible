@@ -120,9 +120,9 @@ spec:
           exec:
             command:
             - "/opt/apache-cassandra/bin/cassandra-docker-ready.sh"
-          timeoutSeconds: "{{openshift_metrics_cassandra_readprobe_timeout | default(10)}}"
+          timeoutSeconds: {{openshift_metrics_cassandra_readprobe_timeout | default(10)}}
 {%      if openshift_metrics_cassandra_readprobe_initialdelay is not none %}
-          initialDelaySeconds: "{{openshift_metrics_cassandra_readprobe_initialdelay}}"
+          initialDelaySeconds: {{openshift_metrics_cassandra_readprobe_initialdelay}}
 {% endif %}
 
         lifecycle:
