@@ -955,13 +955,13 @@ debug_level=2
 #openshift_node_env_vars={"ENABLE_HTTP2": "true"}
 
 # Enable API service auditing
-#openshift_master_audit_config={"enabled": "true"}
+#openshift_master_audit_config={"enabled": true}
 #
 # In case you want more advanced setup for the auditlog you can
 # use this line.
 # The directory in "auditFilePath" will be created if it's not
 # exist
-#openshift_master_audit_config={"enabled": "true", "auditFilePath": "/var/lib/origin/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": "14", "maximumFileSizeMegabytes": "500", "maximumRetainedFiles": "5"}
+#openshift_master_audit_config={"enabled": true, "auditFilePath": "/var/lib/origin/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": 14, "maximumFileSizeMegabytes": 500, "maximumRetainedFiles": 5}
 
 # Enable origin repos that point at Centos PAAS SIG, defaults to true, only used
 # by openshift_deployment_type=origin
