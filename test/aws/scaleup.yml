@@ -76,6 +76,7 @@
     block:
     - name: Collect a list of containers
       command: crictl ps -a -q
+      ignore_errors: true
       register: crictl_ps_output
     - name: Collect container logs
       command: "crictl logs {{ item }}"
