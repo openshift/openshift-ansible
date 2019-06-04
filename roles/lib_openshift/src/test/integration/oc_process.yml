@@ -64,13 +64,14 @@
       reconcile: false
     register: procout
 
+  # These assertions could fail due to changes in item order
   - assert:
       that:
       - not procout.changed
       - procout.module_results.results['items'][0]['metadata']['name'] == 'testdb'
-      - procout.module_results.results['items'][0]['kind'] == 'Service'
-      - procout.module_results.results['items'][1]['metadata']['name'] == 'testdb'
-      - procout.module_results.results['items'][1]['kind'] == 'DeploymentConfig'
+      - procout.module_results.results['items'][0]['kind'] == 'Secret'
+      - procout.module_results.results['items'][2]['metadata']['name'] == 'testdb'
+      - procout.module_results.results['items'][2]['kind'] == 'DeploymentConfig'
       msg: process failed on template
 
   - name: remove namespace test

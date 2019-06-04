@@ -1790,7 +1790,7 @@ class OCSecret(OpenShiftCLI):
                             'msg': api_rval}
 
                 return {'changed': True,
-                        'results': api_rval,
+                        'module_results': api_rval,
                         'state': 'present'}
 
             ########

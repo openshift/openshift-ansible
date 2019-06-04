@@ -318,10 +318,6 @@
       that:
       - statout.stat.exists
 
-  - name: set the date string for backup_ext
-    set_fact:
-      date_str: "{{ lookup('pipe', 'date +%Y%m%dT%H%M%S') }}"
-
   - name: test backup file with default extension
     yedit:
       state: present
@@ -329,6 +325,10 @@
       key: test
       backup: true
       value: "{{ 100 | random }}"
+
+  - name: set the date string for backup_ext
+    set_fact:
+      date_str: "{{ lookup('pipe', 'date +%Y%m%dT%H%M%S') }}"
 
   - name: Stat backup file with default extension
     stat:

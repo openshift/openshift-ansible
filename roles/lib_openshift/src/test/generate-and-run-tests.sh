@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-
 if [[ $# -ne 1 ]] ; then
     echo "Usage: $(basename $0) <master name>"
     exit 1
@@ -13,10 +12,10 @@ MASTER=$1
 cd $(dirname $0)
 
 
-#echo
-#echo "Running lib_utils generate-and-run-tests.sh"
-#echo "-------------------------------------------"
-#../../../lib_utils/src/test/generate-and-run-tests.sh
+echo
+echo "Running lib_utils generate"
+echo "------------------------------"
+../../../lib_utils/src/generate.py
 
 
 echo
@@ -49,5 +48,5 @@ for test in *.yml; do
     echo "--------------------------------------------------------------------------------"
     echo
     echo "Running $test..."
-    ./$test -vvv -e cli_master_test="$MASTER" --user=ec2-user
+    ./$test -vvv -i "$MASTER," -e cli_master_test="$MASTER" --user=ec2-user --become
 done

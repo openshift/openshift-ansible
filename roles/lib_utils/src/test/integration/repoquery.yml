@@ -1,6 +1,6 @@
 #!/usr/bin/ansible-playbook --module-path=../../../library/
 ---
-- hosts: localhost
+- hosts: "{{ cli_master_test }}"
   gather_facts: no
 
   tasks:

@@ -37,7 +37,7 @@
       that:
       - "projout.module_results.results['metadata']['name'] == 'operations'"
       - projout.changed == False
-      msg: project create failed.
+      msg: oc_project is not idempotent
 
   - name: update a project
     oc_project:

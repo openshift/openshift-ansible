@@ -16,9 +16,9 @@
 
   - assert:
       that:
-      - "'result' in scaleout"
-      - scaleout.result > 0
-      msg: "Did not find 'result' in returned value or result not > 0."
+      - scaleout.module_results is defined
+      - scaleout.module_results.0 | int > 0
+      msg: "Did not find 'module_result' in returned value or module_result not > 0."
 
   - name: get the rc for router
     oc_obj:
@@ -108,6 +108,7 @@
   - assert:
       that:
       - scaleout.changed == False
+      - scaleout.msg is defined
       - scaleout.msg.returncode == 1
-      - "'msg' in scaleout and 'stderr' in scaleout.msg"
+      - scaleout.msg.stderr is defined
       msg: "Deploymentconfig exists.  This should error."

@@ -5,6 +5,12 @@
   gather_facts: no
 
   tasks:
+  - name: Ensure test pvc is not present (pre-test cleanup)
+    oc_pvc:
+      state: absent
+      name: oc-pvc-create-test
+      namespace: default
+
   - name: create pvc
     oc_pvc:
       state: present
@@ -26,3 +32,16 @@
       - pvcout.module_results.results[0]['spec']['selector']['matchLabels']['foo'] == 'bar'
       - pvcout.changed
       msg: pvc create failed.
+
+  - name: Remove test pvc
+    oc_pvc:
+      state: absent
+      name: oc-pvc-create-test
+      namespace: default
+    register: pvcout
+  - debug: var=pvcout
+  - assert:
+      that:
+      - pvcout.changed
+      - pvcout.module_results.results == {}
+      - pvcout.module_results.returncode == 0

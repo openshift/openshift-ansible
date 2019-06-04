@@ -1,5 +1,11 @@
 #!/bin/bash -e
 
+if [[ $# -ne 1 ]] ; then
+    echo "Usage: $(basename $0) <master name>"
+    exit 1
+fi
+
+MASTER=$1
 
 # Put us in the same dir as the script.
 cd $(dirname $0)
@@ -34,5 +40,5 @@ for test in *.yml; do
     echo "--------------------------------------------------------------------------------"
     echo
     echo "Running $test..."
-    ./$test -vvv
+    ./$test -vvv -i "$MASTER," -e cli_master_test="$MASTER" --user=ec2-user
 done

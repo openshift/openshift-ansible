@@ -114,7 +114,7 @@
   - assert:
       that:
       - "svc_out.module_results['returncode'] == 0"
-      - "svc_out.module_results.results == ''"
+      - "svc_out.module_results.results == {}"
       msg: service delete failed
 
   - name: oc get service
