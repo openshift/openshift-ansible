@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.146
+Version:        3.10.147
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,17 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Jun 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.147-1
+- Include dedicated etcd in upgrade if they are nodes (rteague@redhat.com)
+- Workaround missing network metrics when using cri-o (jcallen@redhat.com)
+- Avoid duplicate env vars in router deploymentconfig
+  (miciah.masters@gmail.com)
+- Remove deprecated variables openshift_ip and openshift_set_node_ip.
+  (padillon@redhat.com)
+- Fix openshift sdn taint toleration (jcallen@redhat.com)
+- Fix container registry block all not blocking all registries
+  (jcallen@redhat.com)
+
 * Wed May 08 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.146-1
 - Remove bash debug flag from 99-origin-dns.sh script (rteague@redhat.com)
 
