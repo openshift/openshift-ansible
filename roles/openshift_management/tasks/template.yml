@@ -13,7 +13,7 @@
 
 ######################################################################
 # STANDARD PODIFIED DATABASE TEMPLATE
-- when: not __openshift_management_use_ext_db
+- when: not __openshift_management_use_ext_db | bool
   block:
   - name: Check if the Management Server template has been created already
     oc_obj:
@@ -41,7 +41,7 @@
 
 ######################################################################
 # EXTERNAL DATABASE TEMPLATE
-- when: __openshift_management_use_ext_db
+- when: __openshift_management_use_ext_db | bool
   block:
   - name: Check if the Management Ext-DB Server template has been created already
     oc_obj:
@@ -101,7 +101,7 @@
 #---------------------------------------------------------------------
 
 # Required for database if the installation is fully podified
-- when: not __openshift_management_use_ext_db
+- when: not __openshift_management_use_ext_db | bool
   block:
   - name: Check if the Management DB PV template has been created already
     oc_obj:

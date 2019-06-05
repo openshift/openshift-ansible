@@ -12,7 +12,7 @@
   when:
     - openshift_management_template_parameters.APPLICATION_VOLUME_CAPACITY is not defined
 
-- when: not __openshift_management_use_ext_db
+- when: not __openshift_management_use_ext_db | bool
   block:
     - name: Note the DB PV Size from Template Parameters
       set_fact:
@@ -42,7 +42,7 @@
     name: "{{ __openshift_management_flavor_short }}-db"
   register: miq_db_pv_check
   when:
-    - not __openshift_management_use_ext_db
+    - not __openshift_management_use_ext_db | bool
 
 - name: Ensure the Management App PV is created
   oc_process:
@@ -65,5 +65,5 @@
       BASE_PATH: "{{ openshift_management_storage_nfs_base_dir }}"
       NFS_HOST: "{{ openshift_management_nfs_server }}"
   when:
-    - not __openshift_management_use_ext_db
+    - not __openshift_management_use_ext_db | bool
     - miq_db_pv_check.module_results.results == [{}]
