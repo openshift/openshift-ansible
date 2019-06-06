@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.115
+Version:        3.11.116
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,38 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Jun 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.116-1
+- Correct data type of "openshift_master_audit_config" parameters
+  (bysnupy@hotmail.com)
+- Fail on Ansible 2.8 (rteague@redhat.com)
+- Workaround missing network metrics when using cri-o (jcallen@redhat.com)
+- Update main.yml (crmarquesjc@gmail.com)
+- Added mandatory missing argument "system_facts" on openshift_facts module
+  (hector_vido@yahoo.com.br)
+- retries (carlos.marques@bndes.gov.br)
+- Enable ports population for new namespaces (ltomasbo@redhat.com)
+- Test using Ansible 2.7.11 (rteague@redhat.com)
+- Make readinessProbe timeout configurable and add initialDelaySeconds
+  (ruben.vp8510@gmail.com)
+- Remove deprecated openshift_ip host variable. (padillon@redhat.com)
+- Handle deprecated openshift_set_node_ip variable. (padillon@redhat.com)
+- Add "openshift_master_audit_policyfile" to specify user-defined audit policy
+  file (bysnupy@hotmail.com)
+- creating playbook to do logging cert rotation and update secrets and redeploy
+  pods (ewolinet@redhat.com)
+- [KIECLOUD-214] - Update RHDM and RHPAM 7.3.1 templates on OCP and OSO service
+  catalog (fspolti@redhat.com)
+- openshift_node: always check for missing TCMU iSCSI device entry
+  (jarrpa@redhat.com)
+- GlusterFS: Fix brick capacity detection in health check (jarrpa@redhat.com)
+- Update patch_configmap_file.yaml (candace.aleea@gmail.com)
+- Tar node & volume config to do md5sum comparison in sync pod.
+  (pdd@redhat.com)
+- metrics-server: Add node selector variable (fbranczyk@gmail.com)
+- Avoid duplicate env vars in router deploymentconfig
+  (miciah.masters@gmail.com)
+- Revert "Check for changes to volume-config in sync pod." (pdd@redhat.com)
+
 * Thu May 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.115-1
 - Remove bash debug flag from 99-origin-dns.sh script (rteague@redhat.com)
 - BZ1702544 - Elasticsearch failed to start due to invalid cert date if hosts
