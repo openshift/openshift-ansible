@@ -5,8 +5,8 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss,hidden",
-            "version": "15.0",
-            "openshift.io/display-name": "JBoss EAP CD 15 + AMQ 7 (tx recovery)",
+            "version": "16.0",
+            "openshift.io/display-name": "JBoss EAP CD 16 + AMQ 7 (tx recovery)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Enterprise Application Platform continuous delivery application with transaction recovery configured. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap-cd/README.adoc",
             "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform continuous delivery based application, including a build configuration, application deployment configuration and insecure communication using http. The template also demonstrates how to enable automated transaction recovery on scale down of application pods.  Automated transaction recovery is currently Technology Preview.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap-cd-tx-recovery-s2i",
-        "xpaas": "15.0"
+        "xpaas": "16.0"
     },
     "message": "A new JBoss EAP CD based application has been created in your project.",
     "parameters": [
@@ -423,7 +423,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "eap-cd-openshift:15"
+                            "name": "eap-cd-openshift:16"
                         }
                     }
                 },
@@ -589,7 +589,7 @@
                                     },
                                     {
                                         "name": "JGROUPS_PING_PROTOCOL",
-                                        "value": "openshift.DNS_PING"
+                                        "value": "dns.DNS_PING"
                                     },
                                     {
                                         "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",
@@ -898,7 +898,7 @@
                                 "env": [
                                     {
                                         "name": "JGROUPS_PING_PROTOCOL",
-                                        "value": "openshift.DNS_PING"
+                                        "value": "dns.DNS_PING"
                                     },
                                     {
                                         "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",

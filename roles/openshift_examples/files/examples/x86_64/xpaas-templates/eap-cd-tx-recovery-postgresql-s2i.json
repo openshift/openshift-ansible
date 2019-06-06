@@ -5,8 +5,8 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss,hidden",
-            "version": "15.0",
-            "openshift.io/display-name": "JBoss EAP CD 15 (tx recovery) + PostgreSQL (Ephemeral with passthrough TLS)",
+            "version": "16.0",
+            "openshift.io/display-name": "JBoss EAP CD 16 (tx recovery) + PostgreSQL (Ephemeral with passthrough TLS)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Enterprise Application Platform continuous delivery application with an PostgreSQL database configured with secure communication using passthrough TLS and ephemeral storage with transaction recovery enabled. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap-cd/README.adoc",
             "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform continuous delivery based application, including a build configuration, application deployment configuration, database deployment configuration for PostgreSQL using ephemeral (temporary) storage and secure communication using passthrough TLS. The difference from the simple PosgreSQL template is that the transaction recovery is switched on here. The recovery marker data is saved to the PostgreSQL database.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap-cd-tx-recovery-postgresql-s2i",
-        "xpaas": "15.0"
+        "xpaas": "16.0"
     },
     "message": "A new JBoss EAP CD and PostgreSQL based application with SSL support has been created in your project. Transaction recovery is enabled for storing recovery data in the PostgreSQL database. The username/password for accessing the PostgreSQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -478,10 +478,11 @@
                             }
                         ],
                         "forcePull": true,
+                        "incremental": true,
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "eap-cd-openshift:15"
+                            "name": "eap-cd-openshift:16"
                         }
                     }
                 },
@@ -670,7 +671,7 @@
                                     },
                                     {
                                         "name": "JGROUPS_PING_PROTOCOL",
-                                        "value": "openshift.DNS_PING"
+                                        "value": "dns.DNS_PING"
                                     },
                                     {
                                         "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",
@@ -896,7 +897,7 @@
                                     },
                                     {
                                         "name": "JGROUPS_PING_PROTOCOL",
-                                        "value": "openshift.DNS_PING"
+                                        "value": "dns.DNS_PING"
                                     },
                                     {
                                         "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",
