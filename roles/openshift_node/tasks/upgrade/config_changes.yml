@@ -38,3 +38,9 @@
     line: pause_image = "{{ openshift_crio_pause_image }}"
     regexp: '^pause_image ='
   when: crio_conf.stat.exists == True
+
+# BZ1585070
+- name: Clean cpu_manager_state module
+  file:
+    state: absent
+    path: "{{ openshift_node_data_dir }}/openshift.local.volumes/cpu_manager_state"
