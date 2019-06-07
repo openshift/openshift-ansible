@@ -61,7 +61,7 @@ Install base dependencies:
 
 Requirements:
 
-- Ansible >= 2.4.3.0
+- Ansible >= 2.4.3.0, 2.8.x and above is not currently supported for OCP installations
 - Jinja >= 2.7
 - pyOpenSSL
 - python-lxml
