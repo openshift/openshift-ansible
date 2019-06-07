@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.147
+Version:        3.10.148
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Jun 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.148-1
+- 
+
 * Wed Jun 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.147-1
 - Include dedicated etcd in upgrade if they are nodes (rteague@redhat.com)
 - Workaround missing network metrics when using cri-o (jcallen@redhat.com)
