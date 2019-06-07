@@ -60,3 +60,11 @@ rules:
   - list
   - watch
   attributeRestrictions: null
+- apiGroups:
+  - ""
+  resources:
+  - "pods/eviction"
+  verbs:
+  - "create"
+  attributeRestrictions: null
+
