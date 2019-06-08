@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.81
+Version:        3.9.82
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jun 08 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.82-1
+- allow cluster autoscaler to evict pods (jchaloup@redhat.com)
+- Fail on Ansible 2.8 (rteague@redhat.com)
+- Workaround missing network metrics when using cri-o (jcallen@redhat.com)
+- Add a condition not to add "compute" label badly when master scaleup.yml
+  (bysnupy@hotmail.com)
+- Remove bash debug flag from 99-origin-dns.sh script (rteague@redhat.com)
+
 * Sat May 04 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.81-1
 - 
 
