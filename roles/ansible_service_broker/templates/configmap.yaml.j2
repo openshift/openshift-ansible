@@ -11,17 +11,17 @@ data:
     registry:
       - type: {{ ansible_service_broker_registry_type }}
         name: {{ ansible_service_broker_registry_name }}
-        url:  {{ ansible_service_broker_registry_url }}
-        org:  {{ ansible_service_broker_registry_organization }}
-        tag:  {{ ansible_service_broker_registry_tag }}
-        white_list: {{  ansible_service_broker_registry_whitelist | to_yaml }}
-        black_list: {{  ansible_service_broker_registry_blacklist | to_yaml }}
-        auth_type: "{{ ansible_service_broker_registry_auth_type | default("") }}"
-        auth_name: "{{ ansible_service_broker_registry_auth_name | default("") }}"
+        url: {{ ansible_service_broker_registry_url }}
+        org: {{ ansible_service_broker_registry_organization }}
+        tag: {{ ansible_service_broker_registry_tag }}
+        white_list: {{ ansible_service_broker_registry_whitelist }}
+        black_list: {{ ansible_service_broker_registry_blacklist }}
+        auth_type: {{ ansible_service_broker_registry_auth_type | default('') }}
+        auth_name: {{ ansible_service_broker_registry_auth_name | default('') }}
       - type: local_openshift
         name: localregistry
-        white_list: {{ ansible_service_broker_local_registry_whitelist | to_yaml }}
-        namespaces: {{ ansible_service_broker_local_registry_namespaces | to_yaml }}
+        white_list: {{ ansible_service_broker_local_registry_whitelist }}
+        namespaces: {{ ansible_service_broker_local_registry_namespaces }}
     dao:
       type: crd
     log:
@@ -29,9 +29,9 @@ data:
       level: {{ ansible_service_broker_log_level }}
       color: true
     openshift:
-      host: ""
-      ca_file: ""
-      bearer_token_file: ""
+      host: ''
+      ca_file: ''
+      bearer_token_file: ''
       namespace: openshift-ansible-service-broker
       sandbox_role: {{ ansible_service_broker_sandbox_role }}
       image_pull_policy: {{ ansible_service_broker_image_pull_policy }}
