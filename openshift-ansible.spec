@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.116
+Version:        3.11.117
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Jun 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.117-1
+- [3.11]: allow cluster autoscaler to evict pods (jchaloup@redhat.com)
+- Add EAP CD 16 imagestreams & templates (ken@zaptillion.net)
+- Clean up Ansible Service Broker Configmap (rteague@redhat.com)
+- Bug 1585070: remove cpu_manager_state file (rphillips@redhat.com)
+
 * Wed Jun 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.116-1
 - Correct data type of "openshift_master_audit_config" parameters
   (bysnupy@hotmail.com)
