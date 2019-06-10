@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.148
+Version:        3.10.149
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Jun 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.149-1
+- allow cluster autoscaler to evict pods (jchaloup@redhat.com)
+- Fail on Ansible 2.8 (rteague@redhat.com)
+
 * Fri Jun 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.148-1
 - 
 
