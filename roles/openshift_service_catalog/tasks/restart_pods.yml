@@ -1,0 +1,52 @@
+---
+
+- name: Edit DaemonSet and replace the CA hash
+  oc_edit:
+    state: present
+    kind: daemonset
+    name: apiserver
+    namespace: "kube-service-catalog"
+    content:
+      spec.template.metadata.annotations.ca_hash: "{{ apiserver_ca.content|hash('sha1') }}"
+
+- name: Remove apiserver pods
+  oc_obj:
+    selector: "app=apiserver"
+    kind: pod
+    state: absent
+    namespace: kube-service-catalog
+
+- name: Verify that the apiserver is running
+  oc_obj:
+    namespace: kube-service-catalog
+    kind: daemonset
+    state: list
+    name: apiserver
+  register: apiserver_ds
+  until:
+  - apiserver_ds.results.results[0].status.numberReady is defined
+  - apiserver_ds.results.results[0].status.numberReady > 0
+  retries: 60
+  delay: 10
+  changed_when: false
+
+- name: Remove controller-manager pods
+  oc_obj:
+    selector: "app=controller-manager"
+    kind: pod
+    state: absent
+    namespace: kube-service-catalog
+
+- name: Verify that the controller-manager is running
+  oc_obj:
+    namespace: kube-service-catalog
+    kind: daemonset
+    state: list
+    name: controller-manager
+  register: cm_ds
+  until:
+  - cm_ds.results.results[0].status.numberReady is defined
+  - cm_ds.results.results[0].status.numberReady > 0
+  retries: 60
+  delay: 10
+  changed_when: false
