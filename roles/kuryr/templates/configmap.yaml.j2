@@ -239,7 +239,7 @@ data:
 {% if openshift_kuryr_sg_driver|default('default') == 'policy' %}
     enabled_handlers = vif,lb,lbaasspec,namespace,policy,pod_label,kuryrnetpolicy,kuryrnet
 {% else %}
-    enabled_handlers = vif,lb,lbaasspec,namespace,kuryrnet
+    enabled_handlers = vif,lb,lbaasspec,namespace
 {% endif %}
 {% else %}
     enabled_handlers = vif,lb,lbaasspec

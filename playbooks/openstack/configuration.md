@@ -760,6 +760,23 @@ openshift_kuryr_subnet_driver: namespace
 openshift_kuryr_sg_driver: namespace
 ```
 
+When namespace isolation is enabled there is a new subnet per namespace being
+created. If port pooling is enabled, in order to pre-populate the newly created
+namespaces, i.e., to have pools ready for the pods on that namespace, the
+kuryrnet handler needs to be enabled on the kuryr-config configmap after the
+installation is completed:
+
+```
+$ oc -n KURYR_NAMESPACE edit cm kuryr-config
+
+...
+[kubernetes]
+enabled_handlers = vif,lb,lbaasspec,namespace,*kuryrnet*
+...
+```
+
+Note depending on the Kuryr controller image version, this feature (handler)
+may not be available.
 
 ### Network Policies
 
