@@ -82,6 +82,22 @@
       podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
       mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ tempfile.path }}/bootstrap.ign --skip-reboot"
 
+  # Temporary work around for invalid crio.conf
+  - name: Update crio.conf network_dir
+    lineinfile:
+      path: /etc/crio/crio.conf
+      regexp: '^network_dir'
+      line: 'network_dir = "/etc/cni/net.d/"'
+  - name: Update crio.conf plugin_dir
+    lineinfile:
+      path: /etc/crio/crio.conf
+      regexp: '^plugin_dir'
+      line: 'plugin_dir = ["/var/lib/cni/bin"]'
+  - name: Create /var/lib/cni/bin
+    file:
+      path: /var/lib/cni/bin
+      state: directory
+
   - name: Reboot the host and wait for it to come back
     reboot:
     #  reboot_timeout: 600  # default, 10 minutes
