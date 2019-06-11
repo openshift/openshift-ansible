@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.117
+Version:        3.11.118
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jun 11 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.118-1
+- Remove kuryrnet handler from default kuryr configuration
+  (ltomasbo@redhat.com)
+
 * Sun Jun 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.117-1
 - [3.11]: allow cluster autoscaler to evict pods (jchaloup@redhat.com)
 - Add EAP CD 16 imagestreams & templates (ken@zaptillion.net)
