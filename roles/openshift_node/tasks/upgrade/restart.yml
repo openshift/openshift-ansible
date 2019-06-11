@@ -57,6 +57,17 @@
   retries: 30
   until: node_upgrade_oc_csr_approve is succeeded
 
+- name: Check if node-config exists
+  stat:
+    path: "{{ openshift.common.config_base}}/node/node-config.yaml"
+  register: node_config
+  until: node_config.stat.exists
+  changed_when: node_config.stat.exists
+  retries: 30
+  delay: 10
+  notify:
+    - restart node service
+
 - name: Check status of node service
   async_status:
     jid: "{{ node_service.ansible_job_id }}"
