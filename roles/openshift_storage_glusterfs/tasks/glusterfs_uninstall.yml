@@ -115,9 +115,7 @@
   delegate_to: "{{ item[0] }}"
   with_nested:
   - "{{ glusterfs_nodes | default([]) }}"
-  - /var/lib/glusterd
-    /etc/glusterfs
-    /var/lib/heketi
+  - [ '/var/lib/glusterd', '/etc/glusterfs', '/var/lib/heketi' ]
 
 - name: Restore GlusterFS directories (external)
   file:
@@ -126,9 +124,7 @@
   delegate_to: "{{ item[0] }}"
   with_nested:
   - "{{ glusterfs_nodes | default([]) }}"
-  - /var/lib/glusterd
-    /etc/glusterfs
-    /var/lib/heketi
+  - [ '/var/lib/glusterd', '/etc/glusterfs', '/var/lib/heketi' ]
   when:
   - not glusterfs_is_native | bool
 
