@@ -1,0 +1,21 @@
+---
+- name: Remove apiserver pods
+  oc_obj:
+    selector: "apiserver"
+    kind: pod
+    state: absent
+    namespace: openshift-template-service-broker
+
+- name: Verify that the apiserver is running
+  oc_obj:
+    namespace: openshift-template-service-broker
+    kind: daemonset
+    state: list
+    name: apiserver
+  register: apiserver_ds
+  until:
+  - apiserver_ds.results.results[0].status.numberReady is defined
+  - apiserver_ds.results.results[0].status.numberReady > 0
+  retries: 60
+  delay: 10
+  changed_when: false

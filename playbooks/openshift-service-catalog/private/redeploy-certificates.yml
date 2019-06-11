@@ -1,0 +1,58 @@
+---
+- name: Update service catalog certificates
+  hosts: oo_first_master
+  vars:
+  roles:
+    - lib_openshift
+    - openshift_facts
+  tasks:
+    - name: Remove SC Secrets
+      import_role:
+        name: openshift_service_catalog
+        tasks_from: delete_secrets.yml
+
+    - name: Regenerate SC Secrets
+      import_role:
+        name: openshift_service_catalog
+        tasks_from: generate_certs.yml
+
+    - name: Restart SC Pods
+      import_role:
+        name: openshift_service_catalog
+        tasks_from: restart_pods.yml
+
+    - name: Remove ASB Secrets
+      import_role:
+        name: ansible_service_broker
+        tasks_from: delete_secrets.yml
+      when: ansible_service_broker_install | default(false) | bool
+
+    - name: Update ASB Secrets
+      import_role:
+        name: ansible_service_broker
+        tasks_from: update_secrets.yml
+      when: ansible_service_broker_install | default(false) | bool
+
+    - name: Restart ASB Pods
+      import_role:
+        name: ansible_service_broker
+        tasks_from: restart_pods.yml
+      when: ansible_service_broker_install | default(false) | bool
+
+    - name: Remove TSB Secrets
+      import_role:
+        name: template_service_broker
+        tasks_from: delete_secrets.yml
+      when: template_service_broker_install | default(false) | bool
+
+    - name: Update TSB Secrets
+      import_role:
+        name: template_service_broker
+        tasks_from: update_secrets.yml
+      when: template_service_broker_install | default(false) | bool
+
+    - name: Restart TSB Pods
+      import_role:
+        name: template_service_broker
+        tasks_from: restart_pods.yml
+      when: template_service_broker_install | default(false) | bool

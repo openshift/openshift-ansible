@@ -34,7 +34,6 @@
 
 - import_playbook: openshift-master/private/restart.yml
 
-
 - import_playbook: openshift-web-console/private/redeploy-certificates.yml
   when: openshift_web_console_install | default(true) | bool
 
@@ -43,3 +42,8 @@
 
 - import_playbook: openshift-monitoring/private/redeploy-certificates.yml
   when: openshift_cluster_monitoring_operator_install | default(true) | bool
+
+- import_playbook: openshift-service-catalog/private/redeploy-certificates.yml
+  when:
+  - openshift_enable_service_catalog | default(false) | bool
+  - (ansible_service_broker_install | default(false) | bool) or (template_service_broker_install | default(false) | bool)
