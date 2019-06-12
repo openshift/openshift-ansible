@@ -451,7 +451,7 @@
     register: es_hostmount_selected_node
 
   - when:
-    - "es_hostmount_selected_node['results']['results'][0]['items'] | default([]) | length == 0"
+    - "es_hostmount_selected_node['module_results']['results'][0]['items'] | default([]) | length == 0"
     block:
     - name: Retrieve list of schedulable es nodes that are not already allocated for another dc
       oc_obj:
@@ -463,18 +463,18 @@
 
     - name: "Ensure that has nodes for ES to run on"
       assert:
-        that: "{{ es_available_nodes['results']['results'][0]['items'] | default([]) | length != 0 }}"
+        that: "{{ es_available_nodes['module_results']['results'][0]['items'] | default([]) | length != 0 }}"
         msg: |-
           No schedulable nodes found matching node selector for elastic search.'
 
     - name: label node where dc will be stick
       oc_label:
-        name: "{{ es_available_nodes['results']['results'][0]['items'][0].metadata.name }}"
+        name: "{{ es_available_nodes['module_results']['results'][0]['items'][0].metadata.name }}"
         state: add
         kind: node
         labels: "{{ hostmount_node_selector | dict2items }}"
       when:
-      - "es_available_nodes['results']['results'][0]['items'] | default([]) | length != 0"
+      - "es_available_nodes['module_results']['results'][0]['items'] | default([]) | length != 0"
 
 # DC
 - name: Set ES dc templates
