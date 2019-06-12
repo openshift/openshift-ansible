@@ -1,5 +1,5 @@
 ---
-- when: r_openshift_excluder_verify_upgrade
+- when: r_openshift_excluder_verify_upgrade | bool
   block:
   - name: Include verify_upgrade.yml when upgrading
     import_tasks: verify_upgrade.yml

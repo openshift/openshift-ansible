@@ -15,15 +15,15 @@
   vars:
     openshift_node_group_configmap: true
   when:
-  - configout.results.results.0 == {}
+  - configout.module_results.results.0 == {}
   run_once: true
 
 - name: lay down the config from the existing configmap
   copy:
-    content: "{{ configout.results.results.0.data['node-config.yaml'] }}"
+    content: "{{ configout.module_results.results.0.data['node-config.yaml'] }}"
     dest: "{{ mktempout.stdout }}/node-config.yaml"
   when:
-  - configout.results.results.0 != {}
+  - configout.module_results.results.0 != {}
   run_once: true
 
 - name: "specialize the generated configs for {{ l_openshift_node_group_name }}"
@@ -47,7 +47,7 @@
     src: volume-config.yaml.j2
     dest: "{{ mktempout.stdout }}/volume-config.yaml"
   when:
-  - "'data' not in configout['results']['results'][0] or 'volume-config.yaml' not in configout['results']['results'][0]['data']"
+  - "'data' not in configout['module_results']['results'][0] or 'volume-config.yaml' not in configout['module_results']['results'][0]['data']"
   - l_openshift_node_group_name != ""
   - openshift_node_local_quota_per_fsgroup is defined
   - openshift_node_local_quota_per_fsgroup != ""
@@ -55,11 +55,11 @@
 
 - name: lay down the volume config from the existing configmap
   copy:
-    content: "{{ configout.results.results.0.data['volume-config.yaml'] }}"
+    content: "{{ configout.module_results.results.0.data['volume-config.yaml'] }}"
     dest: "{{ mktempout.stdout }}/volume-config.yaml"
   when:
-  - "'data' in configout['results']['results'][0]"
-  - "'volume-config.yaml' in configout['results']['results'][0]['data']"
+  - "'data' in configout['module_results']['results'][0]"
+  - "'volume-config.yaml' in configout['module_results']['results'][0]['data']"
   - l_openshift_node_group_name != ""
   - openshift_node_local_quota_per_fsgroup is defined
   - openshift_node_local_quota_per_fsgroup != ""

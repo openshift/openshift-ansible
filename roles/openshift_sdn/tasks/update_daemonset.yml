@@ -11,11 +11,11 @@
 
 - when:
     - ds_out is succeeded
-    - ds_out.results.results[0].spec.updateStrategy.type == 'RollingUpdate'
+    - ds_out.module_results.results[0].spec.updateStrategy.type == 'RollingUpdate'
   block:
     - name: Update DaemonSet updateStrategy
       set_fact:
-        daemonset: "{{ ds_out.results.results[0] | combine(dict_edit, recursive=True) }}"
+        daemonset: "{{ ds_out.module_results.results[0] | combine(dict_edit, recursive=True) }}"
       vars:
         dict_edit:
           spec:

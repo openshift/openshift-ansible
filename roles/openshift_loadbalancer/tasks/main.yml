@@ -2,7 +2,7 @@
 - name: Fail if atomic
   fail:
     msg: "Load balancers on atomic host are no longer supported"
-  when: openshift_is_atomic
+  when: openshift_is_atomic | bool
 
 - name: setup firewall
   import_tasks: firewall.yml

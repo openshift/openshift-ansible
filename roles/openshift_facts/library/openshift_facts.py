@@ -6,26 +6,22 @@
 
 """Ansible module for retrieving and setting openshift related facts"""
 
-# pylint: disable=no-name-in-module, import-error, wrong-import-order
 import copy
 import errno
 import json
 import re
 import os
-import yaml
 import struct
 import socket
 import ipaddress
 from distutils.util import strtobool
-from ansible.module_utils.six import text_type
-from ansible.module_utils.six import string_types
+import yaml
 
-# ignore pylint errors related to the module_utils import
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
-# import module snippets
-from ansible.module_utils.basic import *  # noqa: F403
-from ansible.module_utils.urls import *  # noqa: F403
-from ansible.module_utils.six import iteritems, itervalues
+from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.urls import fetch_url
+from ansible.module_utils.six import iteritems, itervalues, text_type, string_types
+# ansible.module_utils.six.moves is a meta path importer
+# pylint: disable=no-name-in-module, import-error
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlunparse
 from ansible.module_utils._text import to_native
 

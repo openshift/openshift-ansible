@@ -3,8 +3,14 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
+  - name: Ensure test pvc is not present (pre-test cleanup)
+    oc_pvc:
+      state: absent
+      name: oc-pvc-create-test
+      namespace: default
+
   - name: create pvc
     oc_pvc:
       state: present
@@ -21,8 +27,21 @@
 
   - assert:
       that:
-      - pvcout.results.results[0]['metadata']['name'] == 'oc-pvc-create-test'
-      - pvcout.results.results[0]['spec']['storageClassName'] == 'my-storage-class-name'
-      - pvcout.results.results[0]['spec']['selector']['matchLabels']['foo'] == 'bar'
+      - pvcout.module_results.results[0]['metadata']['name'] == 'oc-pvc-create-test'
+      - pvcout.module_results.results[0]['spec']['storageClassName'] == 'my-storage-class-name'
+      - pvcout.module_results.results[0]['spec']['selector']['matchLabels']['foo'] == 'bar'
       - pvcout.changed
       msg: pvc create failed.
+
+  - name: Remove test pvc
+    oc_pvc:
+      state: absent
+      name: oc-pvc-create-test
+      namespace: default
+    register: pvcout
+  - debug: var=pvcout
+  - assert:
+      that:
+      - pvcout.changed
+      - pvcout.module_results.results == {}
+      - pvcout.module_results.returncode == 0

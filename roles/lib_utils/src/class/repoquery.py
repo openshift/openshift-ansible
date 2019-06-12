@@ -172,7 +172,7 @@ class Repoquery(RepoqueryCLI):
                 return {'failed': True,
                         'msg': results}
 
-            return {'changed': False, 'results': results, 'state': 'list', 'check_mode': check_mode}
+            return {'changed': False, 'module_results': results, 'state': 'list', 'check_mode': check_mode}
 
         return {'failed': True,
                 'changed': False,

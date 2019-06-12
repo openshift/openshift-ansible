@@ -9,6 +9,6 @@
 
 - name: "Ensure that {{ openshift_master_ensure_nodes_service }} has nodes to run on"
   assert:
-    that: "{{  __schedulable_nodes_matching_selector['results']['results'][0]['items'] | default([]) | length != 0 }}"
+    that: "{{ __schedulable_nodes_matching_selector['module_results']['results'][0]['items'] | default([]) | length != 0 }}"
     msg: |-
       No schedulable nodes found matching node selector for {{ openshift_master_ensure_nodes_service }} - '{{ openshift_master_ensure_nodes_selector }}'

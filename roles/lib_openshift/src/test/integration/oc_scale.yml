@@ -3,7 +3,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
   - name: list oc scale for default router dc
     oc_scale:
@@ -16,9 +16,9 @@
 
   - assert:
       that:
-      - "'result' in scaleout"
-      - scaleout.result > 0
-      msg: "Did not find 'result' in returned value or result not > 0."
+      - scaleout.module_results is defined
+      - scaleout.module_results.0 | int > 0
+      msg: "Did not find 'module_result' in returned value or module_result not > 0."
 
   - name: get the rc for router
     oc_obj:
@@ -28,7 +28,7 @@
       selector: router=router
     register: rcout
   - debug:
-      msg: "{{ rcout.results.results[0]['items'][-1]['metadata']['name'] }}"
+      msg: "{{ rcout.module_results.results[0]['items'][-1]['metadata']['name'] }}"
 
   - name: scale dc to 1
     oc_scale:
@@ -57,8 +57,9 @@
 
   - assert:
       that:
-      - "'results' in pods and 'results' in pods.results"
-      - "{{ pods.results.results[0]['items']|length }} == 1"
+      - pods.module_results is defined
+      - pods.module_results.results is defined
+      - pods.module_results.results[0]['items'] | length == 1
       msg: "Did not find 1 replica in scale results."
 
   - name: scale dc to 2
@@ -87,8 +88,9 @@
 
   - assert:
       that:
-      - "'results' in pods and 'results' in pods.results"
-      - "{{ pods.results.results[0]['items']|length }} == 2"
+      - pods.module_results is defined
+      - pods.module_results.results is defined
+      - pods.module_results.results[0]['items'] | length == 2
       msg: "Did not find 1 replica in scale results."
 
 
@@ -106,6 +108,7 @@
   - assert:
       that:
       - scaleout.changed == False
+      - scaleout.msg is defined
       - scaleout.msg.returncode == 1
-      - "'msg' in scaleout and 'stderr' in scaleout.msg"
+      - scaleout.msg.stderr is defined
       msg: "Deploymentconfig exists.  This should error."

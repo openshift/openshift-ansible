@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc_objectvalidator
 '''
@@ -123,7 +124,7 @@ class OCObjectValidatorTest(unittest.TestCase):
         self.assertTrue(results['failed'])
         self.assertEqual(results['msg'], 'Failed to GET hostsubnet.')
         self.assertEqual(results['state'], 'list')
-        self.assertEqual(results['results'], error_results)
+        self.assertEqual(results['module_results'], error_results)
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -913,7 +914,7 @@ class OCObjectValidatorTest(unittest.TestCase):
         self.assertTrue(results['failed'])
         self.assertIn('All objects are not valid.', results['msg'])
         self.assertEqual(results['state'], 'list')
-        self.assertEqual(results['results'], invalid_results)
+        self.assertEqual(results['module_results'], invalid_results)
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([

@@ -181,7 +181,7 @@
     kind: oauthclient
   register: oauth_client_list
 
-- set_fact: proxy_hostnames={{ oauth_client_list.results.results[0].redirectURIs | default ([]) + ['https://' ~ openshift_logging_kibana_hostname] }}
+- set_fact: proxy_hostnames={{ oauth_client_list.module_results.results[0].redirectURIs | default ([]) + ['https://' ~ openshift_logging_kibana_hostname] }}
 
 # create oauth client
 - name: Create oauth-client template

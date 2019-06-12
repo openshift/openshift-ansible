@@ -4,4 +4,4 @@
 
 - fail:
     msg: "Configmap for {{ l_openshift_node_group_name }} must be present. Please see https://docs.openshift.com/container-platform/3.10/upgrading/automated_upgrades.html for details."
-  when: configout.results.results.0 == {}
+  when: configout.module_results.results.0 == {}

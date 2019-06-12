@@ -218,9 +218,9 @@ class SDNCheck(OpenShiftCheck):
 
     def get_resource(self, kind):
         """Return a list of all resources of the specified kind."""
-        for resource in self.task_vars['resources']['results']:
+        for resource in self.task_vars['resources']['module_results']:
             if resource['item'] == kind:
-                return resource['results']['results'][0]['items']
+                return resource['module_results']['results'][0]['items']
 
         raise OpenShiftCheckException('CouldNotListResource',
                                       'Could not list resource %s' % kind)

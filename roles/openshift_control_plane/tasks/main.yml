@@ -225,9 +225,9 @@
     namespace: kube-system
   register: control_plane_pods
   until:
-  - "'results' in control_plane_pods"
-  - "'results' in control_plane_pods.results"
-  - control_plane_pods.results.results | length > 0
+  - control_plane_pods.module_results is defined
+  - control_plane_pods.module_results.results is defined
+  - control_plane_pods.module_results.results | length > 0
   retries: 60
   delay: 5
   with_items:
@@ -277,12 +277,12 @@
     namespace: kube-system
   register: control_plane_health
   until:
-  - "'results' in control_plane_health"
-  - "'results' in control_plane_health.results"
-  - control_plane_health.results.results | length > 0
-  - "'status' in control_plane_health.results.results[0]"
-  - "'conditions' in control_plane_health.results.results[0].status"
-  - control_plane_health.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+  - control_plane_health.module_results is defined
+  - control_plane_health.module_results.results is defined
+  - control_plane_health.module_results.results | length > 0
+  - control_plane_health.module_results.results[0].status is defined
+  - control_plane_health.module_results.results[0].status.conditions is defined
+  - control_plane_health.module_results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
   retries: 60
   delay: 5
   with_items:

@@ -16,10 +16,10 @@
 # configmap_protected_lines  -- The list of variables to exclude from the diff
 
 - when:
-  - configmap_current_file in __configmap_output.results.results[0]['data']
+  - configmap_current_file in __configmap_output.module_results.results[0]['data']
   block:
   - copy:
-      content: "{{ __configmap_output.results.results[0]['data'][configmap_current_file] }}"
+      content: "{{ __configmap_output.module_results.results[0]['data'][configmap_current_file] }}"
       dest: "{{ tempdir }}/current.yml"
 
   - logging_patch:

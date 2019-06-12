@@ -471,7 +471,7 @@ class Router(OpenShiftCLI):
         # get
         ########
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         ########
         # Delete
@@ -488,7 +488,7 @@ class Router(OpenShiftCLI):
             # pylint: disable=redefined-variable-type
             api_rval = ocrouter.delete()
 
-            return {'changed': True, 'results': api_rval, 'state': state}
+            return {'changed': True, 'module_results': api_rval, 'state': state}
 
         if state == 'present':
             ########
@@ -504,7 +504,7 @@ class Router(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             ########
             # Update
@@ -520,4 +520,4 @@ class Router(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {'failed': True, 'msg': api_rval}
 
-            return {'changed': True, 'results': api_rval, 'state': state}
+            return {'changed': True, 'module_results': api_rval, 'state': state}

@@ -65,13 +65,13 @@
     namespace: openshift-node
   register: __status_of_sync_ds
   until:
-    - __status_of_sync_ds.results is defined
-    - __status_of_sync_ds.results.results is defined
-    - __status_of_sync_ds.results.results | length > 0
-    - __status_of_sync_ds.results.results[0].status is defined
-    - __status_of_sync_ds.results.results[0].status.numberAvailable is defined
-    - __status_of_sync_ds.results.results[0].status.desiredNumberScheduled is defined
-    - __status_of_sync_ds.results.results[0].status.numberAvailable == __status_of_sync_ds.results.results[0].status.desiredNumberScheduled
+    - __status_of_sync_ds.module_results is defined
+    - __status_of_sync_ds.module_results.results is defined
+    - __status_of_sync_ds.module_results.results | length > 0
+    - __status_of_sync_ds.module_results.results[0].status is defined
+    - __status_of_sync_ds.module_results.results[0].status.numberAvailable is defined
+    - __status_of_sync_ds.module_results.results[0].status.desiredNumberScheduled is defined
+    - __status_of_sync_ds.module_results.results[0].status.numberAvailable == __status_of_sync_ds.module_results.results[0].status.desiredNumberScheduled
   retries: 80
   delay: 10
 
@@ -82,13 +82,13 @@
     selector: ""
   register: node_status
   until:
-    - node_status.results is defined
-    - node_status.results.results is defined
-    - node_status.results.results | length > 0
-    - node_status.results.results[0]['items']
+    - node_status.module_results is defined
+    - node_status.module_results.results is defined
+    - node_status.module_results.results | length > 0
+    - node_status.module_results.results[0]['items']
         | map(attribute='metadata.annotations') | map('list') | flatten
         | select('match', 'node.openshift.io/md5sum') | list | length ==
-      node_status.results.results[0]['items'] | length
+      node_status.module_results.results[0]['items'] | length
   retries: 180
   delay: 10
 

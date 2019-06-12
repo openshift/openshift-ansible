@@ -90,7 +90,7 @@ class Edit(OpenShiftCLI):
             return {"failed": True, 'msg': api_rval}
 
         if 'updated' in api_rval and not api_rval['updated']:
-            return {"changed": False, 'results': api_rval, 'state': 'present'}
+            return {"changed": False, 'module_results': api_rval, 'state': 'present'}
 
         # return the created object
         api_rval = ocedit.get()
@@ -98,4 +98,4 @@ class Edit(OpenShiftCLI):
         if api_rval['returncode'] != 0:
             return {"failed": True, 'msg': api_rval}
 
-        return {"changed": True, 'results': api_rval, 'state': 'present'}
+        return {"changed": True, 'module_results': api_rval, 'state': 'present'}

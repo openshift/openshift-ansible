@@ -80,7 +80,7 @@
     name: dr-1337
     namespace: openshift-ansible-service-broker
     state: absent
-  when: ansible_service_broker_enable_dashboard_redirector
+  when: ansible_service_broker_enable_dashboard_redirector | bool
 
 - name: remove Ansible Service Broker deployment config
   oc_obj:

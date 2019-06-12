@@ -19,7 +19,7 @@
       name: kube-service-catalog
       state: list
     register: get_output
-    until: not get_output.results.stderr is defined
+    until: not get_output.module_results.stderr is defined
     retries: 30
     delay: 1
     changed_when: false

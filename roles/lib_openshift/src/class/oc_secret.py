@@ -117,7 +117,7 @@ class OCSecret(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, state: 'list'}
+            return {'changed': False, 'module_results': api_rval, state: 'list'}
 
         if not params['name']:
             return {'failed': True,
@@ -134,7 +134,7 @@ class OCSecret(OpenShiftCLI):
                 return {'changed': True, 'msg': 'Would have performed a delete.'}
 
             api_rval = ocsecret.delete()
-            return {'changed': True, 'results': api_rval, 'state': 'absent'}
+            return {'changed': True, 'module_results': api_rval, 'state': 'absent'}
 
         if state == 'present':
             if params['files']:
@@ -164,7 +164,7 @@ class OCSecret(OpenShiftCLI):
                             'msg': api_rval}
 
                 return {'changed': True,
-                        'results': api_rval,
+                        'module_results': api_rval,
                         'state': 'present'}
 
             ########

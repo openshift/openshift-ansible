@@ -1,11 +1,17 @@
 #!/bin/bash -e
 
+if [[ $# -ne 1 ]] ; then
+    echo "Usage: $(basename $0) <master name>"
+    exit 1
+fi
+
+MASTER=$1
 
 # Put us in the same dir as the script.
 cd $(dirname $0)
 
 echo
-echo "Running lib_openshift generate"
+echo "Running lib_utils generate"
 echo "------------------------------"
 ../generate.py
 
@@ -34,9 +40,5 @@ for test in *.yml; do
     echo "--------------------------------------------------------------------------------"
     echo
     echo "Running $test..."
-    ./$test -vvv
+    ./$test -vvv -i "$MASTER," -e cli_master_test="$MASTER" --user=ec2-user
 done
-
-# Clean up this damn file
-# TODO: figure out why this is being written and clean it up.
-rm kube-manager-test.yaml

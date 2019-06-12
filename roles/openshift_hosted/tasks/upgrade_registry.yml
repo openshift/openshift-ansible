@@ -17,7 +17,7 @@
     l_osh_registry_image: "{{ openshift_hosted_registry_registryurl | replace( '${component}', 'docker-registry' )  |
                            replace ( '${version}', openshift_image_tag ) }}"
   when:
-  - _default_registry.results.results[0] != {}
+  - _default_registry.module_results.results[0] != {}
 
 - name: Check for registry-console
   oc_obj:
@@ -40,4 +40,4 @@
                                       replace ( '${version}', openshift_image_tag ) }}"
   when:
   - openshift_deployment_type != 'origin'
-  - _registry_console.results.results[0] != {}
+  - _registry_console.module_results.results[0] != {}

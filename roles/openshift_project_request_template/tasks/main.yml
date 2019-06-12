@@ -2,7 +2,7 @@
 - name: Create temp file for template
   command: mktemp /tmp/openshift-ansible-XXXXXX.yaml
   register: mktemp
-  changed_when: False
+  changed_when: False | bool
 
 - name: Generate default project template
   command: |

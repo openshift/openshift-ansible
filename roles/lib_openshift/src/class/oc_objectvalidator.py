@@ -68,7 +68,8 @@ class OCObjectValidator(OpenShiftCLI):
         for resource, invalid_filter, invalid_msg in checks:
             success, rval, invalid = objectvalidator.get_invalid(resource, invalid_filter)
             if not success:
-                return {'failed': True, 'msg': 'Failed to GET {}.'.format(resource), 'state': 'list', 'results': rval}
+                return {'failed': True, 'msg': 'Failed to GET {}.'.format(resource), 'state': 'list',
+                        'module_results': rval}
             if invalid:
                 failed = True
                 all_invalid[invalid_msg] = invalid
@@ -82,7 +83,7 @@ class OCObjectValidator(OpenShiftCLI):
                     "please contact users@lists.openshift.redhat.com for assistance."
                     ),
                 'state': 'list',
-                'results': all_invalid
+                'module_results': all_invalid
                 }
 
         return {'msg': 'All objects are valid.'}

@@ -28,14 +28,14 @@
     fail:
       msg: "Unable to determine available OpenShift RPM version"
     when:
-    - not repoquery_out.results.package_found
+    - not repoquery_out.module_results.package_found
 
   - name: Set fact avail_openshift_version
     set_fact:
-      avail_openshift_version: "{{ repoquery_out.results.versions.available_versions_full.0 }}"
+      avail_openshift_version: "{{ repoquery_out.module_results.versions.available_versions_full.0 }}"
   - name: Set openshift_pkg_version when not specified
     set_fact:
-      openshift_pkg_version: "-{{ repoquery_out.results.versions.available_versions_full.0 }}"
+      openshift_pkg_version: "-{{ repoquery_out.module_results.versions.available_versions_full.0 }}"
     when: openshift_pkg_version | default('') == ''
 
   - name: Verify OpenShift RPMs are available for upgrade

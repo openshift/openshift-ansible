@@ -295,8 +295,8 @@
     name: "logging-{{ es_component }}-cluster"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
   when:
-  - logging_elasticsearch_cluster_service.results.returncode == 0
-  - logging_elasticsearch_cluster_service.results.results[0] | from_yaml | walk('spec.clusterIP', '') != 'None'
+  - logging_elasticsearch_cluster_service.module_results.returncode == 0
+  - logging_elasticsearch_cluster_service.module_results.results[0] | from_yaml | walk('spec.clusterIP', '') != 'None'
 
 - name: Set logging-{{ es_component }}-cluster service
   oc_service:
@@ -373,11 +373,11 @@
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
   register: logging_elasticsearch_pvc
 
-# logging_elasticsearch_pvc.results.results | length > 0 returns a false positive
+# logging_elasticsearch_pvc.module_results.results | length > 0 returns a false positive
 # so we check for the presence of 'stderr' to determine if the obj exists or not
 # the RC for existing and not existing is both 0
 - when:
-  - logging_elasticsearch_pvc.results.stderr is defined
+  - logging_elasticsearch_pvc.module_results.stderr is defined
   - openshift_logging_elasticsearch_storage_type == "pvc"
   block:
   # storageclasses are used by default but if static then disable

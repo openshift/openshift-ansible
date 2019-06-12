@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc configmap
 '''
@@ -70,7 +71,7 @@ class OCConfigMapTest(unittest.TestCase):
         results = OCConfigMap.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'configmap')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'configmap')
 
     @mock.patch('oc_configmap.Utils._write')
     @mock.patch('oc_configmap.Utils.create_tmpfile_copy')
@@ -127,8 +128,8 @@ class OCConfigMapTest(unittest.TestCase):
         results = OCConfigMap.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'configmap')
-        self.assertEqual(results['results']['results'][0]['data']['deployment_type'], 'openshift-enterprise')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'configmap')
+        self.assertEqual(results['module_results']['results'][0]['data']['deployment_type'], 'openshift-enterprise')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')

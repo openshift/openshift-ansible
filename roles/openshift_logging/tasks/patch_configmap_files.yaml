@@ -20,7 +20,7 @@
     namespace: "{{ configmap_namespace }}"
   register: __configmap_output
 
-- when: __configmap_output.results.stderr is undefined
+- when: __configmap_output.module_results.stderr is undefined
   include_tasks: patch_configmap_file.yaml
   vars:
     configmap_current_file: "{{ configmap_files.current_file }}"

@@ -72,13 +72,8 @@ not_running_fluentd_pod = {
 ], ids=lambda argvals: argvals[0])
 def test_check_logging_config_non_master(name, use_journald, logging_driver, extra_words):
     def execute_module(module_name, args):
-        if module_name == "docker_info":
-            return {
-                "info": {
-                    "LoggingDriver": logging_driver,
-                }
-            }
-
+        if module_name == "command":
+            return dict(stdout='{"LoggingDriver": "%s"}' % logging_driver)
         return {}
 
     task_vars = dict(
@@ -118,13 +113,8 @@ def test_check_logging_config_non_master(name, use_journald, logging_driver, ext
 ], ids=lambda argvals: argvals[0])
 def test_check_logging_config_non_master_failed(name, use_journald, logging_driver, words):
     def execute_module(module_name, args):
-        if module_name == "docker_info":
-            return {
-                "info": {
-                    "LoggingDriver": logging_driver,
-                }
-            }
-
+        if module_name == "command":
+            return dict(stdout='{"LoggingDriver": "%s"}' % logging_driver)
         return {}
 
     task_vars = dict(
@@ -182,13 +172,8 @@ def test_check_logging_config_non_master_failed(name, use_journald, logging_driv
 ], ids=lambda argvals: argvals[0])
 def test_check_logging_config_master(name, pods, logging_driver, extra_words):
     def execute_module(module_name, args):
-        if module_name == "docker_info":
-            return {
-                "info": {
-                    "LoggingDriver": logging_driver,
-                }
-            }
-
+        if module_name == "command":
+            return dict(stdout='{"LoggingDriver": "%s"}' % logging_driver)
         return {}
 
     task_vars = dict(
@@ -264,13 +249,8 @@ def test_check_logging_config_master(name, pods, logging_driver, extra_words):
 ], ids=lambda argvals: argvals[0])
 def test_check_logging_config_master_failed(name, pods, logging_driver, words):
     def execute_module(module_name, args):
-        if module_name == "docker_info":
-            return {
-                "info": {
-                    "LoggingDriver": logging_driver,
-                }
-            }
-
+        if module_name == "command":
+            return dict(stdout='{"LoggingDriver": "%s"}' % logging_driver)
         return {}
 
     task_vars = dict(
@@ -321,13 +301,8 @@ def test_check_logging_config_master_failed(name, pods, logging_driver, words):
 ], ids=lambda argvals: argvals[0])
 def test_check_logging_config_master_fails_on_unscheduled_deployment(name, pods, response, logging_driver, extra_words):
     def execute_module(module_name, args):
-        if module_name == "docker_info":
-            return {
-                "info": {
-                    "LoggingDriver": logging_driver,
-                }
-            }
-
+        if module_name == "command":
+            return dict(stdout='{"LoggingDriver": "%s"}' % logging_driver)
         return {}
 
     task_vars = dict(

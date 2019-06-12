@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc process
 '''
@@ -271,7 +272,7 @@ class OCProcessTest(unittest.TestCase):
         results = OCProcess.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'mysql-ephemeral')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'mysql-ephemeral')
 
     @mock.patch('oc_process.Utils.create_tmpfile_copy')
     @mock.patch('oc_process.OCProcess._run')
@@ -461,7 +462,7 @@ class OCProcessTest(unittest.TestCase):
         results = OCProcess.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertEqual(results['results']['results']['items'][0]['metadata']['name'], 'testdb')
+        self.assertEqual(results['module_results']['results']['items'][0]['metadata']['name'], 'testdb')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')

@@ -3,11 +3,11 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   vars:
     filename: /tmp/test_configmap_from_file
 
-  post_tasks:
+  tasks:
   - name: Setup a file with known contents
     copy:
       content: This is a file
@@ -41,8 +41,8 @@
   - name: assert configmaptest exists
     assert:
       that:
-      - cmout.results.results[0].metadata.name == 'configmaptest'
-      - cmout.results.results[0].data.foo == 'bar'
+      - cmout.module_results.results[0].metadata.name == 'configmaptest'
+      - cmout.module_results.results[0].data.foo == 'bar'
   ###### end create test ###########
 
   ###### update test ###########
@@ -69,9 +69,9 @@
   - name: assert configmaptest exists
     assert:
       that:
-      - cmout.results.results[0].metadata.name == 'configmaptest'
-      - cmout.results.results[0].data.deployment_type == 'openshift-enterprise'
-      - cmout.results.results[0].data.foo == 'notbar'
+      - cmout.module_results.results[0].metadata.name == 'configmaptest'
+      - cmout.module_results.results[0].data.deployment_type == 'openshift-enterprise'
+      - cmout.module_results.results[0].data.foo == 'notbar'
   ###### end update test ###########
 
   ###### delete test ###########
@@ -92,4 +92,4 @@
 
   - name: assert configmaptest exists
     assert:
-      that: "'\"configmaptest\" not found' in cmout.results.stderr"
+      that: "'\"configmaptest\" not found' in cmout.module_results.stderr"

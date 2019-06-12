@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc pvc
 '''
@@ -101,9 +102,9 @@ class OCPVCTest(unittest.TestCase):
         results = OCPVC.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'mypvc')
-        self.assertEqual(results['results']['results'][0]['spec']['storageClassName'], 'myStorage')
-        self.assertEqual(results['results']['results'][0]['spec']['selector']['matchLabels']['foo'], 'bar')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'mypvc')
+        self.assertEqual(results['module_results']['results'][0]['spec']['storageClassName'], 'myStorage')
+        self.assertEqual(results['module_results']['results'][0]['spec']['selector']['matchLabels']['foo'], 'bar')
 
     @mock.patch('oc_pvc.Utils.create_tmpfile_copy')
     @mock.patch('oc_pvc.OCPVC._run')
@@ -206,7 +207,7 @@ class OCPVCTest(unittest.TestCase):
         results = OCPVC.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertEqual(results['results']['msg'], '##### - This volume is currently bound.  Will not update - ####')
+        self.assertEqual(results['module_results']['msg'], '##### - This volume is currently bound.  Will not update - ####')
 
     @mock.patch('oc_pvc.Utils.create_tmpfile_copy')
     @mock.patch('oc_pvc.OCPVC._run')

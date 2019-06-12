@@ -10,4 +10,4 @@
 - name: Upgrade node problem detector daemonset
   include_tasks: install_daemonset.yaml
   when:
-  - npd_daemonset.results.results[0] != {}
+  - npd_daemonset.module_results.results[0] != {}

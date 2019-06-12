@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc secret add
 '''
@@ -164,7 +165,7 @@ secrets:
 
         # Assert
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
+        self.assertEqual(results['module_results']['returncode'], 0)
         self.assertEqual(results['state'], 'present')
 
         # Making sure our mocks were called as we expected
@@ -287,7 +288,7 @@ secrets:
 
         # Assert
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
+        self.assertEqual(results['module_results']['returncode'], 0)
         self.assertEqual(results['state'], 'absent')
 
         # Making sure our mocks were called as we expected

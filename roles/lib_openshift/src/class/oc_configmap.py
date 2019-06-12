@@ -125,7 +125,7 @@ class OCConfigMap(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         if not params['name']:
             return {'failed': True,
@@ -146,7 +146,7 @@ class OCConfigMap(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {'failed': True, 'msg': api_rval}
 
-            return {'changed': True, 'results': api_rval, 'state': state}
+            return {'changed': True, 'module_results': api_rval, 'state': state}
 
         ########
         # Create
@@ -167,7 +167,7 @@ class OCConfigMap(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             ########
             # Update
@@ -184,8 +184,8 @@ class OCConfigMap(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         return {'failed': True, 'msg': 'Unknown state passed. {}'.format(state)}

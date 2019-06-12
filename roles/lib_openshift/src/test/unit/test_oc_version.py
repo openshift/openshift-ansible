@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc version
 '''
@@ -49,9 +50,9 @@ class OCVersionTest(unittest.TestCase):
         results = OCVersion.run_ansible(params)
 
         self.assertFalse(results['changed'])
-        self.assertEqual(results['results']['oc_short'], '3.4')
-        self.assertEqual(results['results']['oc_numeric'], '3.4.0.39')
-        self.assertEqual(results['results']['kubernetes_numeric'], '1.4.0')
+        self.assertEqual(results['module_results']['oc_short'], '3.4')
+        self.assertEqual(results['module_results']['oc_numeric'], '3.4.0.39')
+        self.assertEqual(results['module_results']['kubernetes_numeric'], '1.4.0')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')

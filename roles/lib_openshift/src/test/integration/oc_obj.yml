@@ -3,7 +3,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
   - name: create test project
     oc_project:
@@ -87,8 +87,8 @@
 
   - assert:
       that:
-      - dcout.results.returncode == 0
-      - dcout.results.results[0].metadata.name == 'mysql'
+      - dcout.module_results.returncode == 0
+      - dcout.module_results.results[0].metadata.name == 'mysql'
   # End Create Check #
 
 
@@ -99,7 +99,6 @@
       kind: dc
       state: absent
       namespace: test
-    register: dcout
 
   - name: fetch delete dc
     oc_obj:
@@ -113,8 +112,8 @@
 
   - assert:
       that:
-      - dcout.results.returncode == 0
-      - "'\"mysql\" not found' in dcout.results.stderr"
+      - dcout.module_results.returncode == 0
+      - "'\"mysql\" not found' in dcout.module_results.stderr"
   # End Delete Check #
 
   # Delete selector Check #
@@ -203,5 +202,5 @@
 
   - assert:
       that:
-      - dcout.results.returncode == 0
-      - dcout.results.results[0]["items"]|length == 0
+      - dcout.module_results.returncode == 0
+      - dcout.module_results.results[0]["items"]|length == 0

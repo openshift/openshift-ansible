@@ -31,6 +31,6 @@
         l_nfs_export_name: "{{ __openshift_management_flavor_short }}-db"
         l_nfs_options: "*(rw,no_root_squash,no_wdelay)"
       when:
-        - not __openshift_management_use_ext_db
+        - not __openshift_management_use_ext_db | bool
 
   delegate_to: "{{ openshift_management_nfs_server }}"

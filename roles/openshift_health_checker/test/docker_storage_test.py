@@ -21,84 +21,74 @@ def non_atomic_task_vars():
     return {"openshift_is_atomic": False}
 
 
-@pytest.mark.parametrize('docker_info, failed, expect_msg', [
+@pytest.mark.parametrize('command_result, failed, expect_msg', [
     (
-        dict(failed=True, msg="Error connecting: Error while fetching server API version"),
-        True,
-        ["Is docker running on this host?"],
-    ),
-    (
-        dict(msg="I have no info"),
-        True,
-        ["missing info"],
-    ),
-    (
-        dict(info={
-            "Driver": "devicemapper",
-            "DriverStatus": [("Pool Name", "docker-docker--pool")],
-        }),
+        dict(stdout='{ \
+            "Driver": "devicemapper", \
+            "DriverStatus": [["Pool Name", "docker-docker--pool"]] \
+        }'),
         False,
         [],
     ),
     (
-        dict(info={
-            "Driver": "devicemapper",
-            "DriverStatus": [("Data loop file", "true")],
-        }),
+        dict(stdout='{ \
+            "Driver": "devicemapper", \
+            "DriverStatus": [["Data loop file", "true"]] \
+        }'),
         True,
-        ["loopback devices with the Docker devicemapper storage driver"],
+        ["loopback devices with the Docker devicemapper storage driver"]
     ),
     (
-        dict(info={
-            "Driver": "overlay2",
-            "DriverStatus": [("Backing Filesystem", "xfs")],
-        }),
+        dict(stdout='{ \
+            "Driver": "overlay2", \
+            "DriverStatus": [["Backing Filesystem", "xfs"]] \
+        }'),
         False,
         [],
     ),
     (
-        dict(info={
-            "Driver": "overlay",
-            "DriverStatus": [("Backing Filesystem", "btrfs")],
-        }),
+        dict(stdout='{ \
+            "Driver": "overlay", \
+            "DriverStatus": [["Backing Filesystem", "btrfs"]] \
+        }'),
         True,
         ["storage is type 'btrfs'", "only supported with\n'xfs'"],
     ),
     (
-        dict(info={
-            "Driver": "overlay2",
-            "DriverStatus": [("Backing Filesystem", "xfs")],
-            "OperatingSystem": "Red Hat Enterprise Linux Server release 7.2 (Maipo)",
-            "KernelVersion": "3.10.0-327.22.2.el7.x86_64",
-        }),
+        dict(stdout='{ \
+            "Driver": "overlay2", \
+            "DriverStatus": [["Backing Filesystem", "xfs"]], \
+            "OperatingSystem": "Red Hat Enterprise Linux Server release 7.2 (Maipo)", \
+            "KernelVersion": "3.10.0-327.22.2.el7.x86_64" \
+        }'),
         True,
         ["Docker reports kernel version 3.10.0-327"],
     ),
     (
-        dict(info={
-            "Driver": "overlay",
-            "DriverStatus": [("Backing Filesystem", "xfs")],
-            "OperatingSystem": "CentOS",
-            "KernelVersion": "3.10.0-514",
-        }),
+        dict(stdout='{ \
+            "Driver": "overlay", \
+            "DriverStatus": [["Backing Filesystem", "xfs"]], \
+            "OperatingSystem": "CentOS", \
+            "KernelVersion": "3.10.0-514" \
+        }'),
         False,
         [],
     ),
     (
-        dict(info={
-            "Driver": "unsupported",
-        }),
+        dict(stdout='{ \
+            "Driver": "unsupported" \
+        }'),
         True,
         ["unsupported Docker storage driver"],
     ),
 ])
-def test_check_storage_driver(docker_info, failed, expect_msg):
+def test_check_storage_driver(command_result, failed, expect_msg):
     def execute_module(module_name, *_):
         if module_name == "yum":
             return {}
-        if module_name != "docker_info":
+        if module_name != "command":
             raise ValueError("not expecting module " + module_name)
-        return docker_info
+        return command_result
 
     check = DockerStorage(execute_module, non_atomic_task_vars())
     check.check_dm_usage = lambda status: dict()  # stub out for this test
