@@ -1,0 +1,22 @@
+---
+- name: Get remote imagestream json file
+  slurp:
+    src: "{{ openshift_example_remote_imagestream }}"
+  register: imagestreams_encoded
+
+- set_fact:
+    openshift_examples_imagestreams: "{{ (imagestreams_encoded['content'] | b64decode | from_json) }}"
+
+- set_fact:
+    openshift_examples_modified_imagestreams: "{% set updatedislist = [] %}{% set updatedspec = {} %}{% set updatedimagestream = {} %}{% for is in openshift_examples_imagestreams['items'] %}{% set updatedtags = [] %}{% for tag in is['spec']['tags'] %}{{ updatedtags.append(tag | combine({'referencePolicy': {'type': 'Source'}})) }}{% endfor %}{% set updatedspec = (is['spec'] | combine({'tags': updatedtags})) %}{% set updatedimagestream = (is | combine({'spec': updatedspec})) %}{% set _ = updatedislist.append(updatedimagestream) %}{% endfor %}{{ updatedislist }}"
+
+- name: Import Modified ImageStreams
+  oc_obj:
+    kubeconfig: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    namespace: openshift
+    kind: is
+    content:
+      path: "/tmp/imagestreams"
+      data: "{{ item }}"
+    name: "{{ item['metadata']['name'] }}"
+  with_items: "{{ openshift_examples_modified_imagestreams }}"

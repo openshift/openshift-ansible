@@ -1,4 +1,36 @@
 ---
+- include_tasks: modify_imagestreams.yml
+  vars:
+    openshift_example_remote_imagestream: "{{ outer_item.path }}"
+  with_items:
+  - { path: "{{ rhel_image_streams }}", check: "{{ openshift_examples_load_rhel }}" }
+  - { path: "{{ rhel_dotnet_streams }}", check: "{{ openshift_examples_load_rhel }}" }
+  - { path: "{{ centos_image_streams }}", check: "{{ openshift_examples_load_centos }}" }
+  - { path: "{{ centos_dotnet_streams }}", check: "{{ openshift_examples_load_centos }}" }
+  loop_control:
+    loop_var: outer_item
+  when:
+  - outer_item.check | default(true) | bool
+  - not (openshift_hosted_manage_registry | default(true) | bool)
+
+- name: Get xPaaS ImageStream files
+  find:
+    paths: "{{ xpaas_image_streams }}"
+    patterns: "*.json"
+  register: openshift_examples_xpaas_dir_list
+  when:
+  - openshift_examples_load_xpaas | bool
+  - not (openshift_hosted_manage_registry | default(true) | bool)
+
+- include_tasks: modify_imagestreams.yml
+  vars:
+    openshift_example_remote_imagestream: "{{ outer_item.path }}"
+  with_items: "{{ openshift_examples_xpaas_dir_list.files }}"
+  loop_control:
+    loop_var: outer_item
+  when:
+  - openshift_examples_load_xpaas | bool
+  - not (openshift_hosted_manage_registry | default(true) | bool)
 
 # RHEL and Centos image streams are mutually exclusive
 - name: Import RHEL streams
