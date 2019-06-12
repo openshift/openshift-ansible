@@ -195,7 +195,7 @@
 
 - name: Set openshift_logging_fluentd_hosts
   set_fact:
-    openshift_logging_fluentd_hosts: "{{ fluentd_hosts.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+    openshift_logging_fluentd_hosts: "{{ fluentd_hosts.module_results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   when: "'--all' in openshift_logging_fluentd_hosts"
 
 # We need to pause between nodes while labeling to avoid overloading the scheduler.

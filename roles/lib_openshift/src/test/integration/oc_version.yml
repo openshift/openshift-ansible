@@ -3,7 +3,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   tasks:
   - name: Get openshift version
     oc_version:
@@ -13,5 +13,5 @@
 
   - assert:
       that:
-      - "'oc_numeric' in versionout.results.keys()"
+      - "'oc_numeric' in versionout.module_results.keys()"
       msg: "Did not find 'oc_numeric' in version results."

@@ -561,7 +561,7 @@ that result to this filter plugin.
 
     - name: Save the SA bearer token secret name
       set_fact:
-        management_token: "{{ sa.results | lib_utils_oo_filter_sa_secrets }}"
+        management_token: "{{ sa.module_results | lib_utils_oo_filter_sa_secrets }}"
 
     - name: Get the SA bearer token value
       oc_secret:
@@ -573,7 +573,7 @@ that result to this filter plugin.
 
     - name: Print the bearer token value
       debug:
-        var: sa_secret.results.decoded.token
+        var: sa_secret.module_results.decoded.token
 
     """
     secret_name = None

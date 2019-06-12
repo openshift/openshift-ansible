@@ -44,14 +44,14 @@
     is_legacy_ocs_version: "{{ version != 'latest' and version is version_compare('3.11.1', '<') }}"
     gluster_use_legacy_ocs: "{{ is_enterprise and is_legacy_ocs_version }}"
     host_dev_dir: "{{ '/dev' if gluster_use_legacy_ocs else '/mnt/host-dev' }}"
-  when: (glusterfs_ds.results.results[0].status is not defined) or
-        (glusterfs_ds.results.results[0].status.numberReady | default(0) < glusterfs_ds.results.results[0].status.desiredNumberScheduled | default(glusterfs_nodes | count))
+  when: (glusterfs_ds.module_results.results[0].status is not defined) or
+        (glusterfs_ds.module_results.results[0].status.numberReady | default(0) < glusterfs_ds.module_results.results[0].status.desiredNumberScheduled | default(glusterfs_nodes | count))
 
 - import_tasks: wait_for_pods.yml
 
 - name: Get GlusterFS pods
   set_fact:
-    glusterfs_pods: "{{ glusterfs_pods_wait.results.results[0]['items'] }}"
+    glusterfs_pods: "{{ glusterfs_pods_wait.module_results.results[0]['items'] }}"
   when:
   - glusterfs_restart
 

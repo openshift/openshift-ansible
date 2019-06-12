@@ -34,8 +34,8 @@
       name: prometheus-k8s
     register: prometheus_ss
     until:
-    - prometheus_ss.results.results[0].status.readyReplicas is defined
-    - prometheus_ss.results.results[0].status.readyReplicas > 0
+    - prometheus_ss.module_results.results[0].status.readyReplicas is defined
+    - prometheus_ss.module_results.results[0].status.readyReplicas > 0
     retries: 60
     delay: 10
     changed_when: false
@@ -55,8 +55,8 @@
       name: alertmanager-main
     register: alertmanager_ss
     until:
-    - alertmanager_ss.results.results[0].status.readyReplicas is defined
-    - alertmanager_ss.results.results[0].status.readyReplicas > 0
+    - alertmanager_ss.module_results.results[0].status.readyReplicas is defined
+    - alertmanager_ss.module_results.results[0].status.readyReplicas > 0
     retries: 60
     delay: 10
     changed_when: false
@@ -76,8 +76,8 @@
       name: kube-state-metrics
     register: kube_state_metrics_deployment
     until:
-    - kube_state_metrics_deployment.results.results[0].status.readyReplicas is defined
-    - kube_state_metrics_deployment.results.results[0].status.readyReplicas > 0
+    - kube_state_metrics_deployment.module_results.results[0].status.readyReplicas is defined
+    - kube_state_metrics_deployment.module_results.results[0].status.readyReplicas > 0
     retries: 60
     delay: 10
     changed_when: false
@@ -97,8 +97,8 @@
       name: grafana
     register: grafana_deployment
     until:
-    - grafana_deployment.results.results[0].status.readyReplicas is defined
-    - grafana_deployment.results.results[0].status.readyReplicas > 0
+    - grafana_deployment.module_results.results[0].status.readyReplicas is defined
+    - grafana_deployment.module_results.results[0].status.readyReplicas > 0
     retries: 60
     delay: 10
     changed_when: false
@@ -118,8 +118,8 @@
       name: node-exporter
     register: node_exporter_ds
     until:
-    - node_exporter_ds.results.results[0].status.numberReady is defined
-    - node_exporter_ds.results.results[0].status.numberReady > 0
+    - node_exporter_ds.module_results.results[0].status.numberReady is defined
+    - node_exporter_ds.module_results.results[0].status.numberReady > 0
     retries: 60
     delay: 10
     changed_when: false

@@ -8,9 +8,9 @@
 
 - set_fact:
     available_pod: "{{ item.metadata.name }}"
-  with_items: "{{ pod_list.results.results[0]['items'] }}"
+  with_items: "{{ pod_list.module_results.results[0]['items'] }}"
   when:
-  - pod_list.results.results is defined
+  - pod_list.module_results.results is defined
   - item.status.phase == "Running"
   - item.status.containerStatuses[0].ready == true
   - item.status.containerStatuses[1].ready == true
@@ -30,9 +30,9 @@
 
 - set_fact:
     available_ops_pod: "{{ item.metadata.name }}"
-  with_items: "{{ ops_pod_list.results.results[0]['items'] }}"
+  with_items: "{{ ops_pod_list.module_results.results[0]['items'] }}"
   when:
-  - ops_pod_list.results.results is defined
+  - ops_pod_list.module_results.results is defined
   - item.status.phase == "Running"
   - item.status.containerStatuses[0].ready == true
   - item.status.containerStatuses[1].ready == true

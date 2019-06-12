@@ -86,4 +86,4 @@
       'openshift_management_template_parameters'"
   with_items: "{{ __openshift_management_required_db_conn_params }}"
   when:
-    - __openshift_management_use_ext_db
+    - __openshift_management_use_ext_db | bool

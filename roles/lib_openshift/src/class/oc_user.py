@@ -160,7 +160,7 @@ class OCUser(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval['results'], 'state': "list"}
+            return {'changed': False, 'module_results': api_rval['results'], 'state': 'list'}
 
         ########
         # Delete
@@ -173,7 +173,7 @@ class OCUser(OpenShiftCLI):
 
                 api_rval = oc_user.delete()
 
-                return {'changed': True, 'results': api_rval, 'state': "absent"}
+                return {'changed': True, 'module_results': api_rval, 'state': 'absent'}
             return {'changed': False, 'state': "absent"}
 
         if state == 'present':
@@ -197,7 +197,7 @@ class OCUser(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': "present"}
+                return {'changed': True, 'module_results': api_rval, 'state': 'present'}
 
             ########
             # Update
@@ -217,9 +217,9 @@ class OCUser(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': "present"}
+                return {'changed': True, 'module_results': api_rval, 'state': 'present'}
 
-            return {'changed': False, 'results': api_rval, 'state': "present"}
+            return {'changed': False, 'module_results': api_rval, 'state': 'present'}
 
         return {'failed': True,
                 'changed': False,

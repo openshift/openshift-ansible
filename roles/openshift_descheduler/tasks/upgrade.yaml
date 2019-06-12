@@ -10,4 +10,4 @@
 - name: Upgrade descheduler cronjob
   include_tasks: install_descheduler.yaml
   when:
-  - descheduler_cronjob.results.results[0] != {}
+  - descheduler_cronjob.module_results.results[0] != {}

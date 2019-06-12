@@ -52,8 +52,8 @@
     {{ openshift_client_binary }} process openshift//registry-console
     -p IMAGE_NAME="{{ openshift_cockpit_deployer_image }}"
     -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
-    -p REGISTRY_HOST="{{ docker_registry_route.results[0].spec.host }}"
-    -p COCKPIT_KUBE_URL="https://{{ registry_console_cockpit_kube.results.results[0].spec.host }}"
+    -p REGISTRY_HOST="{{ docker_registry_route.module_results[0].spec.host }}"
+    -p COCKPIT_KUBE_URL="https://{{ registry_console_cockpit_kube.module_results.results[0].spec.host }}"
     --config={{ mktemp.stdout }}/admin.kubeconfig
     -n default
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -

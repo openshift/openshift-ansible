@@ -7,11 +7,11 @@
   register: _logging_dcs
 
 - set_fact:
-    _current_logging_namespace: "{{ _logging_dcs.results.results[0]['items'] | map(attribute='metadata.namespace') | list | unique | join(' ') }}"
+    _current_logging_namespace: "{{ _logging_dcs.module_results.results[0]['items'] | map(attribute='metadata.namespace') | list | unique | join(' ') }}"
   when:
   - _logging_dcs is defined
-  - _logging_dcs.results | count > 0
-  - _logging_dcs.results.results | count > 0
+  - _logging_dcs.module_results | count > 0
+  - _logging_dcs.module_results.results | count > 0
 
 - when:
   - logging_disable_namespace_check | default(false) | bool

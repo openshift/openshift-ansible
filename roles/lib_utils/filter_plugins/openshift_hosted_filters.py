@@ -26,14 +26,14 @@ class FilterModule(object):
         # Ignore boolean expression limit of 5.
         # pylint: disable=too-many-boolean-expressions
         if (isinstance(router_nodes, dict) and
-                'results' in router_nodes and
-                'results' in router_nodes['results'] and
-                isinstance(router_nodes['results']['results'], list) and
-                len(router_nodes['results']['results']) > 0 and
-                'items' in router_nodes['results']['results'][0]):
+                'module_results' in router_nodes and
+                'results' in router_nodes['module_results'] and
+                isinstance(router_nodes['module_results']['results'], list) and
+                len(router_nodes['module_results']['results']) > 0 and
+                'items' in router_nodes['module_results']['results'][0]):
 
-            if len(router_nodes['results']['results'][0]['items']) > 0:
-                replicas = len(router_nodes['results']['results'][0]['items'])
+            if len(router_nodes['module_results']['results'][0]['items']) > 0:
+                replicas = len(router_nodes['module_results']['results'][0]['items'])
 
         return replicas
 

@@ -96,7 +96,7 @@ class OCClusterRole(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         ########
         # Delete
@@ -112,7 +112,7 @@ class OCClusterRole(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             return {'changed': False, 'state': state}
 
@@ -137,7 +137,7 @@ class OCClusterRole(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             ########
             # Update
@@ -158,9 +158,9 @@ class OCClusterRole(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         return {'failed': True,
                 'changed': False,

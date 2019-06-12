@@ -123,7 +123,7 @@
   register: asb_client_secret
 
 - set_fact:
-    service_ca_crt: "{{ asb_client_secret.results.results.0.data['service-ca.crt'] }}"
+    service_ca_crt: "{{ asb_client_secret.module_results.results.0.data['service-ca.crt'] }}"
 
 - name: Create custom resource definitions for asb
   oc_obj:
@@ -182,7 +182,7 @@
       service: asb
     service_name: asb
     port: 1337
-  when: ansible_service_broker_enable_dashboard_redirector
+  when: ansible_service_broker_enable_dashboard_redirector | bool
 
 - name: Set Ansible Service Broker deployment config
   oc_obj:

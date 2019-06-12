@@ -4,7 +4,7 @@
 # In some cases, some services may be run as containers and docker may still
 # be installed via rpm.
 - import_tasks: common/atomic_proxy.yml
-  when: openshift_is_atomic
+  when: openshift_is_atomic | bool
 
 - name: Get current installed Docker version
   command: "{{ repoquery_installed }} --qf '%{version}' docker"

@@ -130,7 +130,7 @@ class OCVolume(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval['results'], 'state': state}
+            return {'changed': False, 'module_results': api_rval['results'], 'state': state}
 
         ########
         # Delete
@@ -146,7 +146,7 @@ class OCVolume(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             return {'changed': False, 'state': state}
 
@@ -171,7 +171,7 @@ class OCVolume(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             ########
             # Update
@@ -188,8 +188,8 @@ class OCVolume(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, state: state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
-            return {'changed': False, 'results': api_rval, state: state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         return {'failed': True, 'msg': 'Unknown state passed. {}'.format(state)}

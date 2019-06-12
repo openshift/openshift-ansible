@@ -14,7 +14,7 @@
     name: "{{ object }}"
     namespace: "{{openshift_provisioners_project}}"
     replicas: 1
-  with_items: "{{ efs_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  with_items: "{{ efs_dc.module_results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
   when: openshift_provisioners_efs | bool

@@ -16,7 +16,6 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
     name = "docker_storage"
     tags = ["health", "preflight"]
 
-    dependencies = ["python-docker-py"]
     storage_drivers = ["devicemapper", "overlay", "overlay2"]
     max_thinpool_data_usage_percent = 90.0
     max_thinpool_meta_usage_percent = 90.0
@@ -42,22 +41,15 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
     ]
 
     def run(self):
-        msg, failed = self.ensure_dependencies()
-        if failed:
-            return {
-                "failed": True,
-                "msg": "Some dependencies are required in order to query docker storage on host:\n" + msg
-            }
-
-        # attempt to get the docker info hash from the API
-        docker_info = self.execute_module("docker_info", {})
-        if docker_info.get("failed"):
-            return {"failed": True,
-                    "msg": "Failed to query Docker API. Is docker running on this host?"}
-        if not docker_info.get("info"):  # this would be very strange
-            return {"failed": True,
-                    "msg": "Docker API query missing info:\n{}".format(json.dumps(docker_info))}
-        docker_info = docker_info["info"]
+        # attempt to get the docker info hash from the docker cli
+        command = ' '.join(['docker', 'info', '--format', '"{{json .}}"'])
+        command_args = dict(_raw_params=command)
+        command_result = self._execute_module('command', command_args)
+        if command_result.get('rc', 0) != 0 or command_result.get('failed'):
+            raise OpenShiftCheckException(
+                'RemoteCommandFailure',
+                'Failed to execute command on remote host: %s' % command)
+        docker_info = json.loads(command_result["stdout"])
 
         # check if the storage driver we saw is valid
         driver = docker_info.get("Driver", "[NONE]")

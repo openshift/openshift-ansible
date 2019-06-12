@@ -202,7 +202,7 @@ class PolicyGroup(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {'msg': api_rval}
 
-            return {'changed': True, 'results' : api_rval, state:'absent'}
+            return {'changed': True, 'module_results' : api_rval, 'state':'absent'}
 
         if state == 'present':
             ########
@@ -222,8 +222,8 @@ class PolicyGroup(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, state: 'present'}
+                return {'changed': True, 'module_results': api_rval, 'state': 'present'}
 
             return {'changed': False, state: 'present'}
 
-        return {'failed': True, 'changed': False, 'results': 'Unknown state passed. %s' % state, state: 'unknown'}
+        return {'failed': True, 'changed': False, 'msg': 'Unknown state passed. %s' % state, state: 'unknown'}

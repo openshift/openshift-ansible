@@ -173,7 +173,7 @@ class OCcsr(OpenShiftCLI):
         api_rval = client.get()
 
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         if state in ['approve', 'deny']:
             if check_mode:

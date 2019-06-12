@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc label
 '''
@@ -79,7 +80,7 @@ class OCLabelTest(unittest.TestCase):
         results = OCLabel.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertTrue(results['results']['labels'] == [{'storage_pv_quota': 'False'}])
+        self.assertTrue(results['module_results']['labels'] == [{'storage_pv_quota': 'False'}])
 
     @mock.patch('oc_label.Utils.create_tmpfile_copy')
     @mock.patch('oc_label.OCLabel._run')
@@ -173,7 +174,7 @@ class OCLabelTest(unittest.TestCase):
         results = OCLabel.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['results']['labels'][0] ==
+        self.assertTrue(results['module_results']['results']['labels'][0] ==
                         {'storage_pv_quota': 'False', 'awesomens': 'testinglabel'})
 
     @unittest.skipIf(six.PY3, 'py2 test only')

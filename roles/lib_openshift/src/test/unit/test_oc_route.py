@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc route
 '''
@@ -123,7 +124,7 @@ class OCRouteTest(unittest.TestCase):
         # Assert
         self.assertFalse(results['changed'])
         self.assertEqual(results['state'], 'list')
-        self.assertEqual(results['results'][0]['metadata']['name'], 'test')
+        self.assertEqual(results['module_results'][0]['metadata']['name'], 'test')
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -255,8 +256,8 @@ metadata:
         # Assert
         self.assertTrue(results['changed'])
         self.assertEqual(results['state'], 'present')
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'test')
-        self.assertEqual(results['results']['results'][0]['metadata']['labels']['route'], 'route')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['name'], 'test')
+        self.assertEqual(results['module_results']['results'][0]['metadata']['labels']['route'], 'route')
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([

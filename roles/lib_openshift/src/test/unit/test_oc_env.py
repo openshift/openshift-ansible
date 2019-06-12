@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc_env
 '''
@@ -126,7 +127,7 @@ class OCEnvTest(unittest.TestCase):
 
         # Assert
         self.assertFalse(results['changed'])
-        for env_var in results['results']:
+        for env_var in results['module_results']:
             if env_var == {'name': 'DEFAULT_CERTIFICATE_DIR', 'value': '/etc/pki/tls/private'}:
                 break
         else:
@@ -312,7 +313,7 @@ class OCEnvTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(results['changed'])
-        for env_var in results['results']:
+        for env_var in results['module_results']:
             if env_var == {'name': 'SOMEKEY', 'value': 'SOMEVALUE'}:
                 break
         else:

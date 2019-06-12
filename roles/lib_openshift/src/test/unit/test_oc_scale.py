@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc scale
 '''
@@ -67,7 +68,7 @@ class OCScaleTest(unittest.TestCase):
         results = OCScale.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertEqual(results['result'][0], 2)
+        self.assertEqual(results['module_results'][0], 2)
 
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
@@ -113,7 +114,7 @@ class OCScaleTest(unittest.TestCase):
 
         self.assertFalse(results['changed'])
         self.assertEqual(results['state'], 'present')
-        self.assertEqual(results['result'][0], 2)
+        self.assertEqual(results['module_results'][0], 2)
 
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
@@ -186,7 +187,7 @@ class OCScaleTest(unittest.TestCase):
 
         self.assertTrue(results['changed'])
         self.assertEqual(results['state'], 'present')
-        self.assertEqual(results['result'][0], 3)
+        self.assertEqual(results['module_results'][0], 3)
 
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
@@ -259,7 +260,7 @@ class OCScaleTest(unittest.TestCase):
 
         self.assertTrue(results['changed'])
         self.assertEqual(results['state'], 'present')
-        self.assertEqual(results['result'][0], 1)
+        self.assertEqual(results['module_results'][0], 1)
 
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
@@ -404,7 +405,7 @@ class OCScaleTest(unittest.TestCase):
         results = OCScale.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertEqual(results['result'][0], 3)
+        self.assertEqual(results['module_results'][0], 3)
 
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
@@ -453,7 +454,7 @@ class OCScaleTest(unittest.TestCase):
         results = OCScale.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertEqual(results['result'][0], 3)
+        self.assertEqual(results['module_results'][0], 3)
 
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')

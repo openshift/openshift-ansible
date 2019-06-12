@@ -81,7 +81,7 @@ class OCScale(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'result': api_rval['results'], 'state': 'list'}  # noqa: E501
+            return {'changed': False, 'module_results': api_rval['results'], 'state': 'list'}  # noqa: E501
 
         elif state == 'present':
             ########
@@ -89,7 +89,7 @@ class OCScale(OpenShiftCLI):
             ########
             if oc_scale.needs_update():
                 if check_mode:
-                    return {'changed': True, 'result': 'CHECK_MODE: Would have updated.'}  # noqa: E501
+                    return {'changed': True, 'module_results': 'CHECK_MODE: Would have updated.'}  # noqa: E501
                 api_rval = oc_scale.put()
 
                 if api_rval['returncode'] != 0:
@@ -101,8 +101,8 @@ class OCScale(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'result': api_rval['results'], 'state': 'present'}  # noqa: E501
+                return {'changed': True, 'module_results': api_rval['results'], 'state': 'present'}  # noqa: E501
 
-            return {'changed': False, 'result': api_rval['results'], 'state': 'present'}  # noqa: E501
+            return {'changed': False, 'module_results': api_rval['results'], 'state': 'present'}  # noqa: E501
 
         return {'failed': True, 'msg': 'Unknown state passed. [{}]'.format(state)}

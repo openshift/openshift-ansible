@@ -73,7 +73,7 @@ class OCUserTest(unittest.TestCase):
         results = OCUser.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
-        self.assertTrue(results['results'][0]['metadata']['name'] == "testuser@email.com")
+        self.assertTrue(results['module_results'][0]['metadata']['name'] == "testuser@email.com")
 
     @mock.patch('oc_user.Utils.create_tmpfile_copy')
     @mock.patch('oc_user.OCUser._run')
@@ -115,7 +115,7 @@ class OCUserTest(unittest.TestCase):
         results = OCUser.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['results'][0]['metadata']['name'] ==
+        self.assertTrue(results['module_results']['results'][0]['metadata']['name'] ==
                         "testuser@email.com")
 
     def tearDown(self):

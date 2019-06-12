@@ -41,7 +41,7 @@ __openshift_management_flavors:
 __openshift_management_flavor: "{{ __openshift_management_flavors[openshift_management_app_template.split('-')[0]]['long'] }}"
 __openshift_management_flavor_short: "{{ __openshift_management_flavors[openshift_management_app_template.split('-')[0]]['short'] }}"
 
-__openshift_management_use_ext_db: "{{ true if 'ext-db' in openshift_management_app_template else false }}"
+__openshift_management_use_ext_db: "true if 'ext-db' in openshift_management_app_template else false"
 
 ######################################################################
 # ACCOUNTING

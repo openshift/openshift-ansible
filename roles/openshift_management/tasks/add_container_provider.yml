@@ -28,7 +28,7 @@
 
 - name: Ensure the management SA bearer token is identified
   set_fact:
-    management_token: "{{ sa.results | lib_utils_oo_filter_sa_secrets }}"
+    management_token: "{{ sa.module_results | lib_utils_oo_filter_sa_secrets }}"
 
 - name: Ensure the SA bearer token value is read
   oc_secret:
@@ -41,7 +41,7 @@
 
 - name: Ensure the SA bearer token value is saved
   set_fact:
-    management_bearer_token: "{{ sa_secret.results.decoded.token }}"
+    management_bearer_token: "{{ sa_secret.module_results.decoded.token }}"
 
 - name: Ensure we have the public route to the management service
   oc_route:
@@ -52,7 +52,7 @@
 
 - name: Ensure the management service route is saved
   set_fact:
-    management_route: "{{ route.results.0.spec.host }}"
+    management_route: "{{ route.module_results.0.spec.host }}"
 
 - name: Ensure this cluster is a container provider
   uri:

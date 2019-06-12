@@ -750,7 +750,7 @@ class Yedit(object):  # pragma: no cover
             if params['key']:
                 rval = yamlfile.get(params['key'])
 
-            return {'changed': False, 'result': rval, 'state': state}
+            return {'changed': False, 'module_results': rval, 'state': state}
 
         elif state == 'absent':
             if params['content']:
@@ -765,7 +765,7 @@ class Yedit(object):  # pragma: no cover
             if rval[0] and params['src']:
                 yamlfile.write()
 
-            return {'changed': rval[0], 'result': rval[1], 'state': state}
+            return {'changed': rval[0], 'module_results': rval[1], 'state': state}
 
         elif state == 'present':
             # check if content is different than what is in the file
@@ -775,12 +775,12 @@ class Yedit(object):  # pragma: no cover
                 # We had no edits to make and the contents are the same
                 if yamlfile.yaml_dict == content and \
                    params['value'] is None:
-                    return {'changed': False, 'result': yamlfile.yaml_dict, 'state': state}
+                    return {'changed': False, 'module_results': yamlfile.yaml_dict, 'state': state}
 
                 yamlfile.yaml_dict = content
 
             # If we were passed a key, value then
-            # we enapsulate it in a list and process it
+            # we encapsulate it in a list and process it
             # Key, Value passed to the module : Converted to Edits list #
             edits = []
             _edit = {}
@@ -810,19 +810,19 @@ class Yedit(object):  # pragma: no cover
                 if results['changed'] and params['src']:
                     yamlfile.write()
 
-                return {'changed': results['changed'], 'result': results['results'], 'state': state}
+                return {'changed': results['changed'], 'module_results': results['results'], 'state': state}
 
             # no edits to make
             if params['src']:
                 # pylint: disable=redefined-variable-type
                 rval = yamlfile.write()
                 return {'changed': rval[0],
-                        'result': rval[1],
+                        'module_results': rval[1],
                         'state': state}
 
             # We were passed content but no src, key or value, or edits.  Return contents in memory
-            return {'changed': False, 'result': yamlfile.yaml_dict, 'state': state}
-        return {'failed': True, 'msg': 'Unkown state passed'}
+            return {'changed': False, 'module_results': yamlfile.yaml_dict, 'state': state}
+        return {'failed': True, 'msg': 'Unknown state passed'}
 
 # -*- -*- -*- End included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 
@@ -1767,7 +1767,7 @@ class OCClusterRole(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         ########
         # Delete
@@ -1783,7 +1783,7 @@ class OCClusterRole(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             return {'changed': False, 'state': state}
 
@@ -1808,7 +1808,7 @@ class OCClusterRole(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             ########
             # Update
@@ -1829,9 +1829,9 @@ class OCClusterRole(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         return {'failed': True,
                 'changed': False,

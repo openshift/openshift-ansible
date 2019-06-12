@@ -69,7 +69,7 @@ EXAMPLES = '''
 #    ok: [localhost] => {
 #        "bash_out": {
 #            "changed": false,
-#            "results": {
+#            "module_results": {
 #                "cmd": "/usr/bin/repoquery --quiet --pkgnarrow=repos --queryformat=%{version}|%{release}|%{arch}|%{repo}|%{version}-%{release} --show-duplicates bash",
 #                "package_found": true,
 #                "package_name": "bash",
@@ -115,7 +115,7 @@ EXAMPLES = '''
 #    ok: [localhost] => {
 #        "bash_out": {
 #            "changed": false,
-#            "results": {
+#            "module_results": {
 #                "cmd": "/usr/bin/repoquery --quiet --pkgnarrow=repos --queryformat=%{version}|%{release}|%{arch}|%{repo}|%{version}-%{release} --show-duplicates bash",
 #                "package_found": true,
 #                "package_name": "bash",
@@ -212,7 +212,7 @@ EXAMPLES = '''
 #    ok: [localhost] => {
 #        "openshift_out": {
 #            "changed": false,
-#            "results": {
+#            "module_results": {
 #                "cmd": "/usr/bin/repoquery --quiet --pkgnarrow=repos --queryformat=%{version}|%{release}|%{arch}|%{repo}|%{version}-%{release} --show-duplicates atomic-openshift",
 #                "package_found": true,
 #                "package_name": "atomic-openshift",

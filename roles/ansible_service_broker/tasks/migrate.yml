@@ -132,18 +132,18 @@
       register: migration_status
       ignore_errors: true
       until:
-        - "'results' in migration_status"
-        - "'results' in migration_status.results"
-        - "migration_status.results.results | count > 0"
+        - migration_status.module_results is defined
+        - migration_status.module_results.results is defined
+        - migration_status.module_results.results | count > 0
         # Pod's 'Complete' status must be True
-        - "migration_status.results.results | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Complete'}) | map('bool') | select | list | count == 1"
+        - "migration_status.module_results.results | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Complete'}) | map('bool') | select | list | count == 1"
       delay: 10
       retries: "{{ (asb_migration_timeout|default(600) | int / 10) | int }}"
       failed_when:
-        - "'results' in migration_status.results"
-        - "migration_status.results.results | count > 0"
+        - migration_status.module_results is defined
+        - migration_status.module_results.results | count > 0
         # Fail when pod's 'Failed' status is True
-        - "migration_status.results.results | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Failed'}) | map('bool') | select | list | count == 1"
+        - "migration_status.module_results.results | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Failed'}) | map('bool') | select | list | count == 1"
 
     - when: not (migration_status is failed)
       block:

@@ -99,9 +99,6 @@
     import_tasks: tasks/enable_bootstrap.yml
 
   post_tasks:
-  - name: Create group for deployment type
-    group_by: key=oo_masters_deployment_type_{{ openshift_deployment_type }}
-    changed_when: False
   - name: Re-enable excluders
     import_role:
       name: openshift_excluder

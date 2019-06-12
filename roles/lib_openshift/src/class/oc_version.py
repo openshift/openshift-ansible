@@ -43,5 +43,5 @@ class OCVersion(OpenShiftCLI):
             #pylint: disable=protected-access
             result = oc_version.get()
             return {'state': params['state'],
-                    'results': result,
+                    'module_results': result,
                     'changed': False}

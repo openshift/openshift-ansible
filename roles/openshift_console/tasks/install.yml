@@ -34,7 +34,7 @@
   register: console_config_map
 
 - set_fact:
-    existing_config_map_data: "{{ console_config_map.results.results[0].data | default({}) }}"
+    existing_config_map_data: "{{ console_config_map.module_results.results[0].data | default({}) }}"
 
 - name: Copy the existing web console config to temp directory
   copy:

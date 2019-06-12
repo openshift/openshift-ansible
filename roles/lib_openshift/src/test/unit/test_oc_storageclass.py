@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc serviceaccount
 '''
@@ -101,7 +102,7 @@ class OCStorageClassTest(unittest.TestCase):
         # Assert
         self.assertTrue(generated_spec['provisioner'], 'kubernetes.io/aws-ebs')
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
+        self.assertEqual(results['module_results']['returncode'], 0)
         self.assertEqual(results['state'], 'present')
 
         # Making sure our mock was called as we expected
@@ -188,7 +189,7 @@ class OCStorageClassTest(unittest.TestCase):
         # Assert
         self.assertTrue(generated_spec['provisioner'], 'kubernetes.io/aws-ebs')
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
+        self.assertEqual(results['module_results']['returncode'], 0)
         self.assertEqual(results['state'], 'present')
 
         # Making sure our mock was called as we expected

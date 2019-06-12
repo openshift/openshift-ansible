@@ -80,7 +80,7 @@
     key: "kubernetesMasterConfig.apiServerArguments.runtime-config"
     value: "{{ r_c | difference(['apis/settings.k8s.io/v1alpha1=true']) }}"
   vars:
-    r_c: "{{ runtime_config.result | default([]) }}"
+    r_c: "{{ runtime_config.module_result | default([]) }}"
 - name: Copy recyler pod to config directory
   template:
     src: "recycler_pod.yaml.j2"

@@ -3,7 +3,7 @@
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
-  user: root
+
   vars:
     my_env_var:
       SOMEKEY: SOMEVALUE
@@ -24,8 +24,8 @@
 
   - assert:
       that:
-      - "'{{ check_env_var.name }}' == '{{ envout.results[0].name }}'"
-      - "{{ envout.results|length }} > 0"
+      - "'{{ check_env_var.name }}' == '{{ envout.module_results[0].name }}'"
+      - "{{ envout.module_results|length }} > 0"
       msg: "Did not find environment variables."
 
   - name: list environment variables from router dc
@@ -40,8 +40,8 @@
 
   - assert:
       that:
-      - "'SOMEKEY' == '{{ envout.results[-1].name }}'"
-      - "'SOMEVALUE' == '{{ envout.results[-1].value }}'"
+      - "'SOMEKEY' == '{{ envout.module_results[-1].name }}'"
+      - "'SOMEVALUE' == '{{ envout.module_results[-1].value }}'"
       msg: "Did not find updated environment variables."
 
   - name: remove environment variables from router dc
@@ -70,6 +70,6 @@
 
   - assert:
       that:
-      - "'SOMEKEY' != '{{ envout.results[-1].name }}'"
-      - "'SOMEVALUE' != '{{ envout.results[-1].value }}'"
+      - "'SOMEKEY' != '{{ envout.module_results[-1].name }}'"
+      - "'SOMEVALUE' != '{{ envout.module_results[-1].value }}'"
       msg: "Did find updated environment variables."

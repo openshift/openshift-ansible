@@ -33,8 +33,8 @@
     selector: "glusterfs=block-{{ glusterfs_name }}-provisioner-pod"
   register: glusterblock_pod
   until:
-  - "glusterblock_pod.results.results[0]['items'] | count > 0"
+  - "glusterblock_pod.module_results.results[0]['items'] | count > 0"
   # Pod's 'Ready' status must be True
-  - "glusterblock_pod.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+  - "glusterblock_pod.module_results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"

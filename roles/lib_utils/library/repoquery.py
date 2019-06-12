@@ -117,7 +117,7 @@ EXAMPLES = '''
 #    ok: [localhost] => {
 #        "bash_out": {
 #            "changed": false,
-#            "results": {
+#            "module_results": {
 #                "cmd": "/usr/bin/repoquery --quiet --pkgnarrow=repos --queryformat=%{version}|%{release}|%{arch}|%{repo}|%{version}-%{release} --show-duplicates bash",
 #                "package_found": true,
 #                "package_name": "bash",
@@ -163,7 +163,7 @@ EXAMPLES = '''
 #    ok: [localhost] => {
 #        "bash_out": {
 #            "changed": false,
-#            "results": {
+#            "module_results": {
 #                "cmd": "/usr/bin/repoquery --quiet --pkgnarrow=repos --queryformat=%{version}|%{release}|%{arch}|%{repo}|%{version}-%{release} --show-duplicates bash",
 #                "package_found": true,
 #                "package_name": "bash",
@@ -260,7 +260,7 @@ EXAMPLES = '''
 #    ok: [localhost] => {
 #        "openshift_out": {
 #            "changed": false,
-#            "results": {
+#            "module_results": {
 #                "cmd": "/usr/bin/repoquery --quiet --pkgnarrow=repos --queryformat=%{version}|%{release}|%{arch}|%{repo}|%{version}-%{release} --show-duplicates atomic-openshift",
 #                "package_found": true,
 #                "package_name": "atomic-openshift",
@@ -591,7 +591,7 @@ class Repoquery(RepoqueryCLI):
                 return {'failed': True,
                         'msg': results}
 
-            return {'changed': False, 'results': results, 'state': 'list', 'check_mode': check_mode}
+            return {'changed': False, 'module_results': results, 'state': 'list', 'check_mode': check_mode}
 
         return {'failed': True,
                 'changed': False,
