@@ -26,10 +26,10 @@
     backup: True
     dest: "/etc/origin/master/{{ item | basename }}"
     src: "{{ item }}"
-  with_items: "{{ openshift_hosted_routers | lib_utils_oo_collect(attribute='certificate') |
+  with_items: "{{ openshift_hosted_routers | lib_utils_oo_collect(attribute='certificate') | flatten |
                   lib_utils_oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
   when: ( not openshift_hosted_router_create_certificate | bool ) or openshift_hosted_router_certificate != {} or
-        (  openshift_hosted_routers | lib_utils_oo_collect(attribute='certificate') | lib_utils_oo_select_keys_from_list(['keyfile', 'certfile', 'cafile'])|length > 0 )
+        (  openshift_hosted_routers | lib_utils_oo_collect(attribute='certificate') | flatten | lib_utils_oo_select_keys_from_list(['keyfile', 'certfile', 'cafile'])|length > 0 )
 
 
 # This is for when we desire a cluster signed cert
