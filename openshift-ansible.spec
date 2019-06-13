@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.118
+Version:        3.11.119
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,25 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jun 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.119-1
+- Fix module_results for recent commits (rteague@redhat.com)
+- Update glusterfs_uninstall.yml (anton.mark@gmail.com)
+- Add redeploy cert for service catalog, asb and tsb (jcallen@redhat.com)
+- Bump to Ansible 2.8.1 for bug fixes (rteague@redhat.com)
+- Clean up additional bare vars in openshift-management (rteague@redhat.com)
+- If managed registry is false modify example ImageStream referencePolicy
+  (jcallen@redhat.com)
+- Fix lib_utils and lib_openshift integration tests (rteague@redhat.com)
+- Update roles/openshift_metrics/templates/hawkular_cassandra_rc.j2
+  (AdlerFleurant@users.noreply.github.com)
+- Update roles/openshift_metrics/templates/hawkular_cassandra_rc.j2
+  (AdlerFleurant@users.noreply.github.com)
+- Fix timeoutSeconds in hawkular-cassandra
+  (AdlerFleurant@users.noreply.github.com)
+- Remove invalid changed_when usage (rteague@redhat.com)
+- Custom module refactor for Ansible 2.8 (rteague@redhat.com)
+- Validate Ansible 2.8 for release-3.11 (rteague@redhat.com)
+
 * Tue Jun 11 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.118-1
 - Remove kuryrnet handler from default kuryr configuration
   (ltomasbo@redhat.com)
