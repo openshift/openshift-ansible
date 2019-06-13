@@ -75,6 +75,14 @@
   - name: Pull MCD image
     command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ tempfile.path }}/pull-secret.json {{ release_image_mcd.stdout }}"
 
+  - name: Create CNI dir
+    file:
+      path: /opt/cni/bin
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
   - name: Apply ignition manifest
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
     vars:
