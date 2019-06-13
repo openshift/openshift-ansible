@@ -48,6 +48,8 @@ objects:
             value: "${TCMU_LOGDIR}"
           - name: GB_LOGDIR
             value: "/var/log/glusterfs/gluster-block"
+          - name: GB_CLI_TIMEOUT
+            value: "${GB_CLI_TIMEOUT}"
           resources:
             requests:
               memory: 100Mi
@@ -188,3 +190,8 @@ parameters:
   description: Volume mount point of /dev from the host so that the container can access all devices.
   value: "/mnt/host-dev"
   required: true
+- name: GB_CLI_TIMEOUT
+  displayName: Gluster block cli timeout value
+  description: This value is to set maximum timeout value for gluster block cli.
+  value: "900"
+  required: false
