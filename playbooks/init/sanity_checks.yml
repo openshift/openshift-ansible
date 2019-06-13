@@ -18,17 +18,38 @@
   - name: Validate openshift_node_groups and openshift_node_group_name
     node_group_checks: {}
 
-# l_networkman_check_hosts may be passed in via playbooks/deploy_cluster.yml
+# l_prereq_check_hosts may be passed in via playbooks/deploy_cluster.yml
 # and master/node scaleup plays
-- name: Verify Node NetworkManager
+- name: Verify Node Prerequisites
   # We only want to run this on new installs and node/master scaleup.
-  hosts: "{{ l_networkman_check_hosts | default('all:!all') }}"
+  hosts: "{{ l_prereq_check_hosts | default('all:!all') }}"
   tasks:
+
   - name: Check for NetworkManager service
     command: 'systemctl show NetworkManager'
     register: nm_show
     changed_when: false
     ignore_errors: True
-  - fail: msg="Currently, NetworkManager must be installed and enabled prior to installation."
+
+  # https://docs.openshift.com/container-platform/3.11/install/prerequisites.html#prereq-networkmanager
+  - name: Verify NetworkManager is active
+    fail:
+      msg: "NetworkManager must be installed and enabled prior to installation."
     when:
     - not ('ActiveState=active' in nm_show.stdout) | bool
+
+  # https://docs.openshift.com/container-platform/3.11/install/prerequisites.html#prereq-selinux
+  - name: Verify SELinux is enabled
+    fail:
+      msg: |
+        The openshift-enterprise deployment type requires SELinux is 'enforcing' with type 'targeted'
+        SELinux status: "{{ ansible_selinux.status | default ('Unable to determine SELinux status') }}"
+        SELinux mode: "{{ ansible_selinux.mode | default('') }}"
+        SELinux type: "{{ ansible_selinux.type | default('') }}"
+    when:
+    - ansible_selinux is not defined or
+      ansible_selinux.status | default ('') != 'enabled' or
+      ansible_selinux.mode | default ('') != 'enforcing' or
+      ansible_selinux.type | default ('') != 'targeted'
+    - openshift_deployment_type == 'openshift-enterprise'
+    - not openshift_use_crio | bool

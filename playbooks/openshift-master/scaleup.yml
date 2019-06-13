@@ -36,7 +36,6 @@
     # oo_masters contains both existing and new masters; oo_masters_to_config just new.
     l_init_fact_hosts: "oo_masters:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_config"
     l_sanity_check_hosts: "{{ groups['oo_nodes_to_config'] | union(groups['oo_masters']) }}"
-    l_networkman_check_hosts: "oo_nodes_to_config"
 
 - import_playbook: ../init/version.yml
   vars:

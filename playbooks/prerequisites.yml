@@ -14,6 +14,7 @@
   vars:
     l_install_base_packages: True
     l_repo_hosts: "{{ l_scale_up_hosts | default('oo_all_hosts') }}"
+    l_prereq_check_hosts: "oo_nodes_to_config"
 
 - import_playbook: init/validate_hostnames.yml
   when: not (skip_validate_hostnames | default(False))
