@@ -24,8 +24,8 @@
     name: apiserver
   register: apiserver_ds
   until:
-  - apiserver_ds.results.results[0].status.numberReady is defined
-  - apiserver_ds.results.results[0].status.numberReady > 0
+  - apiserver_ds.module_results.results[0].status.numberReady is defined
+  - apiserver_ds.module_results.results[0].status.numberReady > 0
   retries: 60
   delay: 10
   changed_when: false
@@ -45,8 +45,8 @@
     name: controller-manager
   register: cm_ds
   until:
-  - cm_ds.results.results[0].status.numberReady is defined
-  - cm_ds.results.results[0].status.numberReady > 0
+  - cm_ds.module_results.results[0].status.numberReady is defined
+  - cm_ds.module_results.results[0].status.numberReady > 0
   retries: 60
   delay: 10
   changed_when: false

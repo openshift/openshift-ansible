@@ -25,8 +25,8 @@
     name: "{{ item }}"
   register: asb_deployment
   until:
-    - asb_deployment.results.results[0].status.readyReplicas is defined
-    - asb_deployment.results.results[0].status.readyReplicas > 0
+    - asb_deployment.module_results.results[0].status.readyReplicas is defined
+    - asb_deployment.module_results.results[0].status.readyReplicas > 0
   retries: 60
   delay: 10
   changed_when: false
