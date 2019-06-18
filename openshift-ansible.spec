@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.119
+Version:        3.11.120
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jun 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.120-1
+- Juniper Contrail SDN patch ** Contrail SDN ** (pvijayaragav@juniper.net)
+- Fix issue with metrics undefined l_kubelet_node_name (jcallen@redhat.com)
+- Run networkmanager and selinux checks in prereqs (rteague@redhat.com)
+- Fix restart_pods.yml (rteague@redhat.com)
+- Updates changes service catalog certificate for Ansible 2.8
+  (jcallen@redhat.com)
+- Supply namespace when generating hawkular role binding (jmartisk@redhat.com)
+
 * Thu Jun 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.119-1
 - Fix module_results for recent commits (rteague@redhat.com)
 - Update glusterfs_uninstall.yml (anton.mark@gmail.com)
