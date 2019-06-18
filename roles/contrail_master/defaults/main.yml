@@ -1,0 +1,21 @@
+---
+contrail_os_release: redhat7
+analyticsdb_min_diskgb: 50
+configdb_min_diskgb: 25
+aaa_mode: no-auth
+auth_mode: noauth
+LOG_LEVEL: SYS_NOTICE
+METADATA_PROXY_SECRET: contrail
+cloud_orchestrator: kubernetes
+metadata_proxy_secret: contrail
+log_level: SYS_NOTICE
+rabbitmq_node_port: 5672
+zookeeper_analytics_port: 2182
+zookeeper_port: 2181
+zookeeper_ports: 2888:3888
+zookeeper_analytics_ports: 4888:5888
+vrouter_gateway:
+kubernetes_api_secure_port: 8443
+nested_mode_contrail: false
+contrail_registry: opencontrailnightly
+contrail_container_tag: latest

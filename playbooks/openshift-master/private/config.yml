@@ -89,6 +89,8 @@
   - role: aci
     when:
     - openshift_use_aci | default(false) | bool
+  - role: contrail_master
+    when: openshift_use_contrail | default(false) | bool
   tasks:
   - import_role:
       name: kuryr

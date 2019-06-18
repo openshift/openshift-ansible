@@ -1,0 +1,144 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-analytics-alarm
+  namespace: contrail-system
+  labels:
+    app: contrail-analytics-alarm
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-analytics-alarm
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/infra"
+                operator: Exists
+      hostNetwork: true
+      initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: CONFIGURE_IPTABLES
+          value: "true"
+        - name: IPTABLES_CHAIN
+          value: "OS_FIREWALL_ALLOW"
+        - name: NODE_TYPE
+          value: "analytics-alarm"
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: contrail-analyticsdb-config
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+        - mountPath: /host/var/lib
+          name: host-var-lib
+      - name: contrail-kafka-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        command: ["mkdir","-pm","777","/host/var/lib/contrail/kafka-logs"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: contrail-analyticsdb-config
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+        - mountPath: /host/var/lib
+          name: host-var-lib
+      containers:
+      - name: kafka
+        image: "{{ contrail_registry }}/contrail-external-kafka:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        env:
+        - name: NODE_TYPE
+          value: analytics-alarm
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: analyticszookeeperenv
+        volumeMounts:
+        - mountPath: /tmp/kafka-logs
+          name: kafka-logs
+      - name: contrail-analytics-alarm-gen
+        image: "{{ contrail_registry }}/contrail-analytics-alarm-gen:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: analyticszookeeperenv
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-alarm-logs
+        - mountPath: /etc/localtime
+          name: localtime
+      - name: contrail-analytics-alarm-nodemgr
+        image: "{{contrail_registry}}/contrail-nodemgr:{{contrail_container_tag}}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: nodemgr-config
+        - configMapRef:
+            name: contrail-analyticsdb-config
+        env:
+        - name: NODE_TYPE
+          value: analytics-alarm
+        - name: DATABASE_NODEMGR__DEFAULTS__minimum_diskGB
+          value: "2"
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-alarm-nodemgr-logs
+        - mountPath: /mnt
+          name: docker-unix-socket
+        - mountPath: /etc/localtime
+          name: localtime
+      volumes:
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
+      - name: host-var-lib
+        hostPath:
+          path: /var/lib
+      - name: kafka-logs
+        hostPath:
+          path: /var/lib/contrail/kafka-logs
+      - name: analytics-alarm-logs
+        hostPath:
+          path: /var/log/contrail/analytics-alarm
+      - name: analytics-alarm-nodemgr-logs
+        hostPath:
+          path: /var/log/contrail/analytics-alarm
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
+---

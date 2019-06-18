@@ -1,0 +1,58 @@
+---
+- name: Create the get IP file to convert hostname to ip
+  template:
+    src: getIp.j2
+    dest: /tmp/getIp.py
+    owner: root
+    mode: 0644
+  run_once: True
+
+- name: Copy the wait for POD script to master node
+  template:
+    src: wait_for_pod.j2
+    dest: /tmp/wait_for_pod.sh
+    owner: root
+    mode: 0777
+  run_once: true
+
+- name: Create the contrail nested template file
+  template:
+    src: contrail-nested.j2
+    dest: /tmp/contrail-nested.yaml
+    owner: root
+    mode: 0644
+  run_once: True
+
+- name: Create the contrail namespace template file
+  template:
+    src: contrail-namespace.j2
+    dest: /tmp/contrail-namespace.yaml
+    owner: root
+    mode: 0644
+  run_once: True
+
+- name: Create the contrail namespace
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-namespace.yaml"
+  run_once: True
+  ignore_errors: True
+
+- name: Give privileged access to default service account of contrail-system namespace
+  oc_adm_policy_user:
+    user: system:serviceaccount:contrail-system:default
+    resource_kind: scc
+    resource_name: privileged
+    state: present
+  run_once: True
+
+- name: Create Contrail registry secret
+  command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n contrail-system"
+  run_once: True
+  when: contrail_registry_username is defined
+  ignore_errors: True
+
+- name: Create the contrail nested components
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-nested.yaml"
+  run_once: True
+  ignore_errors: True
+  when:
+    - contrail_version is version('5.0', '>=')
