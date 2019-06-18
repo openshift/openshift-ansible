@@ -12,6 +12,7 @@
     subjects:
     - kind: ServiceAccount
       name: hawkular
+      namespace: "{{openshift_metrics_project}}"
   changed_when: no
 
 - name: generate hawkular-metrics cluster role binding for the hawkular service account
