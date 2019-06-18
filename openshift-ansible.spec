@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.120
+Version:        3.11.121
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jun 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.121-1
+- 
+
 * Tue Jun 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.120-1
 - Juniper Contrail SDN patch ** Contrail SDN ** (pvijayaragav@juniper.net)
 - Fix issue with metrics undefined l_kubelet_node_name (jcallen@redhat.com)
