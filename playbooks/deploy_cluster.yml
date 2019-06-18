@@ -1,7 +1,7 @@
 ---
 - import_playbook: init/main.yml
   vars:
-    l_networkman_check_hosts: "oo_nodes_to_config"
+    l_prereq_check_hosts: "oo_nodes_to_config"
 
 - import_playbook: openshift-checks/private/install.yml
 
