@@ -5,8 +5,6 @@
 - import_tasks: upgrade.yml
   when: openshift_upgrade_target is defined
 
-- include_tasks: generate_certs.yml
-
 # Deployment of ansible-service-broker starts here
 - name: create openshift-ansible-service-broker project
   oc_project:

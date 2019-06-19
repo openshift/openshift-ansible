@@ -25,34 +25,34 @@
       import_role:
         name: ansible_service_broker
         tasks_from: delete_secrets.yml
-      when: ansible_service_broker_install | default(false) | bool
+      when: ansible_service_broker_install | default(true) | bool
 
     - name: Update ASB Secrets
       import_role:
         name: ansible_service_broker
         tasks_from: update_secrets.yml
-      when: ansible_service_broker_install | default(false) | bool
+      when: ansible_service_broker_install | default(true) | bool
 
     - name: Restart ASB Pods
       import_role:
         name: ansible_service_broker
         tasks_from: restart_pods.yml
-      when: ansible_service_broker_install | default(false) | bool
+      when: ansible_service_broker_install | default(true) | bool
 
     - name: Remove TSB Secrets
       import_role:
         name: template_service_broker
         tasks_from: delete_secrets.yml
-      when: template_service_broker_install | default(false) | bool
+      when: template_service_broker_install | default(true) | bool
 
     - name: Update TSB Secrets
       import_role:
         name: template_service_broker
         tasks_from: update_secrets.yml
-      when: template_service_broker_install | default(false) | bool
+      when: template_service_broker_install | default(true) | bool
 
     - name: Restart TSB Pods
       import_role:
         name: template_service_broker
         tasks_from: restart_pods.yml
-      when: template_service_broker_install | default(false) | bool
+      when: template_service_broker_install | default(true) | bool
