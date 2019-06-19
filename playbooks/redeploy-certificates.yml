@@ -44,6 +44,4 @@
   when: openshift_cluster_monitoring_operator_install | default(true) | bool
 
 - import_playbook: openshift-service-catalog/private/redeploy-certificates.yml
-  when:
-  - openshift_enable_service_catalog | default(false) | bool
-  - (ansible_service_broker_install | default(false) | bool) or (template_service_broker_install | default(false) | bool)
+  when: openshift_enable_service_catalog | default(true) | bool
