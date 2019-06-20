@@ -627,12 +627,10 @@ def set_sdn_facts_if_unset(facts, system_facts):
         facts['node']['sdn_mtu'] = '1450'
 
         for val in itervalues(system_facts):
-            if isinstance(val, dict) and 'mtu' in val:
-                mtu = val['mtu']
 
-                if 'ipv4' in val and val['ipv4'].get('address') == node_ip:
-                    facts['node']['sdn_mtu'] = str(mtu - 50)
-
+            if isinstance(val, dict):
+                if val.get('address') == node_ip:
+                    facts['node']['sdn_mtu'] = str(val.get('mtu') - 50)
     return facts
 
 
