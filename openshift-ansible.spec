@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.121
+Version:        3.11.122
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Jun 19 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.122-1
+- Bug 1718142 - Redeploy catalog/broker certs (fabian@fabianism.us)
+- Fix: generate hawkular-cassandra pvc (dynamic)
+  (lorenzo.digiacomo85@gmail.com)
+
 * Tue Jun 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.121-1
 - 
 
