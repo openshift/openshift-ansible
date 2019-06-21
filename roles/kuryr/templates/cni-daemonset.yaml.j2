@@ -131,8 +131,7 @@ spec:
         - name: net-conf
           mountPath: /etc/cni/net.d
         - name: config-volume
-          mountPath: /etc/kuryr/kuryr.conf
-          subPath: kuryr-cni.conf
+          mountPath: /etc/kuryr
         - name: proc
           mountPath: /host_proc
         - name: openvswitch
@@ -158,8 +157,13 @@ spec:
           hostPath:
             path: /etc/cni/net.d
         - name: config-volume
-          configMap:
-            name: kuryr-config
+          projected:
+            sources:
+            - configMap:
+              name: kuryr-config
+              items:
+              - key: kuryr-cni.conf
+                path: kuryr.conf
         - name: proc
           hostPath:
             path: /proc

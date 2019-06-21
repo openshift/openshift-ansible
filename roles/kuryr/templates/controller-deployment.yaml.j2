@@ -49,8 +49,7 @@ spec:
           runAsUser: 0
         volumeMounts:
         - name: config-volume
-          mountPath: "/etc/kuryr/kuryr.conf"
-          subPath: kuryr.conf
+          mountPath: "/etc/kuryr"
         - name: certificates-volume
           mountPath: "/etc/ssl/certs/kuryr-ca-bundle.crt"
           subPath: kuryr-ca-bundle.crt
@@ -69,9 +68,14 @@ spec:
 {% endif %}
       volumes:
       - name: config-volume
-        configMap:
-          name: kuryr-config
+        projected:
           defaultMode: 0666
+          sources:
+          - configMap:
+            name: kuryr-config
+            items:
+            - key: kuryr.conf
+              path: kuryr.conf
       - name: certificates-volume
         secret:
           secretName: kuryr-certificates
