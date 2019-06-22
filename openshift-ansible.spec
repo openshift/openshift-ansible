@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.83
+Version:        3.9.84
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jun 22 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.84-1
+- openshift_facts: fix MTU detection
+  (52029485+LarryCotarbais@users.noreply.github.com)
+- Don't use hostvars fact for openshift_master_etcd_urls
+  (steve.teuber@idealo.de)
+
 * Sat Jun 15 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.83-1
 - 
 
