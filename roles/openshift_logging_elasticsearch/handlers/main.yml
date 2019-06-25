@@ -1,5 +1,5 @@
 ---
-- name: "Restarting logging-{{ _cluster_component }} cluster"
+- name: "Restarting logging cluster"
   listen: "restart elasticsearch"
   include_tasks: restart_cluster.yml
   with_items: "{{ _restart_logging_components }}"
