@@ -23,8 +23,11 @@
 - name: Verify Node Prerequisites
   # We only want to run this on new installs and node/master scaleup.
   hosts: "{{ l_prereq_check_hosts | default('all:!all') }}"
-  tasks:
 
+  roles:
+  - role: openshift_facts
+
+  tasks:
   - name: Check for NetworkManager service
     command: 'systemctl show NetworkManager'
     register: nm_show
