@@ -22,6 +22,7 @@ l_osm_id_providers_dict:
     kind: 'AllowAllPasswordIdentityProvider'
 
 openshift_master_identity_providers: "{{ l_osm_id_providers_dict[openshift_deployment_type] }}"
+openshift_master_openid_ca_file: '/etc/ssl/certs/ca-bundle.crt'
 
 l_osm_disabled_features: "{{ openshift_deployment_subtype == 'registry' | bool }}"
 l_osm_disabled_features_list:
