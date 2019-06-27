@@ -112,6 +112,20 @@ spec:
               continue
             fi
 
+            # does the openshift-ca.crt exist
+            if [[ -f /etc/pki/ca-trust/source/anchors/openshift-ca.crt ]]; then
+              md5sum /etc/pki/ca-trust/source/anchors/openshift-ca.crt > /tmp/.old-openshift-ca
+            else
+              cat /dev/null > /tmp/.old-openshift-ca
+            fi
+
+            md5sum  /run/secrets/kubernetes.io/serviceaccount/ca.crt > /tmp/.new-openshift-ca
+
+            if [[ "$( cat /tmp/.old-openshift-ca )" != "$( cat /tmp/.new-openshift-ca )" ]]; then
+              cp /run/secrets/kubernetes.io/serviceaccount/ca.crt /etc/pki/ca-trust/source/anchors/openshift-ca.crt
+              update-ca-trust
+            fi
+
             KUBELET_HOSTNAME_OVERRIDE=$(cat /etc/sysconfig/KUBELET_HOSTNAME_OVERRIDE 2>/dev/null) || :
             if ! [[ -z "$KUBELET_HOSTNAME_OVERRIDE" ]]; then
                   #Patching node-config for hostname override
@@ -122,7 +136,7 @@ spec:
             if [[ ! -f /etc/origin/node/node-config.yaml ]]; then
               cat /dev/null > /tmp/.old
             fi
-            
+
             tmp_path=/etc/origin/node/tmp
             if [[ -f ${tmp_path}/volume-config.yaml ]]; then
               tar -Pcf ${tmp_path}/configs.tar ${tmp_path}/volume-config.yaml ${tmp_path}/node-config.yaml
@@ -134,7 +148,7 @@ spec:
 
             if [[ "$( cat /tmp/.old )" != "$( cat /tmp/.new )" && -f ${tmp_path}/volume-config.yaml ]]; then
               mv /etc/origin/node/tmp/volume-config.yaml /etc/origin/node/volume-config.yaml
-            fi 
+            fi
 
             if [[ "$( cat /tmp/.old )" != "$( cat /tmp/.new )" ]]; then
               mv /etc/origin/node/tmp/node-config.yaml /etc/origin/node/node-config.yaml
@@ -195,7 +209,8 @@ spec:
         - mountPath: /run/systemd/system
           name: run-systemd-system
           readOnly: true
-
+        - mountPath: /etc/pki
+          name: host-pki
 
       volumes:
       # In bootstrap mode, the host config contains information not easily available
@@ -212,6 +227,10 @@ spec:
       - hostPath:
           path: /run/systemd/system
         name: run-systemd-system
+      - hostPath:
+          path: /etc/pki
+          type: ""
+        name: host-pki
       # Sync daemonset should tolerate all taints to make sure it runs on all nodes
       tolerations:
       - operator: "Exists"
