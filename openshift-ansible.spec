@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.149
+Version:        3.10.150
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,17 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Jun 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.150-1
+- Add openshift ca to trust via node sync (jcallen@redhat.com)
+- endpoint is missing as part of ClusterRole rule. This in turn throws a error
+  when gluster-block pod is provisioned. (sarumuga@redhat.com)
+- openshift_facts: fix MTU detection
+  (52029485+LarryCotarbais@users.noreply.github.com)
+- Fix: generate hawkular-cassandra pvc (dynamic)
+  (lorenzo.digiacomo85@gmail.com)
+- Fix issue with metrics undefined l_kubelet_node_name (jcallen@redhat.com)
+- While upgrading to 3.10 add node-config file check (jcallen@redhat.com)
+
 * Mon Jun 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.149-1
 - allow cluster autoscaler to evict pods (jchaloup@redhat.com)
 - Fail on Ansible 2.8 (rteague@redhat.com)
