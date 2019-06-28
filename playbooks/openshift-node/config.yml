@@ -1,4 +1,9 @@
 ---
 - import_playbook: ../init/main.yml
 
+- name: Ensure master facts are set
+  hosts: oo_masters_to_config
+  roles:
+  - role: openshift_master_facts
+
 - import_playbook: private/config.yml
