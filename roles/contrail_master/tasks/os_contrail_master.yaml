@@ -41,13 +41,11 @@
     mode: 0644
   run_once: True
 
-- name: Create the contrail-system namespace
-  command: "{{ openshift_client_binary }} create -f /tmp/contrail-namespace.yaml"
-
 - name: Check if the contrail-system namespace is created
   oc_project:
     state: present
     name: "contrail-system"
+    node_selector: ""
   run_once: True
 
 - name: Create the contrail template files
