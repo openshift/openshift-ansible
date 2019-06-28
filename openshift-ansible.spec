@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.123
+Version:        3.11.124
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,16 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jun 27 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.124-1
+- Ensure default vars are loaded for sanity checks (rteague@redhat.com)
+- Add openshift ca to trust via node sync (jcallen@redhat.com)
+- Fix openshift_logging_elasticsearch handler (Ansible 2.8)
+  (rteague@redhat.com)
+- endpoint is missing as part of ClusterRole rule. This in turn throws a error
+  when gluster-block pod is provisioned. (sarumuga@redhat.com)
+- Contrail namespace edited (pvijayaragav@juniper.net)
+- Remove subPaths when mounting Kuryr pods volumes (mdulko@redhat.com)
+
 * Thu Jun 20 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.123-1
 - openshift_facts: fix MTU detection
   (52029485+LarryCotarbais@users.noreply.github.com)
