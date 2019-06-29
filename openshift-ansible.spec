@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.86
+Version:        3.9.87
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jun 29 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.87-1
+- 
+
 * Fri Jun 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.86-1
 - Fix issue with metrics undefined l_kubelet_node_name (jcallen@redhat.com)
 - Ensure master facts are set executing node config
