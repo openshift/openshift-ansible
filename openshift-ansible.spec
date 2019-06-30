@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.124
+Version:        3.11.125
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Jun 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.125-1
+- 
+
 * Thu Jun 27 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.124-1
 - Ensure default vars are loaded for sanity checks (rteague@redhat.com)
 - Add openshift ca to trust via node sync (jcallen@redhat.com)
