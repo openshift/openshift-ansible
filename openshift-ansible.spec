@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.150
+Version:        3.10.151
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Jul 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.151-1
+- 
+
 * Fri Jun 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.150-1
 - Add openshift ca to trust via node sync (jcallen@redhat.com)
 - endpoint is missing as part of ClusterRole rule. This in turn throws a error
