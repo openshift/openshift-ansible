@@ -392,10 +392,8 @@ class OpenShiftAnsibleSyntaxCheck(Command):
             # --syntax-check each entry point playbook
             try:
                 # Create a host group list to avoid WARNING on unmatched host patterns
-                tox_ansible_inv = os.environ['TOX_ANSIBLE_INV_PATH']
                 subprocess.check_output(
-                    ['ansible-playbook', '-i', tox_ansible_inv,
-                     '--syntax-check', playbook, '-e', '@{}_extras'.format(tox_ansible_inv)]
+                    ['ansible-playbook', '--syntax-check', playbook]
                 )
             except subprocess.CalledProcessError as cpe:
                 print('{}Execution failed: {}{}'.format(
