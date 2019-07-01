@@ -40,6 +40,11 @@ spec:
           #!/bin/bash
           set -euo pipefail
 
+          # cleanup old log files
+          rm -f /var/log/openvswitch-old/ovsdb-server.log /var/log/openvswitch-old/ovs-vswitchd.log
+
+          mkdir -p /var/log/openvswitch
+
           # if another process is listening on the cni-server socket, wait until it exits
           trap 'kill $(jobs -p); exit 0' TERM
           retries=0
@@ -74,7 +79,7 @@ spec:
               ovs-vsctl --no-wait set Open_vSwitch . other_config:n-handler-threads=10
           fi
           /usr/share/openvswitch/scripts/ovs-ctl start --no-ovsdb-server --system-id=random
-          
+
           tail --follow=name /var/log/openvswitch/ovs-vswitchd.log /var/log/openvswitch/ovsdb-server.log &
           sleep 20
           while true; do
@@ -100,7 +105,7 @@ spec:
           readOnly: true
         - mountPath: /etc/openvswitch
           name: host-config-openvswitch
-        - mountPath: /var/log/openvswitch
+        - mountPath: /var/log/openvswitch-old
           name: log-openvswitch
         resources:
           requests:
@@ -130,5 +135,6 @@ spec:
       - name: log-openvswitch
         hostPath:
           path: /var/log/openvswitch
+          type: DirectoryOrCreate
       tolerations:
       - operator: "Exists"
