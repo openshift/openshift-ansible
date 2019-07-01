@@ -160,10 +160,10 @@ spec:
           projected:
             sources:
             - configMap:
-              name: kuryr-config
-              items:
-              - key: kuryr-cni.conf
-                path: kuryr.conf
+                name: kuryr-config
+                items:
+                - key: kuryr-cni.conf
+                  path: kuryr.conf
         - name: proc
           hostPath:
             path: /proc

@@ -72,10 +72,10 @@ spec:
           defaultMode: 0666
           sources:
           - configMap:
-            name: kuryr-config
-            items:
-            - key: kuryr.conf
-              path: kuryr.conf
+              name: kuryr-config
+              items:
+              - key: kuryr.conf
+                path: kuryr.conf
       - name: certificates-volume
         secret:
           secretName: kuryr-certificates
