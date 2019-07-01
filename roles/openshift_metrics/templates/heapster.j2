@@ -39,6 +39,7 @@ spec:
         - "--tls_key=/heapster-certs/tls.key"
         - "--tls_client_ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
         - "--allowed_users=%allowed_users%"
+        - "--v={{openshift_metrics_heapster_log_verbosity}}"
         - "--metric_resolution={{openshift_metrics_resolution}}"
 {% if not openshift_metrics_heapster_standalone %}
         - "--wrapper.username_file=/hawkular-account/hawkular-metrics.username"
