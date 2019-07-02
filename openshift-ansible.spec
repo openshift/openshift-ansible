@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.125
+Version:        3.11.126
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jul 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.126-1
+- Fix small typo in task name (candace.aleea@gmail.com)
+- Update tox test environment vars (rteague@redhat.com)
+- Fix indentation on Kuryr volumes (mdulko@redhat.com)
+- openvswtich logrotate is missing due to sdn container change
+  (pcameron@redhat.com)
+
 * Sun Jun 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.125-1
 - 
 
