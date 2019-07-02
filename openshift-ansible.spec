@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.87
+Version:        3.9.88
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.88-1
+- roles/openshift-metrics: Allow configuring heapster log level
+  (fbranczyk@gmail.com)
+
 * Sat Jun 29 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.87-1
 - 
 
