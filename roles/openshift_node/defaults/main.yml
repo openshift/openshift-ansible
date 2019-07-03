@@ -8,11 +8,10 @@ openshift_node_bootstrap_port: 22623
 openshift_node_bootstrap_server: "{{ openshift_node_kubeconfig.clusters.0.cluster.server.split(':')[0:-1] | join(':') }}:{{ openshift_node_bootstrap_port }}"
 openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config/{{ openshift_node_machineconfigpool }}"
 
-openshift_node_package_state: present
 openshift_node_packages:
   - cri-o
-  - openshift-clients
-  - openshift-hyperkube
+  - openshift-clients{{ l_cluster_version }}
+  - openshift-hyperkube{{ l_cluster_version }}
 
 openshift_node_support_packages:
   # Packages from redhat-coreos.git manifest-base.yaml

@@ -29,8 +29,6 @@
 
 # Upgrade Node Packages
 - import_tasks: install.yml
-  vars:
-    openshift_node_package_state: latest
 
 # Apply machine config
 - import_tasks: apply_machine_config.yml

@@ -15,16 +15,47 @@
     group: root
     mode: 0755
   loop:
-    - /var/lib/cni/bin
-    - /etc/kubernetes/cni/net.d/
-    - /opt/cni/bin/
+  - /var/lib/cni/bin
+  - /etc/kubernetes/cni/net.d/
+  - /opt/cni/bin/
 
-- name: Install openshift packages
-  package:
-    name: "{{ openshift_node_packages | join(',') }}"
-    state: "{{ openshift_node_package_state }}"
-  async: 3600
-  poll: 30
+- name: Get cluster version
+  command: >
+    oc get clusterversion
+    --config={{ openshift_node_kubeconfig_path }}
+    --output=jsonpath='{.items[0].status.desired.version}'
+  delegate_to: localhost
+  register: oc_get
+  until:
+  - oc_get.stdout is defined
+  - oc_get.stdout != ''
+  retries: 36
+  delay: 5
+
+- name: Set fact l_cluster_version
+  set_fact:
+    l_cluster_version: "-{{ oc_get.stdout | regex_search('^\\d+\\.\\d+\\.\\d+') }}"
+
+- name: Override version when running CI
+  set_fact:
+    l_cluster_version: ""
+  when: ci_version_override | default(False) | bool == True
+
+- block:
+  - name: Install openshift packages
+    package:
+      name: "{{ openshift_node_packages | join(',') }}"
+      state: present
+    async: 3600
+    poll: 30
+
+  rescue:
+  - name: Package install failure message
+    fail:
+      msg: >
+        Unable to install {{ openshift_node_packages | join(', ') }}.
+        Please ensure repos are configured properly to provide these packages
+        and indicated versions.
 
 - name: Enable the CRI-O service
   systemd:
