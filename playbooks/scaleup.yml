@@ -4,11 +4,9 @@
   connection: local
   gather_facts: no
   tasks:
-  - fail:
-      msg: >
-        Detected no new_workers in inventory. Please add hosts to the
-        new_workers host group to add nodes.
-    when: groups.new_workers | default([]) | length == 0
+  - import_role:
+      name: openshift_node
+      tasks_from: scaleup_checks.yml
 
 - name: install nodes
   hosts: new_workers
