@@ -34,7 +34,7 @@
   retries: 60
   register: result
   until:
-  - "'status' in result"
+  - result.status is defined
   - result.status == 200
 
 - name: Fetch bootstrap ignition file locally
@@ -56,6 +56,7 @@
   delegate_to: localhost
   register: oc_get
   until:
+  - oc_get.stdout is defined
   - oc_get.stdout != ''
   retries: 36
   delay: 5

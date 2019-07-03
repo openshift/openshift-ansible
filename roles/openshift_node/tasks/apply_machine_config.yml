@@ -12,6 +12,7 @@
   delegate_to: localhost
   register: oc_get
   until:
+  - oc_get.stdout is defined
   - oc_get.stdout != ''
   retries: 36
   delay: 5
@@ -28,6 +29,7 @@
   delegate_to: localhost
   register: oc_get
   until:
+  - oc_get.stdout is defined
   - oc_get.stdout != ''
   retries: 36
   delay: 5
@@ -50,6 +52,7 @@
   delegate_to: localhost
   register: oc_get
   until:
+  - oc_get.stdout is defined
   - oc_get.stdout != ''
   retries: 36
   delay: 5
