@@ -39,16 +39,12 @@
     content: "{{ (oc_get.stdout | from_json).spec.config }}"
     dest: "{{ temp_dir.path }}/worker_ignition_config.json"
 
-- name: Copy pull secret
-  copy:
-    src: "{{ openshift_pull_secret_path }}"
-    dest: "{{ temp_dir.path }}/pull-secret.json"
-
-- name: Get release image
+- name: Get machine-config-daemon image
   command: >
-    oc get clusterversion
+    oc get daemonset machine-config-daemon
     --config={{ openshift_node_kubeconfig_path }}
-    --output=jsonpath='{.items[0].status.desired.image}'
+    --namespace=openshift-machine-config-operator
+    --output=jsonpath='{.spec.template.spec.containers[?(@.name=="machine-config-daemon")].image}'
   delegate_to: localhost
   register: oc_get
   until:
@@ -57,37 +53,22 @@
   retries: 36
   delay: 5
 
-- name: Set openshift_release_image fact
+- name: Set l_mcd_image fact
   set_fact:
-    openshift_release_image: "{{ oc_get.stdout }}"
+    l_mcd_image: "{{ oc_get.stdout }}"
 
-- name: Pull release image
-  command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ openshift_release_image }}"
+- name: Apply machine config
+  command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
+  vars:
+    podman_flags: "--privileged --rm -ti {{ l_mcd_image }}"
+    podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
+    mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ temp_dir.path }}/worker_ignition_config.json --skip-reboot"
 
-- name: Get machine controller daemon image from release image
-  command: "podman run --rm {{ openshift_release_image }} image machine-config-daemon"
-  register: release_image_mcd
+- name: Remove temp directory
+  file:
+    path: "{{ temp_dir.path }}"
+    state: absent
 
-- block:
-  - name: Pull MCD image
-    command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ release_image_mcd.stdout }}"
-
-  - name: Apply machine config
-    command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
-    vars:
-      podman_flags: "--privileged --rm -ti {{ release_image_mcd.stdout }}"
-      podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
-      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ temp_dir.path }}/worker_ignition_config.json --skip-reboot"
-
-  - name: Remove temp directory
-    file:
-      path: "{{ temp_dir.path }}"
-      state: absent
-
-  - name: Reboot the host and wait for it to come back
-    reboot:
-    #  reboot_timeout: 600  # default, 10 minutes
-
-  rescue:
-  - fail:
-      msg: "Machine config apply failed"
+- name: Reboot the host and wait for it to come back
+  reboot:
+  #  reboot_timeout: 600  # default, 10 minutes

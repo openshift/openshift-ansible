@@ -38,7 +38,6 @@ An example inventory can be found in [inventory/hosts.example](inventory/hosts.e
 Required variables include:
 
 - `openshift_kubeconfig_path` - Path to the kubeconfig for the cluster
-- `openshift_pull_secret_path` - Path to the pull secret to the image registry
 
 ## Run the RHEL node scaleup playbook
 
