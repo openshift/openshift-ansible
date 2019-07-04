@@ -104,6 +104,8 @@ spec:
             - -cookie-secret-file=/secret/session-secret
             - -upstream=http://localhost:5601
             - "-scope=user:info user:check-access user:list-projects"
+            - '-openshift-sar={"resource": "selfsubjectaccessreviews", "verb": "create", "group": "authorization.k8s.io"}'
+            - '-openshift-delegate-urls={"/": {"resource": "selfsubjectaccessreviews", "verb": "create", "group": "authorization.k8s.io"}}'
             - --tls-cert=/secret/server-cert
             - --tls-key=/secret/server-key
             - -pass-access-token
