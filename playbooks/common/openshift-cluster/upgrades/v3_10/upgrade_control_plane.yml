@@ -136,6 +136,14 @@
   vars:
     openshift_release: '3.10'
 
+- name: Run kube proxy, needed for ACI
+  hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: kube_proxy_and_dns
+    run_once: True
+    when: openshift_use_aci | default(false) | bool
+
 - import_playbook: ../post_control_plane.yml
 
 - hosts: oo_masters
