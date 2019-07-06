@@ -57,9 +57,24 @@
       register: docker_registry_service_ip
       changed_when: false
 
+    # Assume default hostname for docker-registry route
     - set_fact:
         docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ openshift_master_default_subdomain }}"
       changed_when: false
+
+    - name: Retrieve current registry route
+      oc_route:
+        namespace: default
+        name: docker-registry
+        state: list
+      register: docker_registry_current_route
+      changed_when: false
+
+    # Appends current registry route hostname, if its not the default one.
+    - set_fact:
+        docker_registry_route_hostname: "{{ docker_registry_route_hostname }},{{ docker_registry_current_route.module_results[0].spec.host }}"
+      changed_when: false
+      when: docker_registry_route_hostname != docker_registry_current_route.module_results[0].spec.host
 
     - name: Generate registry certificate
       command: >
