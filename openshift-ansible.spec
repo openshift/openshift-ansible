@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.127
+Version:        3.11.128
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Jul 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.128-1
+- Adds current docker-registry route hostname when generating the new certs.
+  (jtudelag@redhat.com)
+- GlusterFS: Fix version image check (sarumuga@redhat.com)
+- GlusterFS: Remove the default values used for keys (sarumuga@redhat.com)
+
 * Thu Jul 04 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.127-1
 - 
 
