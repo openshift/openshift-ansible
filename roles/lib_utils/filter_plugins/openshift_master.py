@@ -10,9 +10,17 @@ from ansible import errors
 from ansible.parsing.yaml.dumper import AnsibleDumper
 from ansible.plugins.filter.core import to_bool as ansible_bool
 
-from ansible.module_utils.six import string_types, u
+from ansible.module_utils.six import string_types, u, PY2
 
 import yaml
+
+if PY2:
+    INFINITY = float('inf')
+else:
+    import math
+    # AUDIT: this member was added in py3 only
+    # pylint: disable=no-member
+    INFINITY = math.inf
 
 
 class IdentityProviderBase(object):
@@ -491,7 +499,7 @@ class FilterModule(object):
         return u(yaml.dump([idp.to_dict() for idp in idp_list],
                            allow_unicode=True,
                            default_flow_style=False,
-                           width=float("inf"),
+                           width=INFINITY,
                            Dumper=AnsibleDumper))
 
     @staticmethod
