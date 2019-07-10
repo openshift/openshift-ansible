@@ -8,6 +8,11 @@
   - openshift_facts
 
   tasks:
+  - name: Check Gluster Health Before Restart
+    include_role:
+      name: openshift_storage_glusterfs
+      tasks_from: check_cluster_health.yml
+
   - name: Mark node unschedulable
     oc_adm_manage_node:
       node: "{{ l_kubelet_node_name | lower }}"
@@ -98,3 +103,8 @@
     when:
     - node_unschedulable is changed
     - openshift_node_restart_drain | default(false) | bool
+
+  - name: Check Gluster Health After Restart
+    include_role:
+      name: openshift_storage_glusterfs
+      tasks_from: check_cluster_health.yml
