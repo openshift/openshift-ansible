@@ -1531,7 +1531,7 @@ class StorageClassConfig(object):
         if self.annotations is not None:
             self.data['metadata']['annotations'] = self.annotations
 
-        self.data['metadata']['annotations']['storageclass.beta.kubernetes.io/is-default-class'] = \
+        self.data['metadata']['annotations']['storageclass.kubernetes.io/is-default-class'] = \
                 self.default_storage_class
 
         self.data['provisioner'] = self.provisioner
