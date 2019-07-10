@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.128
+Version:        3.11.129
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,17 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Jul 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.129-1
+- Setup NetworkManager script before starting dnsmasq
+  (bennett.novak@rackspace.com)
+- restart.yml - check gluster health before and after restart
+  (itewk@redhat.com)
+- Kube Proxy needed to be deployed for ACI to run as a part of upgrade from
+  3.10 to 3.11 (abhisheksharmay2k@gmail.com)
+- translate_idps: use py3-specific infinity number if available
+  (vrutkovs@redhat.com)
+- kube-proxy, namespace and firewalld corrections (pvijayaragav@juniper.net)
+
 * Sun Jul 07 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.128-1
 - Adds current docker-registry route hostname when generating the new certs.
   (jtudelag@redhat.com)
