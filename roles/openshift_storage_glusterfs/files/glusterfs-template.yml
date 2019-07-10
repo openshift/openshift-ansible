@@ -110,6 +110,7 @@ objects:
             successThreshold: 1
             failureThreshold: 50
           terminationMessagePath: "/var/log/termination.log"
+        priorityClassName: system-cluster-critical
         volumes:
         - name: glusterfs-heketi
           hostPath:
