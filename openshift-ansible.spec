@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.153
+Version:        3.10.154
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Jul 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.154-1
+- restart.yml - check gluster health before and after restart
+  (itewk@redhat.com)
+- GlusterFS: Fix version image check (sarumuga@redhat.com)
+
 * Fri Jul 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.153-1
 - Kube Proxy needed to be deployed for ACI to run as a part of upgrade from OSP
   3.9 to 3.10 (abhisheksharmay2k@gmail.com)
