@@ -6,7 +6,7 @@
 - name: Run kube proxy
   import_role:
     name: kube_proxy_and_dns
-  delegate_to: "{{ groups.oo_first_master.0 }}"
+  when: inventory_hostname == groups.masters.0
 
 - name: Get contrail nodes and ips
   import_role:

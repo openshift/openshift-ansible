@@ -6,7 +6,7 @@
       command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 53
       when:
         - openshift_use_contrail | default(false) | bool
-        - os_firewall_use_firewalld | default(False) | bool
+        - not os_firewall_use_firewalld | default(False) | bool
 
 - name: Contrail wait for come up
   hosts: oo_first_master
