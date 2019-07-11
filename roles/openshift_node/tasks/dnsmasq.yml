@@ -28,12 +28,12 @@
     - reload systemd units
     - restart dnsmasq
 
+# Dynamic NetworkManager based dispatcher
+- import_tasks: dnsmasq/network-manager.yml
+  when: network_manager_active | bool
+
 - name: Enable dnsmasq
   systemd:
     name: dnsmasq
     enabled: yes
     state: started
-
-# Dynamic NetworkManager based dispatcher
-- import_tasks: dnsmasq/network-manager.yml
-  when: network_manager_active | bool
