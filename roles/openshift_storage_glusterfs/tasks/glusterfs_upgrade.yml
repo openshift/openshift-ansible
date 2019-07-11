@@ -1,4 +1,12 @@
 ---
+- import_tasks: cluster_health.yml
+  vars:
+    l_check_bricks: true
+  when: glusterfs_is_native
+
+- import_tasks: heketi_db_backup.yml
+  when: glusterfs_heketi_is_native
+
 - import_tasks: heketi_get_key.yml
   when: glusterfs_heketi_admin_key is undefined
 
@@ -44,6 +52,9 @@
     name: "glusterblock-{{ glusterfs_name }}-provisioner"
   failed_when: False
 
+- set_fact:
+    glusterfs_heketi_is_missing: true
+
 # oc delete --cascade=false seems broken for DaemonSets.
 # Using curl to talk to the API directly.
 - name: Delete glusterfs daemonset w/o cascade
@@ -69,3 +80,37 @@
   with_items: "{{ glusterfs_pods.results.results[0]['items'] | default([]) }}"
 
 - import_tasks: glusterfs_common.yml
+
+- block:
+  - name: Get GlusterFS pods
+    oc_obj:
+      namespace: "{{ glusterfs_namespace }}"
+      kind: pod
+      state: list
+      selector: "glusterfs={{ glusterfs_name }}-pod"
+    register: glusterfs_pods_get
+
+  - name: Set GlusterFS CLI
+    set_fact:
+      glusterfs_cli: "{{ glusterfs_pod_rsh }}gluster"
+    vars:
+      glusterfs_pod_name: "{% if glusterfs_is_native %}{{ glusterfs_pods_get.module_results.results[0]['items'][0].metadata.name }}{% endif %}"
+      glusterfs_pod_rsh: "{% if glusterfs_is_native %}{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {{ glusterfs_pod_name }} {% endif %}"
+
+  - name: Get cluster current op version
+    shell: "{{ glusterfs_cli }} volume get all cluster.op-version | grep cluster.op-version | awk '{ print $2 }'"
+    register: glusterfs_op_version
+    changed_when: false
+
+  - name: Get cluster max op version
+    shell: "{{ glusterfs_cli }} volume get all cluster.max-op-version | grep cluster.max-op-version | awk '{ print $2 }'"
+    register: glusterfs_max_op_version
+    changed_when: false
+
+  - name: Set cluster op version on all volumes
+    command: "{{ glusterfs_cli }} volume set all cluster.op-version {{ max_op_version }}"
+    vars:
+      op_version: "{{ glusterfs_op_version.stdout }}"
+      max_op_version: "{{ glusterfs_max_op_version.stdout }}"
+    when: max_op_version | int > op_version | int
+  when: glusterfs_is_native
