@@ -34,9 +34,17 @@
     msg: "{{ instancesout.results | sum(attribute='instances', start=[]) }}"
 
 - name: wait for ssh to become available
+  when: openshift_aws_wait_for_ssh | bool
   wait_for:
     port: 22
     host: "{{ item.public_ip_address }}"
     timeout: 300
     search_regex: OpenSSH
+  with_items: "{{ instancesout.results | sum(attribute='instances', start=[]) }}"
+
+- name: wait for new nodes become ready
+  when: openshift_aws_wait_for_node_ready | bool
+  include_tasks: wait_for_node.yml
+  vars:
+    node_name: "{{ item.private_dns_name }}"
   with_items: "{{ instancesout.results | sum(attribute='instances', start=[]) }}"

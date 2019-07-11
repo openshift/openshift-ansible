@@ -9,6 +9,7 @@ openshift_aws_create_scale_group: True
 
 openshift_aws_node_group_upgrade: False
 openshift_aws_wait_for_ssh: True
+openshift_aws_wait_for_node_ready: True
 
 openshift_aws_clusterid: default
 openshift_aws_region: us-east-1

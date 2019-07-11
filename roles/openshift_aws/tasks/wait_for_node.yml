@@ -1,0 +1,18 @@
+---
+# This will wait for the node to become ready status
+- name: wait for node become ready
+  oc_obj:
+    name: "{{ node_name }}"
+    kind: node
+    state: list
+  delegate_to: "{{ groups.masters.0 }}"
+  register: get_node
+  until:
+    - get_node.module_results.results[0] is defined
+    - get_node.module_results.results[0].status is defined
+    - get_node.module_results.results[0].status.conditions is defined
+    - get_node.module_results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+  retries: 150
+  delay: 10
+- name: dump node info
+  debug: var=get_node
