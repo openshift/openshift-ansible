@@ -4,6 +4,15 @@
     l_check_bricks: true
   when: glusterfs_is_native
 
+- import_tasks: heketi_set_cli.yml
+  when: glusterfs_heketi_is_native
+
+- import_tasks: heketi_set_ro.yml
+  when: glusterfs_heketi_is_native
+
+- import_tasks: heketi_ops_pending.yml
+  when: glusterfs_heketi_is_native
+
 - import_tasks: heketi_db_backup.yml
   when: glusterfs_heketi_is_native
 

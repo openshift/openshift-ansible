@@ -1,0 +1,9 @@
+---
+- name: Check if Heketi operations is pending
+  command: "{{ glusterfs_heketi_client }} server operations info"
+  register: heketi_ops
+  until: 'heketi_ops.stdout.find("In-Flight: 0") != -1'
+  delay: 10
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
+  # Even if heketi ops pending, proceed with upgrade
+  failed_when: False
