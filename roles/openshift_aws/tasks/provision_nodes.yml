@@ -25,7 +25,7 @@
     loop_var: openshift_aws_node_group
 
 # instances aren't scaling fast enough here, we need to wait for them
-- when: openshift_aws_wait_for_ssh | bool
+- when: (openshift_aws_wait_for_ssh | bool) or (openshift_aws_wait_for_node_ready | bool)
   name: wait for our new nodes to come up
   include_tasks: wait_for_groups.yml
   vars:
