@@ -7,6 +7,10 @@
     name: webconsole
   register: console_deployment
   until:
+  - console_deployment.module_results is defined
+  - console_deployment.module_results.results is defined
+  - console_deployment.module_results.results[0] is defined
+  - console_deployment.module_results.results[0].status is defined
   - console_deployment.module_results.results[0].status.readyReplicas is defined
   - console_deployment.module_results.results[0].status.readyReplicas > 0
   retries: 60
