@@ -11,6 +11,12 @@
       name: openshift_node
       tasks_from: glusterfs.yml
   - import_role:
+      name: openshift_node
+      tasks_from: storage_plugin_iscsi.yml
+    when:
+    - "'iscsi' in osn_storage_plugin_deps"
+    - not openshift_is_atomic | bool
+  - import_role:
       name: openshift_storage_glusterfs
       tasks_from: kernel_modules.yml
     when:

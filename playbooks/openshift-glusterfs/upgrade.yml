@@ -1,7 +1,9 @@
 ---
 - import_playbook: ../init/main.yml
   vars:
-    l_init_fact_hosts: "oo_masters_to_config:oo_glusterfs_to_config"
+    # We need facts on all nodes since we need to check (on RPM installs) that
+    # glusterfs-fuse is up to date across the cluster.
+    l_init_fact_hosts: "oo_masters_to_config:oo_nodes_to_config"
     l_openshift_version_set_hosts: "oo_masters_to_config:!oo_first_master"
     l_sanity_check_hosts: "{{ groups['oo_masters_to_config'] | union(groups['oo_glusterfs_to_config']) }}"
     l_install_base_packages: False

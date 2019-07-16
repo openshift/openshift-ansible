@@ -1,0 +1,10 @@
+---
+- import_tasks: heketi_pod_check.yml
+
+- name: Backup heketi DB
+  shell: "{{ heketi_pod_rsh }} bash -c \"{{ heketi_backup_cmd }}\""
+  vars:
+    heketi_pod_rsh: "{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {{ heketi_pod_name }}"
+    heketi_backup_cmd: "cp -a /var/lib/heketi/heketi.db /var/lib/heketi/heketi.db.\\$(date +%s).\\$(heketi --version | cut -d' ' -f 2)"
+  when:
+  - not glusterfs_heketi_is_missing
