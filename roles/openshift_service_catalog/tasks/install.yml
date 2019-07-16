@@ -21,6 +21,7 @@
     state: present
     name: "kube-service-catalog"
     node_selector: ""
+  retries: 20
 
 - when: os_sdn_network_plugin_name == 'redhat/openshift-ovs-multitenant'
   block:
