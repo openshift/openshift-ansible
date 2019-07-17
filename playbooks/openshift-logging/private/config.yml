@@ -100,6 +100,11 @@
       command:
         cat /proc/sys/vm/max_map_count
       register: _vm_max_map_count
+      
+    - name: Check if /etc/sysctl.d/99-elasticsearch.conf file exists
+      stat:
+        path: /etc/sysctl.d/99-elasticsearch.conf
+      register: stat_result
 
     - name: Updating vm.max_map_count value
       sysctl:
@@ -108,7 +113,7 @@
         sysctl_file: "/etc/sysctl.d/99-elasticsearch.conf"
         reload: yes
       when:
-      - _vm_max_map_count.stdout | default(0) | int <= 262144 | int
+      - _vm_max_map_count.stdout | default(0) | int <= 262144 | int or stat_result.stat.exists == False
 
 - name: Remove created 99-elasticsearch sysctl
   hosts: all
