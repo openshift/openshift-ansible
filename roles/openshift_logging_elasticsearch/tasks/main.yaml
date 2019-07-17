@@ -19,6 +19,16 @@
     msg: Invalid deployment type, one of ['data-master', 'data-client', 'master', 'client'] allowed
   when: not openshift_logging_elasticsearch_deployment_type in __allowed_es_types
 
+- when:
+  - openshift_logging_elasticsearch_storage_type == "hostmount"
+  name: "Ensure openshift_logging_elasticsearch_hostmount_path is set"
+  assert:
+    that:
+    - openshift_logging_elasticsearch_hostmount_path is defined
+    - "openshift_logging_elasticsearch_hostmount_path != ''"
+    msg: |-
+      openshift_logging_elasticsearch_hostmount_path has not been set and is required for openshift_logging_elasticsearch_storage_type = "hostmount"
+
 - set_fact:
     elasticsearch_name: "{{ 'logging-elasticsearch' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
     es_component: "{{ 'es' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
@@ -465,7 +475,7 @@
       assert:
         that: "{{ es_available_nodes['module_results']['results'][0]['items'] | default([]) | length != 0 }}"
         msg: |-
-          No schedulable nodes found matching node selector for elastic search.'
+          No schedulable nodes found matching node selector for elasticsearch.
 
     - name: label node where dc will be stick
       oc_label:

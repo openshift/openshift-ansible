@@ -187,6 +187,8 @@
     _es_containers: "{{ outer_item.0.containers}}"
     _es_configmap: "{{ openshift_logging_facts | walk('elasticsearch_ops#configmaps#logging-elasticsearch-ops#elasticsearch.yml', '{}', delimiter='#') | from_yaml }}"
 
+    es_dc_index: "{{ outer_item.2 }}"
+
   with_together:
   - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.values() | list }}"
   - "{{ openshift_logging_facts.elasticsearch_ops.pvcs }}"
@@ -223,6 +225,8 @@
     openshift_logging_es_hostname: "{{ openshift_logging_es_ops_hostname }}"
     openshift_logging_es_edge_term_policy: "{{ openshift_logging_es_ops_edge_term_policy | default('') }}"
     openshift_logging_es_allow_external: "{{ openshift_logging_es_ops_allow_external }}"
+
+    es_dc_index: "{{ outer_item | int + openshift_logging_facts.elasticsearch_ops.deploymentconfigs | count - 1 }}"
 
   with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
   loop_control:
