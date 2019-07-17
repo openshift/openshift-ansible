@@ -100,7 +100,7 @@
       command:
         cat /proc/sys/vm/max_map_count
       register: _vm_max_map_count
-      
+
     - name: Check if /etc/sysctl.d/99-elasticsearch.conf file exists
       stat:
         path: /etc/sysctl.d/99-elasticsearch.conf
