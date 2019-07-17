@@ -108,7 +108,7 @@
         sysctl_file: "/etc/sysctl.d/99-elasticsearch.conf"
         reload: yes
       when:
-      - _vm_max_map_count.stdout | default(0) | int < 262144 | int
+      - _vm_max_map_count.stdout | default(0) | int <= 262144 | int
 
 - name: Remove created 99-elasticsearch sysctl
   hosts: all
