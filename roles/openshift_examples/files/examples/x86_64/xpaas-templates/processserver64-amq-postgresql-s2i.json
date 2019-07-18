@@ -555,7 +555,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-processserver64-openshift:1.5"
+                            "name": "jboss-processserver64-openshift:1.6"
                         }
                     }
                 },
