@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.129
+Version:        3.11.130
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,20 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Jul 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.130-1
+- [Glusterfs] Before upgrade, check for pending heketi operations. Still
+  proceed with the upgrade after timeout. (sarumuga@redhat.com)
+- Update config.yml (sgaikwad@redhat.com)
+- Update config.yml (sgaikwad@redhat.com)
+- Modify Updating vm.max_map_count value task to create 99-elasticsearch.conf
+  file when vm.max_map_count is set to <= 262144 (sgaikwad@redhat.com)
+- Addressing missing es_dc_index for ops install and adding assert for
+  hostmount_path (ewolinet@redhat.com)
+- Fix web console deployment conditional (rteague@redhat.com)
+- Wait the new scale group nodes to be ready before drain the nodes
+  (haowang@redhat.com)
+- Switch to the new default storage class annotation (mharri@redhat.com)
+
 * Wed Jul 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.129-1
 - Setup NetworkManager script before starting dnsmasq
   (bennett.novak@rackspace.com)
