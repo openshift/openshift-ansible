@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.154
+Version:        3.10.155
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Jul 22 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.155-1
+- GlusterFS upgrade playbook related additional fixes (sarumuga@redhat.com)
+- Setup NetworkManager script before starting dnsmasq
+  (bennett.novak@rackspace.com)
+
 * Wed Jul 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.154-1
 - restart.yml - check gluster health before and after restart
   (itewk@redhat.com)
