@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.130
+Version:        3.11.131
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jul 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.131-1
+- 
+
 * Sun Jul 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.130-1
 - [Glusterfs] Before upgrade, check for pending heketi operations. Still
   proceed with the upgrade after timeout. (sarumuga@redhat.com)
