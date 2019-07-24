@@ -2,6 +2,7 @@
 - import_tasks: cluster_health.yml
   vars:
     l_check_bricks: true
+    glusterfs_health_timeout: 30
   when: glusterfs_is_native
 
 - import_tasks: heketi_set_cli.yml
