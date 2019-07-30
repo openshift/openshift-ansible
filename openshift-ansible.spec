@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.133
+Version:        3.11.134
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jul 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.134-1
+- Adding openshift_node_local_quota_per_fsgroup parameter creates incorrect
+  node config. Fixes BZ 1728195 (sgaikwad@redhat.com)
+
 * Sun Jul 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.133-1
 - 
 
