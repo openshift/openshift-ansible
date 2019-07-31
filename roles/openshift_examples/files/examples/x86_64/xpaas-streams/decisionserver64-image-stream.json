@@ -150,6 +150,27 @@
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-decisionserver-6/decisionserver64-openshift:1.5"
                         }
+                    },
+                    {
+                        "name": "1.6",
+                        "annotations": {
+                            "description": "Red Hat JBoss BRMS 6.4 decision server S2I images.",
+                            "iconClass": "icon-decisionserver",
+                            "tags": "builder,decisionserver,java,hidden",
+                            "supports": "decisionserver:6.4,java:8",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
+                            "sampleContextDir": "decisionserver/hellorules",
+                            "sampleRef": "1.4",
+                            "version": "1.6",
+                            "openshift.io/display-name": "Red Hat JBoss BRMS 6.4 decision server"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-decisionserver-6/decisionserver64-openshift:1.6"
+                        }
                     }
                 ]
             }

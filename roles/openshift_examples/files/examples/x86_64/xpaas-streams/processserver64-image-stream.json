@@ -150,6 +150,27 @@
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-processserver-6/processserver64-openshift:1.5"
                         }
+                    },
+                    {
+                        "name": "1.6",
+                        "annotations": {
+                            "description": "Red Hat JBoss BPM Suite 6.4 intelligent process server S2I images.",
+                            "iconClass": "icon-processserver",
+                            "tags": "builder,processserver,java,hidden",
+                            "supports": "processserver:6.4,java:8",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
+                            "sampleContextDir": "processserver/library",
+                            "sampleRef": "1.4",
+                            "version": "1.6",
+                            "openshift.io/display-name": "Red Hat JBoss BPM Suite 6.4 intelligent process server"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-processserver-6/processserver64-openshift:1.6"
+                        }
                     }
                 ]
             }
