@@ -1,4 +1,9 @@
 ---
+# Check image version mentioned in the inventory:
+# Fail in case:
+#    - If the version is latest
+#    - There is no version mentioned
+#    - All the versions mentioned are not equal
 - name: Check for specified container versions
   fail:
     msg: |
@@ -18,6 +23,7 @@
     glusterfs_fail: "{{ glusterfs_is_native | bool and glusterfs_version in [ ':latest', '' ] }}"
     heketi_fail: "{{ glusterfs_heketi_is_native | bool and heketi_version in [ ':latest', '' ] }}"
     glusterblock_fail: "{{ glusterfs_block_deploy | bool and glusterblock_version in [ ':latest', '' ] }}"
+    image_tags_uneven_fail: "{{ not (glusterfs_version == heketi_version and heketi_version == glusterblock_version) }}"
   when:
   - openshift_deployment_type == 'openshift-enterprise'
-  - glusterfs_fail or heketi_fail or glusterblock_fail
+  - glusterfs_fail or heketi_fail or glusterblock_fail or image_tags_uneven_fail
