@@ -154,8 +154,9 @@ data:
     daemon_enabled = true
 
     # Bind address for CNI daemon HTTP server. It is recommened to allow only local
-    # connections. (string value)
-    bind_address = 127.0.0.1:50036
+    # connections. (string value). If the kuryr-cni golang version is used, this
+    # must be left as 5036 as it is hardcoded at the moment
+    bind_address = 127.0.0.1:5036
 
     # Maximum number of processes that will be spawned to process requests from CNI
     # driver. (integer value)
@@ -529,8 +530,9 @@ data:
     daemon_enabled = true
 
     # Bind address for CNI daemon HTTP server. It is recommened to allow only local
-    # connections. (string value)
-    bind_address = 127.0.0.1:50036
+    # connections. (string value). If the kuryr-cni golang version is used, this
+    # must be left as 5036 as it is hardcoded at the moment
+    bind_address = 127.0.0.1:5036
 
     # Maximum number of processes that will be spawned to process requests from CNI
     # driver. (integer value)
