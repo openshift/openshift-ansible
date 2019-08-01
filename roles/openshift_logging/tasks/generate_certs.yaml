@@ -133,7 +133,9 @@
     - not ca_crl_srl_file.stat.exists
 
 - name: Generate PEM certs
-  include_tasks: generate_pems.yaml component={{node_name}}
+  include_tasks: generate_pems.yaml
+  vars:
+    component: "{{node_name}}"
   with_items:
     - system.logging.fluentd
     - system.logging.kibana
@@ -143,7 +145,9 @@
     loop_var: node_name
 
 - name: Generate PEM cert for mux
-  include_tasks: generate_pems.yaml component={{node_name}}
+  include_tasks: generate_pems.yaml
+  vars:
+    component: "{{node_name}}"
   with_items:
     - system.logging.mux
   loop_control:
@@ -151,7 +155,9 @@
   when: openshift_logging_use_mux | bool
 
 - name: Generate PEM cert for Elasticsearch external route
-  include_tasks: generate_pems.yaml component={{node_name}}
+  include_tasks: generate_pems.yaml
+  vars:
+    component: "{{node_name}}"
   with_items:
     - system.logging.es
   loop_control:
