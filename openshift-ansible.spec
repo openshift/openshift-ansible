@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.134
+Version:        3.11.135
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,19 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Aug 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.135-1
+- Add ANSIBLE_CONFIG to tox.ini (rteague@redhat.com)
+- Ensure cni port does not collide with kernel reserved ports
+  (ltomasbo@redhat.com)
+- [GlusterFS]: Fix registry daemonset deletion as part of upgrade.
+  (sarumuga@redhat.com)
+- [Glusterfs]: Ensure that all versions mentioned in image tag is same.
+  (sarumuga@redhat.com)
+- [Glusterfs]: Bring down the number of retries attempted for upgrade playbook.
+  (sarumuga@redhat.com)
+- [KIECLOUD-202] - Update OpenShift catalog for RHIPS/DS 6.4.12
+  (fspolti@redhat.com)
+
 * Tue Jul 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.134-1
 - Adding openshift_node_local_quota_per_fsgroup parameter creates incorrect
   node config. Fixes BZ 1728195 (sgaikwad@redhat.com)
