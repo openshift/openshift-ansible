@@ -1,4 +1,11 @@
 ---
+- name: Upgrade playbook support for converged mode
+  fail:
+    msg: |
+      Upgrade playbook is supported for converged mode only.
+      Use manual method for independent mode.
+  when: not glusterfs_is_native | bool
+
 - import_tasks: cluster_health.yml
   vars:
     l_check_bricks: true
