@@ -514,10 +514,6 @@ class UnattendedCliTests(OOCliFixture):
             os.path.join(self.work_dir, '.ansible/callback_facts.yaml'),
             env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
         self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
-        # If user running test has rpm installed, this might be set to default:
-        self.assertTrue(
-            'ANSIBLE_CONFIG' not in env_vars or
-            env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
 
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][1]
