@@ -1,7 +1,7 @@
 ---
 - import_tasks: cluster_health.yml
   vars:
-    l_check_bricks: true
+    l_check_bricks: "{{ glusterfs_check_brick_size_health }}"
     glusterfs_health_timeout: 30
   when: glusterfs_is_native
 
