@@ -5,13 +5,27 @@
     glusterfs_health_timeout: 30
   when: glusterfs_is_native
 
-- import_tasks: heketi_set_cli.yml
-  when: glusterfs_heketi_is_native
+- block:
+  - name: List and get heketi podname
+    oc_obj:
+      namespace: "{{ glusterfs_namespace }}"
+      kind: pod
+      state: list
+      selector: "glusterfs=heketi-{{ glusterfs_name }}-pod"
+    register: heketi_pod_wait
+    until:
+    - "heketi_pod_wait.module_results.results[0]['items'] | count > 0"
+    # Pod's 'Ready' status must be True
+    - "heketi_pod_wait.module_results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+    delay: 10
+    retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 
-- import_tasks: heketi_set_ro.yml
-  when: glusterfs_heketi_is_native
+  - import_tasks: heketi_set_cli.yml
+    vars:
+      heketi_pod: "{{ heketi_pod_wait.module_results.results[0]['items'][0] }}"
 
-- import_tasks: heketi_ops_pending.yml
+  - import_tasks: heketi_set_ro.yml
+  - import_tasks: heketi_ops_pending.yml
   when: glusterfs_heketi_is_native
 
 - import_tasks: heketi_db_backup.yml
