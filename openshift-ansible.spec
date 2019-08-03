@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.91
+Version:        3.9.92
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Aug 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.92-1
+- import_tasks no longer supports inline variables
+  (mateus.caruccio@getupcloud.com)
+- Drop ANSIBLE_CONFIG check from cli_installer_tests (rteague@redhat.com)
+- Add ANSIBLE_CONFIG to tox.ini (rteague@redhat.com)
+- Update tox test environment vars (rteague@redhat.com)
+- Fix ASB ConfigMap (jcallen@redhat.com)
+
 * Sat Jul 27 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.91-1
 - endpoint is missing as part of ClusterRole rule. This in turn throws a error
   when gluster-block pod is provisioned. (sarumuga@redhat.com)
