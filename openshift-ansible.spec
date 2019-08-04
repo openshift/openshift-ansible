@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.135
+Version:        3.11.136
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Aug 04 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.136-1
+- [GlusterFS]: variable to skip brick size check (sarumuga@redhat.com)
+- Get heketi_pod name before invoking heketi-cli command. (sarumuga@redhat.com)
+
 * Thu Aug 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.135-1
 - Add ANSIBLE_CONFIG to tox.ini (rteague@redhat.com)
 - Ensure cni port does not collide with kernel reserved ports
