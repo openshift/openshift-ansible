@@ -83,7 +83,7 @@
   command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ l_release_image }}"
 
 - name: Get machine controller daemon image from release image
-  command: "podman run --rm {{ l_release_image }} image machine-config-daemon"
+  command: "podman run --rm {{ l_release_image }} image machine-config-operator"
   register: release_image_mcd
 
 - block:
