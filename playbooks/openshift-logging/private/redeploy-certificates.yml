@@ -1,15 +1,15 @@
 ---
-- name: Logging Install Checkpoint Start
+- name: Logging Cert Redploy Checkpoint Start
   hosts: all
   gather_facts: false
   tasks:
-  - name: Set Logging install 'In Progress'
+  - name: Set Logging cert redeploy 'In Progress'
     run_once: true
     set_stats:
       data:
         installer_phase_logging:
-          title: "Logging Install"
-          playbook: "playbooks/openshift-logging/config.yml"
+          title: "Logging Cert Redeploy"
+          playbook: "playbooks/openshift-logging/redeploy-certificates.yml"
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
@@ -109,11 +109,11 @@
       state: absent
     changed_when: False
 
-- name: Logging Install Checkpoint End
+- name: Logging Cert Redeploy Checkpoint End
   hosts: all
   gather_facts: false
   tasks:
-  - name: Set Logging install 'Complete'
+  - name: Set Logging cert redeploy 'Complete'
     run_once: true
     set_stats:
       data:
