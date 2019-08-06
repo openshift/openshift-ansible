@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.92
+Version:        3.9.93
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.93-1
+- 
+
 * Sat Aug 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.92-1
 - import_tasks no longer supports inline variables
   (mateus.caruccio@getupcloud.com)
