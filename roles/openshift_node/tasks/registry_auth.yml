@@ -39,7 +39,7 @@
     # Test that we can actually connect with provided info
     test_login: "{{ item.test_login | default(omit) }}"
     proxy_vars: "{{ l_docker_creds_proxy_vars }}"
-    test_image: "{{ item.test_image | default('openshift3/ose-pod') }}"
+    test_image: "{{ item.test_image | default(l_docker_creds_test_image) }}"
     tls_verify: "{{ item.tls_verify | default(omit) }}"
   when:
     - openshift_additional_registry_credentials != []
