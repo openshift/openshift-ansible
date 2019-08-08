@@ -109,3 +109,17 @@
   rescue:
   - fail:
       msg: "Ignition apply failed"
+
+- name: Wait for nodes to report ready
+  command: >
+    oc get node {{ item | lower }}
+    --config={{ openshift_node_kubeconfig_path }}
+    --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+  loop: "{{ ansible_play_batch }}"
+  delegate_to: localhost
+  run_once: true
+  register: oc_get
+  until:
+  - oc_get.stdout == "True"
+  retries: 36
+  delay: 5
