@@ -39,7 +39,7 @@
     content: "{{ (oc_get.stdout | from_json).spec.config }}"
     dest: "{{ temp_dir.path }}/worker_ignition_config.json"
 
-- name: Get machine-config-daemon image
+- name: Get machine-config-operator image
   command: >
     oc get daemonset machine-config-daemon
     --config={{ openshift_node_kubeconfig_path }}

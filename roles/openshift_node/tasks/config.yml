@@ -83,7 +83,7 @@
   command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ l_release_image }}"
 
 - name: Get machine controller daemon image from release image
-  command: "podman run --rm {{ l_release_image }} image machine-config-daemon"
+  command: "podman run --rm {{ l_release_image }} image machine-config-operator"
   register: release_image_mcd
 
 - block:
@@ -93,7 +93,7 @@
   - name: Apply ignition manifest
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
     vars:
-      podman_flags: "--privileged --rm -ti {{ release_image_mcd.stdout }}"
+      podman_flags: "--privileged --rm --entrypoint=/usr/bin/machine-config-daemon -ti {{ release_image_mcd.stdout }}"
       podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
       mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ temp_dir.path }}/bootstrap.ign --skip-reboot"
 
