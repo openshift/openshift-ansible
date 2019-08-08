@@ -27,6 +27,17 @@
 - name: generate htpasswd file for hawkular metrics
   local_action: htpasswd path="{{ local_tmp.stdout }}/hawkular-metrics.htpasswd" name=hawkular password="{{ hawkular_metrics_pwd.content | b64decode }}"
   become: false
+  when: not openshift_metrics_hawkular_fips | default(False) | bool
+
+- name: generate htpasswd file for hawkular metrics
+  command: docker run "{{ openshift_metrics_hawkular_metrics_image }}" java -Dhtpasswd.username=hawkular -Dhtpasswd.password="{{ hawkular_metrics_pwd.content | b64decode }}" -jar /opt/hawkular/scripts/hawkular-htpasswd.jar
+  register: htpasswd_output
+  when: openshift_metrics_hawkular_fips | default(False) | bool
+
+- copy:
+    content: "{{ htpasswd_output.stdout_lines | join('') }}"
+    dest: "{{ local_tmp.stdout }}/hawkular-metrics.htpasswd"
+  when: openshift_metrics_hawkular_fips | default(False) | bool
 
 - name: copy local generated passwords to target
   copy:
