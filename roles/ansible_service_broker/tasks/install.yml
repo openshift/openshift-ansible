@@ -186,12 +186,6 @@
       path: /tmp/dcout
       data: "{{ lookup('template', 'asb_dc.yaml.j2') | from_yaml }}"
 
-- name: set auth name and type facts if needed
-  set_fact:
-    ansible_service_broker_registry_auth_type: "secret"
-    ansible_service_broker_registry_auth_name: "asb-registry-auth"
-  when: ansible_service_broker_registry_user != "" and ansible_service_broker_registry_password != ""
-
 # TODO: saw a oc_configmap in the library, but didn't understand how to get it to do the following:
 - name: Create config map for ansible-service-broker
   oc_obj:

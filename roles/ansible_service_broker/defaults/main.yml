@@ -20,6 +20,8 @@ ansible_service_broker_keep_namespace: false
 ansible_service_broker_image_pull_policy: Always
 ansible_service_broker_sandbox_role: edit
 ansible_service_broker_auto_escalate: false
+ansible_service_broker_registry_auth_type: "secret"
+ansible_service_broker_registry_auth_name: "asb-registry-auth"
 ansible_service_broker_local_registry_whitelist: []
 
 l_asb_default_images_dict:
