@@ -95,7 +95,7 @@
     vars:
       podman_flags: "--privileged --rm --entrypoint=/usr/bin/machine-config-daemon -ti {{ release_image_mcd.stdout }}"
       podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
-      mcd_command: "start --node-name {{ ansible_hostname }} --once-from {{ temp_dir.path }}/bootstrap.ign --skip-reboot"
+      mcd_command: "start --node-name {{ ansible_nodename | lower }} --once-from {{ temp_dir.path }}/bootstrap.ign --skip-reboot"
 
   - name: Remove temp directory
     file:
@@ -112,7 +112,7 @@
 
 - name: Wait for nodes to report ready
   command: >
-    oc get node {{ item | lower }}
+    oc get node {{ hostvars[item].ansible_nodename | lower }}
     --config={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
   loop: "{{ ansible_play_batch }}"
