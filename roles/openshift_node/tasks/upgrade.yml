@@ -7,18 +7,16 @@
 
 - name: Cordon node prior to upgrade
   command: >
-    oc adm cordon {{ item | lower }}
+    oc adm cordon {{ ansible_nodename | lower }}
     --config={{ openshift_node_kubeconfig_path }}
   delegate_to: localhost
-  with_items: "{{ ansible_play_batch }}"
 
 - name: Drain node prior to upgrade
   command: >
-    oc adm drain {{ item | lower }}
+    oc adm drain {{ ansible_nodename | lower }}
     --config={{ openshift_node_kubeconfig_path }}
     --force --delete-local-data --ignore-daemonsets
   delegate_to: localhost
-  with_items: "{{ ansible_play_batch }}"
 
 # Run the openshift_node_pre_upgrade_hook if defined
 - block:
@@ -42,10 +40,9 @@
 
 - name: Uncordon node after upgrade
   command: >
-    oc adm uncordon {{ item | lower }}
+    oc adm uncordon {{ ansible_nodename | lower }}
     --config={{ openshift_node_kubeconfig_path }}
   delegate_to: localhost
-  with_items: "{{ ansible_play_batch }}"
 
 # Run the openshift_node_post_upgrade_hook if defined
 - block:
