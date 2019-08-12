@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.162
+Version:        3.10.163
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Aug 12 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.163-1
+- Convert Ansible service broker secrets to json instead of yaml
+  (gabriel.mainberger@vshn.net)
+- Configure Ansible service broker secrets (simon.ruegg@vshn.ch)
+
 * Fri Aug 09 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.162-1
 - 
 
