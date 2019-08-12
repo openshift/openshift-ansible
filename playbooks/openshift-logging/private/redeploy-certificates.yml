@@ -60,6 +60,21 @@
     vars:
       generated_certs_dir: "{{openshift.common.config_base}}/logging"
 
+
+  - name: Preparing Kibana proxy secret files
+    include_role:
+      name: openshift_logging_kibana
+      tasks_from: generate_proxy_secret_files.yaml
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging"
+
+  - name: Loading generated Kibana secret files
+    include_role:
+      name: openshift_logging_kibana
+      tasks_from: load_secret_files.yaml
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging"
+
   - name: Regenerating secrets
     include_role:
       name: "{{logging_role}}"
@@ -73,6 +88,44 @@
     - openshift_logging_fluentd
     loop_control:
       loop_var: logging_role
+
+  - name: Create templates subdirectory
+    file:
+      state: directory
+      path: "{{ mktemp.stdout }}/templates"
+      mode: 0755
+    changed_when: False
+
+  - name: Updating Kibana route certs
+    include_role:
+      name: openshift_logging_kibana
+      tasks_from: generate_route.yaml
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging"
+      tempdir: "{{ mktemp.stdout }}"
+
+  - name: Updating Kibana ops route certs
+    include_role:
+      name: openshift_logging_kibana
+      tasks_from: generate_route.yaml
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging"
+      openshift_logging_kibana_ops_deployment: true
+      tempdir: "{{ mktemp.stdout }}"
+      openshift_logging_kibana_hostname: "{{ openshift_logging_kibana_ops_hostname }}"
+      openshift_logging_kibana_cert: "{{ openshift_logging_kibana_ops_cert }}"
+      openshift_logging_kibana_key: "{{ openshift_logging_kibana_ops_key }}"
+      openshift_logging_kibana_ca: "{{ openshift_logging_kibana_ops_ca}}"
+    when:
+    - openshift_logging_use_ops | default(False) | bool
+
+  - name: Updating Kibana Proxy oauth client
+    include_role:
+      name: openshift_logging_kibana
+      tasks_from: generate_oauth_client.yaml
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging"
+      tempdir: "{{ mktemp.stdout }}"
 
   - name: Regenerating secrets
     include_role:

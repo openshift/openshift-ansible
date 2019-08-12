@@ -1,0 +1,54 @@
+---
+# create routes
+- set_fact:
+    kibana_name: "{{ 'logging-kibana' ~ ( (openshift_logging_kibana_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
+
+# TODO: set up these certs differently?
+- set_fact:
+    kibana_key: "{{ lookup('file', openshift_logging_kibana_key) | b64encode }}"
+  when: openshift_logging_kibana_key | trim | length > 0
+  changed_when: false
+
+- set_fact:
+    kibana_cert: "{{ lookup('file', openshift_logging_kibana_cert) | b64encode }}"
+  when: openshift_logging_kibana_cert | trim | length > 0
+  changed_when: false
+
+- set_fact:
+    kibana_ca: "{{ lookup('file', openshift_logging_kibana_ca) | b64encode }}"
+  when: openshift_logging_kibana_ca | trim | length > 0
+  changed_when: false
+
+- set_fact:
+    kibana_ca: "{{ key_pairs | entry_from_named_pair('ca_file') }}"
+  when: kibana_ca is not defined
+  changed_when: false
+
+- name: Generating Kibana route template
+  template:
+    src: "route_reencrypt.j2"
+    dest: "{{ tempdir }}/templates/kibana-route.yaml"
+  vars:
+    obj_name: "{{ kibana_name }}"
+    route_host: "{{ openshift_logging_kibana_hostname }}"
+    service_name: "{{ kibana_name }}"
+    tls_key: "{{ kibana_key | default('') | b64decode }}"
+    tls_cert: "{{ kibana_cert | default('') | b64decode }}"
+    tls_ca_cert: "{{ kibana_ca | b64decode }}"
+    tls_dest_ca_cert: "{{ key_pairs | entry_from_named_pair('ca_file') | b64decode }}"
+    edge_term_policy: "{{ openshift_logging_kibana_edge_term_policy | default('') }}"
+    labels:
+      component: support
+      logging-infra: support
+      provider: openshift
+  changed_when: no
+
+# This currently has an issue if the host name changes
+- name: Setting Kibana route
+  oc_obj:
+    state: present
+    name: "{{ kibana_name }}"
+    namespace: "{{ openshift_logging_namespace }}"
+    kind: route
+    files:
+      - "{{ tempdir }}/templates/kibana-route.yaml"

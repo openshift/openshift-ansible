@@ -1,0 +1,31 @@
+---
+# preserve list of current hostnames
+- name: Get current oauthclient hostnames
+  oc_obj:
+    state: list
+    name: kibana-proxy
+    namespace: "{{ openshift_logging_namespace }}"
+    kind: oauthclient
+  register: oauth_client_list
+
+- set_fact: proxy_hostnames={{ oauth_client_list.module_results.results[0].redirectURIs | default ([]) + ['https://' ~ openshift_logging_kibana_hostname] }}
+
+# create oauth client
+- name: Create oauth-client template
+  template:
+    src: "oauth-client.j2"
+    dest: "{{ tempdir }}/templates/oauth-client.yml"
+  vars:
+    kibana_hostnames: "{{ proxy_hostnames | unique }}"
+    secret: "{{ key_pairs | entry_from_named_pair('oauth_secret') | b64decode }}"
+    access_token_max_age_seconds: "{{ openshift_logging_kibana_session_timeout_seconds | int }}"
+
+- name: Set kibana-proxy oauth-client
+  oc_obj:
+    state: present
+    name: "kibana-proxy"
+    namespace: "{{ openshift_logging_namespace }}"
+    kind: oauthclient
+    files:
+      - "{{ tempdir }}/templates/oauth-client.yml"
+    delete_after: true
