@@ -42,8 +42,6 @@
     - master.kubelet-client.key
     - master.proxy-client.crt
     - master.proxy-client.key
-    - service-signer.crt
-    - service-signer.key
     - etcd.server.crt
     - etcd.server.key
     - master.server.crt
@@ -51,3 +49,12 @@
     - openshift-master.crt
     - openshift-master.key
     - openshift-master.kubeconfig
+
+  - name: Remove service signer certificates
+    file:
+      path: "{{ openshift.common.config_base }}/master/{{ item }}"
+      state: absent
+    with_items:
+    - service-signer.crt
+    - service-signer.key
+    when: openshift_redeploy_openshift_ca | default(false) | bool
