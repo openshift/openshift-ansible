@@ -1,8 +1,8 @@
 ---
 - name: Install GlusterFS storage plugin dependencies
   package:
-    name: glusterfs-fuse
-    state: latest
+    name: glusterfs-fuse{{ glusterfs_fuse_version }}
+    state: present
   when: not (openshift_is_atomic | default(False) | bool)
   register: result
   until: result is succeeded
