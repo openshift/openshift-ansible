@@ -3,31 +3,31 @@
     "kind": "Template",
     "metadata": {
       "annotations": {
-        "openshift.io/display-name": "Red Hat Fuse 7.3 Console",
+        "openshift.io/display-name": "Red Hat Fuse 7.4 Console",
         "openshift.io/provider-display-name": "Red Hat, Inc.",
         "description": "The Red Hat Fuse Console eases the discovery and management of Fuse applications deployed on OpenShift.",
         "tags": "hawtio,java,fis,jboss-fuse",
         "iconClass": "icon-rh-integration",
-        "version": "1.3"
+        "version": "1.4"
       },
       "labels": {
         "template": "fuse-console"
       },
-      "name": "fuse73-console"
+      "name": "fuse74-console"
     },
     "parameters": [
       {
         "name": "APP_NAME",
         "displayName": "Application Name",
         "required": true,
-        "value": "fuse73-console",
+        "value": "fuse74-console",
         "description": "The name assigned to the application."
       },
       {
         "name": "APP_VERSION",
         "displayName": "Application Version",
         "required": true,
-        "value": "1.3",
+        "value": "1.4",
         "description": "The application version."
       },
       {
@@ -65,7 +65,7 @@
       {
         "name": "MEMORY_LIMIT",
         "displayName": "Memory limit",
-        "value": "32Mi",
+        "value": "200Mi",
         "required": true,
         "description": "The amount of memory the container is limited to use."
       }
@@ -78,7 +78,7 @@
           "name": "${APP_NAME}-config"
         },
         "data": {
-          "hawtconfig.json": "{\n  \"about\": {\n    \"title\": \"Red Hat Fuse Console\",\n    \"productInfo\": [],\n    \"additionalInfo\": \"The Red Hat Fuse Console eases the discovery and management of Fuse applications deployed on OpenShift.\",\n    \"copyright\": \"\"\n  },\n  \"branding\": {\n    \"appName\": \"Fuse Console\",\n    \"appLogoUrl\": \"../online/img/fuse-logo.svg\"\n  },\n  \"disabledRoutes\": []\n}\n"
+          "hawtconfig.json": "{\n  \"about\": {\n    \"title\": \"Red Hat Fuse Console\",\n    \"productInfo\": [],\n    \"additionalInfo\": \"The Red Hat Fuse Console eases the discovery and management of Fuse applications deployed on OpenShift.\",\n    \"copyright\": \"\",\n    \"imgSrc\": \"../online/img/Logo-RedHat-A-Reverse-RGB.png\"\n  },\n  \"branding\": {\n    \"appName\": \"Fuse Console\",\n    \"appLogoUrl\": \"../online/img/Logo-Red_Hat-Fuse-A-Reverse-RGB.png\"\n  },\n  \"disabledRoutes\": []\n}\n"
         }
       },
       {
@@ -253,7 +253,7 @@
                   "volumeMounts": [
                     {
                       "name": "${APP_NAME}-config",
-                      "mountPath": "/opt/app-root/src/online/online/hawtconfig.json",
+                      "mountPath": "/opt/app-root/src/online/hawtconfig.json",
                       "subPath": "hawtconfig.json"
                     },
                     {
@@ -298,4 +298,3 @@
       }
     ]
   }
-  
