@@ -79,12 +79,19 @@
   set_fact:
     l_release_image: "{{ oc_get.stdout }}"
 
-- name: Pull release image
-  command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ l_release_image }}"
+- import_tasks: proxy.yml
 
-- name: Get machine controller daemon image from release image
-  command: "podman run --rm {{ l_release_image }} image machine-config-operator"
-  register: release_image_mcd
+- block:
+  - name: Pull release image
+    command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ l_release_image }}"
+
+  - name: Get machine controller daemon image from release image
+    command: "podman run --rm {{ l_release_image }} image machine-config-operator"
+    register: release_image_mcd
+  environment:
+    http_proxy: "{{ http_proxy | default('')}}"
+    https_proxy: "{{https_proxy | default('')}}"
+    no_proxy: "{{ no_proxy | default('')}}"
 
 - block:
   - name: Pull MCD image
@@ -105,7 +112,10 @@
   - name: Reboot the host and wait for it to come back
     reboot:
     #  reboot_timeout: 600  # default, 10 minutes
-
+  environment:
+    http_proxy: "{{ http_proxy | default('')}}"
+    https_proxy: "{{ https_proxy | default('')}}"
+    no_proxy: "{{ no_proxy | default('')}}"
   rescue:
   - fail:
       msg: "Ignition apply failed"
