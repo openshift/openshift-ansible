@@ -5,7 +5,7 @@ metadata:
   annotations:
     iconClass: icon-jboss
     tags: rhpam,processserver,jboss,kieserver,immutable,s2i,amq
-    version: "1.0"
+    version: "1.1"
     openshift.io/display-name: Red Hat Process Automation Manager 7.4 immutable production environment with ActiveMQ
     openshift.io/provider-display-name: Red Hat, Inc.
     description: Application template for an immultable KIE server in a production environment integrated with ActiveMQ, for Red Hat Process Automation Manager 7.4
@@ -16,7 +16,7 @@ metadata:
   name: rhpam74-prod-immutable-kieserver-amq
 labels:
   template: rhpam74-prod-immutable-kieserver-amq
-  rhpam: "1.0"
+  rhpam: "1.1"
 message: |-
           A new immutable Red Hat Process Automation Manager KIE server have been created in your project.
           The username/password for accessing the KIE server is
@@ -67,9 +67,9 @@ parameters:
   value: "rhpam74-kieserver-openshift"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.1".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
+  value: "1.1"
   required: true
 - displayName: KIE Server Persistence DS
   description: KIE server persistence datasource (Sets the org.kie.server.persistence.ds system property)
@@ -257,6 +257,16 @@ parameters:
   name: KIE_SERVER_MGMT_DISABLED
   value: "true"
   required: true
+- displayName: KIE Server JMS Executor
+  description: "Enables the JMS executor, set false to disable it."
+  name: KIE_SERVER_EXECUTOR_JMS
+  value: "true"
+  required: false
+- displayName: KIE Server Transacted Executor
+  description: "Enable transactions for JMS executor, disabled by default"
+  name: KIE_SERVER_EXECUTOR_JMS_TRANSACTED
+  value: "false"
+  required: false
 - displayName: KIE Server JMS Request Queue
   description: "JNDI name of request queue for JMS. The default value is queue/KIE.SERVER.REQUEST"
   name: KIE_SERVER_JMS_QUEUE_REQUEST
@@ -325,7 +335,7 @@ parameters:
   name: AMQ_GLOBAL_MAX_SIZE
   example: 10 gb
   required: false
-- displayName: AMQ Secret Name 
+- displayName: AMQ Secret Name
   description: The name of a secret containing AMQ SSL related files.
   name: AMQ_SECRET
   required: true
@@ -695,7 +705,7 @@ objects:
         port: 61612
         targetPort: 61612
     selector:
-      deploymentConfig: "${APPLICATION_NAME}-amq"      
+      deploymentConfig: "${APPLICATION_NAME}-amq"
   metadata:
     name: "${APPLICATION_NAME}-amq-stomp-ssl"
     labels:
@@ -730,7 +740,7 @@ objects:
         port: 61617
         targetPort: 61617
     selector:
-      deploymentConfig: "${APPLICATION_NAME}-amq"        
+      deploymentConfig: "${APPLICATION_NAME}-amq"
   metadata:
     name: "${APPLICATION_NAME}-amq-tcp-ssl"
     labels:
@@ -1035,6 +1045,10 @@ objects:
 ## PostgreSQL driver settings END
           - name: TIMER_SERVICE_DATA_STORE_REFRESH_INTERVAL
             value: "${TIMER_SERVICE_DATA_STORE_REFRESH_INTERVAL}"
+          - name: KIE_SERVER_EXECUTOR_JMS
+            value: "${KIE_SERVER_EXECUTOR_JMS}"
+          - name: KIE_SERVER_EXECUTOR_JMS_TRANSACTED
+            value: "${KIE_SERVER_EXECUTOR_JMS_TRANSACTED}"
           - name: KIE_SERVER_JMS_QUEUE_REQUEST
             value: "${KIE_SERVER_JMS_QUEUE_REQUEST}"
           - name: KIE_SERVER_JMS_QUEUE_RESPONSE
@@ -1330,11 +1344,11 @@ objects:
             value: "${AMQ_KEYSTORE_PASSWORD}"
           volumeMounts:
           - name: broker-secret-volume
-            mountPath: "/etc/amq-secret-volume"            
+            mountPath: "/etc/amq-secret-volume"
             readOnly: true
         volumes:
         - name: broker-secret-volume
-          secret:           
+          secret:
             secretName: "${AMQ_SECRET}"
 ## PostgreSQL persistent volume claim BEGIN
 - apiVersion: v1
