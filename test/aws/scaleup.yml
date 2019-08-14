@@ -128,13 +128,5 @@
       state: absent
     with_items: "{{ pre_scaleup_machineset_names }}"
 
-  - name: Delete CoreOS nodes
-    k8s:
-      kubeconfig: "{{ kubeconfig_path }}"
-      kind: Node
-      name: "{{ item }}"
-      state: absent
-    with_items: "{{ pre_scaleup_workers_name }}"
-
   - name: Wait for worker configs to roll out
     command: oc wait machineconfigpool/worker --for=condition=Updated --timeout=5m
