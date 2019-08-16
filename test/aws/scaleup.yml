@@ -74,31 +74,9 @@
     ignore_errors: true
   - when: new_machine is failed
     block:
-    - name: Collect a list of containers
-      command: crictl ps -a -q
-      ignore_errors: true
-      register: crictl_ps_output
-    - name: Collect container logs
-      command: "crictl logs {{ item }}"
-      register: crictl_logs_output
-      with_items: "{{ crictl_ps_output.stdout_lines }}"
-      ignore_errors: true
-    - name: Get crio logs
-      command: journalctl --no-pager -u crio
-      register: crio_logs
-      ignore_errors: true
-    - name: Get kubelet logs
-      command: journalctl --no-pager -u kubelet
-      register: kubelet_logs
-      ignore_errors: tru
-    - debug:
-        var: crictl_logs_output
-    - debug:
-        msg: "{{ kubelet_logs.stdout_lines }}"
-    - debug:
-        msg: "{{ crio_logs.stdout_lines }}"
+    - include_tasks: gather_logs.yml
     - fail:
-        msg: Node failed to become Ready
+        msg: Node failed to become Ready.
 
 - name: Remove CoreOS nodes
   hosts: localhost

@@ -1,0 +1,51 @@
+---
+- name: Set path to artifact dir
+  set_fact:
+    scaleup_artifacts_dir: /tmp/artifacts/scaleup
+
+- name: Create log directory
+  local_action:
+    module: file
+    path: "{{ scaleup_artifacts_dir }}"
+    state: directory
+
+- name: Collect a list of containers
+  command: crictl ps -a -q
+  register: crictl_ps_output
+  ignore_errors: true
+- name: Collect container logs
+  command: "crictl logs {{ item }}"
+  register: crictl_logs_output
+  no_log: true
+  with_items: "{{ crictl_ps_output.stdout_lines }}"
+  ignore_errors: true
+- name: Write container logs locally
+  local_action:
+    module: copy
+    content: "{{ crictl_logs_output }}"
+    dest: "{{ scaleup_artifacts_dir }}/{{ inventory_hostname }}-containers.log"
+  ignore_errors: true
+
+- name: Get crio logs
+  command: journalctl --no-pager -u crio
+  register: crio_logs
+  ignore_errors: true
+  no_log: true
+- name: Write crio logs locally
+  local_action:
+    module: copy
+    content: "{{ crio_logs.stdout_lines }}"
+    dest: "{{ scaleup_artifacts_dir }}/{{ inventory_hostname }}-crio.log"
+  ignore_errors: true
+
+- name: Get kubelet logs
+  command: journalctl --no-pager -u kubelet
+  register: kubelet_logs
+  ignore_errors: true
+  no_log: true
+- name: Write kubelet logs locally
+  local_action:
+    module: copy
+    content: "{{ kubelet_logs.stdout_lines }}"
+    dest: "{{ scaleup_artifacts_dir }}/{{ inventory_hostname }}-kubelet.log"
+  ignore_errors: true
