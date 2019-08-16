@@ -55,6 +55,8 @@
     package:
       name: nfs-utils
       state: present
+    register: result
+    until: result is succeeded
   - name: Wait for new nodes to be ready
     k8s_facts:
       kubeconfig: "{{ kubeconfig_path }}"
