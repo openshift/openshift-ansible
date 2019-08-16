@@ -126,6 +126,7 @@
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type | default(default_elasticsearch_storage_type) }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
     openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name | default() }}"
+    openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
 
     es_dc_index: "{{ outer_item | int + openshift_logging_facts.elasticsearch.deploymentconfigs | count - 1 }}"
 
