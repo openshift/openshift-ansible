@@ -89,7 +89,7 @@
 - name: Get cluster pull-secret
   command: >
     oc get secret pull-secret
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --namespace=openshift-config
     --output=jsonpath='{.data.\.dockerconfigjson}'
   delegate_to: localhost
@@ -107,7 +107,7 @@
 - name: Get cluster release image
   command: >
     oc get clusterversion
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.items[0].status.desired.image}'
   delegate_to: localhost
   register: oc_get
@@ -162,67 +162,95 @@
   - fail:
       msg: "Ignition apply failed"
 
-- name: Approve node-bootstrapper CSR
-  shell: >
-    count=0;
-    for csr in `oc --config={{ openshift_node_kubeconfig_path }} get csr --no-headers \
-      | grep " system:serviceaccount:openshift-machine-config-operator:node-bootstrapper " \
-      | cut -d " " -f1`;
-    do
-      oc --config={{ openshift_node_kubeconfig_path }} describe csr/$csr \
-        | grep " system:node:{{ hostvars[item].ansible_nodename | lower }}$";
-      if [ $? -eq 0 ];
-      then
-        oc --config={{ openshift_node_kubeconfig_path }} adm certificate approve ${csr};
+- block:
+  - name: Approve node-bootstrapper CSR
+    shell: >
+      count=0;
+      for csr in `oc --kubeconfig={{ openshift_node_kubeconfig_path }} get csr --no-headers \
+        | grep " system:serviceaccount:openshift-machine-config-operator:node-bootstrapper " \
+        | cut -d " " -f1`;
+      do
+        oc --kubeconfig={{ openshift_node_kubeconfig_path }} describe csr/$csr \
+          | grep " system:node:{{ hostvars[item].ansible_nodename | lower }}$";
+        if [ $? -eq 0 ];
+        then
+          oc --kubeconfig={{ openshift_node_kubeconfig_path }} adm certificate approve ${csr};
+          if [ $? -eq 0 ];
+          then
+            count=$((count+1));
+          fi;
+        fi;
+      done;
+      exit $((!count));
+    loop: "{{ ansible_play_batch }}"
+    delegate_to: localhost
+    run_once: true
+    register: oc_get
+    until:
+    - oc_get is success
+    retries: 6
+    delay: 5
+
+  rescue:
+  - import_tasks: gather_debug.yml
+
+  - name: DEBUG - Failed to approve node-bootstrapper CSR
+    fail:
+      msg: "Failed to approve node-bootstrapper CSR"
+    delegate_to: localhost
+
+- block:
+  - name: Approve node CSR
+    shell: >
+      count=0;
+      for csr in `oc --kubeconfig={{ openshift_node_kubeconfig_path }} get csr --no-headers \
+        | grep " system:node:{{ hostvars[item].ansible_nodename | lower }} " \
+        | cut -d " " -f1`;
+      do
+        oc --kubeconfig={{ openshift_node_kubeconfig_path }} adm certificate approve ${csr};
         if [ $? -eq 0 ];
         then
           count=$((count+1));
         fi;
-      fi;
-    done;
-    exit $((!count));
-  loop: "{{ ansible_play_batch }}"
-  delegate_to: localhost
-  run_once: true
-  register: oc_get
-  until:
-  - oc_get is success
-  retries: 6
-  delay: 5
+      done;
+      exit $((!count));
+    loop: "{{ ansible_play_batch }}"
+    delegate_to: localhost
+    run_once: true
+    register: oc_get
+    until:
+    - oc_get is success
+    retries: 6
+    delay: 5
 
-- name: Approve node CSR
-  shell: >
-    count=0;
-    for csr in `oc --config={{ openshift_node_kubeconfig_path }} get csr --no-headers \
-      | grep " system:node:{{ hostvars[item].ansible_nodename | lower }} " \
-      | cut -d " " -f1`;
-    do
-      oc --config={{ openshift_node_kubeconfig_path }} adm certificate approve ${csr};
-      if [ $? -eq 0 ];
-      then
-        count=$((count+1));
-      fi;
-    done;
-    exit $((!count));
-  loop: "{{ ansible_play_batch }}"
-  delegate_to: localhost
-  run_once: true
-  register: oc_get
-  until:
-  - oc_get is success
-  retries: 6
-  delay: 5
+  rescue:
+  - import_tasks: gather_debug.yml
 
-- name: Wait for nodes to report ready
-  command: >
-    oc get node {{ hostvars[item].ansible_nodename | lower }}
-    --config={{ openshift_node_kubeconfig_path }}
-    --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
-  loop: "{{ ansible_play_batch }}"
-  delegate_to: localhost
-  run_once: true
-  register: oc_get
-  until:
-  - oc_get.stdout == "True"
-  retries: 36
-  delay: 5
+  - name: DEBUG - Failed to approve node CSR
+    fail:
+      msg: "Failed to approve node CSR"
+    delegate_to: localhost
+
+- block:
+  - name: Wait for nodes to report ready
+    command: >
+      oc get node {{ hostvars[item].ansible_nodename | lower }}
+      --kubeconfig={{ openshift_node_kubeconfig_path }}
+      --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+    loop: "{{ ansible_play_batch }}"
+    delegate_to: localhost
+    run_once: true
+    register: oc_get
+    until:
+    - oc_get.stdout == "True"
+    retries: 36
+    delay: 5
+    changed_when: false
+
+  rescue:
+  - import_tasks: gather_debug.yml
+
+  - name: DEBUG - Node failed to report ready
+    fail:
+      msg: "Node failed to report ready"
+    delegate_to: localhost

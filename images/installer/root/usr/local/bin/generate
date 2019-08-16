@@ -82,7 +82,7 @@ class OpenShiftClient:
         """Execute a remote call using `oc`"""
         cmd = [
             self.oc,
-            '--config',
+            '--kubeconfig',
             self.kubeconfig
         ] + shlex.split(cmd_str)
         try:
