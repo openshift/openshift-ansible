@@ -122,16 +122,33 @@
   - fail:
       msg: "Ignition apply failed"
 
-- name: Wait for nodes to report ready
-  command: >
-    oc get node {{ hostvars[item].ansible_nodename | lower }}
-    --config={{ openshift_node_kubeconfig_path }}
-    --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
-  loop: "{{ ansible_play_batch }}"
-  delegate_to: localhost
-  run_once: true
-  register: oc_get
-  until:
-  - oc_get.stdout == "True"
-  retries: 36
-  delay: 5
+- block:
+  - name: Wait for nodes to report ready
+    command: >
+      oc get node {{ hostvars[item].ansible_nodename | lower }}
+      --config={{ openshift_node_kubeconfig_path }}
+      --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+    loop: "{{ ansible_play_batch }}"
+    delegate_to: localhost
+    run_once: true
+    register: oc_get
+    until:
+    - oc_get.stdout == "True"
+    retries: 36
+    delay: 5
+    changed_when: false
+
+  rescue:
+  - name: DEBUG - Get complete node objects
+    command: >
+      oc get node {{ hostvars[item].ansible_nodename | lower }}
+      --config={{ openshift_kubeconfig_path }}
+      --output=json
+    loop: "{{ ansible_play_batch }}"
+    delegate_to: localhost
+    run_once: true
+    changed_when: false
+
+  - name: DEBUG - Node failed to report ready
+    fail:
+      msg: "Node failed to report ready"
