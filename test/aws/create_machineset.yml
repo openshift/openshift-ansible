@@ -55,4 +55,4 @@
     name: "{{ new_machine.resources[0].status.addresses | selectattr('type', 'match', '^InternalIP$') | map(attribute='address') | first }}"
     node_name: "{{ new_machine.resources[0].status.addresses | selectattr('type', 'match', '^InternalDNS$') | map(attribute='address') | first }}"
     groups: new_workers
-    ansible_ssh_common_args: "-o ProxyCommand=\"ssh -o IdentityFile='{{ openshift_aws_scaleup_key_path | default('/opt/app-root/src/.ssh/id_rsa') }}' -o StrictHostKeyChecking=no -W %h:%p -q core@{{ ssh_bastion }}\""
+    ansible_ssh_common_args: "-o ProxyCommand=\"ssh -o IdentityFile='{{ openshift_aws_scaleup_key_path | default('/opt/app-root/src/.ssh/id_rsa') }}' -o ConnectTimeout=30 -o ConnectionAttempts=100 -o StrictHostKeyChecking=no -W %h:%p -q core@{{ ssh_bastion }}\""
