@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.136
+Version:        3.11.137
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,31 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Aug 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.137-1
+- Bug 1732154: Explicitly pass storage class var to logging role
+  (jcantril@redhat.com)
+- [GlusterFS]: Fix version check avoiding minor version comparison
+  (sarumuga@redhat.com)
+- Bug 1735751: avoid excessive dentries due to console liveness probe
+  (spadgett@redhat.com)
+- Use htpasswd hawkular metrics utility to generate SHA256 FIPS compliant
+  hashes (ruben.vp8510@gmail.com)
+- Fix ca node sync always applying certificate (jcallen@redhat.com)
+- Only delete and regenerate service signer cert when updating CA
+  (jcallen@redhat.com)
+- Increase wait for aggregated API availability (rteague@redhat.com)
+- Convert Ansible service broker secrets to json instead of yaml
+  (gabriel.mainberger@vshn.net)
+- Configure Ansible service broker secrets (simon.ruegg@vshn.ch)
+- [KIECLOUD-268] - Update RHPAM and RHMD templates and imagestreams on
+  OpenShift Service Catalog for release 7.4.0 (fspolti@redhat.com)
+- Update l_docker_creds_test_image (rteague@redhat.com)
+- Fixing generate_secret for redeploy-certificates and fixing up checkpoint
+  names (ewolinet@redhat.com)
+- [GlusterFS]: Upgrade playbook is supported for converged mode only. If
+  upgrade playbook is run for independent mode, fail with a message.
+  (sarumuga@redhat.com)
+
 * Sun Aug 04 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.136-1
 - [GlusterFS]: variable to skip brick size check (sarumuga@redhat.com)
 - Get heketi_pod name before invoking heketi-cli command. (sarumuga@redhat.com)
