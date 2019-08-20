@@ -15,6 +15,18 @@
     sysctl_file: "/etc/sysctl.d/99-openshift.conf"
     reload: yes
 
+# The base OS RHEL with "Minimal" installation option is
+# enabled firewalld serivce by default, it denies unexpected 10250 port.
+# Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1740439
+- name: Disable firewalld service
+  systemd:
+    name: "firewalld.service"
+    enabled: false
+  register: service_status
+  failed_when:
+  - service_status is failed
+  - not ('Could not find the requested service' in service_status.msg)
+
 - name: Setting sebool container_manage_cgroup
   seboolean:
     name: container_manage_cgroup
