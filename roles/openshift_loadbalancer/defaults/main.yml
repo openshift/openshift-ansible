@@ -14,7 +14,7 @@ openshift_loadbalancer_backends: "{{ (openshift_master_api_port
                                       + openshift_loadbalancer_additional_backends | default([]) }}"
 
 r_openshift_loadbalancer_os_firewall_deny: []
-r_openshift_loadbalancer_os_firewall_allow:
+default_r_openshift_loadbalancer_os_firewall_allow:
 - service: haproxy stats
   port: "9000/tcp"
 - service: haproxy balance
@@ -22,6 +22,7 @@ r_openshift_loadbalancer_os_firewall_allow:
 - service: nuage mon
   port: "{{ nuage_mon_rest_server_port | default(9443) }}/tcp"
   cond: "{{ r_openshift_lb_use_nuage | bool }}"
+r_openshift_loadbalancer_os_firewall_allow: "{{ default_r_openshift_loadbalancer_os_firewall_allow | union(openshift_loadbalancer_open_ports) }}"
 
 openshift_docker_service_name: "docker"
 
