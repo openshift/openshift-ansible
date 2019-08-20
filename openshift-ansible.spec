@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.137
+Version:        3.11.138
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Aug 20 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.138-1
+- address issue where kibana proxy related secrets and certs werent updated
+  when regenerating other component certs (ewolinet@redhat.com)
+
 * Sun Aug 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.137-1
 - Bug 1732154: Explicitly pass storage class var to logging role
   (jcantril@redhat.com)
