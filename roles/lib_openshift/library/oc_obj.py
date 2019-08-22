@@ -960,6 +960,8 @@ class OpenShiftCLI(object):
         cmd = ['replace', '-f', fname]
         if force:
             cmd.append('--force')
+            cmd.append('--cascade')
+            cmd.append('--grace-period=0')
         return self.openshift_cmd(cmd)
 
     def _create_from_content(self, rname, content):
