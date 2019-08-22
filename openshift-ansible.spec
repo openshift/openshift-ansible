@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.163
+Version:        3.10.164
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Aug 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.164-1
+- [GlusterFS]: Fix registry daemonset deletion as part of upgrade.
+  (sarumuga@redhat.com)
+- Increase wait for aggregated API availability (rteague@redhat.com)
+
 * Mon Aug 12 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.163-1
 - Convert Ansible service broker secrets to json instead of yaml
   (gabriel.mainberger@vshn.net)
