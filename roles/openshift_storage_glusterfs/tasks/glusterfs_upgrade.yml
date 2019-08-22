@@ -6,7 +6,7 @@
       Use manual method for independent mode.
   when: not glusterfs_is_native | bool
 
-- import_tasks: cluster_health.yml
+- include_tasks: cluster_health.yml
   vars:
     l_check_bricks: "{{ glusterfs_check_brick_size_health }}"
     glusterfs_health_timeout: 30
