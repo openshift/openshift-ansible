@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.139
+Version:        3.11.140
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Aug 22 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.140-1
+- Update usage of 'oc replace' (rteague@redhat.com)
+- pass http/s proxy env variables to kibana (patlachance@gmail.com)
+
 * Thu Aug 22 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.139-1
 - 
 
