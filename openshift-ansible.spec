@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.164
+Version:        3.10.165
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Aug 23 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.165-1
+- Fix version check avoiding minor version comparison (sarumuga@redhat.com)
+
 * Wed Aug 21 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.164-1
 - [GlusterFS]: Fix registry daemonset deletion as part of upgrade.
   (sarumuga@redhat.com)
