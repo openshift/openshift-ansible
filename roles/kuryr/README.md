@@ -26,7 +26,7 @@ pods. This allows to have interconnectivity between pods and OpenStack VMs.
 * ``kuryr_openstack_project_id=project_uuid``
 * ``kuryr_openstack_username=kuryr``
 * ``kuryr_openstack_password=kuryr_pass``
-* ``kuryr_openstack_ca=/etc/ssl/ca.crt` (defaults to ``OS_CACERT`` env var)
+* ``kuryr_openstack_ca=/etc/ssl/ca.crt`` (defaults to ``OS_CACERT`` env var)
 * ``kuryr_openstack_pod_sg_id=pod_security_group_uuid``
 * ``kuryr_openstack_pod_subnet_id=pod_subnet_uuid``
 * ``kuryr_openstack_pod_service_id=service_subnet_uuid``
