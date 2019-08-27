@@ -6,6 +6,7 @@
     --output=jsonpath='{.status.httpProxy}'
   register: oc_get_http_proxy
   delegate_to: localhost
+  failed_when: false
 
 - name: Set http proxy
   set_fact:
@@ -19,6 +20,7 @@
     --output=jsonpath='{.status.httpsProxy}'
   register: oc_get_https_proxy
   delegate_to: localhost
+  failed_when: false
 
 - name: Set https proxy
   set_fact:
@@ -32,6 +34,7 @@
     --output=jsonpath='{.status.noProxy}'
   register: oc_get_no_proxy
   delegate_to: localhost
+  failed_when: false
 
 - name: Set no proxy
   set_fact:
