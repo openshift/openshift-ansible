@@ -55,6 +55,31 @@
     url: "{{ openshift_node_bootstrap_endpoint }}"
     dest: "{{ temp_dir.path }}/bootstrap.ign"
     validate_certs: false
+  register: bootstrap_ignition
+
+# registries.conf is listed twice in the config, the second one is the right one
+- name: Extract the last registries.conf file from bootstrap.ign
+  set_fact:
+    registries_conf: >
+      {{
+      bootstrap_ignition.json.storage.files
+      | selectattr('path', 'match', '/etc/containers/registries.conf')
+      | list
+      | last
+      }}
+
+- name: Write /etc/containers/registries.conf
+  copy:
+    content: "{{ registries_conf.contents.source.split(',')[1] | urldecode }}"
+    mode: "{{ '0' ~ registries_conf.mode }}"
+    dest: "{{ registries_conf.path }}"
+  register: update_registries
+
+- name: Restart the CRI-O service
+  systemd:
+    name: "crio"
+    state: restarted
+  when: update_registries is changed
 
 - name: Get cluster pull-secret
   command: >
