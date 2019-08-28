@@ -27,6 +27,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm74-decisioncentral-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - Decision Central image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm74-decisioncentral-openshift:1.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -48,6 +60,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm74-controller-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm74-controller-openshift:1.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -69,6 +93,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm74-kieserver-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm74-kieserver-openshift:1.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -90,3 +126,15 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7-tech-preview/rhdm74-optaweb-employee-rostering-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - Business Optimizer OptaWeb Employee Rostering image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7-tech-preview/rhdm74-optaweb-employee-rostering-openshift:1.1

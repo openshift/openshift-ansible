@@ -5,7 +5,7 @@ metadata:
   annotations:
     iconClass: icon-jboss
     tags: rhpam,processserver,jboss,immutable,s2i,monitor
-    version: "1.0"
+    version: "1.1"
     openshift.io/display-name: Red Hat Process Automation Manager 7.4 production monitoring environment
     openshift.io/provider-display-name: Red Hat, Inc.
     description: Application template for a router and monitoring console in a production environment, for Red Hat Process Automation Manager 7.4
@@ -16,7 +16,7 @@ metadata:
   name: rhpam74-prod-immutable-monitor
 labels:
   template: rhpam74-prod-immutable-monitor
-  rhpam: "1.0"
+  rhpam: "1.1"
 message: |-
   A new environment has been set up for Red Hat Process Automation Manager 7.
   To access the Business Central Monitoring Console use the following credentials
@@ -123,9 +123,9 @@ parameters:
   value: openshift
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "1.0".
+  description: A named pointer to an image in an image stream. Default is "1.1".
   name: IMAGE_STREAM_TAG
-  value: "1.0"
+  value: "1.1"
   required: false
 - displayName: Smart Router Custom http Route Hostname
   description: 'Custom hostname for http service route.  Leave blank for default hostname,
@@ -414,7 +414,7 @@ objects:
   - kind: ServiceAccount
     name: "${APPLICATION_NAME}-smartrouter"
   roleRef:
-    name: view    
+    name: view
 - kind: Service
   apiVersion: v1
   spec:
