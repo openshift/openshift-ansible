@@ -89,7 +89,7 @@ objects:
           imagePullPolicy: IfNotPresent
           env:
           - name: PROVISIONER_NAME
-            value: gluster.org/glusterblock
+            value: gluster.org/glusterblock-${NAMESPACE}
 parameters:
 - name: IMAGE_NAME
   displayName: glusterblock provisioner container image name
