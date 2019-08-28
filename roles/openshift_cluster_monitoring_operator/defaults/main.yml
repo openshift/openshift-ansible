@@ -2,7 +2,7 @@
 openshift_cluster_monitoring_operator_namespace: openshift-monitoring
 
 l_openshift_cluster_monitoring_operator_image_dicts:
-  origin: 'quay.io/coreos/cluster-monitoring-operator:v0.1.1'
+  origin: 'quay.io/openshift/origin-cluster-monitoring-operator:v3.11'
   openshift-enterprise: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'cluster-monitoring-operator') }}"
 
 openshift_cluster_monitoring_operator_image: "{{ l_openshift_cluster_monitoring_operator_image_dicts[openshift_deployment_type] }}"
