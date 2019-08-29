@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.166
+Version:        3.10.167
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Aug 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.167-1
+- Correct dockergc service account namespace (rteague@redhat.com)
+
 * Mon Aug 26 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.166-1
 - 
 
