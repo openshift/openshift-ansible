@@ -667,8 +667,8 @@ openshift_openstack_kuryr_controller_image: kuryr/controller:latest
 openshift_openstack_kuryr_cni_image: kuryr/cni:latest
 
 # OCP
-#openshift_openstack_kuryr_cni_image:  registry.redhat.io/rhosp13/openstack-kuryr-cni:13.0
-#openshift_openstack_kuryr_controller_image: registry.redhat.io/rhosp13/openstack-kuryr-controller:13.0
+#openshift_openstack_kuryr_cni_image:  registry.redhat.io/rhosp14/openstack-kuryr-cni:14.0
+#openshift_openstack_kuryr_controller_image: registry.redhat.io/rhosp14/openstack-kuryr-controller:14.0
 ```
 
 Finally, you *must* set up an OpenStack cloud provider as specified in
