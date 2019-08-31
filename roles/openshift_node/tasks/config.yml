@@ -68,9 +68,14 @@
       | last
       }}
 
+- name: Check data URL encoding and extract source data
+  set_fact:
+    base64encoded: "{{ registries_conf.contents.source.split(',')[0].endswith('base64') }}"
+    source_data: "{{ registries_conf.contents.source.split(',')[1] }}"
+
 - name: Write /etc/containers/registries.conf
   copy:
-    content: "{{ registries_conf.contents.source.split(',')[1] | urldecode }}"
+    content: "{{ (source_data | b64decode) if base64encoded else (source_data | urldecode) }}"
     mode: "{{ '0' ~ registries_conf.mode }}"
     dest: "{{ registries_conf.path }}"
   register: update_registries
