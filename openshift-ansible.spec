@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.167
+Version:        3.10.168
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Aug 30 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.168-1
+- Update usage of 'oc replace' (rteague@redhat.com)
+- Fix typo in readme (wuj4@xiaopeng.com)
+- Bug 1741713. Omit build api in standalone registry
+  (50153379+coberry87@users.noreply.github.com)
+
 * Wed Aug 28 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.167-1
 - Correct dockergc service account namespace (rteague@redhat.com)
 
