@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.141
+Version:        3.11.142
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,22 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Sep 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.142-1
+- Update the docs about default downstream kuryr images (ltomasbo@redhat.com)
+- Bug 1741713. Omit build api in standalone registry
+  (50153379+coberry87@users.noreply.github.com)
+- Add image tag to test image for registry_auth (rteague@redhat.com)
+- roles: switch to CMO image which is automatically build by our CI
+  (pkrupa@redhat.com)
+- Ensure port 10250 is accessible from nodes/pods (ltomasbo@redhat.com)
+- Fix incorrect label "metrics-infra" to "metrics-server-infra"
+  (bysnupy@hotmail.com)
+- Correct dockergc service account namespace (rteague@redhat.com)
+- [KIECLOUD-292] - Update RHPAM and RHMD templates and imagestreams on
+  OpenShift Service Catalog for release 7.4.1 (fspolti@redhat.com)
+- Option to use openshift_metrics_cassandra_pvc_name to denote exact name of
+  PVC to be used by hawkular-cassandra (jmartisk@redhat.com)
+
 * Sun Aug 25 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.141-1
 - 
 
