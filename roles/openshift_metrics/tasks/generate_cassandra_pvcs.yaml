@@ -1,16 +1,40 @@
 ---
-- name: Check to see if PVC already exists
-  oc_obj:
-    state: list
-    kind: pvc
-    name: "{{ openshift_metrics_cassandra_pvc_prefix }}-{{ metrics_pvc_index }}"
-    namespace: "{{ openshift_metrics_project }}"
-  register: _metrics_pvc
+- fail:
+    msg: "It is forbidden to use openshift_metrics_cassandra_pvc_name (which would mean only one PVC is
+    created for Cassandra) if openshift_metrics_cassandra_replicas > 1 because using the same PVC by multiple
+    Cassandra replicas is not possible"
+  when:
+    - openshift_metrics_cassandra_pvc_name is defined
+    - openshift_metrics_cassandra_replicas | int > 1
+
+- when:
+    - openshift_metrics_cassandra_pvc_prefix is defined
+  block:
+    - name: Check to see if PVC already exists
+      oc_obj:
+        state: list
+        kind: pvc
+        name: "{{ openshift_metrics_cassandra_pvc_prefix }}-{{ metrics_pvc_index }}"
+        namespace: "{{ openshift_metrics_project }}"
+      register: _metrics_pvc
+
+- when:
+    - openshift_metrics_cassandra_pvc_name is defined
+  block:
+    - name: Check to see if PVC already exists (using openshift_metrics_cassandra_pvc_name without prefix usage)
+      oc_obj:
+        state: list
+        kind: pvc
+        name: "{{ openshift_metrics_cassandra_pvc_name }}"
+        namespace: "{{ openshift_metrics_project }}"
+      register: _metrics_pvc_name
 
 # _metrics_pvc.module_results.results | length > 0 returns a false positive
 # so we check for the presence of 'stderr' to determine if the obj exists or not
 # the RC for existing and not existing is both 0
 - when:
+    - openshift_metrics_cassandra_pvc_prefix is defined
+    - openshift_metrics_cassandra_pvc_name is not defined
     - _metrics_pvc.module_results.stderr is defined
   block:
     - name: generate hawkular-cassandra persistent volume claims
@@ -42,4 +66,22 @@
         size: "{{ openshift_metrics_cassandra_pvc_size }}"
         pv_selector: "{{ openshift_metrics_cassandra_pv_selector }}"
       when: openshift_metrics_cassandra_storage_type == 'dynamic'
+      changed_when: false
+
+- when:
+    - openshift_metrics_cassandra_pvc_name is defined
+    - _metrics_pvc_name.results.stderr is defined
+  block:
+    - name: generate hawkular-cassandra persistent volume claims (without prefix)
+      template:
+        src: pvc.j2
+        dest: "{{ mktemp.stdout }}/templates/hawkular-cassandra-pvc.yaml"
+      vars:
+        obj_name: "{{ openshift_metrics_cassandra_pvc_name }}"
+        labels:
+          metrics-infra: hawkular-cassandra
+        access_modes: "{{ openshift_metrics_cassandra_pvc_access | list }}"
+        size: "{{ openshift_metrics_cassandra_pvc_size }}"
+        pv_selector: "{{ openshift_metrics_cassandra_pv_selector }}"
+        storage_class_name: "{{ openshift_metrics_cassandra_pvc_storage_class_name | default('', true) }}"
       changed_when: false
