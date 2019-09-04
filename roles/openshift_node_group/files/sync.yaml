@@ -53,6 +53,12 @@ spec:
           #!/bin/bash
           set -euo pipefail
 
+          function md5()
+          {
+               local  md5result=($(md5sum $1))
+               echo "$md5result"
+          }
+
           # set by the node image
           unset KUBECONFIG
 
@@ -60,13 +66,13 @@ spec:
 
           # track the current state of the config
           if [[ -f /etc/origin/node/node-config.yaml ]]; then
-            md5sum /etc/origin/node/node-config.yaml > /tmp/.old
+            md5 /etc/origin/node/node-config.yaml > /tmp/.old
           else
             touch /tmp/.old
           fi
 
           if [[ -f /etc/origin/node/volume-config.yaml ]]; then
-            md5sum /etc/origin/node/volume-config.yaml > /tmp/.old-volume.config
+            md5 /etc/origin/node/volume-config.yaml > /tmp/.old-volume.config
           else
             touch /tmp/.old-volume-config
           fi
@@ -140,12 +146,12 @@ spec:
             if [[ ! -f /etc/origin/node/volume-config.yaml ]]; then
               cat /dev/null > /tmp/.old-volume-config
             fi
-            md5sum /etc/origin/node/tmp/node-config.yaml > /tmp/.new
+            md5 /etc/origin/node/tmp/node-config.yaml > /tmp/.new
 
             if [[ ! -f /etc/origin/node/tmp/volume-config.yaml ]]; then
               cat /dev/null > /tmp/.new-volume-config
             else
-              md5sum /etc/origin/node/tmp/volume-config.yaml > /tmp/.new-volume-config
+              md5 /etc/origin/node/tmp/volume-config.yaml > /tmp/.new-volume-config
             fi
 
             trigger_restart=false
@@ -190,7 +196,7 @@ spec:
             fi
             # annotate node with md5sum of the config
             oc annotate --config=/etc/origin/node/node.kubeconfig "node/${NODE_NAME}" \
-              node.openshift.io/md5sum="$( cat /tmp/.new | cut -d' ' -f1 )" --overwrite
+              node.openshift.io/md5sum="$( cat /tmp/.new )" --overwrite
             cp -f /tmp/.new /tmp/.old
             cp -f /tmp/.new-volume-config /tmp/.old-volume-config
             sleep 180 &
