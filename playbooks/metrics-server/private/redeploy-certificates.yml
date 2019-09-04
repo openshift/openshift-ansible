@@ -1,0 +1,82 @@
+---
+- name: Update metrics-server certificates
+  hosts: oo_first_master
+  roles:
+  - lib_openshift
+  - openshift_facts
+  tasks:
+  - name: Create temp directory for doing work in on target
+    command: mktemp -td openshift-metrics-server-ansible-XXXXXX
+    register: mktemp
+    changed_when: False
+
+  - name: Create temp directory for all our templates
+    file:
+      path: "{{ mktemp.stdout }}/templates"
+      state: directory
+      mode: 0755
+    changed_when: False
+    when: openshift_metrics_server_install | bool
+
+  - name: Create temp directory local on control node
+    local_action: command mktemp -d
+    register: local_tmp
+    changed_when: False
+    vars:
+      ansible_become: false
+
+  - name: Copy the admin client config(s)
+    command: >
+       cp {{ openshift.common.config_base}}/master/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    changed_when: False
+    check_mode: no
+
+  - name: Remove TLS secret
+    oc_obj:
+      name: "{{ item }}"
+      kind: secret
+      state: absent
+      namespace: openshift-metrics-server
+    with_items:
+    - metrics-server-certs
+
+  - name: Generate Certificates
+    include_role:
+      name: metrics_server
+      tasks_from: generate_certs_and_apiservice
+
+  - name: Create metrics secret certificates
+    oc_obj:
+      state: present
+      kind: Secret
+      namespace: "openshift-metrics-server"
+      name: metrics-server-certs
+      files:
+      - "{{ mktemp.stdout }}/templates/metrics-server-certs.yaml"
+
+  - name: Replace existing APIService with new CA
+    command: >
+      {{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+      replace -f
+      {{ mktemp.stdout }}/templates/metrics-server-apiservice.yaml
+
+  - name: Remove metrics-server pod
+    oc_obj:
+      selector: "k8s-app=metrics-server"
+      kind: pod
+      state: absent
+      namespace: openshift-metrics-server
+
+  - name: Verify that the metrics-server is running
+    oc_obj:
+      namespace: openshift-metrics-server
+      kind: deployment
+      state: list
+      name: metrics-server
+    register: metrics_server_deploy
+    until:
+    - metrics_server_deploy.module_results.results[0].status.readyReplicas is defined
+    - metrics_server_deploy.module_results.results[0].status.readyReplicas > 0
+    retries: 60
+    delay: 10
+    changed_when: false
