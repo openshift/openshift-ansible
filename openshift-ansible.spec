@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.142
+Version:        3.11.143
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Sep 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.143-1
+- Ensure minimum kernel version (rteague@redhat.com)
+- Add metrics-server redeploy certificate playbook (jcallen@redhat.com)
+
 * Tue Sep 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.142-1
 - Update the docs about default downstream kuryr images (ltomasbo@redhat.com)
 - Bug 1741713. Omit build api in standalone registry
