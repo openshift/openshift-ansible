@@ -27,6 +27,23 @@
     command: timedatectl set-ntp true
     when: openshift_clock_enabled | default(True) | bool
 
+  - name: Ensure minimum kernel version
+    fail:
+      msg: |
+        The installed kernel version does not meet the required minimum for RHEL {{ ansible_facts.distribution_version  }}.
+        Please update the kernel before continuing.
+        Minimum Kernel Version: {{ minimum_kernel_version[ansible_facts.distribution_version] }}
+        Installed Kernel Version: {{ ansible_facts.kernel }}
+        Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1749024
+    when:
+    - ansible_facts.distribution == "RedHat"
+    - ansible_facts.distribution_version in minimum_kernel_version
+    - ansible_facts.kernel is version_compare(minimum_kernel_version[ansible_facts.distribution_version], '<')
+    vars:
+      minimum_kernel_version:
+        "7.6": "3.10.0-957.27.2.el7"
+        "7.7": "3.10.0-1062.el7"
+
   - when:
     - not openshift_is_atomic | bool
     block:
