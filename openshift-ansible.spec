@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.169
+Version:        3.10.170
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Sep 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.170-1
+- Only delete and regenerate service signer cert when updating CA
+  (jcallen@redhat.com)
+
 * Mon Sep 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.169-1
 - 
 
