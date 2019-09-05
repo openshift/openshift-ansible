@@ -49,7 +49,7 @@ spec:
           trap 'kill $(jobs -p); rm -Rf /etc/cni/net.d/80-openshift-network.conf ; exit 0' TERM
           retries=0
           while true; do
-            if echo 'test' | socat - UNIX-CONNECT:/var/run/openshift-sdn/cni-server.sock >/dev/null; then
+            if lsof /var/run/openshift-sdn/cni-server.sock &>/dev/null; then
               echo "warning: Another process is currently listening on the CNI socket, waiting 15s ..." 2>&1
               sleep 15 & wait
               (( retries += 1 ))
