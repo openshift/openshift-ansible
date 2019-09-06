@@ -4,10 +4,10 @@
 
 - name: Add enterprise registry, if necessary
   set_fact:
-    l2_docker_additional_registries: "{{ l2_docker_additional_registries + [openshift_docker_ent_reg] }}"
+    l_additional_registries: "{{ l_additional_registries + [openshift_docker_ent_reg] }}"
   when:
     - openshift_deployment_type == 'openshift-enterprise'
     - openshift_docker_ent_reg != ''
-    - openshift_docker_ent_reg not in l2_docker_additional_registries
+    - openshift_docker_ent_reg not in l_additional_registries
     - not openshift_use_crio_only | bool
-    - ((oreg_url is not defined or oreg_url | default('') == '') or ('all' not in l2_docker_blocked_registries | default([])))
+    - ((oreg_url is not defined or oreg_url | default('') == '') or ('all' not in l_blocked_registries | default([])))
