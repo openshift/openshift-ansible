@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.143
+Version:        3.11.144
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Sep 08 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.144-1
+- Validate openshift_master_ca_certificate and ca.crt (jcallen@redhat.com)
+- Bug 1735502: compare solely md5sum for config change, not default md5sum
+  output which includes file name (aconstan@redhat.com)
+
 * Thu Sep 05 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.143-1
 - Ensure minimum kernel version (rteague@redhat.com)
 - Add metrics-server redeploy certificate playbook (jcallen@redhat.com)
