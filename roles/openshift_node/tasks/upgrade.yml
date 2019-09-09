@@ -24,6 +24,10 @@
 - name: stop services for upgrade
   import_tasks: upgrade/stop_services.yml
 
+- import_role:
+    name: container_runtime
+    tasks_from: update_registries.yml
+
 # Ensure actually install latest package.
 - name: install docker upgrade rpm
   command: "{{ ansible_pkg_mgr }} install -y docker{{ '-' + docker_version }}"

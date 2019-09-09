@@ -9,7 +9,9 @@
   until: not (r_docker_restart_docker_result is failed)
   retries: 3
   delay: 30
-  when: not docker_service_status_changed | default(false) | bool
+  when:
+  - not docker_service_status_changed | default(false) | bool
+  - not openshift_use_crio_only
 
 - name: restart udev
   systemd:

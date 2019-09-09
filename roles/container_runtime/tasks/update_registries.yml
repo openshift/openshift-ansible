@@ -1,0 +1,11 @@
+---
+
+- name: Update registries.conf
+  template:
+    dest: "{{ containers_registries_conf_path }}"
+    src: registries.conf.j2
+    backup: true
+  when:
+  - (l_search_registries is defined and l_search_registries != '') or
+    (l_insecure_registries is defined and l_insecure_registries != '') or
+    (l_blocked_registries is defined and l_blocked_registries != '')

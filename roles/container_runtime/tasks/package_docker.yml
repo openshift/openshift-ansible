@@ -55,12 +55,7 @@
     get_mime: false
   register: docker_check
 
-- name: Place additional/blocked/insecure registries in /etc/containers/registries.conf
-  template:
-    dest: "{{ containers_registries_conf_path }}"
-    src: registries.conf.j2
-  notify:
-  - restart container runtime
+- include_tasks: update_registries.yml
 
 - name: Set Proxy Settings
   lineinfile:
