@@ -41,8 +41,8 @@
     - ansible_facts.kernel is version_compare(minimum_kernel_version[ansible_facts.distribution_version], '<')
     vars:
       minimum_kernel_version:
-        "7.6": "3.10.0-957.27.2.el7"
-        "7.7": "3.10.0-1062.el7"
+        "7.6": "3.10.0-957.27.2"
+        "7.7": "3.10.0-1062"
 
   - when:
     - not openshift_is_atomic | bool
