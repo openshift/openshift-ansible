@@ -118,17 +118,11 @@ spec:
             fi
 
             # does the openshift-ca.crt exist
-            if [[ -f /etc/pki/ca-trust/source/anchors/openshift-ca.crt ]]; then
-              md5sum /etc/pki/ca-trust/source/anchors/openshift-ca.crt > /tmp/.old-openshift-ca
-            else
-              cat /dev/null > /tmp/.old-openshift-ca
-            fi
-
-            md5sum  /run/secrets/kubernetes.io/serviceaccount/ca.crt > /tmp/.new-openshift-ca
-
-            if [[ "$( cat /tmp/.old-openshift-ca )" != "$( cat /tmp/.new-openshift-ca )" ]]; then
-              cp /run/secrets/kubernetes.io/serviceaccount/ca.crt /etc/pki/ca-trust/source/anchors/openshift-ca.crt
-              update-ca-trust
+            oldca=/etc/pki/ca-trust/source/anchors/openshift-ca.crt
+            newca=/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            if ! cmp -s "${oldca}" "${newca}" ; then
+              cp "${newca}" "${oldca}"
+              update-ca-trust extract
             fi
 
             KUBELET_HOSTNAME_OVERRIDE=$(cat /etc/sysconfig/KUBELET_HOSTNAME_OVERRIDE 2>/dev/null) || :
