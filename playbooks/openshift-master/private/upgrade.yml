@@ -154,6 +154,7 @@
 - name: Gate on master update
   hosts: localhost
   connection: local
+  gather_facts: false
   tasks:
   - set_fact:
       master_update_completed: "{{ hostvars
@@ -213,6 +214,7 @@
 - name: Gate on reconcile
   hosts: localhost
   connection: local
+  gather_facts: false
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars
