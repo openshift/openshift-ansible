@@ -1,4 +1,15 @@
 ---
+- name: Upgrade is in tech preview
+  hosts: all
+  gather_facts: False
+  become: False
+  tasks:
+    - name: Check if user acknowledged that upgrade playbook is in tech preview
+      fail:
+        msg: "Upgrade playbook is in tech preview, please define var openshift_storage_glusterfs_upgrade_in_tech_preview=true to proceed"
+      run_once: True
+      when: openshift_storage_glusterfs_upgrade_in_tech_preview != "true" or openshift_storage_glusterfs_upgrade_in_tech_preview is not defined
+
 - import_playbook: ../init/main.yml
   vars:
     # We need facts on all nodes since we need to check (on RPM installs) that
