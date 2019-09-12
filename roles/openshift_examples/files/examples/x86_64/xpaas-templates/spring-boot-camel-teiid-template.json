@@ -3,44 +3,63 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.3 Camel REST DSL and 3Scale",
+      "openshift.io/display-name": "Red Hat Fuse 7.3 Camel + JDV with Spring Boot",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
-      "description": "Spring Boot, Camel REST DSL and 3Scale QuickStart. This example demonstrates how to use Camel's REST DSL to expose a RESTful API and expose it to 3scale.",
-      "tags": "quickstart,java,springboot,fis,jboss-fuse,3scale",
+      "description": "Spring Boot, Camel and JBoss Data Virtualization QuickStart. This example demonstrates how to connect Apache Camel to a remote JBoss Data Virtualization (or Teiid) Server using the JDBC protocol. This quickstart assumes that the JDV server is already running and configured on OpenShift, more information about to setup a JDV server can be found at https://github.com/fabric8-quickstarts/spring-boot-camel-teiid/blob/spring-boot-camel-teiid-1.0.0.fuse-730046-redhat-00002/README.md",
+      "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
       "version": "1.3"
     },
-    "name": "s2i-fuse73-spring-boot-camel-rest-3scale"
+    "name": "s2i-fuse73-spring-boot-camel-teiid"
   },
   "labels": {
-    "template": "s2i-fuse73-spring-boot-camel-rest-3scale"
+    "template": "s2i-fuse73-spring-boot-camel-teiid"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse73-spring-boot-camel-rest-3scale",
+      "value": "s2i-fuse73-spring-boot-camel-teiid",
       "description": "The name assigned to the application."
     },
     {
       "name": "GIT_REPO",
       "displayName": "Git Repository URL",
       "required": true,
-      "value": "https://github.com/fabric8-quickstarts/spring-boot-camel-rest-3scale.git",
+      "value": "https://github.com/fabric8-quickstarts/spring-boot-camel-teiid.git",
       "description": "The URL of the repository with your application source code."
     },
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-rest-3scale-1.0.0.fuse-730046-redhat-00002",
+      "value": "spring-boot-camel-teiid-1.0.0.fuse-730046-redhat-00002",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
-      "name": "SERVICE_NAME",
-      "displayName": "Service Name",
-      "value": "camel-rest-3scale",
-      "description": "Exposed service name."
+      "name": "TEIID_SERVICE_NAME",
+      "displayName": "JDV Server Name",
+      "required": true,
+      "value": "datavirt-app",
+      "description": "Set this to the name of the JDV Server. You may need to create an instance before."
+    },
+    {
+      "name": "TEIID_PORT_NAME",
+      "displayName": "JDV Port Name",
+      "value": "jdbc",
+      "description": "Set this to the name of the JDV port to use. Set this value if the JDV service contains multiple named ports."
+    },
+    {
+      "name": "TEIID_USERNAME",
+      "displayName": "JDV Server Username",
+      "required": true,
+      "description": "The username used to authenticate with the JDV Server."
+    },
+    {
+      "name": "TEIID_PASSWORD",
+      "displayName": "JDV Server Password",
+      "required": true,
+      "description": "The password used to authenticate with the JDV Server."
     },
     {
       "name": "BUILDER_VERSION",
@@ -128,59 +147,6 @@
     }
   ],
   "objects": [
-    {
-      "apiVersion": "v1",
-      "kind": "Route",
-      "metadata": {
-        "labels": {
-          "component": "${APP_NAME}",
-          "provider": "s2i",
-          "app": "${APP_NAME}",
-          "version": "${APP_VERSION}",
-          "group": "quickstarts"
-        },
-        "name": "${SERVICE_NAME}-route"
-      },
-      "spec": {
-        "to": {
-          "kind": "Service",
-          "name": "${SERVICE_NAME}"
-        }
-      }
-    },
-    {
-      "apiVersion": "v1",
-      "kind": "Service",
-      "metadata": {
-        "annotations": {
-        },
-        "labels": {
-          "component": "${APP_NAME}",
-          "provider": "s2i",
-          "app": "${APP_NAME}",
-          "version": "${APP_VERSION}",
-          "group": "quickstarts"
-        },
-        "name": "${SERVICE_NAME}"
-      },
-      "spec": {
-        "clusterIP": "None",
-        "deprecatedPublicIPs": [],
-        "ports": [
-          {
-            "port": 9411,
-            "protocol": "TCP",
-            "targetPort": 8080
-          }
-        ],
-        "selector": {
-          "app": "${APP_NAME}",
-          "component": "${APP_NAME}",
-          "provider": "s2i",
-          "group": "quickstarts"
-        }
-      }
-    },
     {
       "kind": "ImageStream",
       "apiVersion": "v1",
@@ -367,22 +333,31 @@
                 },
                 "ports": [
                   {
-                    "containerPort": 8080,
-                    "name": "http"
-                  },
-                  {
                     "containerPort": 8778,
                     "name": "jolokia"
                   }
                 ],
-                "env" : [ {
-                  "name" : "KUBERNETES_NAMESPACE",
-                  "valueFrom" : {
-                    "fieldRef" : {
-                      "fieldPath" : "metadata.namespace"
+                "env" : [
+                  {
+                    "name" : "KUBERNETES_NAMESPACE",
+                    "valueFrom" : {
+                      "fieldRef" : {
+                        "fieldPath" : "metadata.namespace"
+                      }
                     }
-                  }
-                } ],
+                  }, {
+                    "name": "TEIID_SERVICE_NAME",
+                    "value": "${TEIID_SERVICE_NAME}"
+                  }, {
+                    "name": "TEIID_PORT_NAME",
+                    "value": "${TEIID_PORT_NAME}"
+                  }, {
+                    "name": "TEIID_USERNAME",
+                    "value": "${TEIID_USERNAME}"
+                  }, {
+                    "name": "TEIID_PASSWORD",
+                    "value": "${TEIID_PASSWORD}"
+                  }],
                 "resources": {
                   "requests": {
                     "cpu": "${CPU_REQUEST}",
