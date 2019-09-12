@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.145
+Version:        3.11.146
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,14 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Sep 12 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.146-1
+- Add RHEL 7.5 to minimum kernel version (rteague@redhat.com)
+- Update registries.conf during upgrades (rteague@redhat.com)
+- Clean up container_runtime role (rteague@redhat.com)
+- [GlusterFS]: include varaible at runtime for cluster health
+  (sarumuga@redhat.com)
+- Update Fuse templates with 7.4 release (antonin@stefanutti.fr)
+
 * Tue Sep 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.145-1
 - Update minimum required kernel version (rteague@redhat.com)
 
