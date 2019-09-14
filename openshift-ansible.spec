@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.171
+Version:        3.10.172
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Sep 13 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.172-1
+- Ensure minimum kernel version (rteague@redhat.com)
+
 * Wed Sep 11 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.171-1
 - Update upgrade.yml (mateus.caruccio@getupcloud.com)
 - Avoid gathering facts on set_fact-only play (mateus.caruccio@getupcloud.com)
