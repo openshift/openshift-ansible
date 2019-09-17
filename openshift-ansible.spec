@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.100
+Version:        3.9.101
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -203,6 +203,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.101-1
+- Ensure minimum kernel version (rteague@redhat.com)
+
 * Fri Sep 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.100-1
 - Update usage of 'oc replace' (rteague@redhat.com)
 
