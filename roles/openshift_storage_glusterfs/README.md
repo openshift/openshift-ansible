@@ -121,7 +121,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_ssh_keyfile         | Undefined               | Path to a private key file for use with SSH connections to external GlusterFS nodes via native heketi **NOTE:** This must be an absolute path
 | openshift_storage_glusterfs_heketi_fstab               | '/var/lib/heketi/fstab' | When heketi is native, sets the path to the fstab file on the GlusterFS nodes to update on LVM volume mounts, changes to '/etc/fstab/' when the heketi executor is 'ssh' **NOTE:** This should not need to be changed
 | openshift_storage_glusterfs_heketi_wipe                | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
-|openshift_storage_glusterfs_upgrade_in_tech_preview     | Undefined               | Acknowledge that upgrade playbook is in tech preview to run it
+| openshift_storage_gluster_update_techpreview           | Undefined               | Acknowledge that upgrade playbook is in tech preview to run it
 
 Each role variable also has a corresponding variable to optionally configure a
 separate GlusterFS cluster for use as storage for an integrated Docker

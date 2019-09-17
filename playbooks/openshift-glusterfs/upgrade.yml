@@ -6,9 +6,9 @@
   tasks:
     - name: Check if user acknowledged that upgrade playbook is in tech preview
       fail:
-        msg: "Upgrade playbook is in tech preview, please define var openshift_storage_glusterfs_upgrade_in_tech_preview=true to proceed"
+        msg: "Upgrade playbook is in tech preview, please define var openshift_storage_gluster_update_techpreview=true to proceed"
       run_once: True
-      when: openshift_storage_glusterfs_upgrade_in_tech_preview != "true" or openshift_storage_glusterfs_upgrade_in_tech_preview is not defined
+      when: not openshift_storage_glusterfs_upgrade_in_tech_preview | default('false') | bool
 
 - import_playbook: ../init/main.yml
   vars:
