@@ -20,12 +20,16 @@ From this role:
 | openshift_node_start_options             | UNDEF (Optional)      | Options to pass to node start cmdline                    |
 | oreg_url                                 | UNDEF (Optional)      | Default docker registry to use                           |
 | openshift_persistentlocalstorage_enabled | false                 | Enable the persistent local storage                      |
+| openshift_storage_glusterfs_fuse_version | UNDEF (Optional)      | To pass the glusterfs-fuse version to install            |
 
 openshift_node_start_options can be used for passing any start node option, e.g.:
 
 --enable=kubelet,plugins
 
 Which would have a node running without kube-proxy and dns.
+
+openshift_storage_glusterfs_fuse_version can be used to pass the glusterfs-fuse version to be installed.
+eg:    openshift_storage_glusterfs_fuse_version=glusterfs-fuse-3.12.2-18.el7
 
 Dependencies
 ------------
