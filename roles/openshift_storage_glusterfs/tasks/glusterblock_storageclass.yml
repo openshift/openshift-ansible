@@ -4,7 +4,7 @@
     namespace: "{{ glusterfs_namespace }}"
     state: present
     name: "heketi-{{ glusterfs_name }}-admin-secret-block"
-    type: "gluster.org/glusterblock"
+    type: "gluster.org/glusterblock-{{ glusterfs_namespace }}"
     force: True
     contents:
     - path: key
