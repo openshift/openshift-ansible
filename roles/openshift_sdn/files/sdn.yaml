@@ -77,6 +77,12 @@ spec:
             fi
           done
 
+          #BUG 1728081: If /etc/sysconfig/origin-node got mounted as DirectoryOrCreate; clean it up so we can ultimately mount /etc/sysconfig/origin-node as FileOrCreate
+          if [[ -d /etc/sysconfig/origin-node ]]; then
+            echo "Deleting the origin-node dir"
+            rmdir /etc/sysconfig/origin-node || true
+          fi
+          
           # Take over network functions on the node
           rm -Rf /etc/cni/net.d/80-openshift-network.conf
           cp -Rf /opt/cni/bin/* /host/opt/cni/bin/
@@ -84,9 +90,11 @@ spec:
           # Load DEBUG_LOGLEVEL
           if [[ -f /etc/sysconfig/origin-node ]]; then
             set -o allexport
+            echo "Reading environment variables from /etc/sysconfig/origin-node"
             source /etc/sysconfig/origin-node
           elif [[ -f /etc/sysconfig/atomic-openshift-node ]]; then
             set -o allexport
+            echo "Reading environment variables from /etc/sysconfig/atomic-openshift-node"
             source /etc/sysconfig/atomic-openshift-node
           fi
 
@@ -121,9 +129,8 @@ spec:
         - mountPath: /etc/origin/node/
           name: host-config
           readOnly: true
-        - mountPath: /etc/sysconfig/origin-node
-          name: host-sysconfig-node
-          readOnly: true
+        - mountPath: /etc/sysconfig
+          name: host-sysconfig
         # Mount the entire run directory for socket access for Docker or CRI-o
         # TODO: remove
         - mountPath: /var/run
@@ -181,9 +188,9 @@ spec:
       - name: host-config
         hostPath:
           path: /etc/origin/node
-      - name: host-sysconfig-node
+      - name: host-sysconfig
         hostPath:
-          path: /etc/sysconfig/origin-node
+          path: /etc/sysconfig
       - name: host-modules
         hostPath:
           path: /lib/modules
