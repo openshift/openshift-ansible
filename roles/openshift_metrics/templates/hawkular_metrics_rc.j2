@@ -115,10 +115,12 @@ spec:
           exec:
             command:
             - "/opt/hawkular/scripts/hawkular-metrics-readiness.py"
+          failureThreshold: {{openshift_metrics_hawkular_readiness_probe_failure_threshold}}
         livenessProbe:
           exec:
             command:
             - "/opt/hawkular/scripts/hawkular-metrics-liveness.py"
+          failureThreshold: {{openshift_metrics_hawkular_liveness_probe_failure_threshold}}
       volumes:
       - name: hawkular-metrics-certs
         secret:
