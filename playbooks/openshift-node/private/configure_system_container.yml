@@ -1,0 +1,17 @@
+---
+- name: Update Atomic container mounts
+  hosts: oo_nodes_to_config
+  tasks:
+  - name: Get a list of the containers with ostree backend
+    command: "atomic containers list --json -f backend=ostree"
+    register: l_atomic_containers_list_json
+
+  - set_fact:
+      l_atomic_containers_list: "{{ l_atomic_containers_list_json.stdout | from_json }}"
+
+  - import_role:
+      name: openshift_node
+      tasks_from: node_system_container_install
+    vars:
+      l_bind_docker_reg_auth: True
+      system_osn_image: "{{ l_atomic_containers_list[0]['image_name'] }}"

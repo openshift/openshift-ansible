@@ -7,3 +7,8 @@
     skip_sanity_checks: True
 
 - import_playbook: private/imageconfig.yml
+
+- import_playbook: private/configure_system_container.yml
+  when:
+  - openshift_is_atomic | default(false) | bool
+  - oreg_auth_user is defined or openshift_additional_registry_credentials != []
