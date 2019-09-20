@@ -32,16 +32,19 @@ openshift_logging_kibana_proxy_cpu_request: 100m
 openshift_logging_kibana_proxy_memory_limit: 256Mi
 
 #The absolute path on the control node to the cert file to use
-#for the public facing kibana certs
+#for the public facing kibana and kibana-ops certs
 openshift_logging_kibana_cert: ""
+openshift_logging_kibana_ops_cert: ""
 
 #The absolute path on the control node to the key file to use
-#for the public facing kibana certs
+#for the public facing kibana and kibana-ops certs
 openshift_logging_kibana_key: ""
+openshift_logging_kibana_ops_key: ""
 
 #The absolute path on the control node to the CA file to use
-#for the public facing kibana certs
+#for the public facing kibana and kibana-ops certs
 openshift_logging_kibana_ca: ""
+openshift_logging_kibana_ops_ca: ""
 
 # Value in OauthClient object definition that overwrites master-config
 # 1 week = 168 hours = 604800 seconds
