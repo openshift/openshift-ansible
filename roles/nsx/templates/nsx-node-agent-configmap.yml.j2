@@ -86,7 +86,7 @@ data:
     # KUBERNETES_SERVICE_HOST.
     #apiserver_host_ip = <ip_address>
 
-    apiserver_host_ip = "{{ nsx_k8s_api_ip | default(nsx_k8s_svc.results.clusterip) }}"
+    apiserver_host_ip = "{{ nsx_k8s_api_ip | default(nsx_k8s_svc.module_results.clusterip) }}"
 
     # Port of the Kubernetes API Server.
     # Set to 6443 for https. If not set, will try to
