@@ -109,8 +109,8 @@ def run_module():
 
     original_contents = account_for_whitelist(original_contents, new_contents, module.params['whitelist'])
 
-    uni_diff = difflib.unified_diff(new_contents.splitlines(),
-                                    original_contents.splitlines(),
+    uni_diff = difflib.unified_diff(original_contents.splitlines(),
+                                    new_contents.splitlines(),
                                     lineterm='')
 
     return module.exit_json(changed=False,  # noqa: F405
