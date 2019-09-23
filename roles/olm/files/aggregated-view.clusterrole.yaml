@@ -3,7 +3,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: aggregate-olm-view
   labels:
-    # Add these permissions to the "view" default roles
+    # Add these permissions to the "admin", "edit" and "view" default roles
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"    
     rbac.authorization.k8s.io/aggregate-to-view: "true"
 rules:
 - apiGroups: ["operators.coreos.com"]
