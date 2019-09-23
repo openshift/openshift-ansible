@@ -124,7 +124,7 @@ r_openshift_storage_glusterfs_os_firewall_allow:
 - service: glusterfs_rdma
   port: "24008/tcp"
 - service: glusterfs_bricks
-  port: "49152-60999/tcp
+  port: "49152-60999/tcp"
 - service: glusterblockd
   port: "24010/tcp"
 - service: iscsi-targets
