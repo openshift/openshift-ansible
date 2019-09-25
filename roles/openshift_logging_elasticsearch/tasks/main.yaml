@@ -230,7 +230,6 @@
     es_unicast_host: "logging-{{ es_component }}-cluster"
   changed_when: no
 
-# create diff between current configmap files and our current files
 - template:
     src: "log4j2.properties.j2"
     dest: "{{ tempdir }}/log4j2.properties"
@@ -238,6 +237,34 @@
     root_logger: "{{ openshift_logging_es_log_appenders | list }}"
   changed_when: no
 
+- when: openshift_logging_elasticsearch_replace_configmap
+  name: Get current configmap logging-elasticsearch
+  oc_configmap:
+    name: logging-elasticsearch
+    state: list
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+  register: __current_es_configmap_output
+
+- when:
+  - openshift_logging_elasticsearch_replace_configmap
+  - __current_es_configmap_output.module_results.stderr is undefined
+  block:
+  - name: Get configmap logging-elasticsearch.old
+    oc_configmap:
+      state: list
+      name: logging-elasticsearch.old
+      namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    register: __current_es_old_configmap_output
+
+  - when: __current_es_old_configmap_output.module_results.stderr is defined
+    name: Copy current configmap to logging-elasticsearch.old
+    oc_configmap:
+      state: present
+      name: logging-elasticsearch.old
+      namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+      from_literal: "{{ __current_es_configmap_output.module_results.results[0]['data'] | to_json }}"
+
+# create diff between current configmap files and our current files
 - include_role:
     name: openshift_logging
     tasks_from: patch_configmap_files.yaml
@@ -249,7 +276,9 @@
       new_file: "{{ tempdir }}/elasticsearch.yml"
     - current_file: "log4j2.properties"
       new_file: "{{ tempdir }}/log4j2.properties"
-  when: not full_restart_cluster | default(false) | bool
+  when:
+  - not full_restart_cluster | default(false) | bool
+  - not openshift_logging_elasticsearch_replace_configmap
 
 - slurp:
     src: "{{ tempdir }}/elasticsearch.yml"

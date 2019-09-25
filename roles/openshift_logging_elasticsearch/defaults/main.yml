@@ -62,3 +62,16 @@ openshift_logging_es_port: 9200
 openshift_logging_es_ca: /etc/fluent/keys/ca
 openshift_logging_es_client_cert: /etc/fluent/keys/cert
 openshift_logging_es_client_key: /etc/fluent/keys/key
+
+# If this is set to true, the existing logging-elasticsearch
+# configmap will be copied to logging-elasticsearch.old if
+# it does not exist, and logging-elasticsearch will be
+# completely removed and replaced - this assumes you have
+# not customized the logging-elasticsearch configmap, and
+# if you have, you will have to manually retrieve those
+# customizations from logging-elasticsearch.old and
+# reapply them to logging-elasticsearch
+# NOTE: If you need to make custom changes to elasticsearch.yml
+# which are reapplied every time you run ansible, use
+# openshift_logging_es_config for those changes.
+openshift_logging_elasticsearch_replace_configmap: false
