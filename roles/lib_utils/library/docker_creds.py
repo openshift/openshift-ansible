@@ -206,7 +206,7 @@ def run_module():
         password=dict(type='str', required=True, no_log=True),
         test_login=dict(type='bool', required=False, default=True),
         proxy_vars=dict(type='str', required=False, default=''),
-        test_timeout=dict(type='int', required=False, default=20),
+        test_timeout=dict(type='int', required=False, default=60),
         test_image=dict(type='str', required=True),
         tls_verify=dict(type='bool', required=False, default=True)
     )
