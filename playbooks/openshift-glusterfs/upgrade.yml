@@ -8,7 +8,7 @@
       fail:
         msg: "Upgrade playbook is in tech preview, please define var openshift_storage_gluster_update_techpreview=true to proceed"
       run_once: True
-      when: not openshift_storage_glusterfs_upgrade_in_tech_preview | default('false') | bool
+      when: not openshift_storage_gluster_update_techpreview | default('false') | bool
 
 - import_playbook: ../init/main.yml
   vars:
