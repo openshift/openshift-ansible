@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.174
+Version:        3.10.175
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -182,6 +182,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Oct 01 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.175-1
+- 
+
 * Wed Sep 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.174-1
 - [GlusterFS]: Remove upgrade playbook that was not fully backported
   (dpivonka@redhat.com)
