@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.146
+Version:        3.11.147
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,36 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Oct 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.147-1
+- [GlusterFS]: fix cluster health check retry variable (dpivonka@redhat.com)
+- [GlusterFS]: fix mismatched var in upgrade playbook warning
+  (dpivonka@redhat.com)
+- Add label to kuryr-controller (ltomasbo@redhat.com)
+- Bug 1752532: upgrade from 3.11 failed to upgrade es settings from configmap
+  (rmeggins@redhat.com)
+- Bug 1645725: Increase timeout for Docker images and creds
+  (padillon@redhat.com)
+- Fix rbac aggregation for OLM (cordell.evan@gmail.com)
+- Update roles/openshift_storage_glusterfs/defaults/main.yml (mail@pm92.de)
+- Update main.yml (mail@pm92.de)
+- Modify mounts when using atomic during imageconfig if oreg username is
+  defined (jcallen@redhat.com)
+- Bug 1747307 - The redeploy-certificates.yml failed when ops is enabled
+  (nhosoi@redhat.com)
+- Bug 1747305 - Couldn't regenerate the cert if the /etc/origin/logging is
+  deleted (nhosoi@redhat.com)
+- change var name and conditional (dpivonka@redhat.com)
+- [GlusterFS]: Update pod name so previously created heketi key can be found
+  (dpivonka@redhat.com)
+- [GlusterFS]: Add a var to make user acknowledged that upgrade playbook is in
+  tech preview (dpivonka@redhat.com)
+- [GlusterFS]: Install specific  glusterfs-fuse version mentioned
+  (sarumuga@redhat.com)
+- [GlusterFS]: unique names for glusterblock provisioner name
+  (sarumuga@redhat.com)
+- Variables to specify failureThreshold for Hawkular probes
+  (jmartisk@redhat.com)
+
 * Thu Sep 12 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.146-1
 - Add RHEL 7.5 to minimum kernel version (rteague@redhat.com)
 - Update registries.conf during upgrades (rteague@redhat.com)
