@@ -24,7 +24,7 @@ l_gluster_heketi_image_dict:
 openshift_storage_glusterfs_heketi_image: "{{ l_gluster_heketi_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
 
 openshift_storage_glusterfs_timeout: 300
-openshift_storage_glusterfs_health_timeout: 1200
+openshift_storage_glusterfs_health_timeout: 30
 openshift_storage_glusterfs_restart: False
 openshift_storage_glusterfs_namespace: "{{ 'glusterfs' | quote if openshift_storage_glusterfs_is_native or openshift_storage_glusterfs_heketi_is_native else 'default' | quote }}"
 openshift_storage_glusterfs_is_native: True
