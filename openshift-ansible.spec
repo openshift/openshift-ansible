@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.147
+Version:        3.11.148
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Oct 03 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.148-1
+- check if delete was succesful (dpivonka@redhat.com)
+- Mount the parent dir in daemonset configuration for openshift-sdn
+  (anbhat@redhat.com)
+- Fixing NSX role templates to refer correct variable for clusterip
+  (travi@redhat.com)
+
 * Wed Oct 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.147-1
 - [GlusterFS]: fix cluster health check retry variable (dpivonka@redhat.com)
 - [GlusterFS]: fix mismatched var in upgrade playbook warning
