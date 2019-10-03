@@ -94,6 +94,18 @@
     delegate_to: "{{ groups.oo_first_master.0 }}"
     failed_when: False
 
+  - name: Check GlusterFS DaemonSet status
+    oc_obj:
+      namespace: "{{ glusterfs_namespace }}"
+      kind: daemonset
+      name: glusterfs-{{ glusterfs_name }}
+      state: list
+    register: glusterfs_ds
+
+  - fail:
+      msg: Unable to delete glusterfs daemonset
+    when: glusterfs_ds.module_results.results[0].status is defined
+
   - name: Get old-style GlusterFS pods
     oc_obj:
       namespace: "{{ glusterfs_namespace }}"
