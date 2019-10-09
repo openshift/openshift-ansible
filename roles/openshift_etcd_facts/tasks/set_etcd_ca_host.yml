@@ -24,6 +24,7 @@
                                                                  filters={'stat.path':'/etc/etcd/generated_certs','stat.exists':True}) }}"
   run_once: true
 
+
 # __etcd_ca_hosts is the intersection of hosts which have /etc/etcd/ca
 # and /etc/etcd/generated_certs directories.
 - set_fact:
@@ -37,6 +38,14 @@
   when:
   - __etcd_ca_hosts | length > 0
   - etcd_ca_host is not defined
+
+# Fail early on redeployment of certificates if /etc/etcd/ca directory is missing
+- fail:
+    msg: "Missing certificate directories required for etcd.  Please redeploy etcd CA."
+  when:
+  - etcd_certificates_redeploy | default(false)
+  - __etcd_ca_hosts | length == 0
+  run_once: true
 
 # No etcd_ca_host was found in __etcd_ca_hosts. This is probably a
 # fresh installation so we will default to the first member of the
