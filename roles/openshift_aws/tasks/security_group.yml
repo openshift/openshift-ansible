@@ -15,18 +15,54 @@
     vpc_id: "{{ vpcout.vpcs[0].id }}"
   with_dict: "{{ openshift_aws_node_security_groups }}"
 
-- name: create the k8s sgs for the node group
+- name: create the _k8s_security_groups fact
+  set_fact:
+    k8s_security_groups: "{{ openshift_aws_node_security_groups | json_query('*.name') | map('regex_replace', '(.*)', '\\1_k8s') | list }}"
+
+- name: Look for existing _k8s security groups
+  ec2_group_facts:
+    filters:
+      vpc_id: "{{ vpcout.vpcs[0].id }}"
+      group-name: "{{ k8s_security_groups }}"
+    region: "{{ openshift_aws_region }}"
+  register: k8s_sg_facts
+
+- name: debug the k8s_sg_facts
+  debug:
+    var: k8s_sg_facts
+    verbosity: 1
+
+- name: create the k8s sgs for the node group if they don't exist
   ec2_group:
     name: "{{ item.value.name }}_k8s"
     description: "{{ item.value.desc }} for k8s"
     region: "{{ openshift_aws_region }}"
     vpc_id: "{{ vpcout.vpcs[0].id }}"
+  when: item.value.name + "_k8s" not in (k8s_sg_facts.security_groups | map(attribute='group_name') | list)
   with_dict: "{{ openshift_aws_node_security_groups }}"
   register: k8s_sg_create
+
+- name: debug the k8s_sg_create
+  debug:
+    var: k8s_sg_create
+    verbosity: 1
+
+- name: Gather all of the groups we need to tag
+  ec2_group_facts:
+    filters:
+      vpc_id: "{{ vpcout.vpcs[0].id }}"
+      group-name: "{{ (openshift_aws_node_security_groups | json_query('*.name') | list) + k8s_security_groups }}"
+    region: "{{ openshift_aws_region }}"
+  register: sg_to_tag_facts
+
+- name: debug the sg_to_tag_facts
+  debug:
+    var: sg_to_tag_facts
+    verbosity: 1
 
 - name: tag sg groups with proper tags
   ec2_tag:
     tags: "{{ openshift_aws_security_groups_tags }}"
     resource: "{{ item.group_id }}"
     region: "{{ openshift_aws_region }}"
-  with_items: "{{ k8s_sg_create.results }}"
+  with_items: "{{ sg_to_tag_facts.security_groups }}"
