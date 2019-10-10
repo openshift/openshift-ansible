@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.152
+Version:        3.11.153
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,14 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Oct 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.153-1
+- fixed the security group tagging.  also, don't re-create the _k8s sg's if
+  they are there, openshift manages these sg's (mwoodson@redhat.com)
+- [Glusterfs]: Check image tag versions earlier in the upgrade
+  (dpivonka@redhat.com)
+- [GlusterFS]: Change init/main vars for upgrade playbook to limit nodes sanity
+  checks is run on (dpivonka@redhat.com)
+
 * Sun Oct 06 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.152-1
 - 
 
