@@ -2,6 +2,7 @@
 - name: Install openshift support packages
   package:
     name: "{{ openshift_node_support_packages | join(',') }}"
+    state: latest
     update_cache: true
   async: 3600
   poll: 30
@@ -47,7 +48,7 @@
   - name: Install openshift packages
     package:
       name: "{{ openshift_node_packages | join(',') }}"
-      state: present
+      state: latest
     async: 3600
     poll: 30
     register: result
