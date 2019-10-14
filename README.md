@@ -8,7 +8,7 @@ This repository contains [Ansible](https://www.ansible.com/) roles and
 playbooks to install, upgrade, and manage
 [OpenShift](https://www.openshift.com/) clusters.
 
-**Note**: the Ansible playbooks in this repository require an RPM
+**Note**: Ansible playbooks in this repository require an RPM
 package that provides `docker`. Currently, the RPMs from
 [dockerproject.org](https://dockerproject.org/) do not provide this
 requirement, though they may in the future. This limitation is being
