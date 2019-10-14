@@ -101,7 +101,7 @@ kubernetesMasterConfig:
     - VolumeScheduling=true
 {% endif %}
   masterCount: {{ openshift_master_count | default(groups.oo_masters | length) }}
-  masterIP: {{ openshift.common.ip }}
+  masterIP: {{ openshift_ip | default(openshift.common.ip) }}
   podEvictionTimeout: {{ openshift_master_pod_eviction_timeout }}
   proxyClientInfo:
     certFile: master.proxy-client.crt
