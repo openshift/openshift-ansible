@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/openshift/openshift-ansible/badge.svg?branch=master)](https://coveralls.io/github/openshift/openshift-ansible?branch=master)
 
 # OpenShift Ansible
-
+-
 This repository contains [Ansible](https://www.ansible.com/) roles and
 playbooks to install, upgrade, and manage
 [OpenShift](https://www.openshift.com/) clusters.
