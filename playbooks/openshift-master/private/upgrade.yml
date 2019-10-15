@@ -161,7 +161,6 @@
 - name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
   hosts: oo_masters_to_config
   roles:
-  - openshift_cli
   - openshift_facts
   vars:
     __master_shared_resource_viewer_file: "shared_resource_viewer_role.yaml"
