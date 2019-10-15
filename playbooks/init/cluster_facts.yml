@@ -85,7 +85,7 @@
       openshift_master_etcd_hosts: "{{ hostvars
                                        | lib_utils_oo_select_keys(groups['oo_etcd_to_config']
                                                         | default([]))
-                                       | lib_utils_oo_collect('openshift.common.hostname')
+                                       | lib_utils_oo_collect('openshift.common.ip')
                                        | default(none, true) }}"
   # This fact requires the facts set above, so needs to happen in it's own task.
   - set_fact:
