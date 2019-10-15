@@ -25,7 +25,6 @@ Dependencies
 ------------
 
 * openshift_repos
-* openshift_cli
 
 Example Playbook
 ----------------
