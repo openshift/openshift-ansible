@@ -61,8 +61,8 @@ docker_storage_extra_options:
 
 container_runtime_extra_storage: []
 
-docker_http_proxy: "{{ openshift_http_proxy | default('') }}"
-docker_https_proxy: "{{ openshift.common.https_proxy | default('') }}"
+docker_http_proxy: "{{ openshift_docker_http_proxy | default(True) | ternary(openshift_http_proxy, '') }}"
+docker_https_proxy: "{{ openshift_docker_https_proxy | default(True) | ternary(openshift_https_proxy, '') }}"
 docker_no_proxy: "{{ openshift.common.no_proxy | default('') }}"
 
 l_required_docker_version: '1.13'
