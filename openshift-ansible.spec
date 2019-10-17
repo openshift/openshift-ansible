@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.153
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -190,6 +190,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Oct 16 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.153-2
+- Fix upgrade not respecting openshift_pkg_version (rteague@redhat.com)
+- [GlusterFS]: revert heketi block secret type (dpivonka@redhat.com)
+- [GlusterFS]: Warn that the health check could take a long time
+  (dpivonka@redhat.com)
+
 * Thu Oct 10 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.153-1
 - fixed the security group tagging.  also, don't re-create the _k8s sg's if
   they are there, openshift manages these sg's (mwoodson@redhat.com)
