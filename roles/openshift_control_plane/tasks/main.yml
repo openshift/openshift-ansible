@@ -217,7 +217,7 @@
   - fail:
       msg: Node start failed.
 
-- name: Wait for control plane pods to appear
+- name: Wait for all control plane pods to come up and become ready
   oc_obj:
     state: list
     kind: pod
@@ -228,12 +228,17 @@
   - control_plane_pods.module_results is defined
   - control_plane_pods.module_results.results is defined
   - control_plane_pods.module_results.results | length > 0
-  retries: 60
+  - control_plane_pods.module_results.results[0].status is defined
+  - control_plane_pods.module_results.results[0].status.conditions is defined
+  - control_plane_pods.module_results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+  retries: 72  # 6 minutes
   delay: 5
   with_items:
-  - "{{ 'etcd' if inventory_hostname in groups['oo_etcd_to_config'] else omit }}"
+  - "{{ 'etcd' if inventory_hostname in groups['oo_etcd_to_config'] else '' }}"
   - api
   - controllers
+  when:
+  - item != ''
   ignore_errors: true
 
 - when: control_plane_pods is failed
@@ -243,98 +248,68 @@
       {{ openshift_client_binary }} status --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
     register: control_plane_status
     ignore_errors: true
-  - debug:
+  - name: Output status in the kube-system namespace
+    debug:
       msg: "{{ control_plane_status.stdout_lines }}"
+
   - name: Get pods in the kube-system namespace
     command: >
       {{ openshift_client_binary }} get pods --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system -o wide
     register: control_plane_pods_list
     ignore_errors: true
-  - debug:
+  - name: Output pods in the kube-system namespace
+    debug:
       msg: "{{ control_plane_pods_list.stdout_lines }}"
+
   - name: Get events in the kube-system namespace
     command: >
       {{ openshift_client_binary }} get events --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
     register: control_plane_events
     ignore_errors: true
-  - debug:
+  - name: Output events in the kube-system namespace
+    debug:
       msg: "{{ control_plane_events.stdout_lines }}"
+
   - name: Get node logs
     command: journalctl --no-pager -n 300 -u {{ openshift_service_type }}-node
     register: logs_node
     ignore_errors: true
-  - debug:
+  - name: Output node logs
+    debug:
       msg: "{{ logs_node.stdout_lines }}"
-  - name: Report control plane errors
-    fail:
-      msg: Control plane pods didn't come up
 
-- name: Wait for all control plane pods to become ready
-  oc_obj:
-    state: list
-    kind: pod
-    name: "master-{{ item }}-{{ l_kubelet_node_name | lower }}"
-    namespace: kube-system
-  register: control_plane_health
-  until:
-  - control_plane_health.module_results is defined
-  - control_plane_health.module_results.results is defined
-  - control_plane_health.module_results.results | length > 0
-  - control_plane_health.module_results.results[0].status is defined
-  - control_plane_health.module_results.results[0].status.conditions is defined
-  - control_plane_health.module_results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
-  retries: 60
-  delay: 5
-  with_items:
-  - "{{ 'etcd' if inventory_hostname in groups['oo_etcd_to_config'] else '' }}"
-  - api
-  - controllers
-  when:
-  - item != ''
-
-- when: control_plane_health is failed
-  block:
-  - debug:
-      msg: "{{ control_plane_pods_list.stdout_lines }}"
-  - name: Get events in the kube-system namespace
-    command: >
-      {{ openshift_client_binary }} get events --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
-    register: control_plane_events
-    ignore_errors: true
-  - debug:
-      msg: "{{ control_plane_events.stdout_lines }}"
-  - name: Get node logs
-    command: journalctl --no-pager -n 300 -u {{ openshift_service_type }}-node
-    register: logs_node
-    ignore_errors: true
-  - debug:
-      msg: "{{ logs_node.stdout_lines }}"
   - name: Get API logs
     command: >
       /usr/local/bin/master-logs api api
     register: control_plane_logs_api
     ignore_errors: true
-  - debug:
-      msg: "{{ control_plane_logs_api.stdout_lines }}"
+  - name: Output API logs
+    debug:
+      msg: "{{ control_plane_logs_api.stderr_lines }}"
+
   - name: Get controllers logs
     command: >
       /usr/local/bin/master-logs controllers controllers
     register: control_plane_logs_controllers
     ignore_errors: true
-  - debug:
-      msg: "{{ control_plane_logs_controllers.stdout_lines }}"
+  - name: Output controllers logs
+    debug:
+      msg: "{{ control_plane_logs_controllers.stderr_lines }}"
+
   - name: Get etcd logs
     command: >
       /usr/local/bin/master-logs etcd etcd
     register: control_plane_logs_etcd
     when: inventory_hostname in groups['oo_etcd_to_config']
     ignore_errors: true
-  - debug:
-      msg: "{{ control_plane_logs_controllers.stdout_lines }}"
+  - name: Output etcd logs
+    debug:
+      msg: "{{ control_plane_logs_etcd.stderr_lines }}"
     when: inventory_hostname in groups['oo_etcd_to_config']
+
   - name: Report control plane errors
     fail:
-      msg: Control plane pods didn't pass health check
+      msg: Control plane pods didn't come up and become ready
 
 - import_tasks: check_master_api_is_ready.yml
 

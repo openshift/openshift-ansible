@@ -17,7 +17,7 @@
   when: openshift_apis is failed
 
 - debug:
-    msg: "{{ control_plane_logs_api.stdout_lines }}"
+    msg: "{{ control_plane_logs_api.stderr_lines }}"
   when: openshift_apis is failed
 
 - fail:
