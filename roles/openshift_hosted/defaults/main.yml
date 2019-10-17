@@ -65,6 +65,8 @@ openshift_hosted_routers:
 openshift_hosted_router_certificate: {}
 openshift_hosted_router_create_certificate: True
 
+openshift_hosted_router_certificate_from_remote: False
+
 r_openshift_hosted_router_os_firewall_deny: []
 r_openshift_hosted_router_os_firewall_allow: []
 
