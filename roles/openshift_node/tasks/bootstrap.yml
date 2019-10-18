@@ -57,7 +57,10 @@
 - name: Create a symlink to the node client CA for the docker registry
   file:
     src: "{{ openshift_node_config_dir }}/client-ca.crt"
-    dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
+    dest: "{{ item }}"
     state: link
     force: yes
     follow: no
+  with_items:
+  - "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
+  - "/etc/pki/ca-trust/source/anchors/node-client-ca.crt"
