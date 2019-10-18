@@ -16,7 +16,6 @@
       state: directory
       mode: 0755
     changed_when: False
-    when: openshift_metrics_server_install | bool
 
   - name: Create temp directory local on control node
     local_action: command mktemp -d
@@ -43,7 +42,7 @@
   - name: Generate Certificates
     include_role:
       name: metrics_server
-      tasks_from: generate_certs_and_apiservice
+      tasks_from: generate_certs_and_apiservice.yaml
 
   - name: Create metrics secret certificates
     oc_obj:
