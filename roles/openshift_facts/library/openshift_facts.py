@@ -705,8 +705,10 @@ def merge_facts(orig, new, additive_facts_to_overwrite):
     inventory_json_facts = ['admission_plugin_config',
                             'kube_admission_plugin_config',
                             'image_policy_config',
-                            "builddefaults",
-                            "buildoverrides"]
+                            'builddefaults',
+                            'buildoverrides',
+                            'api_server_args',
+                            'audit_config']
 
     facts = dict()
     for key, value in iteritems(orig):
