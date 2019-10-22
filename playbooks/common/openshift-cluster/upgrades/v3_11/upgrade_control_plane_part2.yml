@@ -82,8 +82,7 @@
   hosts: oo_first_master
   roles:
   - role: metrics_server
-    when: openshift_metrics_server_install | default(false) | bool
-
+    when: openshift_metrics_server_install | default(openshift_metrics_install_metrics | default(false)) | bool
 
 - name: Configure components that must be available prior to upgrade
   hosts: oo_first_master

@@ -54,9 +54,7 @@ openshift_container_cli: "{{ openshift_use_crio | bool | ternary('crictl', 'dock
 openshift_crio_docker_gc_node_selector:
   runtime: 'cri-o'
 
-# osm_default_subdomain is an old migrated fact, can probably be removed.
-osm_default_subdomain: "router.default.svc.cluster.local"
-openshift_master_default_subdomain: "{{ osm_default_subdomain }}"
+openshift_master_default_subdomain: "router.default.svc.cluster.local"
 
 openshift_portal_net: "{{ openshift_master_portal_net | default(None) }}"
 openshift_cluster_network_cidr: "{{ osm_cluster_network_cidr | default('10.128.0.0/14') }}"
@@ -119,9 +117,6 @@ openshift_loggingops_storage_nfs_options: '*(rw,root_squash)'
 openshift_loggingops_storage_access_modes:
   - 'ReadWriteOnce'
 
-openshift_metrics_deploy: False
-openshift_metrics_duration: 7
-openshift_metrics_resolution: '10s'
 openshift_metrics_storage_volume_name: 'metrics'
 openshift_metrics_storage_volume_size: '10Gi'
 openshift_metrics_storage_create_pv: True
