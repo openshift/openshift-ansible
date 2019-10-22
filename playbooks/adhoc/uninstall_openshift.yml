@@ -393,6 +393,8 @@
     with_subelements:
     - "{{ directories.results | default([]) }}"
     - files
+    # Ignore failure when openshift.local.volumes is mounted.
+    failed_when: false
 
   - set_fact:
       client_users: "{{ [ansible_ssh_user, 'root'] | unique }}"
