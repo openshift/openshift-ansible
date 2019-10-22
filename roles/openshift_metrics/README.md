@@ -15,7 +15,9 @@ The following variables need to be set and will be validated:
 - `openshift_metrics_hawkular_hostname`: hostname used on the hawkular metrics route.
 
 - `openshift_metrics_project`: project (i.e. namespace) where the components will be
-  deployed.
+  deployed.  NOTE: this value defaults to `openshift-infra` and should not be changed.  Changing this
+  anything else will cause `./roles/openshift_metrics/tasks/pre_install.yaml` to fail unless the required
+  namespace is created before this is run.
 
 Role Variables
 --------------
