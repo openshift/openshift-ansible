@@ -20,7 +20,9 @@
 
 - name: Disable all repositories
   command: bash -c "subscription-manager repos --disable='*'"
-  when: repo_rhel.changed
+  when:
+    - rhsub_ak is undefined
+    - repo_rhel.changed
 
 - name: Enable RHEL repositories
   command: subscription-manager repos \
@@ -29,4 +31,6 @@
                --enable="rhel-7-server-ose-{{ ( openshift_release ).split('.')[0:2] | join('.') }}-rpms"
   register: subscribe_repos
   until: subscribe_repos is succeeded
-  when: repo_rhel.changed
+  when:
+    - rhsub_ak is undefined
+    - repo_rhel.changed
