@@ -28,3 +28,9 @@
     src: metrics-server-resource-reader.j2
     dest: "{{ mktemp.stdout }}/templates/metrics-server-resource-reader-rolebinding.yaml"
   changed_when: no
+
+- name: create aggregated-metrics-reader role for users to access the metrics API
+  copy:
+    src: metrics-server-aggregated-metrics-reader.yaml
+    dest: "{{ mktemp.stdout }}/templates/metrics-server-aggregated-metrics-reader-cluster-role.yaml"
+  changed_when: no
