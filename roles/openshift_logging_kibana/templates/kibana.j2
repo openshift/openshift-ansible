@@ -143,29 +143,29 @@ spec:
                resourceFieldRef:
                  containerName: kibana-proxy
                  resource: limits.memory
-{% if (openshift_http_proxy is defined and openshift_http_proxy is not none and openshift_http_proxy != "") %}
+{% if 'http_proxy' in openshift.common %}
             -
              name: "http_proxy"
-             value: "{{ openshift_http_proxy }}"
+             value: "{{ openshift.common.http_proxy | default('') }}"
             -
              name: "HTTP_PROXY"
-             value: "{{ openshift_http_proxy }}"
+             value: "{{ openshift.common.http_proxy | default('') }}"
 {% endif %}
-{% if (openshift_https_proxy is defined and openshift_https_proxy is not none and openshift_https_proxy != "") %}
+{% if 'https_proxy' in openshift.common %}
             -
              name: "https_proxy"
-             value: "{{ openshift_https_proxy }}"
+             value: "{{ openshift.common.https_proxy | default('') }}"
             -
              name: "HTTPS_PROXY"
-             value: "{{ openshift_https_proxy }}"
+             value: "{{ openshift.common.https_proxy | default('') }}"
 {% endif %}
-{% if (openshift_no_proxy is defined and openshift_no_proxy is not none and openshift_no_proxy != "") %}
+{% if 'no_proxy' in openshift.common %}
             -
              name: "no_proxy"
-             value: "{{ openshift_no_proxy }}"
+             value: "{{ openshift.common.no_proxy | default('') }}"
             -
              name: "NO_PROXY"
-             value: "{{ openshift_no_proxy }}"
+             value: "{{ openshift.common.no_proxy | default('') }}"
 {% endif %}
           volumeMounts:
             - name: kibana-proxy
