@@ -10,13 +10,16 @@
     state: directory
     path: "/etc/docker/certs.d/docker-registry.default.svc:5000"
 
-- name: Update the docker-registry CA symlink
+- name: Update symlink to the node client CA for the docker registry
   file:
     src: "{{ openshift_node_config_dir }}/client-ca.crt"
-    dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
+    dest: "{{ item }}"
     state: link
     force: yes
     follow: no
+  with_items:
+  - "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
+  - "/etc/pki/ca-trust/source/anchors/node-client-ca.crt"
 
 - name: Reset selinux context
   command: restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes

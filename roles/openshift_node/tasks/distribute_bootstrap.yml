@@ -36,3 +36,6 @@
       msg: "{{ logs_node.stdout_lines }}"
   - fail:
       msg: Node start failed.
+
+- name: Update CA trust
+  command: update-ca-trust extract
