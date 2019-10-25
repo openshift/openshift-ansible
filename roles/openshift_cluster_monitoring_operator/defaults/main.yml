@@ -73,3 +73,5 @@ openshift_cluster_monitoring_operator_alertmanager_config: |+
   receivers:
   - name: default
   - name: deadmansswitch
+
+openshift_cluster_monitoring_extra_targets: False

@@ -5,6 +5,9 @@ metadata:
   namespace: {{ openshift_cluster_monitoring_operator_namespace }}
 data:
   config.yaml: |+
+{% if openshift_cluster_monitoring_extra_targets -%}
+{{ openshift_cluster_monitoring_extra_targets | to_nice_yaml(indent=2) | indent(4, True) }}
+{%- endif %}
     prometheusOperator:
       baseImage: {{ openshift_cluster_monitoring_operator_prometheus_operator_repo }}
       prometheusConfigReloaderBaseImage: {{ openshift_cluster_monitoring_operator_prometheus_reloader_repo }}
