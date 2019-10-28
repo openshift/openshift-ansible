@@ -39,15 +39,38 @@
   - local_action: copy content="{{ patch_output.raw_patch }}\n" dest={{ local_tmp.stdout }}/patch.patch
     vars:
       ansible_become: false
+    when: not openshift_logging_patch_configmaps_on_remote | default(False)
+
+  - copy:
+      content: "{{ patch_output.raw_patch }}\n"
+      dest: "{{ tempdir }}/patch.patch"
+    when: openshift_logging_patch_configmaps_on_remote | default(False)
 
   - local_action: copy content={{ new_file_slurp['content'] | b64decode }} dest={{ local_tmp.stdout }}/configmap_new_file
     vars:
       ansible_become: false
+    when: not openshift_logging_patch_configmaps_on_remote | default(False)
+
+  - copy:
+      content: "{{ new_file_slurp['content'] | b64decode }}"
+      dest: "{{ tempdir }}/configmap_new_file"
+    when: openshift_logging_patch_configmaps_on_remote | default(False)
 
   - local_action: command patch --force --quiet -u {{ local_tmp.stdout }}/configmap_new_file {{ local_tmp.stdout }}/patch.patch
     vars:
       ansible_become: false
+    when: not openshift_logging_patch_configmaps_on_remote | default(False)
+
+  - command: patch --force --quiet -u {{ tempdir }}/configmap_new_file {{ tempdir }}/patch.patch
+    when: openshift_logging_patch_configmaps_on_remote | default(False)
 
   - copy:
       src: "{{ local_tmp.stdout }}/configmap_new_file"
       dest: "{{ configmap_new_file }}"
+    when: not openshift_logging_patch_configmaps_on_remote | default(False)
+
+  - copy:
+      src: "{{ tempdir }}/configmap_new_file"
+      remote_src: True
+      dest: "{{ configmap_new_file }}"
+    when: openshift_logging_patch_configmaps_on_remote | default(False)

@@ -13,6 +13,8 @@ openshift_logging_image_pull_secret: ""
 
 openshift_logging_image: "{{ openshift_facts_versioned_registry_url | regex_replace(l_openshift_logging_search | regex_escape, 'logging-deployer') }}"
 
+openshift_logging_patch_configmaps_on_remote: False
+
 openshift_logging_curator_default_days: 30
 openshift_logging_curator_run_hour: 3
 openshift_logging_curator_run_minute: 30
