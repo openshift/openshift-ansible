@@ -31,6 +31,16 @@ openshift_logging_fluentd_ops_port: "{{ openshift_logging_fluentd_app_port }}"
 # openshift_logging_fluentd_merge_json_log configures fluentd to parse
 # JSON log messages into the top level payload envelope
 openshift_logging_fluentd_merge_json_log: "true"
+# these are all undefined by default - listed here for reference
+#openshift_logging_fluentd_extra_keep_fields: "field1,field2"
+#openshift_logging_fluentd_keep_empty_fields: "field1,field2"
+#openshift_logging_fluentd_use_undefined: "true"
+#openshift_logging_fluentd_undefined_name: "undefined"
+#openshift_logging_fluentd_undefined_to_string: "true"
+#openshift_logging_fluentd_undefined_dot_replace_char: "_"
+#openshift_logging_fluentd_undefined_max_num_fields: 200
+#openshift_logging_fluentd_use_multiline_json: "true"
+#openshift_logging_fluentd_use_multiline_journal: "true"
 
 ### Used by "hosted" and "secure-aggregator" deployments
 openshift_logging_fluentd_journal_source: ""
