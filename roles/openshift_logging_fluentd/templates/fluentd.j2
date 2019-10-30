@@ -265,6 +265,15 @@ spec:
 {% if openshift_logging_fluentd_use_multiline_journal is defined %}
         - name: USE_MULTILINE_JOURNAL
           value: "{{ openshift_logging_fluentd_use_multiline_journal }}"
+
+{% if openshift_logging_fluentd_refresh_interval is defined %}
+        - name: CONTAINER_LOGS_REFRESH_INTERVAL
+          value: "{{ openshift_logging_fluentd_refresh_interval }}"
+{% endif %}
+
+{% if openshift_logging_fluentd_rotate_wait is defined %}
+        - name: CONTAINER_LOGS_ROTATE_WAIT
+          value: "{{ openshift_logging_fluentd_rotate_wait }}"
 {% endif %}
 
       volumes:

@@ -28,6 +28,9 @@ openshift_logging_fluentd_app_port: 9200
 openshift_logging_fluentd_ops_host: "{{ openshift_logging_fluentd_app_host }}"
 openshift_logging_fluentd_ops_port: "{{ openshift_logging_fluentd_app_port }}"
 
+#openshift_logging_fluentd_refresh_interval: 5
+#openshift_logging_fluentd_rotate_wait: 5
+
 # openshift_logging_fluentd_merge_json_log configures fluentd to parse
 # JSON log messages into the top level payload envelope
 openshift_logging_fluentd_merge_json_log: "true"
