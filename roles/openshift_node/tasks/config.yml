@@ -213,16 +213,33 @@
   retries: 6
   delay: 5
 
-- name: Wait for nodes to report ready
-  command: >
-    oc get node {{ hostvars[item].ansible_nodename | lower }}
-    --config={{ openshift_node_kubeconfig_path }}
-    --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
-  loop: "{{ ansible_play_batch }}"
-  delegate_to: localhost
-  run_once: true
-  register: oc_get
-  until:
-  - oc_get.stdout == "True"
-  retries: 36
-  delay: 5
+- block:
+  - name: Wait for nodes to report ready
+    command: >
+      oc get node {{ hostvars[item].ansible_nodename | lower }}
+      --config={{ openshift_node_kubeconfig_path }}
+      --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+    loop: "{{ ansible_play_batch }}"
+    delegate_to: localhost
+    run_once: true
+    register: oc_get
+    until:
+    - oc_get.stdout == "True"
+    retries: 36
+    delay: 5
+  rescue:
+  - name: Gather oc get node output
+    command: >
+      oc get node {{ hostvars[item].ansible_nodename | lower }}
+      --config={{ openshift_node_kubeconfig_path }}
+      --output=json
+    loop: "{{ ansible_play_batch }}"
+    delegate_to: localhost
+    run_once: true
+    register: oc_get
+  - name: Print oc get node output
+    debug:
+      var: oc_get
+  - name: Wait for nodes to report ready failed
+    fail:
+      msg: "Wait for nodes to report ready failed"
