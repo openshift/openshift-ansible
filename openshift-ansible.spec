@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.153
-Release:        2%{?dist}
+Version:        3.11.154
+Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -190,6 +190,33 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Oct 31 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.154-1
+- add restart (jcallen@redhat.com)
+- Escape literals in regex for test image (rteague@redhat.com)
+- metrics_server: Add ClusterRole to allow users to access metrics API
+  (fbranczyk@gmail.com)
+- Fix satellite subscription registration (rteague@redhat.com)
+- Allow custom mirrored registry paths (rteague@redhat.com)
+- Update docs to indicate that changing  will break install
+  (cdouglas@redhat.com)
+- Ensure openshift_metrics_install_metrics defaults are set
+  (rteague@redhat.com)
+- Updating kibana-proxy {http,https,no}_proxy variable sources
+  (ewolinet@redhat.com)
+- Fix redploy-certificates (metrics server) (rteague@redhat.com)
+- amended as per ewolinetz request (dofinn@redhat.com)
+- Add CA to system trust (jcallen@redhat.com)
+- Back up certificates on all masters (rteague@redhat.com)
+- openshift_facts: add more json facts (vrutkovs@redhat.com)
+- roles/openshift_cluster_monitoring_operator: remove limits
+  (pkrupa@redhat.com)
+- JKS renewal bug (dofinn@redhat.com)
+- Increase timeout for control plane pod checks (rteague@redhat.com)
+- Add possibility to use certs on master as source (christian.meissner
+  @unbelievable-machine.com)
+- JKS renewal bug (dofinn@redhat.com)
+- Modify the default kuryr images (ltomasbo@redhat.com)
+
 * Wed Oct 16 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.153-2
 - Fix upgrade not respecting openshift_pkg_version (rteague@redhat.com)
 - [GlusterFS]: revert heketi block secret type (dpivonka@redhat.com)
