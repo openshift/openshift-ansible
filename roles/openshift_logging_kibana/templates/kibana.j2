@@ -162,10 +162,10 @@ spec:
 {% if 'no_proxy' in openshift.common %}
             -
              name: "no_proxy"
-             value: "{{ openshift.common.no_proxy | default('') }}"
+             value: "{{ openshift.common.no_proxy | default('') }},{{ openshift.common.portal_net }},{{ openshift_cluster_network_cidr }}"
             -
              name: "NO_PROXY"
-             value: "{{ openshift.common.no_proxy | default('') }}"
+             value: "{{ openshift.common.no_proxy | default('') }},{{ openshift.common.portal_net }},{{ openshift_cluster_network_cidr }}"
 {% endif %}
           volumeMounts:
             - name: kibana-proxy
