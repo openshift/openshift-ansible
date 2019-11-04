@@ -37,7 +37,7 @@
 
 - name: Set fact l_cluster_version
   set_fact:
-    l_cluster_version: "-{{ oc_get.stdout | regex_search('^\\d+\\.\\d+\\.\\d+') }}"
+    l_cluster_version: "-{{ oc_get.stdout | regex_search('^\\d+\\.\\d+') }}*"
 
 - name: Override version when running CI
   set_fact:
