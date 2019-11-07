@@ -19,10 +19,10 @@ kuryr_version: "v3.11"
 
 kuryr_controller_dict:
   origin: "quay.io/openshift/origin-kuryr-controller:{{ kuryr_version }}"
-  openshift-enterprise: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'kuryr-controller') }}"
+  openshift-enterprise: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'kuryr-controller') }}"
 kuryr_cni_dict:
   origin: "quay.io/openshift/origin-kuryr-cni:{{ kuryr_version }}"
-  openshift-enterprise: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'kuryr-cni') }}"
+  openshift-enterprise: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'kuryr-cni') }}"
 
 openshift_openstack_kuryr_controller_image: "{{ kuryr_controller_dict[openshift_deployment_type] }}"
 openshift_openstack_kuryr_cni_image: "{{ kuryr_cni_dict[openshift_deployment_type] }}"

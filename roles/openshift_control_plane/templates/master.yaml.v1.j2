@@ -60,7 +60,7 @@ etcdStorageConfig:
   openShiftStoragePrefix: openshift.io
   openShiftStorageVersion: v1
 imageConfig:
-  format: {{ openshift_imageconfig_format }}
+  format: {{ openshift_facts_registry_url }}
   latest: {{ openshift_master_image_config_latest }}
 imagePolicyConfig:{{ openshift.master.image_policy_config | default({}) | combine({"internalRegistryHostname":"docker-registry.default.svc:5000"}) | lib_utils_to_padded_yaml(level=1) }}
 kubeletClientInfo:

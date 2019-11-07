@@ -3,7 +3,7 @@
 #
 # Image name:
 
-openshift_autoheal_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'autoheal') }}"
+openshift_autoheal_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'autoheal') }}"
 
 #
 # Content of the configuration file of the auto-heal service. Note that this is

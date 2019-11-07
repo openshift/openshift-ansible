@@ -5,7 +5,7 @@ l_os_cockpit_image_version_dict:
   openshift-enterprise: "{{ openshift_image_tag }}"
 l_os_cockpit_image_version: "{{ l_os_cockpit_image_version_dict[openshift_deployment_type] }}"
 
-l_os_cockpit_image_format: "{{ l_os_non_standard_reg_url | regex_replace('${version}' | regex_escape, l_os_cockpit_image_version) }}"
+l_os_cockpit_image_format: "{{ openshift_facts_registry_url | regex_replace('${version}' | regex_escape, l_os_cockpit_image_version) }}"
 
 l_openshift_cockit_search_dict:
   origin: "openshift/origin-${component}"

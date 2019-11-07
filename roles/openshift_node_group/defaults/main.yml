@@ -5,8 +5,6 @@ openshift_node_group_network_plugin: "{{ openshift_node_group_network_plugin_def
 openshift_node_group_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
 openshift_node_group_node_data_dir: "{{ openshift_node_group_node_data_dir_default }}"
 
-openshift_imageconfig_format: "{{ oreg_url | default(l_osm_registry_url_default) }}"
-
 openshift_node_group_use_persistentlocalvolumes: "{{ openshift_persistentlocalstorage_enabled | default(False) | bool }}"
 openshift_node_group_name: 'node-config-compute'
 

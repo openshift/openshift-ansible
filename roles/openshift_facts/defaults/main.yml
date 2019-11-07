@@ -6,45 +6,45 @@ system_images_registry_dict:
   origin: "docker.io"
 system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"
 
-l_openshift_images_dict:
+l_default_registry_url_dict:
   origin: 'docker.io/openshift/origin-${component}:${version}'
   openshift-enterprise: 'registry.redhat.io/openshift3/ose-${component}:${version}'
+openshift_facts_default_registry_url: "{{ l_default_registry_url_dict[openshift_deployment_type] }}"
 
 # oreg_url is defined by user input
 # Example:
 # oreg_url: registry.company.com:443/test/ose3/ose-${component}:${version}
+openshift_facts_registry_url: "{{ oreg_url | default(openshift_facts_default_registry_url) }}"
+openshift_facts_registry_host: "{{ openshift_facts_registry_url.split('/')[0] }}"  # From example: "registry.company.com:443"
+openshift_facts_registry_image: "{{ openshift_facts_registry_url | regex_replace('.*?/(.*)$', '\\1') }}"  # From example: "test/ose3/ose-${component}:${version}"
 
-l_osm_registry_url_default: "{{ l_openshift_images_dict[openshift_deployment_type] }}"
-l_oreg_host_temp: "{{ oreg_url | default(l_osm_registry_url_default) }}"
-oreg_host: "{{ l_oreg_host_temp.split('/')[0] }}"  # From example: "registry.company.com:443"
-oreg_image: "{{ l_oreg_host_temp | regex_replace('.*?/(.*)$', '\\1') }}"  # From example: "test/ose3/ose-${component}:${version}"
+l_registry_test_image_dict:
+  openshift-enterprise: "{{ openshift_facts_registry_image | regex_replace('ose-\\${component}:\\${version}', 'ose-pod:' ~ openshift_image_tag) }}"
+  origin: 'openshift/origin'
+openshift_facts_registry_test_image: "{{ l_registry_test_image_dict[openshift_deployment_type] }}"
 
 # Used to define a list of registry credentials
 # ex openshift_additional_registry_credentials=[{'host':'registry.redhat.io','user':'bob','password':'redhat'},{'host':'registry.connect.redhat.com','user':'alice','password':'redhat','test_login':False}]
 openshift_additional_registry_credentials: []
 
-# this variable does not replace ${version} with openshift_image_tag
-l_os_non_standard_reg_url: "{{ oreg_url | default(l_osm_registry_url_default) }}"
-
-l_docker_creds_image_dict:
-  openshift-enterprise: "{{ oreg_image | regex_replace('ose-\\${component}:\\${version}', 'ose-pod:' ~ openshift_image_tag) }}"
+l_default_registry_image: "{{ openshift_facts_default_registry_url | regex_replace('.*?/(.*)$', '\\1') }}"
+l_default_registry_test_image_dict:
+  openshift-enterprise: "{{ l_default_registry_image | regex_replace('ose-\\${component}:\\${version}', 'ose-pod:' ~ openshift_image_tag) }}"
   origin: 'openshift/origin'
-l_docker_creds_test_image: "{{ l_docker_creds_image_dict[openshift_deployment_type] }}"
+openshift_facts_default_registry_test_image: "{{ l_default_registry_test_image_dict[openshift_deployment_type] }}"
 
-l_docker_creds_http_proxy: "{{ 'HTTP_PROXY=' ~ openshift.common.http_proxy if openshift.common.http_proxy is defined and openshift.common.http_proxy != '' else ''}}"
-l_docker_creds_https_proxy: "{{ 'HTTPS_PROXY=' ~ openshift.common.https_proxy if openshift.common.https_proxy is defined and openshift.common.https_proxy != '' else ''}}"
-l_docker_creds_no_proxy: "{{ 'NO_PROXY=' ~ openshift.common.no_proxy if openshift.common.no_proxy is defined and openshift.common.no_proxy != '' else ''}}"
-l_docker_creds_proxy_vars: "{{ l_docker_creds_http_proxy }} {{ l_docker_creds_https_proxy }} {{ l_docker_creds_no_proxy }}"
+l_http_proxy: "{{ 'HTTP_PROXY=' ~ openshift.common.http_proxy if openshift.common.http_proxy is defined and openshift.common.http_proxy != '' else ''}}"
+l_https_proxy: "{{ 'HTTPS_PROXY=' ~ openshift.common.https_proxy if openshift.common.https_proxy is defined and openshift.common.https_proxy != '' else ''}}"
+l_no_proxy: "{{ 'NO_PROXY=' ~ openshift.common.no_proxy if openshift.common.no_proxy is defined and openshift.common.no_proxy != '' else ''}}"
+openshift_facts_proxy_vars: "{{ l_http_proxy }} {{ l_https_proxy }} {{ l_no_proxy }}"
 
-l_osm_registry_url: "{{ oreg_url | default(l_osm_registry_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
-l_os_registry_url: "{{ oreg_url | default(l_osm_registry_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
-openshift_image_default: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'node') }}"
+openshift_facts_versioned_registry_url: "{{ openshift_facts_registry_url | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
 # not sure why this one is more complicated than other images
-openshift_cli_image: "{{ (system_images_registry == 'docker') | ternary(openshift_image_default, (openshift_image_default.split('/')|length==2) | ternary(system_images_registry + '/' + openshift_image_default, openshift_image_default)) }}"
+openshift_cli_image: "{{ (system_images_registry == 'docker') | ternary(osn_image, (osn_image.split('/')|length==2) | ternary(system_images_registry + '/' + osn_image, osn_image)) }}"
 system_openshift_cli_image: "{{ (system_images_registry == 'docker') | ternary('docker:' + openshift_cli_image, openshift_cli_image) }}"
-osn_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'node') }}"
-osn_pod_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
-osm_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'control-plane') }}"
+osn_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'node') }}"
+openshift_facts_pod_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
+openshift_facts_control_plane_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'control-plane') }}"
 
 repoquery_cmd: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0', 'repoquery --plugins') }}"
 repoquery_installed: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed', 'repoquery --plugins --installed') }}"
@@ -53,7 +53,7 @@ openshift_use_crio: False
 openshift_use_crio_only: False
 openshift_crio_enable_docker_gc: False
 openshift_crio_var_sock: "/var/run/crio/crio.sock"
-openshift_crio_pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
+openshift_crio_pause_image: "{{ openshift_facts_pod_image }}"
 openshift_container_cli: "{{ openshift_use_crio | bool | ternary('crictl', 'docker') }}"
 openshift_crio_docker_gc_node_selector:
   runtime: 'cri-o'
@@ -133,8 +133,8 @@ openshift_metrics_storage_access_modes:
 openshift_service_type_dict:
   origin: origin
   openshift-enterprise: atomic-openshift
-
 openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_type] }}"
+
 openshift_master_api_port: "8443"
 openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 openshift_use_openshift_sdn: true

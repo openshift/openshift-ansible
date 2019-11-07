@@ -54,7 +54,7 @@
   yedit:
     src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: 'imageConfig.format'
-    value: "{{ openshift_imageconfig_format }}"
+    value: "{{ openshift_facts_registry_url }}"
 
 - name: Change default node selector to compute=true
   yedit:
