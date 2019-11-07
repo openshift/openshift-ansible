@@ -37,5 +37,3 @@
   - fail:
       msg: Node start failed.
 
-- name: Update CA trust
-  command: update-ca-trust extract
