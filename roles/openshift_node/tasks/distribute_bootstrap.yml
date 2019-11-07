@@ -36,4 +36,3 @@
       msg: "{{ logs_node.stdout_lines }}"
   - fail:
       msg: Node start failed.
-
