@@ -24,6 +24,10 @@
 - name: Create bootstrap update script
   template: src=openshift-bootstrap-update.j2 dest=/usr/bin/openshift-bootstrap-update mode=u+rx
 
+- name: DEBUG BOOTSTRAP METADATA
+  debug:
+    msg: START {{lookup('file', '/root/bootstrap.kubeconfig') }}
+
 - name: Start bootstrap update timer
   systemd:
     name: "openshift-bootstrap-update.timer"
