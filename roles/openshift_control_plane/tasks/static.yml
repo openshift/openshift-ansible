@@ -31,7 +31,7 @@
     src: "{{ mktemp.stdout }}/{{ item }}"
     edits:
     - key: spec.containers[0].image
-      value: "{{ osm_image }}"
+      value: "{{ openshift_facts_control_plane_image }}"
   with_items:
   - apiserver.yaml
   - controller.yaml

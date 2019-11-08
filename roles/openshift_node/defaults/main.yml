@@ -32,7 +32,7 @@ r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }
 
 openshift_node_syscon_auth_mounts_l:
 - type: bind
-  source: "{{ oreg_auth_credentials_path }}"
+  source: "{{ docker_auth_credentials_path }}"
   destination: "/root/.docker"
   options:
   - ro
@@ -100,8 +100,7 @@ default_r_openshift_node_os_firewall_allow:
 # Allow multiple port ranges to be added to the role
 r_openshift_node_os_firewall_allow: "{{ default_r_openshift_node_os_firewall_allow | union(openshift_node_open_ports | default([])) }}"
 
-# oreg_url is defined by user input
-oreg_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
+docker_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
 l_bind_docker_reg_auth: False
 
 openshift_docker_service_name: "docker"

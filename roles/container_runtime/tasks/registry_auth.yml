@@ -4,14 +4,14 @@
 # alternative implementation that operates directly on config.json
 - name: Create credentials for oreg_url
   docker_creds:
-    path: "{{ docker_cli_auth_config_path }}"
-    registry: "{{ oreg_host }}"
+    path: "{{ docker_auth_credentials_path }}"
+    registry: "{{ openshift_facts_registry_host }}"
     username: "{{ oreg_auth_user }}"
     password: "{{ oreg_auth_password }}"
     # Test that we can actually connect with provided info
     test_login: "{{ oreg_test_login | default(True) }}"
-    proxy_vars: "{{ l_docker_creds_proxy_vars }}"
-    test_image: "{{ l_docker_creds_test_image }}"
+    proxy_vars: "{{ openshift_facts_proxy_vars }}"
+    test_image: "{{ openshift_facts_registry_test_image }}"
   when:
   - oreg_auth_user is defined
   register: crt_oreg_auth_credentials_create
@@ -21,14 +21,14 @@
 
 - name: Create for any additional registries
   docker_creds:
-    path: "{{ docker_cli_auth_config_path }}"
+    path: "{{ docker_auth_credentials_path }}"
     registry: "{{ item.host }}"
     username: "{{ item.user | default('openshift') }}"
     password: "{{ item.password }}"
     # Test that we can actually connect with provided info
     test_login: "{{ item.test_login | default(omit) }}"
-    proxy_vars: "{{ l_docker_creds_proxy_vars }}"
-    test_image: "{{ item.test_image | default(l_docker_creds_test_image) }}"
+    proxy_vars: "{{ openshift_facts_proxy_vars }}"
+    test_image: "{{ item.test_image | default(openshift_facts_default_registry_test_image) }}"
     tls_verify: "{{ item.tls_verify | default(omit) }}"
   when:
   - openshift_additional_registry_credentials != []

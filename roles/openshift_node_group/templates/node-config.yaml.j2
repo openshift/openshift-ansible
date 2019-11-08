@@ -16,7 +16,7 @@ dockerConfig:
   execHandlerName: native
 enableUnidling: true
 imageConfig:
-  format: "{{ openshift_imageconfig_format }}"
+  format: "{{ openshift_facts_registry_url }}"
   latest: false
 iptablesSyncPeriod: "{{ openshift_node_iptables_sync_period }}"
 kubeletArguments:

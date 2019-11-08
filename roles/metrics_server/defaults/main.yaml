@@ -1,5 +1,5 @@
 ---
-openshift_metrics_server_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'metrics-server') }}"
+openshift_metrics_server_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'metrics-server') }}"
 
 # if the user has metrics turned on, don't break existing installations by not installing metrics-server,
 # and behave sanely for new installations by default.

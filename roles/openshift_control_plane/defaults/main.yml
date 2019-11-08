@@ -7,8 +7,6 @@ openshift_master_debug_level: "{{ debug_level | default(2) }}"
 r_openshift_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_master_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-openshift_imageconfig_format: "{{ oreg_url | default(l_osm_registry_url_default) }}"
-
 l_osm_id_providers_dict:
   openshift-enterprise:
   - name: 'deny_all'
@@ -52,7 +50,7 @@ default_r_openshift_master_os_firewall_allow:
   port: "{{ openshift_master_dns_port }}/udp"
 r_openshift_master_os_firewall_allow: "{{ default_r_openshift_master_os_firewall_allow | union(openshift_master_open_ports | default([])) }}"
 
-oreg_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
+docker_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
 
 containerized_svc_dir: "/usr/lib/systemd/system"
 ha_svc_template_path: "native-cluster"
@@ -160,4 +158,4 @@ l_core_api_list:
 - "template.openshift.io"
 - "user.openshift.io"
 
-openshift_volume_recycler_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'recycler') }}"
+openshift_volume_recycler_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'recycler') }}"

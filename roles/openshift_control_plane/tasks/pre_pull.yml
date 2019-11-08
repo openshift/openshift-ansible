@@ -1,7 +1,7 @@
 ---
 # This task runs async to save time while the master is being configured
 - name: Pre-pull Origin image (docker)
-  command: "{{ openshift_container_cli }} pull {{ osm_image }}"
+  command: "{{ openshift_container_cli }} pull {{ openshift_facts_control_plane_image }}"
   environment:
     NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
   # 10 minutes to pull the image

@@ -6,7 +6,7 @@ openshift_node_problem_detector_delete_tempfiles: True
 
 # node-problem-detector image setup
 
-openshift_node_problem_detector_image: "{{ l_osm_registry_url | regex_replace('${component}' | regex_escape, 'node-problem-detector') }}"
+openshift_node_problem_detector_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'node-problem-detector') }}"
 
 # node_problem_detector daemonset setup
 openshift_node_problem_detector_daemonset_name: node-problem-detector

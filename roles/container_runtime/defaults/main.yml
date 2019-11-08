@@ -1,5 +1,5 @@
 ---
-docker_cli_auth_config_path: '/root/.docker'
+docker_auth_credentials_path: '/root/.docker'
 openshift_docker_signature_verification: False
 
 openshift_docker_selinux_enabled: True
