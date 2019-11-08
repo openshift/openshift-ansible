@@ -99,8 +99,6 @@ spec:
           readOnly: true
 {% endif %}
         env:
-        - name: "MERGE_JSON_LOG"
-          value: "{{ openshift_logging_fluentd_merge_json_log }}"
         - name: "K8S_HOST_URL"
           value: "{{ openshift_logging_fluentd_master_url }}"
         - name: "ES_HOST"
@@ -219,6 +217,54 @@ spec:
 {% if audit_pos_log_file != '' %}
         - name: AUDIT_POS_FILE
           value: "{{ audit_pos_log_file }}"
+{% endif %}
+
+        - name: "MERGE_JSON_LOG"
+          value: "{{ openshift_logging_fluentd_merge_json_log }}"
+
+{% if openshift_logging_fluentd_extra_keep_fields is defined %}
+        - name: CDM_EXTRA_KEEP_FIELDS
+          value: "{{ openshift_logging_fluentd_extra_keep_fields }}"
+{% endif %}
+
+{% if openshift_logging_fluentd_keep_empty_fields is defined %}
+        - name: CDM_KEEP_EMPTY_FIELDS
+          value: "{{ openshift_logging_fluentd_keep_empty_fields }}"
+{% endif %}
+
+{% if openshift_logging_fluentd_use_undefined is defined %}
+        - name: CDM_USE_UNDEFINED
+          value: "{{ openshift_logging_fluentd_use_undefined }}"
+{% endif %}
+
+{% if openshift_logging_fluentd_undefined_name is defined %}
+        - name: CDM_UNDEFINED_NAME
+          value: "{{ openshift_logging_fluentd_undefined_name }}"
+{% endif %}
+
+{% if openshift_logging_fluentd_undefined_to_string is defined %}
+        - name: CDM_UNDEFINED_TO_STRING
+          value: "{{ openshift_logging_fluentd_undefined_to_string }}"
+{% endif %}
+
+{% if openshift_logging_fluentd_undefined_dot_replace_char is defined %}
+        - name: CDM_UNDEFINED_DOT_REPLACE_CHAR
+          value: "{{ openshift_logging_fluentd_undefined_dot_replace_char }}"
+{% endif %}
+
+{% if openshift_logging_fluentd_undefined_max_num_fields is defined %}
+        - name: CDM_UNDEFINED_MAX_NUM_FIELDS
+          value: "{{ openshift_logging_fluentd_undefined_max_num_fields }}"
+{% endif %}
+
+{% if openshift_logging_fluentd_use_multiline_json is defined %}
+        - name: USE_MULTILINE_JSON
+          value: "{{ openshift_logging_fluentd_use_multiline_json }}"
+{% endif %}
+
+{% if openshift_logging_fluentd_use_multiline_journal is defined %}
+        - name: USE_MULTILINE_JOURNAL
+          value: "{{ openshift_logging_fluentd_use_multiline_journal }}"
 {% endif %}
 
       volumes:
