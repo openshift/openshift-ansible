@@ -190,6 +190,20 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Nov 11 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.154-2
+- manually bump release version of openshift-ansible (aos-team-art@redhat.com)
+- Fix test_image for additional registries (rteague@redhat.com)
+- IGMP was blocked on the nodes which was preventing the IGMP queries from
+  reaching Linux and sending back IGMP reports of joined multicast groups So,
+  it stop forwarding multicast traffic after some time since it couldn’t
+  snoop on IGMP and verify if the nodes still need to receive those multicast
+  groups (abhisheksharmay2k@gmail.com)
+- [KIECLOUD-316] - Update RHPAM and RHDM templates and imagestreams on
+  OpenShift Service Catalog for release 7.5.0 (fspolti@redhat.com)
+- Bug 1767111 - logging - expose undefined field, multiline parameters
+  (rmeggins@redhat.com)
+- ignore failure on master (glykos@gmx.net)
+
 * Thu Oct 31 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.154-1
 - add restart (jcallen@redhat.com)
 - Escape literals in regex for test image (rteague@redhat.com)
