@@ -14,11 +14,11 @@ openshift_node_packages:
   - openshift-clients{{ l_cluster_version }}
   - openshift-hyperkube{{ l_cluster_version }}
 
-openshift_node_support_packages:
+openshift_node_support_packages: "{{ openshift_node_support_packages_base + openshift_node_support_packages_by_arch[ansible_architecture] }}"
+
+openshift_node_support_packages_base:
   # Packages from redhat-coreos.git manifest-base.yaml
   - kernel
-  - irqbalance
-  - microcode_ctl
   - systemd
   #- systemd-journal-gateway
   #- rpm-ostree
@@ -86,8 +86,20 @@ openshift_node_support_packages:
   - policycoreutils-python
   - iptables-services
   - bridge-utils
-  - biosdevname
   - container-storage-setup
   - cloud-utils-growpart
   - ceph-common
-  - glusterfs-fuse
+
+openshift_node_support_packages_by_arch:
+  ppc64le:
+    - irqbalance
+  s390x:
+    - s390utils-base
+  x86_64:
+    - microcode_ctl
+    - irqbalance
+    - biosdevname
+    # GlusterFS
+    # Temporaly only for x86_64 as were not shipping it for other arches atm
+    # Tracked in https://bugzilla.redhat.com/show_bug.cgi?id=1715175
+    - glusterfs-fuse
