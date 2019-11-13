@@ -44,6 +44,12 @@
     - l_docker_upgrade_drain_result is failed
     - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
+  - name: pause before restarting docker - touch /tmp/before-restart-docker to resume
+    wait_for:
+      path: /tmp/before-restart-docker
+      state: present
+      timeout: 86400
+
   - name: Restart docker
     service:
       name: docker
@@ -55,6 +61,12 @@
     when:
     - openshift_node_restart_docker_required | default(True)
     - not openshift_use_crio_only | bool
+
+  - name: pause after restarting docker - touch /tmp/after-restart-docker to resume
+    wait_for:
+      path: /tmp/after-restart-docker
+      state: present
+      timeout: 86400
 
   - name: Wait for master API to come back online
     wait_for:

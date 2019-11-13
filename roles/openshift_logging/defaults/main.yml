@@ -188,3 +188,4 @@ openshift_logging_mux_namespaces: []
 #fluentd_secureforward_contents:
 #fluentd_mux_config_contents:
 #fluentd_mux_secureforward_contents:
+dummy_logging_setting: true
