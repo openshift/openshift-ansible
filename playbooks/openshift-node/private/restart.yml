@@ -108,3 +108,4 @@
     include_role:
       name: openshift_storage_glusterfs
       tasks_from: check_cluster_health.yml
+    when: groups.oo_glusterfs_to_config | default([]) | count > 0
