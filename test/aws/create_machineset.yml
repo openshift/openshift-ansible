@@ -12,6 +12,7 @@
         name: "{{ machineset_name }}"
         resourceVersion: ""
       spec:
+        replicas: 1
         selector:
           matchLabels:
             machine.openshift.io/cluster-api-machineset: "{{ machineset_name }}"
