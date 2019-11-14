@@ -122,6 +122,9 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_fstab               | '/var/lib/heketi/fstab' | When heketi is native, sets the path to the fstab file on the GlusterFS nodes to update on LVM volume mounts, changes to '/etc/fstab/' when the heketi executor is 'ssh' **NOTE:** This should not need to be changed
 | openshift_storage_glusterfs_heketi_wipe                | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
 | openshift_storage_gluster_update_techpreview           | Undefined               | Acknowledge that upgrade playbook is in tech preview to run it
+| openshift_storage_glusterfs_health_timeout             | 30                      | This variable limits the number of cluster health check retries. The variable value should be multiple of 10, 10 means one retry, 20 means 2 retries and this value should not be less than 10.
+|openshift_storage_glusterfs_fuse_version                | Undefined               | To upgrade nodes to specific client packages we need to mention the version of which you want to upgrade.
+| openshift_storage_glusterfs_check_brick_size_health    | True                    | The playbook contians checks for bricks that are close to full capacity but in some cases this is not an error condition and setting this variable to False will allow you to disable that check.
 
 Each role variable also has a corresponding variable to optionally configure a
 separate GlusterFS cluster for use as storage for an integrated Docker
