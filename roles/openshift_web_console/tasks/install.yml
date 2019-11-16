@@ -44,7 +44,7 @@
   when: existing_config_map_data['webconsole-config.yaml'] is defined
 
 - set_fact:
-    console_picker_admin_console_public_url: "https://{{ openshift_console_hostname | default('console.{{openshift_master_default_subdomain}}') }}{{ openshift_console_base_path | default('/') }}"
+    console_picker_admin_console_public_url: "https://{{ openshift_console_hostname | default('console.' ~ openshift_master_default_subdomain) }}{{ openshift_console_base_path | default('/') }}"
   when: (openshift_web_console_enable_context_selector | default(true) | bool) and (openshift_console_install | default(true) | bool)
 
 # Generate a new config when a config map is not defined.
