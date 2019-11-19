@@ -1,7 +1,7 @@
 ---
 - name: Create machineset_name
   set_fact:
-    machineset_name: "{{ item.metadata.name ~ '-centos'}}"
+    machineset_name: "{{ item.metadata.name ~ '-rhel'}}"
 
 - name: Update machineset definition
   set_fact:
@@ -32,26 +32,36 @@
     kubeconfig: "{{ kubeconfig_path }}"
     definition: "{{ machineset | to_yaml }}"
 
-- name: wait for machine to be created
-  k8s_facts:
-    api_version: machine.openshift.io/v1beta1
-    kubeconfig: "{{ kubeconfig_path }}"
-    namespace: openshift-machine-api
-    kind: Machine
-    label_selectors:
-    - "machine.openshift.io/cluster-api-machineset={{ machineset_name }}"
-  register: new_machine
-  retries: 36
-  delay: 5
-  until:
-  - new_machine.resources is defined
-  - new_machine.resources | length > 0
-  - new_machine.resources[0].status is defined
-  - new_machine.resources[0].status.providerStatus is defined
-  - new_machine.resources[0].status.providerStatus.instanceState is defined
-  - new_machine.resources[0].status.providerStatus.instanceState == 'running'
+- block:
+  - name: Wait for machine to be created
+    k8s_facts:
+      api_version: machine.openshift.io/v1beta1
+      kubeconfig: "{{ kubeconfig_path }}"
+      namespace: openshift-machine-api
+      kind: Machine
+      label_selectors:
+      - "machine.openshift.io/cluster-api-machineset={{ machineset_name }}"
+    register: new_machine
+    retries: 36
+    delay: 5
+    until:
+    - new_machine.resources is defined
+    - new_machine.resources | length > 0
+    - new_machine.resources[0].status is defined
+    - new_machine.resources[0].status.providerStatus is defined
+    - new_machine.resources[0].status.providerStatus.instanceState is defined
+    - new_machine.resources[0].status.providerStatus.instanceState == 'running'
+    failed_when:
+    - new_machine.resources is defined
+    - new_machine.resources | length > 0
+    - new_machine.resources[0].status is defined
+    - new_machine.resources[0].status.phase == 'Failed'
+  rescue:
+  - name: Machine creation failed
+    fail:
+      msg: "Machine creation failed, error: {{ new_machine.resources[0].status.errorMessage }}"
 
-- name: add machine to the inventory
+- name: Add machine to the inventory
   add_host:
     name: "{{ new_machine.resources[0].status.addresses | selectattr('type', 'match', '^InternalIP$') | map(attribute='address') | first }}"
     node_name: "{{ new_machine.resources[0].status.addresses | selectattr('type', 'match', '^InternalDNS$') | map(attribute='address') | first }}"
