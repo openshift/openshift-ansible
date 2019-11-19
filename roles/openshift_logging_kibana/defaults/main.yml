@@ -11,6 +11,7 @@ openshift_logging_kibana_cpu_request: 100m
 openshift_logging_kibana_memory_limit: 736Mi
 
 openshift_logging_kibana_hostname: "{{ 'kibana.' ~ openshift_master_default_subdomain }}"
+openshift_logging_kibana_ops_hostname: "{{ 'kibana-ops.' ~ openshift_master_default_subdomain }}"
 
 openshift_logging_kibana_es_host: "logging-es"
 openshift_logging_kibana_es_port: 9200
