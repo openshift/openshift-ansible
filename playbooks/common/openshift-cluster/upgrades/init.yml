@@ -11,6 +11,7 @@
 
 - name: Inspect cluster certificates
   hosts: "{{ l_upgrade_cert_check_hosts }}"
+  any_errors_fatal: true
   tasks:
   - import_role:
       name: openshift_certificate_expiry
