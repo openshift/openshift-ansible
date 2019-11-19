@@ -12,6 +12,7 @@ generation for Elasticsearch (it uses JKS) as well as openssl to sign certificat
 As part of the installation, it is recommended that you add the Fluentd node selector label
 to the list of persisted [node labels](https://docs.okd.io/latest/install_config/install/advanced_install.html#configuring-node-host-labels).
 
+
 ### Required vars:
 
 - `openshift_logging_install_logging`: When `True` the `openshift_logging` role will install Aggregated Logging.
