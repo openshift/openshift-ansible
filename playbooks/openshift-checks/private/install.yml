@@ -14,7 +14,7 @@
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - name: OpenShift Health Checks
-  hosts: oo_all_hosts
+  hosts: oo_etcd_to_config:oo_nodes_to_config:oo_masters_to_config
   any_errors_fatal: true
   roles:
   - openshift_health_checker
