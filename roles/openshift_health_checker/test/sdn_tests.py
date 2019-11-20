@@ -58,7 +58,7 @@ def test_check_master():
 
     task_vars = dict(
         group_names=['oo_masters_to_config'],
-        resources=dict(module_results=[
+        resources=dict(results=[
             dict(item='nodes', module_results=dict(results=[dict(items=nodes)])),
             dict(item='pods', module_results=dict(results=[dict(items={})])),
             dict(item='services', module_results=dict(results=[dict(items={})]))
@@ -156,7 +156,7 @@ def test_check_nodes():
 
     task_vars = dict(
         group_names=['oo_nodes_to_config'],
-        resources=dict(module_results=[
+        resources=dict(results=[
             dict(item='nodes', module_results=dict(results=[dict(items=nodes)])),
             dict(item='hostsubnets', module_results=dict(results=[dict(items=hostsubnets)]))
         ]),
@@ -201,7 +201,7 @@ def test_resolve_address():
 def test_no_nodes():
     task_vars = dict(
         group_names=['oo_masters_to_config'],
-        resources=dict(module_results=[
+        resources=dict(results=[
             dict(item='nodes', module_results=dict(results=[dict(items={})])),
             dict(item='pods', module_results=dict(results=[dict(items={})])),
             dict(item='services', module_results=dict(results=[dict(items={})]))
