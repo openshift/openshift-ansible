@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.4 Camel AMQP with Spring Boot",
+      "openshift.io/display-name": "Red Hat Fuse 7.5 Camel AMQP with Spring Boot",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Spring Boot, Camel and EnMasse (MaaS) QuickStart. This quickstart demonstrates how to connect a Spring Boot application to a EnMasse (MaaS) and use JMS messaging between two Camel routes using OpenShift. It requires EnMasse to have been deployed and running first.",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.4"
+      "version": "1.5"
     },
-    "name": "s2i-fuse74-spring-boot-camel-amq"
+    "name": "s2i-fuse75-spring-boot-camel-amq"
   },
   "labels": {
-    "template": "s2i-fuse74-spring-boot-camel-amq"
+    "template": "s2i-fuse75-spring-boot-camel-amq"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse74-spring-boot-camel-amq",
+      "value": "s2i-fuse75-spring-boot-camel-amq",
       "description": "The name assigned to the application."
     },
     {
@@ -33,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-amq-1.0.0.fuse-740016-redhat-00002",
+      "value": "spring-boot-camel-amq-1.0.0.fuse-750023-redhat-00002",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -61,13 +61,13 @@
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.4",
+      "value": "1.5",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-740016-redhat-00002",
+      "value": "1.0.0.fuse-750023-redhat-00002",
       "description": "The application version."
     },
     {
