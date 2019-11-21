@@ -972,6 +972,13 @@ def pop_obsolete_local_facts(local_facts):
                 local_facts[role].pop(key, None)
 
 
+def pop_obsolete_local_roles(known_roles, local_facts):
+    """Remove unknown roles from local_facts"""
+    for role in local_facts.keys():
+        if role not in known_roles:
+            local_facts.pop(role, None)
+
+
 class OpenShiftFactsUnsupportedRoleError(Exception):
     """Origin Facts Unsupported Role Error"""
     pass
@@ -1008,7 +1015,6 @@ class OpenShiftFacts(object):
                    'buildoverrides',
                    'cloudprovider',
                    'common',
-                   'etcd',
                    'master',
                    'node']
 
@@ -1217,6 +1223,7 @@ class OpenShiftFacts(object):
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
         pop_obsolete_local_facts(new_local_facts)
+        pop_obsolete_local_roles(self.known_roles, new_local_facts)
 
         if new_local_facts != local_facts:
             changed = True
