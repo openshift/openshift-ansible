@@ -127,3 +127,12 @@
     l_masters: "{{ groups['oo_masters_to_config'] | default([]) }}"
     l_openshift_schedulable: "{{ l_masters | map('extract', hostvars, 'openshift_schedulable') | select('defined') | list }}"
     l_master_schedulable: "{{ l_openshift_schedulable | map('bool') | list }}"
+
+- name: Ensure openshift_master_cluster_hostname is set when deploying multiple masters
+  fail:
+    msg: >
+      openshift_master_cluster_hostname must be set when deploying multiple masters to ensure the loadbalancer name
+      is used for accessing the cluster API
+  when:
+    - groups.oo_masters_to_config | length > 1
+    - openshift_master_cluster_hostname is not defined or openshift_master_cluster_hostname == ''
