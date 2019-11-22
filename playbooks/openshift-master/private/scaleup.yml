@@ -8,6 +8,9 @@
       name: openshift_control_plane
       tasks_from: update_master_count.yml
 
+# Ensure configmaps for the new nodes exist
+- import_playbook: openshift_node_group.yml
+
 - import_playbook: ../../openshift-node/private/bootstrap.yml
 
 - import_playbook: ../../openshift-etcd/private/master_etcd_certificates.yml
