@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.154
-Release:        2%{?dist}
+Version:        3.11.155
+Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -190,6 +190,30 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Nov 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.155-1
+- Ensure openshift_master_cluster_hostname is set when deploying multiple
+  masters (rteague@redhat.com)
+- Remove obsolete roles from local openshift.fact (rteague@redhat.com)
+- Fix openshift_health_checker sdn.py key error (rteague@redhat.com)
+- Update Fuse templates with 7.5 release (antonin@stefanutti.fr)
+- Add logging certificate redeploy to main redeploy playbook
+  (rteague@redhat.com)
+- Bug 1747307 - The redeploy-certificates.yml failed when ops is enabled
+  (nhosoi@redhat.com)
+- Increase the timeout for restart (anbhat@redhat.com)
+- Use Ansible 2.9.1 for testing (rteague@redhat.com)
+- Fix web console URL (rteague@redhat.com)
+- revert change of update-ca-trust extract (jcallen@redhat.com)
+- Bug 1765646: Fluentd single pod logging performance regression 3.x
+  (rmeggins@redhat.com)
+- tox (jcallen@redhat.com)
+- GCP still failing CI. Remove `update-ca-trust extract` (jcallen@redhat.com)
+- Remove import playbook restart (jcallen@redhat.com)
+- Fix gluster after restart change (jcallen@redhat.com)
+- Create configmaps only for used openshift_node_group_names
+  (rteague@redhat.com)
+- Update EAP CD to CD 17 (ken@zaptillion.net)
+
 * Mon Nov 11 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.154-2
 - manually bump release version of openshift-ansible (aos-team-art@redhat.com)
 - Fix test_image for additional registries (rteague@redhat.com)
