@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.155
+Version:        3.11.156
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Nov 25 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.156-1
+- 
+
 * Sun Nov 24 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.155-1
 - Ensure openshift_master_cluster_hostname is set when deploying multiple
   masters (rteague@redhat.com)
