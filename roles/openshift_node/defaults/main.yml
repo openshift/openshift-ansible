@@ -87,7 +87,7 @@ openshift_node_support_packages_base:
   - iptables-services
   - bridge-utils
   - container-storage-setup
-  - cloud-utils-growpart
+  #- cloud-utils-growpart
   - ceph-common
 
 openshift_node_support_packages_by_arch:
