@@ -10,9 +10,9 @@ openshift_node_bootstrap_server: "{{ openshift_node_kubeconfig.clusters.0.cluste
 openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config/{{ openshift_node_machineconfigpool }}"
 
 openshift_node_packages:
-  - cri-o
-  - openshift-clients{{ l_cluster_version }}
-  - openshift-hyperkube{{ l_cluster_version }}
+  - cri-o-{{ kubernetes_major_version }}.{{ kubernetes_minor_version }}.*
+  - openshift-clients-{{ l_cluster_version }}.*
+  - openshift-hyperkube-{{ l_cluster_version }}.*
 
 openshift_node_support_packages: "{{ openshift_node_support_packages_base + openshift_node_support_packages_by_arch[ansible_architecture] }}"
 

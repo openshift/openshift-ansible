@@ -32,17 +32,34 @@
   until:
   - oc_get.stdout is defined
   - oc_get.stdout != ''
-  retries: 36
-  delay: 5
 
 - name: Set fact l_cluster_version
   set_fact:
-    l_cluster_version: "-{{ oc_get.stdout | regex_search('^\\d+\\.\\d+') }}*"
+    l_cluster_version: "{{ oc_get.stdout | regex_search('^\\d+\\.\\d+') }}"
 
-- name: Override version when running CI
+- name: Override cluster version when running CI
   set_fact:
-    l_cluster_version: ""
-  when: ci_version_override | default(False) | bool == True
+    l_cluster_version: "*"
+  when: ci_version_override | default(false) | bool == true
+
+- name: Get kubernetes server version
+  command: >
+    oc version
+    --config={{ openshift_node_kubeconfig_path }}
+    --output=json
+  delegate_to: localhost
+  register: oc_get
+  until:
+  - oc_get.stdout is defined
+  - oc_get.stdout != ''
+
+- name: Set fact kubernetes_major_version
+  set_fact:
+    kubernetes_major_version: "{{ (oc_get.stdout | from_json).serverVersion.major }}"
+
+- name: Set fact kubernetes_minor_version
+  set_fact:
+    kubernetes_minor_version: "{{ (oc_get.stdout | from_json).serverVersion.minor | regex_search('^\\d+') }}"
 
 - block:
   - name: Install openshift packages
