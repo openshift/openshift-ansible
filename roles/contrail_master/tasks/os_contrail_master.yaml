@@ -33,22 +33,10 @@
   when: api_vip_result is success
   run_once: True
 
-- name: Create the contrail namespace template file
-  template:
-    src: contrail-namespace.j2
-    dest: /tmp/contrail-namespace.yaml
-    owner: root
-    mode: 0644
-  run_once: True
+- name: Contrail starting common
+  include_tasks: os_contrail_common.yaml
 
-- name: Check if the contrail-system namespace is created
-  oc_project:
-    state: present
-    name: "contrail-system"
-    node_selector: ""
-  run_once: True
-
-- name: Create the contrail template files
+- name: Contrail create the template files
   template:
     src: "{{ item }}-5.j2"
     dest: "/tmp/{{ item }}.yaml"
@@ -56,55 +44,96 @@
     mode: 0644
   run_once: True
   with_items:
-    - "contrail-image-downloader"
+    - "contrail-image-downloader-infra"
+    - "contrail-image-downloader-controller"
+    - "contrail-image-downloader-analytics"
+    - "contrail-image-downloader-agent"
     - "contrail-infra-vars"
     - "contrail-agent"
+    - "contrail-ext-redis"
+    - "contrail-config-db"
+    - "contrail-analytics-db"
+    - "contrail-control-config"
     - "contrail-analytics"
     - "contrail-analytics-alarm"
-    - "contrail-analytics-db"
     - "contrail-analytics-snmp"
-    - "contrail-config-db"
-    - "contrail-control-config"
-    - "contrail-ext-redis"
-    - "contrail-kube-manager"
     - "contrail-webui"
+    - "contrail-control-control"
+    - "contrail-kube-manager"
 
-- name: Copy the wait for POD script to master node
-  template:
-    src: wait_for_pod.j2
-    dest: /tmp/wait_for_pod.sh
-    owner: root
-    mode: 0777
-  run_once: true
-
-- name: Give privileged access to default service account of contrail-system namespace
-  oc_adm_policy_user:
-    user: system:serviceaccount:contrail-system:default
-    resource_kind: scc
-    resource_name: privileged
-    state: present
-  run_once: True
-
-- name: Create Contrail registry secret
-  command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n contrail-system"
-  run_once: True
-  when: contrail_registry_username is defined
-  ignore_errors: True
-
-- name: Starting the contrail components on required nodes
+- name: Contrail starting image downloader
   command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
   run_once: True
   ignore_errors: True
   with_items:
-    - "contrail-image-downloader"
+    - "contrail-image-downloader-infra"
+    - "contrail-image-downloader-controller"
+    - "contrail-image-downloader-analytics"
+    - "contrail-image-downloader-agent"
+
+- name: Contrail wait for image downloader pods
+  command: /tmp/wait_for_pod.sh
+
+- name: Contrail starting infra-vars
+  command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
+  run_once: True
+  ignore_errors: True
+  with_items:
     - "contrail-infra-vars"
+
+- name: Contrail starting vrouter-agent
+  command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
+  run_once: True
+  ignore_errors: True
+  with_items:
     - "contrail-agent"
+
+- name: Contrail wait for vrouter-agent
+  command: /tmp/wait_for_pod.sh
+
+- name: Contrail starting config analytics webui
+  command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
+  run_once: True
+  ignore_errors: True
+  with_items:
+    - "contrail-ext-redis"
+    - "contrail-config-db"
+    - "contrail-analytics-db"
+    - "contrail-control-config"
     - "contrail-analytics"
     - "contrail-analytics-alarm"
-    - "contrail-analytics-db"
     - "contrail-analytics-snmp"
-    - "contrail-config-db"
-    - "contrail-control-config"
-    - "contrail-ext-redis"
-    - "contrail-kube-manager"
     - "contrail-webui"
+
+- name: Contrail wait for config analytics webui
+  command: /tmp/wait_for_pod.sh
+
+- name: Contrail starting control
+  command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
+  run_once: True
+  ignore_errors: True
+  with_items:
+    - "contrail-control-control"
+
+- name: Contrail wait for control
+  command: /tmp/wait_for_pod.sh
+
+- name: Contrail starting orchestartor plugins
+  command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
+  run_once: True
+  ignore_errors: True
+  with_items:
+    - "contrail-kube-manager"
+
+- name: Contrail wait for orchestartor plugins
+  command: /tmp/wait_for_pod.sh
+
+- name: Contrail deleting all image downloader
+  command: "{{ openshift_client_binary }} delete -f /tmp/{{ item }}.yaml"
+  run_once: True
+  ignore_errors: True
+  with_items:
+    - "contrail-image-downloader-infra"
+    - "contrail-image-downloader-controller"
+    - "contrail-image-downloader-analytics"
+    - "contrail-image-downloader-agent"

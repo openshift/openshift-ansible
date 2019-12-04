@@ -1,7 +1,7 @@
 ---
 - fail:
     msg: Contrail doesn't support CRI-O
-  when: openshift_use_crio_only
+  when: openshift_use_crio_only | default(false) | bool
 
 - name: Run kube proxy
   import_role:
@@ -14,13 +14,12 @@
 
 - name: Create contrail controller components and Daemonsets
   include_tasks: os_contrail_master.yaml
-  when: not nested_mode_contrail | default(false) | bool
+  when:
+    - not nested_mode_contrail | default(false) | bool
+    - contrail_masters | length > 0
 
 - name: Create contrail nested components
   include_tasks: os_contrail_nested.yaml
-  when: nested_mode_contrail | default(false) | bool
-
-- name: Enable Fabric SNAT on default project
-  command: >
-    {{ openshift_client_binary }} annotate namespace default "opencontrail.org/ip_fabric_snat=true" --overwrite
-  delegate_to: "{{ groups.oo_first_master.0 }}"
+  when:
+    - nested_mode_contrail | default(false) | bool
+    - contrail_masters | length > 0

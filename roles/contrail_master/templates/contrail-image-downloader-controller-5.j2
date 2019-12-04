@@ -1,0 +1,74 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-image-installer-controller
+  namespace: contrail-system
+  labels:
+    app: contrail-image-download-controller
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-image-download-controller
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/infra"
+                operator: Exists
+      hostNetwork: true
+      initContainers:
+      - name: contrail-download-controller-config-image
+        image: "{{ contrail_registry }}/contrail-controller-config-api:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-controller-config-schema-image
+        image: "{{ contrail_registry }}/contrail-controller-config-schema:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-controller-config-svc-monitor-image
+        image: "{{ contrail_registry }}/contrail-controller-config-svcmonitor:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-controller-config-devicemgr-image
+        image: "{{ contrail_registry }}/contrail-controller-config-devicemgr:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-controller-control-image
+        image: "{{ contrail_registry }}/contrail-controller-control-control:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-controller-control-dns-image
+        image: "{{ contrail_registry }}/contrail-controller-control-dns:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-controller-control-named-image
+        image: "{{ contrail_registry }}/contrail-controller-control-named:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-controller-webui-job-image
+        image: "{{ contrail_registry }}/contrail-controller-webui-job:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-controller-webui-web-image
+        image: "{{ contrail_registry }}/contrail-controller-webui-web:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-controller-kube-manager-image
+        image: "{{ contrail_registry }}/contrail-kubernetes-kube-manager:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      containers:
+      - name: contrail-download-image-controller
+        image: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["tailf","/dev/null"]
+        securityContext:
+          privileged: true
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}

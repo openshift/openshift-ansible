@@ -14,8 +14,15 @@ data:
   CLOUD_ORCHESTRATOR: {{ cloud_orchestrator }}
   CONFIG_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   CONFIGDB_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+{% if multi_interface is defined and multi_interface.lower() == 'true' %}
+  CONTROL_NODES: {{ control_nodes }}
+  CONTROLLER_NODES: {{ controller_nodes }}
+  PHYSICAL_INTERFACE: {{ vrouter_physical_interface }}
+{% else %}
   CONTROL_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   CONTROLLER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  PHYSICAL_INTERFACE: {{ vrouter_physical_interface | default('') }}
+{% endif %}
   KAFKA_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   LOG_LEVEL: {{ log_level }}
   METADATA_PROXY_SECRET: {{ metadata_proxy_secret }}
@@ -63,46 +70,23 @@ spec:
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
-      - name: kubernetes-entrypoint-init
-        image: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: true
-        command:
-        - kubernetes-entrypoint
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        #- name: INTERFACE_NAME
-        #  value: eth0
-        - name: DEPENDENCY_SERVICE
-        - name: DEPENDENCY_JOBS
-        - name: DEPENDENCY_DAEMONSET
-          value: contrail-controller-config
-        - name: DEPENDENCY_CONTAINER
-        - name: COMMAND
-          value: echo done
-        volumeMounts:
-        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-          name: pod-secret
       - name: contrail-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
+{% if os_firewall_use_firewalld is defined and os_firewall_use_firewalld.lower() == 'true' %}
+        - name: CONFIGURE_FIREWALLD
+          value: "true"
+        - name: FIREWALL_ZONE
+          value: "{{firewall_zone}}"
+{% else %}
         - name: CONFIGURE_IPTABLES
           value: "true"
         - name: IPTABLES_CHAIN
           value: "OS_FIREWALL_ALLOW"
+{% endif %}
         - name: CONTRAIL_STATUS_IMAGE
           value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
         - name: NODE_TYPE
@@ -113,22 +97,6 @@ spec:
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
-      - name: contrail-download-contrail-status-image
-        image: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
-        imagePullPolicy: "IfNotPresent"
-        command: ["/bin/true"]
-      - name: contrail-download-contrail-kubernetes-cni-init-image
-        image: "{{ contrail_registry }}/contrail-kubernetes-cni-init:{{ contrail_container_tag }}"
-        imagePullPolicy: "IfNotPresent"
-        command: ["/bin/true"]
-      - name: contrail-download-contrail-vrouter-agent-image
-        image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
-        imagePullPolicy: "IfNotPresent"
-        command: ["/bin/true"]
-      - name: contrail-download-contrail-nodemgr-image
-        image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
-        imagePullPolicy: "IfNotPresent"
-        command: ["/bin/true"]
       - name: contrail-vrouter-kernel-init
         image: "{{ contrail_registry }}/contrail-vrouter-kernel-init:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"

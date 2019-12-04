@@ -1,18 +1,18 @@
-# This file contains the contrail webui components.
-# Thiscomponent will be installed as DaemonSet on the infra node
+# This file contains the contrail controller component.
+# It will be installed as DaemonSets on the infra node
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: contrail-controller-webui
+  name: contrail-controller-control
   namespace: contrail-system
   labels:
-    app: contrail-controller-webui
+    app: contrail-controller-control
 spec:
   template:
     metadata:
       labels:
-        app: contrail-controller-webui
+        app: contrail-controller-control
     spec:
       affinity:
         nodeAffinity:
@@ -41,7 +41,7 @@ spec:
           value: "OS_FIREWALL_ALLOW"
 {% endif %}
         - name: NODE_TYPE
-          value: "webui"
+          value: "control"
         - name: CONTRAIL_STATUS_IMAGE
           value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
         envFrom:
@@ -51,8 +51,8 @@ spec:
         - mountPath: /host/usr/bin
           name: host-usr-bin
       containers:
-      - name: contrail-controller-webui-job
-        image: "{{ contrail_registry }}/contrail-controller-webui-job:{{ contrail_container_tag }}"
+      - name: contrail-controller-control
+        image: "{{ contrail_registry }}/contrail-controller-control-control:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -61,17 +61,47 @@ spec:
             name: env
         - configMapRef:
             name: configzookeeperenv
-        - configMapRef:
-            name: kubernetes-config
         volumeMounts:
         - mountPath: /var/log/contrail
-          name: webui-logs
-        - mountPath: /tmp/serviceaccount
-          name: ssl-secret-gen-token
+          name: control-logs
         - mountPath: /etc/localtime
           name: localtime
-      - name: contrail-controller-webui-web
-        image: "{{ contrail_registry }}/contrail-controller-webui-web:{{ contrail_container_tag }}"
+      - name: contrail-controller-control-dns
+        image: "{{ contrail_registry }}/contrail-controller-control-dns:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        volumeMounts:
+        - mountPath: /etc/contrail
+          name: dns-config
+        - mountPath: /var/log/contrail
+          name: control-logs
+        - mountPath: /etc/localtime
+          name: localtime
+      - name: contrail-controller-control-named
+        image: "{{ contrail_registry }}/contrail-controller-control-named:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: configzookeeperenv
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrail
+          name: dns-config
+        - mountPath: /var/log/contrail
+          name: control-logs
+        - mountPath: /etc/localtime
+          name: localtime
+      - name: contrail-controller-control-nodemgr
+        image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -81,22 +111,35 @@ spec:
         - configMapRef:
             name: configzookeeperenv
         - configMapRef:
-            name: kubernetes-config
+            name: nodemgr-config
+        env:
+        - name: NODE_TYPE
+          value: control
+# todo: there is type Socket in new kubernetes, it is possible to use full
+# path:
+# hostPath:
+#   path: /var/run/docker.sock and
+#   type: Socket
         volumeMounts:
         - mountPath: /var/log/contrail
-          name: webui-logs
-        - mountPath: /tmp/serviceaccount
-          name: ssl-secret-gen-token
+          name: control-logs
+        - mountPath: /mnt
+          name: docker-unix-socket
         - mountPath: /etc/localtime
           name: localtime
       volumes:
-      - name: webui-logs
+      - name: control-logs
         hostPath:
-          path: /var/log/contrail/webui
+          path: /var/log/contrail/control
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
+      - name: dns-config
+        emptyDir: {}
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
-      - name: ssl-secret-gen-token
+      - name: pod-secret
         secret:
           secretName: contrail-kubernetes-token
       - name: localtime

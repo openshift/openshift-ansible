@@ -1,0 +1,54 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-image-installer-infra
+  namespace: contrail-system
+  labels:
+    app: contrail-image-download-infra
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-image-download-infra
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/infra"
+                operator: Exists
+      hostNetwork: true
+      initContainers:
+      - name: contrail-download-external-zookeeper-image
+        image: "{{ contrail_registry }}/contrail-external-zookeeper:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-external-cassandra-image
+        image: "{{ contrail_registry }}/contrail-external-cassandra:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-external-rabbitmq-image
+        image: "{{ contrail_registry }}/contrail-external-rabbitmq:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-external-kafka-image
+        image: "{{ contrail_registry }}/contrail-external-kafka:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-redis-image
+        image: "redis:4.0.2"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      containers:
+      - name: contrail-download-image-infra
+        image: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["tailf","/dev/null"]
+        securityContext:
+          privileged: true
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}

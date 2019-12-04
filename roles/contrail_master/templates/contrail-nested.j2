@@ -85,6 +85,7 @@ data:
   KUBERNETES_IP_FABRIC_SNAT: "{{ ip_fabric_snat | default('false') }}"
   KUBERNETES_PUBLIC_FIP_POOL: "{{ public_fip_pool | default('{}') }}"
   KUBERNESTES_NESTED_VROUTER_VIP: {{ k8s_nested_vrouter_vip }}
+  PHYSICAL_INTERFACE: {{ vrouter_physical_interface | default('')  }}
 ---
 apiVersion: v1
 kind: ConfigMap

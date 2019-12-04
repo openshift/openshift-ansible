@@ -1,0 +1,58 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-image-installer-analytics
+  namespace: contrail-system
+  labels:
+    app: contrail-image-download-analytics
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-image-download-analytics
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/infra"
+                operator: Exists
+      hostNetwork: true
+      initContainers:
+      - name: contrail-download-analytics-api-image
+        image: "{{ contrail_registry }}/contrail-analytics-api:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-analytics-collector-image
+        image: "{{ contrail_registry }}/contrail-analytics-collector:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-analytics-query-engine-image
+        image: "{{ contrail_registry }}/contrail-analytics-query-engine:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-analytics-alarm-gen-image
+        image: "{{ contrail_registry }}/contrail-analytics-alarm-gen:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-analytics-snmp-collector-image
+        image: "{{ contrail_registry }}/contrail-analytics-snmp-collector:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-analytics-topology-image
+        image: "{{ contrail_registry }}/contrail-analytics-snmp-topology:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      containers:
+      - name: contrail-download-image-analytics
+        image: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["tailf","/dev/null"]
+        securityContext:
+          privileged: true
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}

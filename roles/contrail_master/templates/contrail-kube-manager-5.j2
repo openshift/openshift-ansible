@@ -24,46 +24,23 @@ spec:
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
-      - name: kubernetes-entrypoint-init
-        image: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: true
-        command:
-        - kubernetes-entrypoint
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        #- name: INTERFACE_NAME
-        #  value: eth0
-        - name: DEPENDENCY_SERVICE
-        - name: DEPENDENCY_JOBS
-        - name: DEPENDENCY_DAEMONSET
-          value: contrail-agent
-        - name: DEPENDENCY_CONTAINER
-        - name: COMMAND
-          value: echo done
-        volumeMounts:
-        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-          name: pod-secret
       - name: contrail-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
+{% if os_firewall_use_firewalld is defined and os_firewall_use_firewalld.lower() == 'true' %}
+        - name: CONFIGURE_FIREWALLD
+          value: "true"
+        - name: FIREWALL_ZONE
+          value: "{{firewall_zone}}"
+{% else %}
         - name: CONFIGURE_IPTABLES
           value: "true"
         - name: IPTABLES_CHAIN
           value: "OS_FIREWALL_ALLOW"
+{% endif %}
         - name: NODE_TYPE
           value: "kubernetes"
         - name: CONTRAIL_STATUS_IMAGE

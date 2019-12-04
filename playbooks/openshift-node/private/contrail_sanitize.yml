@@ -1,28 +1,12 @@
 ---
-- name: Opening port 53
-  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
-  tasks:
-    - name: open udp port 53
-      command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 53
-      when:
-        - openshift_use_contrail | default(false) | bool
-        - not os_firewall_use_firewalld | default(False) | bool
-
-- name: Contrail wait for come up
+- name: Contrail wait for all pods
   hosts: oo_first_master
   tasks:
-    - name: Waiting for pods to come up
-      wait_for: timeout=360
-      delegate_to: localhost
-      when: openshift_use_contrail | default(false) | bool
-
-- name: Contrail wait for pod check script
-  hosts: oo_first_master
-  tasks:
-    - name: Check Pods script to Master Node
+    - name: Run wait_for_pod.sh in oo_first_master
       command: /tmp/wait_for_pod.sh
+      register: command_result
+      failed_when: "'ERROR' in command_result.stdout"
       when: openshift_use_contrail | default(false) | bool
-      ignore_errors: True
 
 - name: Contrail Restarting dnsmasq service
   hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
@@ -36,34 +20,11 @@
         - openshift_use_contrail | default(false) | bool
         - not nested_mode_contrail | default(false) | bool
 
-- name: Contrail Sanitize schema transformer
-  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
-  roles:
-    - role: contrail_common
-      when:
-        - openshift_use_contrail | default(false) | bool
-        - not nested_mode_contrail | default(false) | bool
-    - role: contrail_st
-      when:
-        - openshift_use_contrail | default(false) | bool
-        - not nested_mode_contrail | default(false) | bool
-
-- name: Contrail Restarting dnsmasq service
+- name: Contrail opening port 53
   hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
   tasks:
-    - name: Restart dnsmasq
-      service: name="dnsmasq" state=restarted enabled=yes
+    - name: Open udp port 53
+      command: iptables -I OS_FIREWALL_ALLOW 1 -j ACCEPT -p udp --dport 53
       when:
         - openshift_use_contrail | default(false) | bool
-        - not nested_mode_contrail | default(false) | bool
-
-- name: Contrail wait for pod check script
-  hosts: oo_first_master
-  tasks:
-    - name: Check Pods script to Master Node
-      command: /tmp/wait_for_pod.sh
-      register: command_result
-      failed_when: "'ERROR' in command_result.stdout"
-      when:
-        - openshift_use_contrail | default(false) | bool
-        - not nested_mode_contrail | default(false) | bool
+        - not os_firewall_use_firewalld | default(False) | bool
