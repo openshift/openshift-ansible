@@ -23,7 +23,7 @@ tracks our current work **in development**.
 
 Requirements: (localhost)
 
-- Ansible >= 2.8.2
+- Ansible >= 2.9.1
 - OpenShift Client (oc)
 
 # Quickstart
