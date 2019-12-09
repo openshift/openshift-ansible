@@ -52,9 +52,9 @@ parameters:
   value: "rhdm-optaweb-employee-rostering-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.5.0".
+  description: A named pointer to an image in an image stream. Default is "7.5.1".
   name: IMAGE_STREAM_TAG
-  value: "7.5.0"
+  value: "7.5.1"
   required: true
 - displayName: Optaweb Employee Rostering Persistence Datasource
   description: Optaweb employee rostering persistence datasource (Sets the org.optaweb.employeerostering.persistence.datasource system property)
