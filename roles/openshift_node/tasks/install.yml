@@ -9,20 +9,6 @@
   register: result
   until: result is succeeded
 
-# FIXME: Creation of these directories should not be required for crio 1.16+
-- name: Create CNI dirs for crio
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
-  loop:
-  - /var/lib/cni/bin
-  - /etc/kubernetes/cni/net.d/
-  - /opt/cni/bin/
-  - /usr/share/containers/oci/hooks.d
-
 - name: Get cluster version
   command: >
     oc get clusterversion
