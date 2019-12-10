@@ -27,9 +27,9 @@
     files:
     - "{{ mktemp.stdout }}/heketi-service.yml"
 
-- name: Copy heketi template
-  copy:
-    src: "heketi-template.yml"
+- name: Generate heketi template
+  template:
+    src: "heketi-template.yml.j2"
     dest: "{{ mktemp.stdout }}/heketi-template.yml"
 
 - name: Create heketi template
