@@ -34,7 +34,7 @@
 
   - name: Find all hostnames for bootstrapping
     set_fact:
-      l_nodes_to_join: "{{ groups['oo_nodes_to_config'] | default([]) | map('extract', hostvars) | map(attribute='l_kubelet_node_name') | list }}"
+      l_nodes_to_join: "{{ groups['oo_nodes_to_config'] | default([]) | map('extract', hostvars) | map(attribute='l_kubelet_node_name') | map('default', None) | list }}"
 
   - name: Dump the bootstrap hostnames
     debug:

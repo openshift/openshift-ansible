@@ -1,0 +1,8 @@
+- name: Check latest available OpenShift RPM version
+  repoquery:
+    name: "atomic-openshift-3.11*"
+    ignore_excluders: true
+  register: repoquery_out
+- name: debug 
+  debug: 
+    msg: "{{ repoquery_out }}"
