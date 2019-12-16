@@ -94,6 +94,23 @@ It has all the same requirements and behaviors as `config.yml`.
 If the variable `openshift_storage_glusterfs_wipe` is set as True,
 it clears the backend data as well.
 
+## Playbook: upgrade.yml
+
+This playbook is intended to upgrade the GlusterFS related resources on an
+existing OpenShift cluster. This is applicable only for GlusterFS resources
+that were deployed using the config.yml playbook in the converged mode.
+
+This playbook is tech-preview and that needs to be acknowledged using the
+variable `openshift_storage_gluster_update_techpreview=true`
+
+The same inventory from install should be reused after updating the following
+variables to the desired version.
+`openshift_storage_glusterfs_image`
+`openshift_storage_glusterfs_heketi_image`
+`openshift_storage_glusterfs_block_image`
+`openshift_storage_glusterfs_fuse_version`
+
+
 ## Role: openshift_storage_glusterfs
 
 The bulk of the work is done by the `openshift_storage_glusterfs` role. This
