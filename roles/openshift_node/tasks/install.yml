@@ -70,3 +70,12 @@
   systemd:
     name: "crio"
     enabled: yes
+
+# persistent storage in journal is needed for MachineConfig to work
+- name: Enable persistent storage on journal
+  ini_file:
+    dest: "/etc/systemd/journald.conf"
+    section: Journal
+    option: Storage
+    value: "persistent"
+    no_extra_spaces: yes
