@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.157
+Version:        3.11.158
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,18 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Dec 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.158-1
+- Fix for bug 1755120, when key is undefined ansible sets unicode
+  (rhowe@redhat.com)
+- gluster: add env variable to run Heketis LVM commands through a wrapper
+  (ndevos@redhat.com)
+- [KIECLOUD-336] - Update RHPAM and RHDM templates and imagestreams on
+  OpenShift Service Catalog for release 7.5.1 (fspolti@redhat.com)
+- [GlusterFS]: Doc updates (dpivonka@redhat.com)
+- Bug 1753593 - [Reg] openshift_logging_elasticsearch_kibana_index_mode cannot
+  be changed by inventory variable (nhosoi@redhat.com)
+- Set arp_announce=2 (farandac@redhat.com)
+
 * Mon Dec 02 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.157-1
 - Insered a missing "endif" (martin@dermac.de)
 
