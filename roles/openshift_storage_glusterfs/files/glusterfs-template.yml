@@ -33,6 +33,7 @@ objects:
       spec:
         nodeSelector: "${{NODE_LABELS}}"
         hostNetwork: true
+        hostPID: true
         containers:
         - name: glusterfs
           image: ${IMAGE_NAME}
@@ -84,6 +85,8 @@ objects:
             readOnly: true
           - name: glusterfs-target
             mountPath: "/etc/target"
+          - name: host-rootfs
+            mountPath: "/rootfs"
           securityContext:
             capabilities: {}
             privileged: true
@@ -152,6 +155,9 @@ objects:
         - name: glusterfs-target
           hostPath:
             path: "/etc/target"
+        - name: host-rootfs
+          hostPath:
+            path: "/"
         restartPolicy: Always
         terminationGracePeriodSeconds: 30
         dnsPolicy: ClusterFirst
