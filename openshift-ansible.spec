@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.158
+Version:        3.11.159
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Dec 18 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.159-1
+- 
+
 * Tue Dec 17 2019 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.158-1
 - Fix for bug 1755120, when key is undefined ansible sets unicode
   (rhowe@redhat.com)
