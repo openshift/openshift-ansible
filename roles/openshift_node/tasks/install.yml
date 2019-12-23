@@ -40,13 +40,14 @@
   - oc_get.stdout is defined
   - oc_get.stdout != ''
 
-- name: Set fact kubernetes_major_version
+- name: Set fact l_kubernetes_version
   set_fact:
-    kubernetes_major_version: "{{ (oc_get.stdout | from_json).serverVersion.major }}"
+    l_kubernetes_version: "{{ (oc_get.stdout | from_json).serverVersion.major ~ '.' ~  (oc_get.stdout | from_json).serverVersion.minor | regex_search('^\\d+') }}"
 
-- name: Set fact kubernetes_minor_version
+- name: Override kubernetes version when running CI
   set_fact:
-    kubernetes_minor_version: "{{ (oc_get.stdout | from_json).serverVersion.minor | regex_search('^\\d+') }}"
+    l_kubernetes_version: "*"
+  when: ci_version_override | default(false) | bool == true
 
 - block:
   - name: Install openshift packages
