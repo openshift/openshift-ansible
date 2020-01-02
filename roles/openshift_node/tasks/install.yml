@@ -44,11 +44,6 @@
   set_fact:
     l_kubernetes_version: "{{ (oc_get.stdout | from_json).serverVersion.major ~ '.' ~  (oc_get.stdout | from_json).serverVersion.minor | regex_search('^\\d+') }}"
 
-- name: Override kubernetes version when running CI
-  set_fact:
-    l_kubernetes_version: "*"
-  when: ci_version_override | default(false) | bool == true
-
 - block:
   - name: Install openshift packages
     package:
