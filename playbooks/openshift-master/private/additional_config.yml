@@ -22,6 +22,12 @@
   roles:
   # TODO: this is currently required in order to schedule pods onto the masters, but
   #   should be moved into components once nodes are using dynamic config
+  - role: cockpit
+    when:
+    - not openshift_is_atomic | bool
+    - openshift_deployment_type == 'openshift-enterprise'
+    - osm_use_cockpit is undefined or osm_use_cockpit | bool
+    - (openshift_deployment_subtype | default('')) != 'registry'
   - role: openshift_sdn
     when: openshift_use_openshift_sdn | default(True) | bool
   - role: openshift_project_request_template
@@ -33,12 +39,6 @@
     when: openshift_cluster_autoscaler_deploy | default(false) | bool
   - role: openshift_manageiq
     when: openshift_use_manageiq | default(true) | bool
-  - role: cockpit
-    when:
-    - not openshift_is_atomic | bool
-    - openshift_deployment_type == 'openshift-enterprise'
-    - osm_use_cockpit is undefined or osm_use_cockpit | bool
-    - (openshift_deployment_subtype | default('')) != 'registry'
   - role: flannel_register
     when: openshift_use_flannel | default(false) | bool
 
