@@ -33,7 +33,7 @@ objects:
       spec:
         nodeSelector: "${{NODE_LABELS}}"
         hostNetwork: true
-        hostPID: true
+        hostPID: false
         containers:
         - name: glusterfs
           image: ${IMAGE_NAME}
