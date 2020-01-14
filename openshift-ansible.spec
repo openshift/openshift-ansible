@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.162
+Version:        3.11.163
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jan 14 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.163-1
+- 
+
 * Mon Jan 13 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.162-1
 - [Bug 1744900] Bump up etcd release to 3.2.26 (skolicha@redhat.com)
 - gluster: do not enable hostPID for glusterfs-server pods (ndevos@redhat.com)
