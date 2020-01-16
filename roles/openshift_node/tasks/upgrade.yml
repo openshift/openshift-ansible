@@ -28,22 +28,8 @@
 # Upgrade Node Packages
 - import_tasks: install.yml
 
-- name: Reboot the host and wait for it to come back
-  reboot:
-  #  reboot_timeout: 600  # default, 10 minutes
-
-- name: Wait for nodes to report ready
-  command: >
-    oc get node {{ ansible_nodename | lower }}
-    --config={{ openshift_node_kubeconfig_path }}
-    --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
-  delegate_to: localhost
-  run_once: true
-  register: oc_get
-  until:
-  - oc_get.stdout == "True"
-  retries: 36
-  delay: 5
+# Apply machine config
+- import_tasks: apply_machine_config.yml
 
 # Run the openshift_node_pre_uncordon_hook if defined
 - block:
