@@ -4,11 +4,11 @@
     state: directory
   register: temp_dir
 
-- name: Get worker machine config name
+- name: Get worker machine current config name
   command: >
-    oc get machineconfigpool worker
+    oc get node {{ ansible_nodename | lower }}
     --config={{ openshift_node_kubeconfig_path }}
-    --output=jsonpath='{.status.configuration.name}'
+    --output=jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/desiredConfig}'
   delegate_to: localhost
   register: oc_get
   until:
@@ -57,12 +57,22 @@
   set_fact:
     l_mcd_image: "{{ oc_get.stdout }}"
 
-- name: Apply machine config
-  command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
-  vars:
-    podman_flags: "--privileged --rm --entrypoint=/usr/bin/machine-config-daemon -ti {{ l_mcd_image }}"
-    podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
-    mcd_command: "start --node-name {{ ansible_nodename | lower }} --once-from {{ temp_dir.path }}/worker_ignition_config.json --skip-reboot"
+- import_tasks: proxy.yml
+
+- block:
+  - name: Pull MCD image
+    command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile /var/lib/kubelet/config.json {{ l_mcd_image }}"
+
+  - name: Apply machine config
+    command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
+    vars:
+      podman_flags: "--privileged --rm --entrypoint=/usr/bin/machine-config-daemon -ti {{ l_mcd_image }}"
+      podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
+      mcd_command: "start --node-name {{ ansible_nodename | lower }} --once-from {{ temp_dir.path }}/worker_ignition_config.json --skip-reboot"
+  environment:
+    http_proxy: "{{ http_proxy | default('')}}"
+    https_proxy: "{{https_proxy | default('')}}"
+    no_proxy: "{{ no_proxy | default('')}}"
 
 - name: Remove temp directory
   file:
