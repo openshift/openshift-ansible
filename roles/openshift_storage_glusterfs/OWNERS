@@ -1,8 +1,10 @@
 # approval == this is a good idea /approve
 approvers:
   - jarrpa
-  - abutcher
+  - raghavendra-talur
+  - Daniel-Pivonka
 # review == this code is good /lgtm
 reviewers:
   - jarrpa
-  - abutcher
+  - raghavendra-talur
+  - Daniel-Pivonka
