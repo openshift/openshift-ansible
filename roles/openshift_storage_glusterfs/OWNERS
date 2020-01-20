@@ -3,8 +3,10 @@ approvers:
   - jarrpa
   - raghavendra-talur
   - Daniel-Pivonka
+  - nixpanic
 # review == this code is good /lgtm
 reviewers:
   - jarrpa
   - raghavendra-talur
   - Daniel-Pivonka
+  - nixpanic
