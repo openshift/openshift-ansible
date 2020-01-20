@@ -17,11 +17,11 @@
                 "annotations": {
                     "openshift.io/display-name": "JBoss EAP continuous delivery",
                     "openshift.io/provider-display-name": "Red Hat, Inc.",
-                    "version": "17.0"
+                    "version": "18.0"
                 }
             },
             "labels": {
-                "xpaas": "17.0"
+                "xpaas": "18.0"
             },
             "spec": {
                 "tags": [
@@ -31,7 +31,7 @@
                             "description": "The latest available build of JBoss EAP continuous delivery Tech Preview.",
                             "iconClass": "icon-eap",
                             "tags": "builder,eap,javaee,java,jboss,hidden",
-                            "supports": "eap:7.3,javaee:8,java:8",
+                            "supports": "eap:7.3,javaee:8,java:11",
                             "sampleRepo": "https://github.com/jbossas/eap-quickstarts/openshift",
                             "sampleContextDir": "kitchensink",
                             "sampleRef": "openshift",
@@ -47,12 +47,55 @@
                         }
                     },
                     {
+                        "name": "18",
+                        "annotations": {
+                            "description": "JBoss EAP continuous delivery Tech Preview version 18.",
+                            "iconClass": "icon-eap",
+                            "tags": "builder,eap,javaee,java,jboss,hidden",
+                            "supports": "eap:7.3,javaee:8,java:11",
+                            "sampleRepo": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
+                            "sampleContextDir": "kitchensink",
+                            "sampleRef": "openshift",
+                            "version": "18",
+                            "openshift.io/display-name": "JBoss EAP continuous delivery 18 (Tech Preview)"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "18.0"
+
+                        }
+                    },
+                    {
+                        "name": "18.0",
+                        "annotations": {
+                            "description": "JBoss EAP continuous delivery 18 Tech Preview S2I Image",
+                            "iconClass": "icon-eap",
+                            "tags": "builder,eap,javaee,java,jboss,hidden",
+                            "supports": "eap:7.3,javaee:8,java:11",
+                            "sampleRepo": "https://github.com/jbossas/eap-quickstarts/openshift",
+                            "sampleContextDir": "kitchensink",
+                            "sampleRef": "openshift",
+                            "version": "18.0",
+                            "openshift.io/display-name": "JBoss EAP continuous delivery 18 (Tech Preview)"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-eap-7-tech-preview/eap-cd-openshift-rhel8:18.0"
+                        }
+                    },
+                    {
                         "name": "17",
                         "annotations": {
                             "description": "JBoss EAP continuous delivery Tech Preview version 17.",
                             "iconClass": "icon-eap",
                             "tags": "builder,eap,javaee,java,jboss,hidden",
-                            "supports": "eap:7.3,javaee:8,java:8",
+                            "supports": "eap:7.3,javaee:8,java:11",
                             "sampleRepo": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
                             "sampleContextDir": "kitchensink",
                             "sampleRef": "openshift",
@@ -74,7 +117,7 @@
                             "description": "JBoss EAP continuous delivery 17 Tech Preview S2I Image",
                             "iconClass": "icon-eap",
                             "tags": "builder,eap,javaee,java,jboss,hidden",
-                            "supports": "eap:7.3,javaee:8,java:8",
+                            "supports": "eap:7.3,javaee:8,java:11",
                             "sampleRepo": "https://github.com/jbossas/eap-quickstarts/openshift",
                             "sampleContextDir": "kitchensink",
                             "sampleRef": "openshift",
@@ -302,6 +345,81 @@
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-eap-7-tech-preview/eap-cd-openshift:16.0"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "eap-cd-runtime-openshift",
+                "annotations": {
+                    "openshift.io/display-name": "JBoss EAP continuous delivery runtime image",
+                    "openshift.io/provider-display-name": "Red Hat, Inc.",
+                    "version": "18.0"
+                }
+            },
+            "labels": {
+                "xpaas": "18.0"
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "latest",
+                        "annotations": {
+                            "description": "The latest available build of JBoss EAP continuous delivery runtime image [Tech Preview]",
+                            "iconClass": "icon-eap",
+                            "tags": "eap,javaee,java,jboss,hidden",
+                            "supports": "eap:7.3,javaee:8,java:11",
+                            "version": "latest",
+                            "openshift.io/display-name": "JBoss EAP continuous delivery (Tech Preview)"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-eap-7-tech-preview/eap-cd-runtime-openshift-rhel8:latest"
+                        }
+                    },
+                    {
+                        "name": "18",
+                        "annotations": {
+                            "description": "JBoss EAP continuous delivery runtime image version 18 [Tech Preview]",
+                            "iconClass": "icon-eap",
+                            "tags": "eap,javaee,java,jboss,hidden",
+                            "supports": "eap:7.3,javaee:8,java:11",
+                            "version": "18",
+                            "openshift.io/display-name": "JBoss EAP continuous delivery 18 (Tech Preview)"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "18.0"
+
+                        }
+                    },
+                    {
+                        "name": "18.0",
+                        "annotations": {
+                            "description": "JBoss EAP continuous delivery 18 runtime image [Tech Preview]",
+                            "iconClass": "icon-eap",
+                            "tags": "eap,javaee,java,jboss,hidden",
+                            "supports": "eap:7.3,javaee:8,java:11",
+
+                            "version": "18.0",
+                            "openshift.io/display-name": "JBoss EAP continuous delivery 18 (Tech Preview)"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-eap-7-tech-preview/eap-cd-runtime-openshift-rhel8:18.0"
                         }
                     }
                 ]
