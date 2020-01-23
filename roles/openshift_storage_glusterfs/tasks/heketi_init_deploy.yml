@@ -1,12 +1,10 @@
 ---
-- name: Copy initial heketi resource files
-  copy:
-    src: "{{ item }}"
-    dest: "{{ mktemp.stdout }}/{{ item }}"
-  with_items:
-  - "deploy-heketi-template.yml"
+- name: Generate initial heketi resource files
+  template:
+    src: "deploy-heketi-template.yml.j2"
+    dest: "{{ mktemp.stdout }}/deploy-heketi-template.yml"
 
-- name: Create deploy-heketi template
+- name: deploy-heketi template
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: template
@@ -28,6 +26,7 @@
       HEKETI_EXECUTOR: "{{ glusterfs_heketi_executor }}"
       HEKETI_FSTAB: "{{ glusterfs_heketi_fstab }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
+      HEKETI_LVMWRAPPER: "{{ glusterfs_heketi_lvmwrapper }}"
 
 - name: Wait for deploy-heketi pod
   oc_obj:
