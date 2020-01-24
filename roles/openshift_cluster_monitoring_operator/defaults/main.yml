@@ -56,6 +56,9 @@ openshift_cluster_monitoring_operator_cluster_id: "{{ openshift_clusterid | defa
 
 openshift_cluster_monitoring_operator_node_selector: "{{ openshift_hosted_infra_selector | default('node-role.kubernetes.io/infra=true') | map_from_pairs }}"
 
+openshift_cluster_monitoring_operator_etcd_enabled: false
+openshift_cluster_monitoring_operator_etcd_hosts: []
+
 openshift_cluster_monitoring_operator_alertmanager_config: |+
   global:
     resolve_timeout: 5m
