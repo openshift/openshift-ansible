@@ -21,7 +21,7 @@
 
   tasks:
     - name: Erase vms
-      ovirt_vms:
+      ovirt_vm:
         auth: "{{ ovirt_auth }}"
         state: absent
         name: "{{ item.name }}"
