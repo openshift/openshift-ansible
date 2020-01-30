@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.165
+Version:        3.11.166
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,20 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jan 30 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.166-1
+- Fix to rename ovirt_vms to ovirt_vm (bward@redhat.com)
+- Update owners for monitoring components (spasquie@redhat.com)
+- Support monitoring of etcd with cluster monitoring operator
+  (spasquie@redhat.com)
+- metrics_server: add nodes resource to aggregated-metrics-reader
+  (sergiusz.urbaniak@gmail.com)
+- roles/openshift_storage_glusterfs/OWNERS add nixpanic (sdodson@redhat.com)
+- update roles/openshift_storage_glusterfs/OWNERS (sdodson@redhat.com)
+- gluster: set HEKETI_LVMWRAPPER during the initial heketi deployment
+  (ndevos@redhat.com)
+- gluster: Heketi template does not contain LVM-wrapper on containerized
+  deployment (ndevos@redhat.com)
+
 * Thu Jan 16 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.165-1
 - 
 
