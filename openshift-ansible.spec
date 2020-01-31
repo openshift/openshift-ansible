@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.166
+Version:        3.11.167
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Jan 31 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.167-1
+- 
+
 * Thu Jan 30 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.166-1
 - Fix to rename ovirt_vms to ovirt_vm (bward@redhat.com)
 - Update owners for monitoring components (spasquie@redhat.com)
