@@ -7,7 +7,7 @@
 - name: Get worker machine current config name
   command: >
     oc get node {{ ansible_nodename | lower }}
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/desiredConfig}'
   delegate_to: localhost
   register: oc_get
@@ -24,7 +24,7 @@
 - name: Get worker ignition config
   command: >
     oc get machineconfig {{ l_worker_machine_config_name }}
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=json
   delegate_to: localhost
   register: oc_get
@@ -42,7 +42,7 @@
 - name: Get machine-config-operator image
   command: >
     oc get daemonset machine-config-daemon
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --namespace=openshift-machine-config-operator
     --output=jsonpath='{.spec.template.spec.containers[?(@.name=="machine-config-daemon")].image}'
   delegate_to: localhost
@@ -86,7 +86,7 @@
 - name: Wait for nodes to report ready
   command: >
     oc get node {{ ansible_nodename | lower }}
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
   delegate_to: localhost
   run_once: true

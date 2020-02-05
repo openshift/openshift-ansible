@@ -48,9 +48,8 @@
     - new_machine.resources is defined
     - new_machine.resources | length > 0
     - new_machine.resources[0].status is defined
-    - new_machine.resources[0].status.providerStatus is defined
-    - new_machine.resources[0].status.providerStatus.instanceState is defined
-    - new_machine.resources[0].status.providerStatus.instanceState == 'running'
+    - new_machine.resources[0].status.phase is defined
+    - new_machine.resources[0].status.phase == 'Provisioned'
     failed_when:
     - new_machine.resources is defined
     - new_machine.resources | length > 0
