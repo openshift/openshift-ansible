@@ -87,10 +87,8 @@ objects:
             value: "true"
           - name: HEKETI_DEBUG_UMOUNT_FAILURES
             value: "true"
-{% if glusterfs_is_native | bool %}
-          - name: HEKETI_LVMWRAPPER
-            value: ${HEKETI_LVMWRAPPER}
-{% endif %}
+          - name: HEKETI_LVM_WRAPPER
+            value: ${HEKETI_LVM_WRAPPER}
           ports:
           - containerPort: 8080
           volumeMounts:
@@ -147,9 +145,7 @@ parameters:
   displayName: GlusterFS cluster name
   description: A unique name to identify this heketi service, useful for running multiple heketi instances
   value: glusterfs
-{% if glusterfs_is_native | bool %}
-- name: HEKETI_LVMWRAPPER
+- name: HEKETI_LVM_WRAPPER
   displayName: Wrapper for executing LVM commands
   description: Heketi can use a wrapper to execute LVM commands, i.e. run commands in the host namespace instead of in the Gluster container.
   value: "/usr/sbin/exec-on-host"
-{% endif %}

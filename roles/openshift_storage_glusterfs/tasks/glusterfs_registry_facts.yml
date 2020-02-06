@@ -46,6 +46,6 @@
     glusterfs_heketi_ssh_sudo: "{{ openshift_storage_glusterfs_registry_heketi_ssh_sudo | bool }}"
     glusterfs_heketi_ssh_keyfile: "{{ openshift_storage_glusterfs_registry_heketi_ssh_keyfile }}"
     glusterfs_heketi_fstab: "{{ openshift_storage_glusterfs_registry_heketi_fstab }}"
-    glusterfs_heketi_lvmwrapper: "{{ openshift_storage_glusterfs_registry_heketi_lvmwrapper }}"
+    glusterfs_heketi_lvm_wrapper: "{{ openshift_storage_glusterfs_registry_heketi_lvm_wrapper }}"
     glusterfs_nodes: "{% if groups.glusterfs_registry is defined and groups['glusterfs_registry'] | length > 0 %}{% set nodes = groups.glusterfs_registry %}{% elif 'groups.glusterfs' is defined and groups['glusterfs'] | length > 0 %}{% set nodes = groups.glusterfs %}{% else %}{% set nodes = '[]' %}{% endif %}{{ nodes }}"
     glusterfs_check_brick_size_health: "{{ openshift_storage_glusterfs_registry_check_brick_size_health | bool }}"
