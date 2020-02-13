@@ -28,8 +28,8 @@
     - "{{ mktemp.stdout }}/heketi-service.yml"
 
 - name: Generate heketi template
-  template:
-    src: "heketi-template.yml.j2"
+  copy:
+    src: "heketi-template.yml"
     dest: "{{ mktemp.stdout }}/heketi-template.yml"
 
 - name: Create heketi template
@@ -54,6 +54,7 @@
       HEKETI_EXECUTOR: "{{ glusterfs_heketi_executor }}"
       HEKETI_FSTAB: "{{ glusterfs_heketi_fstab }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
+      HEKETI_LVM_WRAPPER: "{% if glusterfs_is_native | bool %}{{ glusterfs_heketi_lvm_wrapper }}{% endif %}"
 
 - name: Wait for heketi pod
   oc_obj:

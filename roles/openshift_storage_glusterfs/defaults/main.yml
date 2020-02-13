@@ -64,7 +64,7 @@ openshift_storage_glusterfs_heketi_ssh_user: 'root'
 openshift_storage_glusterfs_heketi_ssh_sudo: False
 openshift_storage_glusterfs_heketi_ssh_keyfile: "{{ omit }}"
 openshift_storage_glusterfs_heketi_fstab: "{{ '/var/lib/heketi/fstab' | quote if openshift_storage_glusterfs_heketi_executor == 'kubernetes' else '/etc/fstab' | quote }}"
-openshift_storage_glusterfs_heketi_lvmwrapper: "/usr/sbin/exec-on-host"
+openshift_storage_glusterfs_heketi_lvm_wrapper: "/usr/sbin/exec-on-host"
 openshift_storage_glusterfs_check_brick_size_health: True
 
 openshift_storage_glusterfs_registry_timeout: "{{ openshift_storage_glusterfs_timeout }}"
@@ -112,7 +112,7 @@ openshift_storage_glusterfs_registry_heketi_ssh_user: "{{ openshift_storage_glus
 openshift_storage_glusterfs_registry_heketi_ssh_sudo: "{{ openshift_storage_glusterfs_heketi_ssh_sudo }}"
 openshift_storage_glusterfs_registry_heketi_ssh_keyfile: "{{ openshift_storage_glusterfs_heketi_ssh_keyfile | default(omit) }}"
 openshift_storage_glusterfs_registry_heketi_fstab: "{{ '/var/lib/heketi/fstab' | quote if openshift_storage_glusterfs_registry_heketi_executor == 'kubernetes' else '/etc/fstab' | quote }}"
-openshift_storage_glusterfs_registry_heketi_lvmwrapper: "/usr/sbin/exec-on-host"
+openshift_storage_glusterfs_registry_heketi_lvm_wrapper: "/usr/sbin/exec-on-host"
 openshift_storage_glusterfs_registry_check_brick_size_health: "{{ openshift_storage_glusterfs_check_brick_size_health }}"
 
 r_openshift_storage_glusterfs_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
