@@ -43,20 +43,6 @@ data:
         {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
-{% if openshift_cluster_monitoring_operator_etcd_enabled | bool %}
-    etcd:
-      targets:
-{% if openshift_cluster_monitoring_operator_etcd_hosts | default([], True) | length > 0 %}
-        ips:
-{% for host in openshift_cluster_monitoring_operator_etcd_hosts %}
-        - "{{ host }}"
-{% endfor %}
-{% else %}
-        selector:
-          openshift.io/component: etcd
-          openshift.io/control-plane: "true"
-{% endif %}
-{% endif %}
 {% if openshift_cluster_monitoring_operator_alertmanager_storage_enabled | bool %}
       volumeClaimTemplate:
         spec:
@@ -100,4 +86,18 @@ data:
 {% endif %}
 {% if 'no_proxy' in openshift.common %}
       noProxy: {{ openshift.common.no_proxy }}
+{% endif %}
+{% if openshift_cluster_monitoring_operator_etcd_enabled | bool %}
+    etcd:
+      targets:
+{% if openshift_cluster_monitoring_operator_etcd_hosts | default([], True) | length > 0 %}
+        ips:
+{% for host in openshift_cluster_monitoring_operator_etcd_hosts %}
+        - "{{ host }}"
+{% endfor %}
+{% else %}
+        selector:
+          openshift.io/component: etcd
+          openshift.io/control-plane: "true"
+{% endif %}
 {% endif %}
