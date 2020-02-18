@@ -30,7 +30,7 @@
     --to={{ _logging_handler_tempdir.stdout }}
 
 ### Check for cluster state before making changes -- if its red, yellow or missing nodes then we don't want to continue
-- name: "Checking current health for {{ _es_node }} cluster"
+- name: "Checking current health for cluster"
   command: >
     curl -s -k
     --cert {{ _logging_handler_tempdir.stdout }}/admin-cert
