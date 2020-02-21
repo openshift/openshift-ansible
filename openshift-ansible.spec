@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.170
+Version:        3.11.171
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,17 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Feb 21 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.171-1
+- roles/openshift_cluster_monitoring_operator: configure retention
+  (sergiusz.urbaniak@gmail.com)
+- Fix cluster monitoring operator config map with etcd (spasquie@redhat.com)
+- gluster: fix how lvm wrapper is passed to heketi templates
+  (jmulligan@redhat.com)
+- Remove variable from logging task name (rteague@redhat.com)
+- Use Ansible 2.9.4 for testing (rteague@redhat.com)
+- [KIECLOUD-317] - Update RHPAM and RHDM templates and imagestreams on
+  OpenShift Service Catalog for release 7.6.0 (fspolti@redhat.com)
+
 * Mon Feb 03 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.170-1
 - 
 
