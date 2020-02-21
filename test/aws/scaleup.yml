@@ -2,6 +2,9 @@
 - name: create new nodes
   hosts: localhost
   connection: local
+  vars:
+    new_workers_list: []
+
   tasks:
   - import_tasks: ssh_bastion.yml
 
