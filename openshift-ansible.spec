@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.171
+Version:        3.11.172
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Feb 22 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.172-1
+- 
+
 * Fri Feb 21 2020 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.171-1
 - roles/openshift_cluster_monitoring_operator: configure retention
   (sergiusz.urbaniak@gmail.com)
