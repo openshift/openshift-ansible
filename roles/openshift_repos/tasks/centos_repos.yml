@@ -17,3 +17,9 @@
     src: "CentOS-OpenShift-Origin39.repo.j2"
     dest: "/etc/yum.repos.d/CentOS-OpenShift-Origin39.repo"
   notify: refresh cache
+
+- name: Configure correct origin release repository for GlusterFS
+  template:
+    src: "CentOS-OpenShift-Origin40.repo.j2"
+    dest: "/etc/yum.repos.d/CentOS-OpenShift-Origin40.repo"
+  notify: refresh cache
