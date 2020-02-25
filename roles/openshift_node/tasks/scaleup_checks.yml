@@ -11,7 +11,7 @@
 - name: Get cluster nodes
   command: >
     oc get nodes
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=name
   register: oc_get
   until:

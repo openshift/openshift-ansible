@@ -12,7 +12,6 @@
         name: "{{ machineset_name }}"
         resourceVersion: ""
       spec:
-        replicas: 1
         selector:
           matchLabels:
             machine.openshift.io/cluster-api-machineset: "{{ machineset_name }}"
@@ -33,29 +32,51 @@
     definition: "{{ machineset | to_yaml }}"
 
 - block:
-  - name: Wait for machine to be created
-    k8s_facts:
-      api_version: machine.openshift.io/v1beta1
-      kubeconfig: "{{ kubeconfig_path }}"
-      namespace: openshift-machine-api
-      kind: Machine
-      label_selectors:
-      - "machine.openshift.io/cluster-api-machineset={{ machineset_name }}"
+  - name: Get machines in the machineset
+    command: >
+      oc get machine
+      --kubeconfig={{ kubeconfig_path }}
+      --namespace=openshift-machine-api
+      --selector='machine.openshift.io/cluster-api-machineset={{ machineset_name }}'
+      --output=json
+    register: oc_get_machine
+    changed_when: false
+
+  - name: Create list of machines
+    set_fact:
+      worker_machines: "{{ (oc_get_machine.stdout | from_json)['items'] | map(attribute='metadata.name') | list }}"
+
+  - name: Wait for machines to be provisioned
+    command: >
+      oc get machine {{ item }}
+      --kubeconfig={{ kubeconfig_path }}
+      --namespace=openshift-machine-api
+      --output=json
+    loop: "{{ worker_machines }}"
     register: new_machine
+    until:
+    - new_machine.stdout != ''
+    - (new_machine.stdout | from_json).status is defined
+    - (new_machine.stdout | from_json).status.phase == 'Provisioned'
     retries: 36
     delay: 5
-    until:
-    - new_machine.resources is defined
-    - new_machine.resources | length > 0
-    - new_machine.resources[0].status is defined
-    - new_machine.resources[0].status.providerStatus is defined
-    - new_machine.resources[0].status.providerStatus.instanceState is defined
-    - new_machine.resources[0].status.providerStatus.instanceState == 'running'
-    failed_when:
-    - new_machine.resources is defined
-    - new_machine.resources | length > 0
-    - new_machine.resources[0].status is defined
-    - new_machine.resources[0].status.phase == 'Failed'
+    changed_when: false
+
+  - name: Get machines in the machineset after provisioning
+    command: >
+      oc get machine
+      --kubeconfig={{ kubeconfig_path }}
+      --namespace=openshift-machine-api
+      --selector='machine.openshift.io/cluster-api-machineset={{ machineset_name }}'
+      --output=json
+    register: oc_get_machine
+    changed_when: false
+
+  - name: Add hostname to new_workers_list
+    set_fact:
+      new_workers_list: "{{ new_workers_list + [ item.status.addresses | selectattr('type', 'match', '^InternalDNS$') | map(attribute='address') | first ] }}"
+    loop: "{{ (oc_get_machine.stdout | from_json)['items'] }}"
+
   rescue:
   - name: Machine creation failed
     fail:
@@ -63,7 +84,8 @@
 
 - name: Add machine to the inventory
   add_host:
-    name: "{{ new_machine.resources[0].status.addresses | selectattr('type', 'match', '^InternalIP$') | map(attribute='address') | first }}"
-    node_name: "{{ new_machine.resources[0].status.addresses | selectattr('type', 'match', '^InternalDNS$') | map(attribute='address') | first }}"
+    name: "{{ item }}"
+    node_name: "{{ item }}"
     groups: new_workers
     ansible_ssh_common_args: "-o ProxyCommand=\"ssh -o IdentityFile='{{ openshift_aws_scaleup_key_path | default('/opt/app-root/src/.ssh/id_rsa') }}' -o ConnectTimeout=30 -o ConnectionAttempts=100 -o StrictHostKeyChecking=no -W %h:%p -q core@{{ ssh_bastion }}\""
+  loop: "{{ new_workers_list }}"

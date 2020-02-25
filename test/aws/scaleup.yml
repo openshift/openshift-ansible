@@ -2,6 +2,9 @@
 - name: create new nodes
   hosts: localhost
   connection: local
+  vars:
+    new_workers_list: []
+
   tasks:
   - import_tasks: ssh_bastion.yml
 
@@ -87,13 +90,13 @@
   - name: Mark CoreOS nodes as unschedulable
     command: >
       oc adm cordon {{ item | lower }}
-      --config={{ kubeconfig_path }}
+      --kubeconfig={{ kubeconfig_path }}
     with_items: "{{ pre_scaleup_workers_name }}"
 
   - name: Drain CoreOS nodes
     command: >
       oc adm drain {{ item | lower }}
-      --config={{ kubeconfig_path }}
+      --kubeconfig={{ kubeconfig_path }}
       --force --delete-local-data --ignore-daemonsets
       --timeout=0s
     with_items: "{{ pre_scaleup_workers_name }}"
@@ -108,5 +111,21 @@
       state: absent
     with_items: "{{ pre_scaleup_machineset_names }}"
 
-  - name: Wait for worker configs to roll out
-    command: oc wait machineconfigpool/worker --for=condition=Updated --timeout=5m
+  - block:
+    - name: Wait for worker configs to roll out
+      command: >
+        oc wait machineconfigpool/worker
+        --kubeconfig={{ kubeconfig_path }}
+        --for=condition=Updated
+        --timeout=5m
+
+    rescue:
+    - name: DEBUG - Get worker machine config pool
+      command: >
+        oc get machineconfigpool/worker
+        --kubeconfig={{ kubeconfig_path }}
+        --output=json
+
+    - name: DEBUG - Worker config rollout failed
+      fail:
+        msg: "Worker config rollout failed"

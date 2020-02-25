@@ -2,7 +2,7 @@
 - name: Check for cluster http proxy
   command: >
     oc get proxies.config.openshift.io cluster
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.status.httpProxy}'
   register: oc_get_http_proxy
   delegate_to: localhost
@@ -15,7 +15,7 @@
 - name: Check for cluster https proxy
   command: >
     oc get proxies.config.openshift.io cluster
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.status.httpsProxy}'
   register: oc_get_https_proxy
   delegate_to: localhost
@@ -28,7 +28,7 @@
 - name: Check for cluster no proxy
   command: >
     oc get proxies.config.openshift.io cluster
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.status.noProxy}'
   register: oc_get_no_proxy
   delegate_to: localhost
@@ -41,7 +41,7 @@
 - name: Check for additional trust bundle
   command: >
     oc get configmap user-ca-bundle -n openshift-config
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.data.ca-bundle\.crt}'
   register: oc_get_additional_trust_bundle
   delegate_to: localhost
