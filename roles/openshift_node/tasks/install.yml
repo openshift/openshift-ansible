@@ -17,7 +17,6 @@
   delegate_to: localhost
   register: oc_get
   until:
-  - oc_get.stdout is defined
   - oc_get.stdout != ''
 
 - name: Set fact l_cluster_version
@@ -37,7 +36,6 @@
   delegate_to: localhost
   register: oc_get
   until:
-  - oc_get.stdout is defined
   - oc_get.stdout != ''
 
 - name: Set fact l_kubernetes_version
