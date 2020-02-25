@@ -623,7 +623,16 @@ an OpenShift Container Platform cluster
                 # Read in the nodes kubeconfig file and grab the good stuff
                 cfg = yaml.load(fp)
 
-            c = cfg['users'][0]['user'].get('client-certificate-data')
+            # A worker node node.kubeconfig is different than a masters
+            client_certificate_path = cfg['users'][0]['user'].get('client-certificate')
+            if client_certificate_path is not None:
+                base64decode = False
+                with io.open(client_certificate_path, 'rb') as fp:
+                    c = fp.read()
+            else:
+                base64decode = True
+                c = cfg['users'][0]['user'].get('client-certificate-data')
+
             if not c:
                 # This is not a node
                 raise IOError
@@ -631,7 +640,7 @@ an OpenShift Container Platform cluster
              cert_expiry_date,
              time_remaining,
              cert_serial,
-             issuer) = load_and_handle_cert(c, now, base64decode=True, ans_module=module)
+             issuer) = load_and_handle_cert(c, now, base64decode=base64decode, ans_module=module)
 
             expire_check_result = {
                 'cert_cn': cert_subject,
