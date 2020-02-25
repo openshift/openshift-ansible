@@ -12,7 +12,6 @@
   delegate_to: localhost
   register: oc_get
   until:
-  - oc_get.stdout is defined
   - oc_get.stdout != ''
   retries: 36
   delay: 5
@@ -29,7 +28,6 @@
   delegate_to: localhost
   register: oc_get
   until:
-  - oc_get.stdout is defined
   - oc_get.stdout != ''
   retries: 36
   delay: 5
@@ -48,7 +46,6 @@
   delegate_to: localhost
   register: oc_get
   until:
-  - oc_get.stdout is defined
   - oc_get.stdout != ''
   retries: 36
   delay: 5
@@ -62,6 +59,9 @@
 - block:
   - name: Pull MCD image
     command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile /var/lib/kubelet/config.json {{ l_mcd_image }}"
+    register: podman_pull
+    until:
+      podman_pull.stdout != ''
 
   - name: Apply machine config
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"

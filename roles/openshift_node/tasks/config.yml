@@ -112,7 +112,6 @@
   delegate_to: localhost
   register: oc_get
   until:
-  - oc_get.stdout is defined
   - oc_get.stdout != ''
   retries: 36
   delay: 5
@@ -126,6 +125,9 @@
 - block:
   - name: Pull release image
     command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ l_release_image }}"
+    register: podman_pull
+    until:
+      podman_pull.stdout != ''
 
   - name: Get machine controller daemon image from release image
     command: "podman run --rm {{ l_release_image }} image machine-config-operator"
@@ -138,6 +140,9 @@
 - block:
   - name: Pull MCD image
     command: "podman pull --tls-verify={{ openshift_node_tls_verify }} --authfile {{ temp_dir.path }}/pull-secret.json {{ release_image_mcd.stdout }}"
+    register: podman_pull
+    until:
+      podman_pull.stdout != ''
 
   - name: Apply ignition manifest
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
