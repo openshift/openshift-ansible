@@ -67,14 +67,14 @@ def recursive_search(search_list, field):
     return fields_found
 
 
-def find_playbooks():
+def find_playbooks(base_dir):
     ''' find Ansible playbooks'''
     all_playbooks = set()
     included_playbooks = set()
 
     exclude_dirs = ('adhoc', 'tasks', 'ovirt')
     for yaml_file in find_files(
-            os.path.join(os.getcwd(), 'playbooks'),
+            os.path.join(os.getcwd(), base_dir),
             exclude_dirs, None, r'^[^\.].*\.ya?ml$'):
         with open(yaml_file, 'r') as contents:
             for task in yaml.safe_load(contents) or {}:
@@ -288,7 +288,7 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         if not has_errors:
             print('...PASSED')
 
-        all_playbooks, included_playbooks = find_playbooks()
+        all_playbooks, included_playbooks = find_playbooks('playbooks')
 
         print('#' * 60)
         print('Invalid Playbook Include Checks')
@@ -323,6 +323,10 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         print('Ansible Playbook Entry Point Syntax Checks')
         # Evaluate the difference between all playbooks and included playbooks
         entrypoint_playbooks = sorted(all_playbooks.difference(included_playbooks))
+        # Add ci test playbooks
+        test_playbooks, test_included_playbooks = find_playbooks('test')
+        test_entrypoint_playbooks = sorted(test_playbooks.difference(test_included_playbooks))
+        entrypoint_playbooks.extend(test_entrypoint_playbooks)
         print('Entry point playbook count: {}'.format(len(entrypoint_playbooks)))
         for playbook in entrypoint_playbooks:
             print('-' * 60)

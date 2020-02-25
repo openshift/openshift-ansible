@@ -1,0 +1,55 @@
+---
+- name: Create AWS instances using machine sets
+  hosts: localhost
+  connection: local
+
+  vars:
+    new_workers_list: []
+
+  tasks:
+  - import_tasks: tasks/get_machinesets.yml
+
+  - include_tasks: tasks/create_machineset.yml
+    loop: "{{ (machineset.stdout | from_json)['items'] }}"
+    when:
+    - item.status.replicas is defined
+    - item.status.replicas != 0
+
+- name: Prepare new nodes
+  hosts: new_workers
+  gather_facts: false
+  tasks:
+  - wait_for_connection: {}
+  - setup: {}
+  - name: Copy ops-mirror.pem
+    copy:
+      src: ../../inventory/dynamic/injected/ops-mirror.pem
+      dest: /var/lib/yum/ops-mirror.pem
+      owner: root
+      group: root
+      mode: 0644
+  - name: Initialize openshift repos
+    import_tasks: tasks/additional_repos.yml
+
+  # Preparation required for e2e tests
+  - name: Disable selinux
+    selinux:
+      policy: targeted
+      state: permissive
+  - name: Create core user for storage tests to pass
+    user:
+      name: core
+      group: wheel
+  - name: Make sure core user has ssh config directory
+    file:
+      name: /home/core/.ssh
+      state: directory
+      owner: core
+      group: wheel
+      mode: 0700
+  - name: Install nfs-utils for storage tests
+    package:
+      name: nfs-utils
+      state: present
+    register: result
+    until: result is succeeded

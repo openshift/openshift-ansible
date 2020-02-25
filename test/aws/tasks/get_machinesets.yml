@@ -1,0 +1,30 @@
+---
+- name: List existing worker nodes
+  command: >
+    oc get nodes
+    --kubeconfig={{ kubeconfig_path }}
+    --selector="node-role.kubernetes.io/worker"
+    --output=json
+  register: oc_get
+  until:
+  - oc_get.stdout != ''
+  changed_when: false
+
+- name: Set fact pre_scaleup_workers_name
+  set_fact:
+    pre_scaleup_workers_name: "{{ (oc_get.stdout | from_json)['items'] | map(attribute='metadata.name') | list }}"
+
+- name: Get existing worker machinesets
+  command: >
+    oc get machinesets
+    --kubeconfig={{ kubeconfig_path }}
+    --namespace=openshift-machine-api
+    --output=json
+  register: machineset
+  until:
+  - machineset.stdout != ''
+  changed_when: false
+
+- name: Set fact pre_scaleup_machineset_names
+  set_fact:
+    pre_scaleup_machineset_names: "{{ (machineset.stdout | from_json)['items'] | map(attribute='metadata.name') | list }}"
