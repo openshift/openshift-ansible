@@ -117,7 +117,7 @@
         oc wait machineconfigpool/worker
         --kubeconfig={{ kubeconfig_path }}
         --for=condition=Updated
-        --timeout=5m
+        --timeout=10m
 
     rescue:
     - name: DEBUG - Get worker machine config pool
