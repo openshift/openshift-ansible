@@ -128,6 +128,8 @@
     register: podman_pull
     until:
       podman_pull.stdout != ''
+    retries: 12
+    delay: 10
 
   - name: Get machine controller daemon image from release image
     command: "podman run --rm {{ l_release_image }} image machine-config-operator"
@@ -143,6 +145,8 @@
     register: podman_pull
     until:
       podman_pull.stdout != ''
+    retries: 12
+    delay: 10
 
   - name: Apply ignition manifest
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"

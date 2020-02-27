@@ -62,6 +62,8 @@
     register: podman_pull
     until:
       podman_pull.stdout != ''
+    retries: 12
+    delay: 10
 
   - name: Apply machine config
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
