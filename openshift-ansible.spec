@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.176
+Version:        3.11.177
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Feb 27 2020 AOS Automation Release Team <aos-team-art <noreply@redhat.com>> 3.11.177-1
+- 
+
 * Wed Feb 26 2020 AOS Automation Release Team <aos-team-art <noreply@redhat.com>> 3.11.176-1
 - Delete container.yaml (lmeyer@redhat.com)
 - add any_errors_fatal (jcallen@redhat.com)
