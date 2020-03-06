@@ -21,7 +21,7 @@ def display(*args, **kwargs):
 
 
 # Set to minimum required Ansible version
-REQUIRED_VERSION = '2.9.1'
+REQUIRED_VERSION = '2.9.5'
 DESCRIPTION = "Supported versions: %s or newer" % REQUIRED_VERSION
 
 
