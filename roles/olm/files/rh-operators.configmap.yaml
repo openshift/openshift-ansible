@@ -1,8 +1,12 @@
+##---
+# Source: olm/templates/0000_30_06-rh-operators.configmap.yaml
+
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: rh-operators
-  namespace: operator-lifecycle-manager
+  namespace: openshift-operator-lifecycle-manager
+
 data:
   customResourceDefinitions: |-
     - apiVersion: apiextensions.k8s.io/v1beta1
@@ -18,9 +22,19 @@ data:
         validation:
           openAPIV3Schema:
             properties:
+              apiVersion:
+                description: 'APIVersion defines the versioned schema of this representation
+                  of an object. Servers should convert recognized schemas to the latest
+                  internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+                type: string
+              kind:
+                description: 'Kind is a string value representing the REST resource this
+                  object represents. Servers may infer this from the endpoint the client
+                  submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+                type: string
               spec:
-                description: 'Specification of the desired behavior of the Alertmanager
-                  cluster. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status'
+                description: 'AlertmanagerSpec is a specification of the desired behavior
+                  of the Alertmanager cluster. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status'
                 properties:
                   affinity:
                     description: Affinity is a group of affinity scheduling rules.
@@ -717,7 +731,7 @@ data:
                               configMapRef:
                                 description: |-
                                   ConfigMapEnvSource selects a ConfigMap to populate the environment variables with.
-      
+
                                   The contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.
                                 properties:
                                   name:
@@ -733,7 +747,7 @@ data:
                               secretRef:
                                 description: |-
                                   SecretEnvSource selects a Secret to populate the environment variables with.
-      
+
                                   The contents of the target Secret's Data field will represent the key-value pairs as environment variables.
                                 properties:
                                   name:
@@ -1427,9 +1441,9 @@ data:
                       generateName:
                         description: |-
                           GenerateName is an optional prefix, used by the server, to generate a unique name ONLY IF the Name field has not been provided. If this field is used, the name returned to the client will be different than the name passed. This value will also be combined with a unique suffix. The provided value has the same validation rules as the Name field, and may be truncated by the length of the suffix required to make the value unique on the server.
-      
+
                           If this field is specified and the generated name exists, the server will NOT return a 409 - instead, it will either return 201 Created or 500 with Reason ServerTimeout indicating a unique name could not be found in the time allotted, and the client should retry (optionally after the time indicated in the Retry-After header).
-      
+
                           Applied only if Name is not specified. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#idempotency
                         type: string
                       generation:
@@ -1493,7 +1507,7 @@ data:
                                         field:
                                           description: |-
                                             The field of the resource that has caused this error, as named by its JSON serialization. May include dot and postfix notation for nested attributes. Arrays are zero-indexed.  Fields may appear more than once in an array of causes due to fields having multiple errors. Optional.
-      
+
                                             Examples:
                                               "name" - the field "name" on the current resource
                                               "items[0].name" - the field "name" on the first array entry in "items"
@@ -1605,7 +1619,7 @@ data:
                       namespace:
                         description: |-
                           Namespace defines the space within each name must be unique. An empty namespace is equivalent to the "default" namespace, but "default" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty.
-      
+
                           Must be a DNS_LABEL. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/namespaces
                         type: string
                       ownerReferences:
@@ -1651,7 +1665,7 @@ data:
                       resourceVersion:
                         description: |-
                           An opaque value that represents the internal version of this object that can be used by clients to determine when objects have changed. May be used for optimistic concurrency, change detection, and the watch operation on a resource or set of resources. Clients must treat these values as opaque and passed unmodified back to the server. They may only be valid for a particular resource or set of resources.
-      
+
                           Populated by the system. Read-only. Value must be treated as opaque by clients and . More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency
                         type: string
                       selfLink:
@@ -1661,7 +1675,7 @@ data:
                       uid:
                         description: |-
                           UID is the unique in time and space value for this object. It is typically generated by the server on successful creation of a resource and is not allowed to change on PUT operations.
-      
+
                           Populated by the system. Read-only. More info: http://kubernetes.io/docs/user-guide/identifiers#uids
                         type: string
                   replicas:
@@ -1683,6 +1697,10 @@ data:
                           to Limits if that is explicitly specified, otherwise to an implementation-defined
                           value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
+                  retention:
+                    description: Time duration Alertmanager shall retain data for. Default
+                      is '120h'.
+                    type: string
                   routePrefix:
                     description: The route prefix Alertmanager registers HTTP handlers for.
                       This is useful, if using ExternalURL and a proxy is rewriting HTTP
@@ -1706,9 +1724,9 @@ data:
                       fsGroup:
                         description: |-
                           A special supplemental group that applies to all containers in a pod. Some volume types allow the Kubelet to change the ownership of that volume to be owned by the pod:
-      
+
                           1. The owning GID will be the FSGroup 2. The setgid bit is set (new files created in the volume will be owned by FSGroup) 3. The permission bits are OR'd with rw-rw----
-      
+
                           If unset, the Kubelet will not modify the ownership and permissions of any volume.
                         format: int64
                         type: integer
@@ -1857,9 +1875,9 @@ data:
                           matchLabels:
                             description: matchLabels is a map of {key,value} pairs. A single
                               {key,value} in the matchLabels map is equivalent to an element
-                                           of matchExpressions, whose key field is "key", the operator
-                                           is "In", and the values array contains only "value". The requirements
-                                           are ANDed.
+                              of matchExpressions, whose key field is "key", the operator
+                              is "In", and the values array contains only "value". The requirements
+                              are ANDed.
                             type: object
                       volumeClaimTemplate:
                         description: PersistentVolumeClaim is a user's request for and claim
@@ -1928,9 +1946,9 @@ data:
                               generateName:
                                 description: |-
                                   GenerateName is an optional prefix, used by the server, to generate a unique name ONLY IF the Name field has not been provided. If this field is used, the name returned to the client will be different than the name passed. This value will also be combined with a unique suffix. The provided value has the same validation rules as the Name field, and may be truncated by the length of the suffix required to make the value unique on the server.
-      
+
                                   If this field is specified and the generated name exists, the server will NOT return a 409 - instead, it will either return 201 Created or 500 with Reason ServerTimeout indicating a unique name could not be found in the time allotted, and the client should retry (optionally after the time indicated in the Retry-After header).
-      
+
                                   Applied only if Name is not specified. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#idempotency
                                 type: string
                               generation:
@@ -1998,7 +2016,7 @@ data:
                                                 field:
                                                   description: |-
                                                     The field of the resource that has caused this error, as named by its JSON serialization. May include dot and postfix notation for nested attributes. Arrays are zero-indexed.  Fields may appear more than once in an array of causes due to fields having multiple errors. Optional.
-      
+
                                                     Examples:
                                                       "name" - the field "name" on the current resource
                                                       "items[0].name" - the field "name" on the first array entry in "items"
@@ -2056,8 +2074,8 @@ data:
                                         type: string
                                       metadata:
                                         description: ListMeta describes metadata that synthetic
-                                                       resources must have, including lists and various
-                                                       status objects. A resource may have only one of
+                                          resources must have, including lists and various
+                                          status objects. A resource may have only one of
                                           {ObjectMeta, ListMeta}.
                                         properties:
                                           continue:
@@ -2117,7 +2135,7 @@ data:
                               namespace:
                                 description: |-
                                   Namespace defines the space within each name must be unique. An empty namespace is equivalent to the "default" namespace, but "default" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty.
-      
+
                                   Must be a DNS_LABEL. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/namespaces
                                 type: string
                               ownerReferences:
@@ -2138,11 +2156,11 @@ data:
                                       type: string
                                     blockOwnerDeletion:
                                       description: If true, AND if the owner has the "foregroundDeletion"
-                                                     finalizer, then the owner cannot be deleted from
-                                                     the key-value store until this reference is removed.
-                                                     Defaults to false. To set this field, a user needs
-                                                     "delete" permission of the owner, otherwise 422
-                                                     (Unprocessable Entity) will be returned.
+                                        finalizer, then the owner cannot be deleted from
+                                        the key-value store until this reference is removed.
+                                        Defaults to false. To set this field, a user needs
+                                        "delete" permission of the owner, otherwise 422
+                                        (Unprocessable Entity) will be returned.
                                       type: boolean
                                     controller:
                                       description: If true, this reference points to the
@@ -2166,7 +2184,7 @@ data:
                               resourceVersion:
                                 description: |-
                                   An opaque value that represents the internal version of this object that can be used by clients to determine when objects have changed. May be used for optimistic concurrency, change detection, and the watch operation on a resource or set of resources. Clients must treat these values as opaque and passed unmodified back to the server. They may only be valid for a particular resource or set of resources.
-      
+
                                   Populated by the system. Read-only. Value must be treated as opaque by clients and . More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency
                                 type: string
                               selfLink:
@@ -2176,7 +2194,7 @@ data:
                               uid:
                                 description: |-
                                   UID is the unique in time and space value for this object. It is typically generated by the server on successful creation of a resource and is not allowed to change on PUT operations.
-      
+
                                   Populated by the system. Read-only. More info: http://kubernetes.io/docs/user-guide/identifiers#uids
                                 type: string
                           spec:
@@ -2368,9 +2386,9 @@ data:
                     description: Version the cluster should be on.
                     type: string
               status:
-                description: 'Most recent observed status of the Alertmanager cluster. Read-only.
-                  Not included when requesting from the apiserver, only from the Prometheus
-                  Operator API itself. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status'
+                description: 'AlertmanagerStatus is the most recent observed status of the
+                  Alertmanager cluster. Read-only. Not included when requesting from the
+                  apiserver, only from the Prometheus Operator API itself. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status'
                 properties:
                   availableReplicas:
                     description: Total number of available pods (ready for at least minReadySeconds)
@@ -2403,7 +2421,7 @@ data:
                 - availableReplicas
                 - unavailableReplicas
         version: v1
-      
+
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
@@ -3651,7 +3669,7 @@ data:
                 required:
                 - kafka
                 - zookeeper
-      
+
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
@@ -3978,7 +3996,7 @@ data:
                     - trustedCertificates
                 required:
                 - bootstrapServers
-      
+
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
@@ -4307,7 +4325,7 @@ data:
                           type: string
                 required:
                 - bootstrapServers
-      
+
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
@@ -4433,7 +4451,7 @@ data:
           listKind: EtcdBackupList
           plural: etcdbackups
           singular: etcdbackup
-      
+
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
@@ -4450,7 +4468,7 @@ data:
           shortNames:
             - etcdclus
             - etcd
-      
+
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
@@ -4464,7 +4482,7 @@ data:
           listKind: EtcdRestoreList
           plural: etcdrestores
           singular: etcdrestore
-      
+
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
@@ -4478,9 +4496,19 @@ data:
         validation:
           openAPIV3Schema:
             properties:
+              apiVersion:
+                description: 'APIVersion defines the versioned schema of this representation
+                  of an object. Servers should convert recognized schemas to the latest
+                  internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+                type: string
+              kind:
+                description: 'Kind is a string value representing the REST resource this
+                  object represents. Servers may infer this from the endpoint the client
+                  submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+                type: string
               spec:
-                description: 'Specification of the desired behavior of the Prometheus cluster.
-                  More info: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status'
+                description: 'PrometheusSpec is a specification of the desired behavior
+                  of the Prometheus cluster. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status'
                 properties:
                   additionalAlertManagerConfigs:
                     description: SecretKeySelector selects a key of a Secret.
@@ -5127,6 +5155,76 @@ data:
                         type: array
                     required:
                     - alertmanagers
+                  apiserverConfig:
+                    description: 'APIServerConfig defines a host and auth methods to access
+                      apiserver. More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config'
+                    properties:
+                      basicAuth:
+                        description: 'BasicAuth allow an endpoint to authenticate over basic
+                          authentication More info: https://prometheus.io/docs/operating/configuration/#endpoints'
+                        properties:
+                          password:
+                            description: SecretKeySelector selects a key of a Secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or it's key must
+                                  be defined
+                                type: boolean
+                            required:
+                            - key
+                          username:
+                            description: SecretKeySelector selects a key of a Secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or it's key must
+                                  be defined
+                                type: boolean
+                            required:
+                            - key
+                      bearerToken:
+                        description: Bearer token for accessing apiserver.
+                        type: string
+                      bearerTokenFile:
+                        description: File to read bearer token for accessing apiserver.
+                        type: string
+                      host:
+                        description: Host of apiserver. A valid string consisting of a hostname
+                          or IP followed by an optional port number
+                        type: string
+                      tlsConfig:
+                        description: TLSConfig specifies TLS configuration parameters.
+                        properties:
+                          caFile:
+                            description: The CA cert to use for the targets.
+                            type: string
+                          certFile:
+                            description: The client cert file for the targets.
+                            type: string
+                          insecureSkipVerify:
+                            description: Disable target certificate validation.
+                            type: boolean
+                          keyFile:
+                            description: The client key file for the targets.
+                            type: string
+                          serverName:
+                            description: Used to verify the hostname for the targets.
+                            type: string
+                    required:
+                    - host
                   baseImage:
                     description: Base image to use for a Prometheus deployment.
                     type: string
@@ -6472,7 +6570,8 @@ data:
                           value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                   retention:
-                    description: Time duration Prometheus shall retain data for.
+                    description: Time duration Prometheus shall retain data for. Default
+                      is '24h'.
                     type: string
                   routePrefix:
                     description: The route prefix Prometheus registers HTTP handlers for.
@@ -6519,9 +6618,9 @@ data:
                       matchLabels:
                         description: matchLabels is a map of {key,value} pairs. A single
                           {key,value} in the matchLabels map is equivalent to an element
-                                       of matchExpressions, whose key field is "key", the operator is
-                                       "In", and the values array contains only "value". The requirements
-                                       are ANDed.
+                          of matchExpressions, whose key field is "key", the operator is
+                          "In", and the values array contains only "value". The requirements
+                          are ANDed.
                         type: object
                   ruleSelector:
                     description: A label selector is a label query over a set of resources.
@@ -6561,9 +6660,9 @@ data:
                       matchLabels:
                         description: matchLabels is a map of {key,value} pairs. A single
                           {key,value} in the matchLabels map is equivalent to an element
-                                       of matchExpressions, whose key field is "key", the operator is
-                                       "In", and the values array contains only "value". The requirements
-                                       are ANDed.
+                          of matchExpressions, whose key field is "key", the operator is
+                          "In", and the values array contains only "value". The requirements
+                          are ANDed.
                         type: object
                   scrapeInterval:
                     description: Interval between consecutive scrapes.
@@ -6703,9 +6802,9 @@ data:
                       matchLabels:
                         description: matchLabels is a map of {key,value} pairs. A single
                           {key,value} in the matchLabels map is equivalent to an element
-                                       of matchExpressions, whose key field is "key", the operator is
-                                       "In", and the values array contains only "value". The requirements
-                                       are ANDed.
+                          of matchExpressions, whose key field is "key", the operator is
+                          "In", and the values array contains only "value". The requirements
+                          are ANDed.
                         type: object
                   serviceMonitorSelector:
                     description: A label selector is a label query over a set of resources.
@@ -6745,9 +6844,9 @@ data:
                       matchLabels:
                         description: matchLabels is a map of {key,value} pairs. A single
                           {key,value} in the matchLabels map is equivalent to an element
-                                       of matchExpressions, whose key field is "key", the operator is
-                                       "In", and the values array contains only "value". The requirements
-                                       are ANDed.
+                          of matchExpressions, whose key field is "key", the operator is
+                          "In", and the values array contains only "value". The requirements
+                          are ANDed.
                         type: object
                   storage:
                     description: StorageSpec defines the configured storage for a group
@@ -6821,9 +6920,9 @@ data:
                           matchLabels:
                             description: matchLabels is a map of {key,value} pairs. A single
                               {key,value} in the matchLabels map is equivalent to an element
-                                           of matchExpressions, whose key field is "key", the operator
-                                           is "In", and the values array contains only "value". The requirements
-                                           are ANDed.
+                              of matchExpressions, whose key field is "key", the operator
+                              is "In", and the values array contains only "value". The requirements
+                              are ANDed.
                             type: object
                       volumeClaimTemplate:
                         description: PersistentVolumeClaim is a user's request for and claim
@@ -7017,8 +7116,8 @@ data:
                                         type: string
                                       metadata:
                                         description: ListMeta describes metadata that synthetic
-                                                       resources must have, including lists and various
-                                                       status objects. A resource may have only one of
+                                          resources must have, including lists and various
+                                          status objects. A resource may have only one of
                                           {ObjectMeta, ListMeta}.
                                         properties:
                                           continue:
@@ -7098,11 +7197,11 @@ data:
                                       type: string
                                     blockOwnerDeletion:
                                       description: If true, AND if the owner has the "foregroundDeletion"
-                                                     finalizer, then the owner cannot be deleted from
-                                                     the key-value store until this reference is removed.
-                                                     Defaults to false. To set this field, a user needs
-                                                     "delete" permission of the owner, otherwise 422
-                                                     (Unprocessable Entity) will be returned.
+                                        finalizer, then the owner cannot be deleted from
+                                        the key-value store until this reference is removed.
+                                        Defaults to false. To set this field, a user needs
+                                        "delete" permission of the owner, otherwise 422
+                                        (Unprocessable Entity) will be returned.
                                       type: boolean
                                     controller:
                                       description: If true, this reference points to the
@@ -7298,11 +7397,41 @@ data:
                             description: Google Cloud Storage bucket name for stored blocks.
                               If empty it won't store any block inside Google Cloud Storage.
                             type: string
+                          credentials:
+                            description: SecretKeySelector selects a key of a Secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or it's key must
+                                  be defined
+                                type: boolean
+                            required:
+                            - key
                       peers:
                         description: Peers is a DNS name for Thanos to discover peers through.
                         type: string
+                      resources:
+                        description: ResourceRequirements describes the compute resource
+                          requirements.
+                        properties:
+                          limits:
+                            description: 'Limits describes the maximum amount of compute
+                              resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                            type: object
+                          requests:
+                            description: 'Requests describes the minimum amount of compute
+                              resources required. If Requests is omitted for a container,
+                              it defaults to Limits if that is explicitly specified, otherwise
+                              to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                            type: object
                       s3:
-                        description: ThanosSpec defines parameters for of AWS Simple Storage
+                        description: ThanosS3Spec defines parameters for of AWS Simple Storage
                           Service (S3) with Thanos. (S3 compatible services apply as well)
                         properties:
                           accessKey:
@@ -7324,6 +7453,9 @@ data:
                           bucket:
                             description: S3-Compatible API bucket name for stored blocks.
                             type: string
+                          encryptsse:
+                            description: Whether to use Server Side Encryption
+                            type: boolean
                           endpoint:
                             description: S3-Compatible API endpoint for stored blocks.
                             type: string
@@ -7401,9 +7533,9 @@ data:
                     description: Version of Prometheus to be deployed.
                     type: string
               status:
-                description: 'Most recent observed status of the Prometheus cluster. Read-only.
-                  Not included when requesting from the apiserver, only from the Prometheus
-                  Operator API itself. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status'
+                description: 'PrometheusStatus is the most recent observed status of the
+                  Prometheus cluster. Read-only. Not included when requesting from the apiserver,
+                  only from the Prometheus Operator API itself. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status'
                 properties:
                   availableReplicas:
                     description: Total number of available pods (ready for at least minReadySeconds)
@@ -7436,7 +7568,7 @@ data:
                 - availableReplicas
                 - unavailableReplicas
         version: v1
-      
+        
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
@@ -7450,6 +7582,291 @@ data:
         validation:
           openAPIV3Schema:
             properties:
+              apiVersion:
+                description: 'APIVersion defines the versioned schema of this representation
+                  of an object. Servers should convert recognized schemas to the latest
+                  internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+                type: string
+              kind:
+                description: 'Kind is a string value representing the REST resource this
+                  object represents. Servers may infer this from the endpoint the client
+                  submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+                type: string
+              metadata:
+                description: ObjectMeta is metadata that all persisted resources must have,
+                  which includes all objects users must create.
+                properties:
+                  annotations:
+                    description: 'Annotations is an unstructured key value map stored with
+                      a resource that may be set by external tools to store and retrieve
+                      arbitrary metadata. They are not queryable and should be preserved
+                      when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+                    type: object
+                  clusterName:
+                    description: The name of the cluster which the object belongs to. This
+                      is used to distinguish resources with same name and namespace in different
+                      clusters. This field is not set anywhere right now and apiserver is
+                      going to ignore it if set in create or update request.
+                    type: string
+                  creationTimestamp:
+                    description: Time is a wrapper around time.Time which supports correct
+                      marshaling to YAML and JSON.  Wrappers are provided for many of the
+                      factory methods that the time package offers.
+                    format: date-time
+                    type: string
+                  deletionGracePeriodSeconds:
+                    description: Number of seconds allowed for this object to gracefully
+                      terminate before it will be removed from the system. Only set when
+                      deletionTimestamp is also set. May only be shortened. Read-only.
+                    format: int64
+                    type: integer
+                  deletionTimestamp:
+                    description: Time is a wrapper around time.Time which supports correct
+                      marshaling to YAML and JSON.  Wrappers are provided for many of the
+                      factory methods that the time package offers.
+                    format: date-time
+                    type: string
+                  finalizers:
+                    description: Must be empty before the object is deleted from the registry.
+                      Each entry is an identifier for the responsible component that will
+                      remove the entry from the list. If the deletionTimestamp of the object
+                      is non-nil, entries in this list can only be removed.
+                    items:
+                      type: string
+                    type: array
+                  generateName:
+                    description: |-
+                      GenerateName is an optional prefix, used by the server, to generate a unique name ONLY IF the Name field has not been provided. If this field is used, the name returned to the client will be different than the name passed. This value will also be combined with a unique suffix. The provided value has the same validation rules as the Name field, and may be truncated by the length of the suffix required to make the value unique on the server.
+                      If this field is specified and the generated name exists, the server will NOT return a 409 - instead, it will either return 201 Created or 500 with Reason ServerTimeout indicating a unique name could not be found in the time allotted, and the client should retry (optionally after the time indicated in the Retry-After header).
+                      Applied only if Name is not specified. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#idempotency
+                    type: string
+                  generation:
+                    description: A sequence number representing a specific generation of
+                      the desired state. Populated by the system. Read-only.
+                    format: int64
+                    type: integer
+                  initializers:
+                    description: Initializers tracks the progress of initialization.
+                    properties:
+                      pending:
+                        description: Pending is a list of initializers that must execute
+                          in order before this object is visible. When the last pending
+                          initializer is removed, and no failing result is set, the initializers
+                          struct will be set to nil and the object is considered as initialized
+                          and visible to all clients.
+                        items:
+                          description: Initializer is information about an initializer that
+                            has not yet completed.
+                          properties:
+                            name:
+                              description: name of the process that is responsible for initializing
+                                this object.
+                              type: string
+                          required:
+                          - name
+                        type: array
+                      result:
+                        description: Status is a return value for calls that don't return
+                          other objects.
+                        properties:
+                          apiVersion:
+                            description: 'APIVersion defines the versioned schema of this
+                              representation of an object. Servers should convert recognized
+                              schemas to the latest internal value, and may reject unrecognized
+                              values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+                            type: string
+                          code:
+                            description: Suggested HTTP return code for this status, 0 if
+                              not set.
+                            format: int32
+                            type: integer
+                          details:
+                            description: StatusDetails is a set of additional properties
+                              that MAY be set by the server to provide additional information
+                              about a response. The Reason field of a Status object defines
+                              what attributes will be set. Clients must ignore fields that
+                              do not match the defined type of each attribute, and should
+                              assume that any attribute may be empty, invalid, or under
+                              defined.
+                            properties:
+                              causes:
+                                description: The Causes array includes more details associated
+                                  with the StatusReason failure. Not all StatusReasons may
+                                  provide detailed causes.
+                                items:
+                                  description: StatusCause provides more information about
+                                    an api.Status failure, including cases when multiple
+                                    errors are encountered.
+                                  properties:
+                                    field:
+                                      description: |-
+                                        The field of the resource that has caused this error, as named by its JSON serialization. May include dot and postfix notation for nested attributes. Arrays are zero-indexed.  Fields may appear more than once in an array of causes due to fields having multiple errors. Optional.
+
+                                        Examples:
+                                          "name" - the field "name" on the current resource
+                                          "items[0].name" - the field "name" on the first array entry in "items"
+                                      type: string
+                                    message:
+                                      description: A human-readable description of the cause
+                                        of the error.  This field may be presented as-is
+                                        to a reader.
+                                      type: string
+                                    reason:
+                                      description: A machine-readable description of the
+                                        cause of the error. If this value is empty there
+                                        is no information available.
+                                      type: string
+                                type: array
+                              group:
+                                description: The group attribute of the resource associated
+                                  with the status StatusReason.
+                                type: string
+                              kind:
+                                description: 'The kind attribute of the resource associated
+                                  with the status StatusReason. On some operations may differ
+                                  from the requested resource Kind. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+                                type: string
+                              name:
+                                description: The name attribute of the resource associated
+                                  with the status StatusReason (when there is a single name
+                                  which can be described).
+                                type: string
+                              retryAfterSeconds:
+                                description: If specified, the time in seconds before the
+                                  operation should be retried. Some errors may indicate
+                                  the client must take an alternate action - for those errors
+                                  this field may indicate how long to wait before taking
+                                  the alternate action.
+                                format: int32
+                                type: integer
+                              uid:
+                                description: 'UID of the resource. (when there is a single
+                                  resource which can be described). More info: http://kubernetes.io/docs/user-guide/identifiers#uids'
+                                type: string
+                          kind:
+                            description: 'Kind is a string value representing the REST resource
+                              this object represents. Servers may infer this from the endpoint
+                              the client submits requests to. Cannot be updated. In CamelCase.
+                              More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+                            type: string
+                          message:
+                            description: A human-readable description of the status of this
+                              operation.
+                            type: string
+                          metadata:
+                            description: ListMeta describes metadata that synthetic resources
+                              must have, including lists and various status objects. A resource
+                              may have only one of {ObjectMeta, ListMeta}.
+                            properties:
+                              continue:
+                                description: continue may be set if the user set a limit
+                                  on the number of items returned, and indicates that the
+                                  server has more data available. The value is opaque and
+                                  may be used to issue another request to the endpoint that
+                                  served this list to retrieve the next set of available
+                                  objects. Continuing a list may not be possible if the
+                                  server configuration has changed or more than a few minutes
+                                  have passed. The resourceVersion field returned when using
+                                  this continue value will be identical to the value in
+                                  the first response.
+                                type: string
+                              resourceVersion:
+                                description: 'String that identifies the server''s internal
+                                  version of this object that can be used by clients to
+                                  determine when objects have changed. Value must be treated
+                                  as opaque by clients and passed unmodified back to the
+                                  server. Populated by the system. Read-only. More info:
+                                  https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency'
+                                type: string
+                              selfLink:
+                                description: selfLink is a URL representing this object.
+                                  Populated by the system. Read-only.
+                                type: string
+                          reason:
+                            description: A machine-readable description of why this operation
+                              is in the "Failure" status. If this value is empty there is
+                              no information available. A Reason clarifies an HTTP status
+                              code but does not override it.
+                            type: string
+                          status:
+                            description: 'Status of the operation. One of: "Success" or
+                              "Failure". More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#spec-and-status'
+                            type: string
+                    required:
+                    - pending
+                  labels:
+                    description: 'Map of string keys and values that can be used to organize
+                      and categorize (scope and select) objects. May match selectors of
+                      replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+                    type: object
+                  name:
+                    description: 'Name must be unique within a namespace. Is required when
+                      creating resources, although some resources may allow a client to
+                      request the generation of an appropriate name automatically. Name
+                      is primarily intended for creation idempotence and configuration definition.
+                      Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace defines the space within each name must be unique. An empty namespace is equivalent to the "default" namespace, but "default" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty.
+
+                      Must be a DNS_LABEL. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/namespaces
+                    type: string
+                  ownerReferences:
+                    description: List of objects depended by this object. If ALL objects
+                      in the list have been deleted, this object will be garbage collected.
+                      If this object is managed by a controller, then an entry in this list
+                      will point to this controller, with the controller field set to true.
+                      There cannot be more than one managing controller.
+                    items:
+                      description: OwnerReference contains enough information to let you
+                        identify an owning object. Currently, an owning object must be in
+                        the same namespace, so there is no namespace field.
+                      properties:
+                        apiVersion:
+                          description: API version of the referent.
+                          type: string
+                        blockOwnerDeletion:
+                          description: If true, AND if the owner has the "foregroundDeletion"
+                            finalizer, then the owner cannot be deleted from the key-value
+                            store until this reference is removed. Defaults to false. To
+                            set this field, a user needs "delete" permission of the owner,
+                            otherwise 422 (Unprocessable Entity) will be returned.
+                          type: boolean
+                        controller:
+                          description: If true, this reference points to the managing controller.
+                          type: boolean
+                        kind:
+                          description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+                          type: string
+                        uid:
+                          description: 'UID of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#uids'
+                          type: string
+                      required:
+                      - apiVersion
+                      - kind
+                      - name
+                      - uid
+                    type: array
+                  resourceVersion:
+                    description: |-
+                      An opaque value that represents the internal version of this object that can be used by clients to determine when objects have changed. May be used for optimistic concurrency, change detection, and the watch operation on a resource or set of resources. Clients must treat these values as opaque and passed unmodified back to the server. They may only be valid for a particular resource or set of resources.
+
+                      Populated by the system. Read-only. Value must be treated as opaque by clients and . More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency
+                    type: string
+                  selfLink:
+                    description: SelfLink is a URL representing this object. Populated by
+                      the system. Read-only.
+                    type: string
+                  uid:
+                    description: |-
+                      UID is the unique in time and space value for this object. It is typically generated by the server on successful creation of a resource and is not allowed to change on PUT operations.
+
+                      Populated by the system. Read-only. More info: http://kubernetes.io/docs/user-guide/identifiers#uids
+                    type: string
               spec:
                 description: PrometheusRuleSpec contains specification parameters for a
                   Rule.
@@ -7488,7 +7905,7 @@ data:
                       - rules
                     type: array
         version: v1
-      
+
     - apiVersion: apiextensions.k8s.io/v1beta1
       kind: CustomResourceDefinition
       metadata:
@@ -7502,6 +7919,16 @@ data:
         validation:
           openAPIV3Schema:
             properties:
+              apiVersion:
+                description: 'APIVersion defines the versioned schema of this representation
+                  of an object. Servers should convert recognized schemas to the latest
+                  internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+                type: string
+              kind:
+                description: 'Kind is a string value representing the REST resource this
+                  object represents. Servers may infer this from the endpoint the client
+                  submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+                type: string
               spec:
                 description: ServiceMonitorSpec contains specification parameters for a
                   ServiceMonitor.
@@ -7649,7 +8076,7 @@ data:
                     description: The label to use to retrieve the job name from.
                     type: string
                   namespaceSelector:
-                    description: A selector for selecting namespaces either selecting all
+                    description: NamespaceSelector is a selector for selecting either all
                       namespaces or a list of namespaces.
                     properties:
                       any:
@@ -7699,9 +8126,9 @@ data:
                       matchLabels:
                         description: matchLabels is a map of {key,value} pairs. A single
                           {key,value} in the matchLabels map is equivalent to an element
-                                       of matchExpressions, whose key field is "key", the operator is
-                                       "In", and the values array contains only "value". The requirements
-                                       are ANDed.
+                          of matchExpressions, whose key field is "key", the operator is
+                          "In", and the values array contains only "value". The requirements
+                          are ANDed.
                         type: object
                   targetLabels:
                     description: TargetLabels transfers labels on the Kubernetes Service
@@ -7713,7 +8140,7 @@ data:
                 - endpoints
                 - selector
         version: v1
-      
+
   clusterServiceVersions: |-
     - apiVersion: operators.coreos.com/v1alpha1
       kind: ClusterServiceVersion
@@ -8150,7 +8577,7 @@ data:
                 path: authorization.type
                 x-descriptors:
                   - 'urn:alm:descriptor:com.tectonic.ui:label'
-    - #! validate-crd: ./deploy/chart/templates/03-clusterserviceversion.crd.yaml
+    - #! validate-crd: deploy/chart/templates/0000_30_02-clusterserviceversion.crd.yaml
       #! parse-kind: ClusterServiceVersion
       apiVersion: operators.coreos.com/v1alpha1
       kind: ClusterServiceVersion
@@ -8326,7 +8753,7 @@ data:
                 x-descriptors:
                   - 'urn:alm:descriptor:io.kubernetes.phase:reason'
       
-    - #! validate-crd: ./deploy/chart/templates/03-clusterserviceversion.crd.yaml
+    - #! validate-crd: deploy/chart/templates/0000_30_02-clusterserviceversion.crd.yaml
       #! parse-kind: ClusterServiceVersion
       apiVersion: operators.coreos.com/v1alpha1
       kind: ClusterServiceVersion
@@ -8609,7 +9036,7 @@ data:
                 x-descriptors: 
                   - 'urn:alm:descriptor:io.kubernetes.phase:reason'
       
-    - #! validate-crd: ./deploy/chart/templates/03-clusterserviceversion.crd.yaml
+    - #! validate-crd: deploy/chart/templates/0000_30_02-clusterserviceversion.crd.yaml
       #! parse-kind: ClusterServiceVersion
       apiVersion: operators.coreos.com/v1alpha1
       kind: ClusterServiceVersion
@@ -8891,8 +9318,8 @@ data:
                 path: reason
                 x-descriptors: 
                   - 'urn:alm:descriptor:io.kubernetes.phase:reason'
-      
-    - #! validate-crd: ./deploy/chart/templates/03-clusterserviceversion.crd.yaml
+
+    - #! validate-crd: deploy/chart/templates/0000_30_02-clusterserviceversion.crd.yaml
       #! parse-kind: ClusterServiceVersion
       apiVersion: operators.coreos.com/v1alpha1
       kind: ClusterServiceVersion
@@ -9134,7 +9561,7 @@ data:
               x-descriptors:
               - 'urn:alm:descriptor:com.tectonic.ui:podCount'
       
-    - #! validate-crd: ./deploy/chart/templates/03-clusterserviceversion.crd.yaml
+    - #! validate-crd: deploy/chart/templates/0000_30_02-clusterserviceversion.crd.yaml
       #! parse-kind: ClusterServiceVersion
       apiVersion: operators.coreos.com/v1alpha1
       kind: ClusterServiceVersion
@@ -9400,7 +9827,7 @@ data:
               x-descriptors:
                 - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
       
-    - #! validate-crd: ./deploy/chart/templates/03-clusterserviceversion.crd.yaml
+    - #! validate-crd: deploy/chart/templates/0000_30_02-clusterserviceversion.crd.yaml
       #! parse-kind: ClusterServiceVersion
       apiVersion: operators.coreos.com/v1alpha1
       kind: ClusterServiceVersion
@@ -9672,7 +10099,277 @@ data:
               path: resources
               x-descriptors:
               - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
+
+    - #! validate-crd: deploy/chart/templates/0000_30_02-clusterserviceversion.crd.yaml
+      #! parse-kind: ClusterServiceVersion
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: ClusterServiceVersion
+      metadata:
+        name: prometheusoperator.0.23.2
+        namespace: placeholder
+        annotations:
+          alm-examples: '[{"apiVersion":"monitoring.coreos.com/v1","kind":"Prometheus","metadata":{"name":"example","labels":{"prometheus":"k8s"}},"spec":{"replicas":2,"version":"v2.3.2","serviceAccountName":"prometheus-k8s","securityContext": {}, "serviceMonitorSelector":{"matchExpressions":[{"key":"k8s-app","operator":"Exists"}]},"ruleSelector":{"matchLabels":{"role":"prometheus-rulefiles","prometheus":"k8s"}},"alerting":{"alertmanagers":[{"namespace":"monitoring","name":"alertmanager-main","port":"web"}]}}},{"apiVersion":"monitoring.coreos.com/v1","kind":"ServiceMonitor","metadata":{"name":"example","labels":{"k8s-app":"prometheus"}},"spec":{"selector":{"matchLabels":{"k8s-app":"prometheus"}},"endpoints":[{"port":"web","interval":"30s"}]}},{"apiVersion":"monitoring.coreos.com/v1","kind":"Alertmanager","metadata":{"name":"alertmanager-main"},"spec":{"replicas":3, "securityContext": {}}}]'
+      spec:
+        replaces: prometheusoperator.0.22.2
+        displayName: Prometheus Operator
+        description: |
+          The Prometheus Operator for Kubernetes provides easy monitoring definitions for Kubernetes services and deployment and management of Prometheus instances.
       
+          Once installed, the Prometheus Operator provides the following features:
+      
+          * **Create/Destroy**: Easily launch a Prometheus instance for your Kubernetes namespace, a specific application or team easily using the Operator.
+      
+          * **Simple Configuration**: Configure the fundamentals of Prometheus like versions, persistence, retention policies, and replicas from a native Kubernetes resource.
+      
+          * **Target Services via Labels**: Automatically generate monitoring target configurations based on familiar Kubernetes label queries; no need to learn a Prometheus specific configuration language.
+      
+          ### Other Supported Features
+      
+          **High availability**
+      
+          Multiple instances are run across failure zones and data is replicated. This keeps your monitoring available during an outage, when you need it most.
+      
+          **Updates via automated operations**
+      
+          New Prometheus versions are deployed using a rolling update with no downtime, making it easy to stay up to date.
+      
+          **Handles the dynamic nature of containers**
+      
+          Alerting rules are attached to groups of containers instead of individual instances, which is ideal for the highly dynamic nature of container deployment.
+      
+        keywords: ['prometheus', 'monitoring', 'tsdb', 'alerting']
+      
+        maintainers:
+        - name: Red Hat
+          email: openshift-operators@redhat.com
+      
+        provider:
+          name: Red Hat
+      
+        links:
+        - name: Prometheus
+          url: https://www.prometheus.io/
+        - name: Documentation
+          url: https://coreos.com/operators/prometheus/docs/latest/
+        - name: Prometheus Operator
+          url: https://github.com/coreos/prometheus-operator
+      
+        labels:
+          alm-status-descriptors: prometheusoperator.0.23.2
+          alm-owner-prometheus: prometheusoperator
+      
+        selector:
+          matchLabels:
+            alm-owner-prometheus: prometheusoperator
+      
+        icon:
+        - base64data: PHN2ZyB3aWR0aD0iMjQ5MCIgaGVpZ2h0PSIyNTAwIiB2aWV3Qm94PSIwIDAgMjU2IDI1NyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCI+PHBhdGggZD0iTTEyOC4wMDEuNjY3QzU3LjMxMS42NjcgMCA1Ny45NzEgMCAxMjguNjY0YzAgNzAuNjkgNTcuMzExIDEyNy45OTggMTI4LjAwMSAxMjcuOTk4UzI1NiAxOTkuMzU0IDI1NiAxMjguNjY0QzI1NiA1Ny45NyAxOTguNjg5LjY2NyAxMjguMDAxLjY2N3ptMCAyMzkuNTZjLTIwLjExMiAwLTM2LjQxOS0xMy40MzUtMzYuNDE5LTMwLjAwNGg3Mi44MzhjMCAxNi41NjYtMTYuMzA2IDMwLjAwNC0zNi40MTkgMzAuMDA0em02MC4xNTMtMzkuOTRINjcuODQyVjE3OC40N2gxMjAuMzE0djIxLjgxNmgtLjAwMnptLS40MzItMzMuMDQ1SDY4LjE4NWMtLjM5OC0uNDU4LS44MDQtLjkxLTEuMTg4LTEuMzc1LTEyLjMxNS0xNC45NTQtMTUuMjE2LTIyLjc2LTE4LjAzMi0zMC43MTYtLjA0OC0uMjYyIDE0LjkzMyAzLjA2IDI1LjU1NiA1LjQ1IDAgMCA1LjQ2NiAxLjI2NSAxMy40NTggMi43MjItNy42NzMtOC45OTQtMTIuMjMtMjAuNDI4LTEyLjIzLTMyLjExNiAwLTI1LjY1OCAxOS42OC00OC4wNzkgMTIuNTgtNjYuMjAxIDYuOTEuNTYyIDE0LjMgMTQuNTgzIDE0LjggMzYuNTA1IDcuMzQ2LTEwLjE1MiAxMC40Mi0yOC42OSAxMC40Mi00MC4wNTYgMC0xMS43NjkgNy43NTUtMjUuNDQgMTUuNTEyLTI1LjkwNy02LjkxNSAxMS4zOTYgMS43OSAyMS4xNjUgOS41MyA0NS40IDIuOTAyIDkuMTAzIDIuNTMyIDI0LjQyMyA0Ljc3MiAzNC4xMzguNzQ0LTIwLjE3OCA0LjIxMy00OS42MiAxNy4wMTQtNTkuNzg0LTUuNjQ3IDEyLjguODM2IDI4LjgxOCA1LjI3IDM2LjUxOCA3LjE1NCAxMi40MjQgMTEuNDkgMjEuODM2IDExLjQ5IDM5LjYzOCAwIDExLjkzNi00LjQwNyAyMy4xNzMtMTEuODQgMzEuOTU4IDguNDUyLTEuNTg2IDE0LjI4OS0zLjAxNiAxNC4yODktMy4wMTZsMjcuNDUtNS4zNTVjLjAwMi0uMDAyLTMuOTg3IDE2LjQwMS0xOS4zMTQgMzIuMTk3eiIgZmlsbD0iI0RBNEUzMSIvPjwvc3ZnPg==
+          mediatype: image/svg+xml
+      
+        install:
+          strategy: deployment
+          spec:
+            permissions:
+            - serviceAccountName: prometheus-k8s
+              rules:
+              - apiGroups: [""]
+                resources:
+                - nodes
+                - services
+                - endpoints
+                - pods
+                verbs: ["get", "list", "watch"]
+              - apiGroups: [""]
+                resources:
+                - configmaps
+                verbs: ["get"]
+            - serviceAccountName: prometheus-operator-0-23-2
+              rules:
+              - apiGroups:
+                - apiextensions.k8s.io
+                resources:
+                - customresourcedefinitions
+                verbs:
+                - '*'
+              - apiGroups:
+                - monitoring.coreos.com
+                resources:
+                - alertmanagers
+                - prometheuses
+                - prometheuses/finalizers
+                - alertmanagers/finalizers
+                - servicemonitors
+                - prometheusrules
+                verbs:
+                - '*'
+              - apiGroups:
+                - apps
+                resources:
+                - statefulsets
+                verbs:
+                - '*'
+              - apiGroups:
+                - ""
+                resources:
+                - configmaps
+                - secrets
+                verbs:
+                - '*'
+              - apiGroups:
+                - ""
+                resources:
+                - pods
+                verbs:
+                - list
+                - delete
+              - apiGroups:
+                - ""
+                resources:
+                - services
+                - endpoints
+                verbs:
+                - get
+                - create
+                - update
+              - apiGroups:
+                - ""
+                resources:
+                - nodes
+                verbs:
+                - list
+                - watch
+              - apiGroups:
+                - ""
+                resources:
+                - namespaces
+                verbs:
+                - list
+                - watch
+            deployments:
+            - name: prometheus-operator
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    k8s-app: prometheus-operator
+                template:
+                  metadata:
+                    labels:
+                      k8s-app: prometheus-operator
+                  spec:
+                    serviceAccount: prometheus-operator-0-23-2
+                    containers:
+                    - name: prometheus-operator
+                      image: quay.io/coreos/prometheus-operator@sha256:8211b3eb30cb8591ddf536f1cf62100f5c97659c14d18dd45001acf94dafd713
+                      args:
+                      - -namespace=$(K8S_NAMESPACE)
+                      - -manage-crds=false
+                      - -logtostderr=true
+                      - --config-reloader-image=quay.io/coreos/configmap-reload:v0.0.1
+                      - --prometheus-config-reloader=quay.io/coreos/prometheus-config-reloader:v0.23.2
+                      env:
+                      - name: K8S_NAMESPACE
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.namespace
+                      ports:
+                      - containerPort: 8080
+                        name: http
+                      resources:
+                        limits:
+                          cpu: 200m
+                          memory: 200Mi
+                        requests:
+                          cpu: 100m
+                          memory: 100Mi
+                    nodeSelector:
+                      beta.kubernetes.io/os: linux
+        maturity: beta
+        version: 0.23.2
+        customresourcedefinitions:
+          owned:
+          - name: prometheuses.monitoring.coreos.com
+            version: v1
+            kind: Prometheus
+            displayName: Prometheus
+            description: A running Prometheus instance
+            resources:
+            - kind: StatefulSet
+              version: v1beta2
+            - kind: Pod
+              version: v1
+            specDescriptors:
+            - description: Desired number of Pods for the cluster
+              displayName: Size
+              path: replicas
+              x-descriptors:
+              - 'urn:alm:descriptor:com.tectonic.ui:podCount'
+            - description: A selector for the ConfigMaps from which to load rule files
+              displayName: Rule Config Map Selector
+              path: ruleSelector
+              x-descriptors:
+              - 'urn:alm:descriptor:com.tectonic.ui:selector:core:v1:ConfigMap'
+            - description: ServiceMonitors to be selected for target discovery
+              displayName: Service Monitor Selector
+              path: serviceMonitorSelector
+              x-descriptors:
+              - 'urn:alm:descriptor:com.tectonic.ui:selector:monitoring.coreos.com:v1:ServiceMonitor'
+            - description: The ServiceAccount to use to run the Prometheus pods
+              displayName: Service Account
+              path: serviceAccountName
+              x-descriptors:
+              - 'urn:alm:descriptor:io.kubernetes:ServiceAccount'
+            - description: Limits describes the minimum/maximum amount of compute resources required/allowed
+              displayName: Resource Requirements
+              path: resources
+              x-descriptors:
+              - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
+          - name: prometheusrules.monitoring.coreos.com
+            version: v1
+            kind: PrometheusRule
+            displayName: Prometheus Rule
+            description: A Prometheus Rule configures groups of sequentially evaluated recording and alerting rules.
+          - name: servicemonitors.monitoring.coreos.com
+            version: v1
+            kind: ServiceMonitor
+            displayName: Service Monitor
+            description: Configures prometheus to monitor a particular k8s service
+            resources:
+            - kind: Pod
+              version: v1
+            specDescriptors:
+            - description: The label to use to retrieve the job name from
+              displayName: Job Label
+              path: jobLabel
+              x-descriptors:
+              - 'urn:alm:descriptor:com.tectonic.ui:label'
+            - description: A list of endpoints allowed as part of this ServiceMonitor
+              displayName: Endpoints
+              path: endpoints
+              x-descriptors:
+              - 'urn:alm:descriptor:com.tectonic.ui:endpointList'
+          - name: alertmanagers.monitoring.coreos.com
+            version: v1
+            kind: Alertmanager
+            displayName: Alertmanager
+            description: Configures an Alertmanager for the namespace
+            resources:
+            - kind: StatefulSet
+              version: v1beta2
+            - kind: Pod
+              version: v1
+            specDescriptors:
+            - description: Desired number of Pods for the cluster
+              displayName: Size
+              path: replicas
+              x-descriptors:
+              - 'urn:alm:descriptor:com.tectonic.ui:podCount'
+            - description: Limits describes the minimum/maximum amount of compute resources required/allowed
+              displayName: Resource Requirements
+              path: resources
+              x-descriptors:
+              - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
+
   packages: |-
     - #! package-manifest: ./deploy/chart/catalog_resources/rh-operators/amq-streams.v1.0.0-clusterserviceversion
       packageName: amq-streams
@@ -9686,10 +10383,8 @@ data:
       - name: alpha
         currentCSV: etcdoperator.v0.9.2
       
-    - #! package-manifest: ./deploy/chart/catalog_resources/rh-operators/prometheusoperator.0.22.2.clusterserviceversion.yaml
+    - #! package-manifest: ./deploy/chart/catalog_resources/rh-operators/prometheusoperator.0.23.2.clusterserviceversion.yaml
       packageName: prometheus
       channels:
       - name: preview
-        currentCSV: prometheusoperator.0.22.2
-      
-
+        currentCSV: prometheusoperator.0.23.2
