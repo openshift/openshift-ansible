@@ -226,6 +226,8 @@ spec:
           readOnly: true
         - mountPath: /etc/pki
           name: host-pki
+        - mountPath: /usr/share/pki
+          name: host-pki-usr
 
       volumes:
       # In bootstrap mode, the host config contains information not easily available
@@ -246,6 +248,10 @@ spec:
           path: /etc/pki
           type: ""
         name: host-pki
+      - hostPath:
+          path: /usr/share/pki
+          type: ""
+        name: host-pki-usr
       # Sync daemonset should tolerate all taints to make sure it runs on all nodes
       tolerations:
       - operator: "Exists"
