@@ -230,6 +230,7 @@
         - registry\.qe\.openshift\.com/.*
         - registry\.access\..*redhat\.com/rhel7/etcd
         - docker.io/openshift
+        - quay.io/coreos
 
       - shell: "docker rmi -f {{ item.stdout_lines | join(' ') }}"
         changed_when: False
