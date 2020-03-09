@@ -1,11 +1,13 @@
 ---
 openshift_hosted_manage_registry_console: True
 l_os_cockpit_image_version_dict:
-  origin: 'latest'
+  origin: "{{ openshift_image_tag | regex_replace('(v\\d+\\.\\d+).\\d+$', '\\1') }}"
   openshift-enterprise: "{{ openshift_image_tag }}"
 l_os_cockpit_image_version: "{{ l_os_cockpit_image_version_dict[openshift_deployment_type] }}"
 
-l_os_cockpit_image_format: "{{ openshift_facts_registry_url | regex_replace('${version}' | regex_escape, l_os_cockpit_image_version) }}"
+l_os_cockpit_registry_url: "{{ openshift_facts_registry_url | replace('docker.io','registry.access.redhat.com') }}"
+
+l_os_cockpit_image_format: "{{ l_os_cockpit_registry_url | regex_replace('${version}' | regex_escape, l_os_cockpit_image_version) }}"
 
 l_openshift_cockit_search_dict:
   origin: "openshift/origin-${component}"
@@ -13,7 +15,7 @@ l_openshift_cockit_search_dict:
 l_openshift_cockit_search: "{{ l_openshift_cockit_search_dict[openshift_deployment_type] }}"
 
 l_openshift_cockpit_replace_dict:
-  origin: "cockpit/kubernetes"
+  origin: "openshift3/registry-console"
   openshift-enterprise: "registry-console"
 l_openshift_cockpit_replace: "{{ l_openshift_cockpit_replace_dict[openshift_deployment_type] }}"
 
