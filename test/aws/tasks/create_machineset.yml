@@ -27,9 +27,15 @@
                 keyName: "{{ openshift_aws_scaleup_key }}"
 
 - name: Import machineset definition
-  k8s:
-    kubeconfig: "{{ kubeconfig_path }}"
-    definition: "{{ machineset | to_yaml }}"
+  command: >
+    oc apply -f -
+    --kubeconfig={{ kubeconfig_path }}
+  register: oc_apply
+  args:
+    stdin: "{{ machineset | to_yaml }}"
+  changed_when:
+  - ('created' in oc_apply.stdout) or
+    ('configured' in oc_apply.stdout)
 
 - block:
   - name: Get machines in the machineset
@@ -81,6 +87,21 @@
   - name: Machine creation failed
     fail:
       msg: "Machine creation failed, error: {{ new_machine.resources[0].status.errorMessage }}"
+
+- name: Get ssh bastion address
+  command: >
+    oc get service ssh-bastion
+    --kubeconfig={{ kubeconfig_path }}
+    --namespace=test-ssh-bastion
+    --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+  register: oc_get
+  until:
+  - oc_get.stdout != ''
+  changed_when: false
+
+- name: Set fact ssh_bastion
+  set_fact:
+    ssh_bastion: "{{ oc_get.stdout }}"
 
 - name: Add machine to the inventory
   add_host:

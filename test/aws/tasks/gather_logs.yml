@@ -17,7 +17,7 @@
   command: "crictl logs {{ item }}"
   register: crictl_logs_output
   no_log: true
-  with_items: "{{ crictl_ps_output.stdout_lines }}"
+  loop: "{{ crictl_ps_output.stdout_lines }}"
   ignore_errors: true
 - name: Write container logs locally
   local_action:

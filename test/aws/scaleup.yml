@@ -1,116 +1,40 @@
 ---
-- name: create new nodes
-  hosts: localhost
-  connection: local
-  vars:
-    new_workers_list: []
 
-  tasks:
-  - import_tasks: ssh_bastion.yml
-
-  - import_tasks: get_machinesets.yml
-
-  - include_tasks: create_machineset.yml
-    loop: "{{ machineset.resources }}"
-    when:
-    - item.status.replicas is defined
-    - item.status.replicas != 0
-
-- name: wait for nodes to become available
-  hosts: new_workers
-  gather_facts: false
-  tasks:
-  - wait_for_connection: {}
-  - setup: {}
-  - name: Copy ops-mirror.pem
-    copy:
-      src: ../../inventory/dynamic/injected/ops-mirror.pem
-      dest: /var/lib/yum/ops-mirror.pem
-      owner: root
-      group: root
-      mode: 0644
-  - name: Initialize openshift repos
-    import_tasks: additional_repos.yml
+- import_playbook: create_machines.yml
 
 - import_playbook: ../../playbooks/scaleup.yml
   vars:
     openshift_kubeconfig_path: "{{ kubeconfig_path }}"
 
-- name: wait for nodes to join
+- name: Wait for nodes to join
   hosts: new_workers
   tasks:
-  - name: HACK disable selinux
-    selinux:
-      policy: targeted
-      state: permissive
-  - name: Create core user for storage tests to pass
-    user:
-      name: core
-      group: wheel
-  - name: Make sure core user has ssh config directory
-    file:
-      name: /home/core/.ssh
-      state: directory
-      owner: core
-      group: wheel
-      mode: 0700
-  - name: Install nfs-utils for storage tests
-    package:
-      name: nfs-utils
-      state: present
-    register: result
-    until: result is succeeded
-  - name: Wait for new nodes to be ready
-    k8s_facts:
-      kubeconfig: "{{ kubeconfig_path }}"
-      kind: Node
-      name: "{{ node_name }}"
-    delegate_to: localhost
-    register: new_machine
-    until:
-    - new_machine.resources is defined
-    - new_machine.resources | length > 0
-    - new_machine.resources[0].status is defined
-    - new_machine.resources[0].status.conditions is defined
-    - new_machine.resources[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
-    # Give the node three minutes to come back online.
-    retries: 48
-    delay: 30
-    ignore_errors: true
-  - when: new_machine is failed
-    block:
-    - include_tasks: gather_logs.yml
-    - fail:
-        msg: Node failed to become Ready.
+  - block:
+    - name: Wait for nodes to report ready
+      command: >
+        oc get node {{ hostvars[item].ansible_nodename | lower }}
+        --kubeconfig={{ kubeconfig_path }}
+        --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+      loop: "{{ ansible_play_batch }}"
+      delegate_to: localhost
+      run_once: true
+      register: oc_get
+      until:
+      - oc_get.stdout == "True"
+      retries: 36
+      delay: 5
+      changed_when: false
+
+    rescue:
+    - include_tasks: tasks/gather_logs.yml
+    - name: DEBUG - Node failed to report ready
+      fail:
+        msg: "Node failed to report Ready"
 
 - name: Remove CoreOS nodes
   hosts: localhost
   connection: local
   tasks:
-  - name: Mark CoreOS nodes as unschedulable
-    command: >
-      oc adm cordon {{ item | lower }}
-      --kubeconfig={{ kubeconfig_path }}
-    with_items: "{{ pre_scaleup_workers_name }}"
-
-  - name: Drain CoreOS nodes
-    command: >
-      oc adm drain {{ item | lower }}
-      --kubeconfig={{ kubeconfig_path }}
-      --force --delete-local-data --ignore-daemonsets
-      --timeout=0s
-    with_items: "{{ pre_scaleup_workers_name }}"
-
-  - name: remove existing machinesets
-    k8s:
-      api_version: machine.openshift.io/v1beta1
-      kubeconfig: "{{ kubeconfig_path }}"
-      namespace: openshift-machine-api
-      kind: MachineSet
-      name: "{{ item }}"
-      state: absent
-    with_items: "{{ pre_scaleup_machineset_names }}"
-
   - block:
     - name: Wait for worker configs to roll out
       command: >
@@ -129,3 +53,24 @@
     - name: DEBUG - Worker config rollout failed
       fail:
         msg: "Worker config rollout failed"
+
+  - name: Mark pre-scaleup worker nodes as unschedulable
+    command: >
+      oc adm cordon {{ item | lower }}
+      --kubeconfig={{ kubeconfig_path }}
+    loop: "{{ pre_scaleup_workers_name }}"
+
+  - name: Drain pre-scaleup worker nodes
+    command: >
+      oc adm drain {{ item | lower }}
+      --kubeconfig={{ kubeconfig_path }}
+      --force --delete-local-data --ignore-daemonsets
+      --timeout=0s
+    loop: "{{ pre_scaleup_workers_name }}"
+
+  - name: Remove pre-scaleup machinesets
+    command: >
+      oc delete machinesets {{ item }}
+      --kubeconfig={{ kubeconfig_path }}
+      --namespace=openshift-machine-api
+    loop: "{{ pre_scaleup_machineset_names }}"

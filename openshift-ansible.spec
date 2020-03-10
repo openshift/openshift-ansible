@@ -61,7 +61,6 @@ cp -rp test %{buildroot}%{_datadir}/ansible/%{name}/
 Summary:       Openshift and Atomic Enterprise Ansible Test Playbooks
 Requires:      %{name} = %{version}-%{release}
 Requires:      ansible = 2.9.5
-Requires:      python2-openshift
 Requires:      openssh-clients
 BuildArch:     noarch
 
