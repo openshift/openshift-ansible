@@ -19,6 +19,7 @@ BuildArch:      noarch
 
 Requires:      ansible >= 2.9.1
 Requires:      openshift-clients
+Requires:      openssl
 
 %description
 OpenShift RHEL Worker Management Ansible Playbooks
