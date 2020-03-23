@@ -1,0 +1,21 @@
+---
+
+- name: Gather Debug - Get service status
+  command: >
+    systemctl status {{ item }}
+  changed_when: false
+  ignore_errors: true
+  register: systemctl_status
+  loop:
+  - cri-o
+  - kubelet
+
+- name: Gather Debug - Get complete node objects
+  command: >
+    oc get node {{ ansible_nodename | lower }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
+    --output=json
+  delegate_to: localhost
+  changed_when: false
+  ignore_errors: true
+  register: oc_get
