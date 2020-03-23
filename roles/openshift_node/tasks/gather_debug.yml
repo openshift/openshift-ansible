@@ -12,12 +12,10 @@
 
 - name: Gather Debug - Get complete node objects
   command: >
-    oc get node {{ hostvars[item].ansible_nodename | lower }}
+    oc get node {{ ansible_nodename | lower }}
     --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=json
-  loop: "{{ ansible_play_batch }}"
   delegate_to: localhost
-  run_once: true
   changed_when: false
   ignore_errors: true
   register: oc_get
