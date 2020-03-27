@@ -118,7 +118,7 @@
   oc_obj:
     state: present
     kind: CustomResourceDefinition
-    name: "kuryrnets"
+    name: "kuryrnets.openstack.org"
     files:
     - "{{ manifests_tmpdir.stdout }}/kuryrnet.yaml"
   run_once: true
@@ -128,7 +128,7 @@
   oc_obj:
     state: present
     kind: CustomResourceDefinition
-    name: "kuryrnetpolicies"
+    name: "kuryrnetpolicies.openstack.org"
     files:
     - "{{ manifests_tmpdir.stdout }}/kuryrnetpolicy.yaml"
   run_once: true
