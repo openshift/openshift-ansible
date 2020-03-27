@@ -1,0 +1,38 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-21T17:14:45Z",
+                "name": "node-csr-TkefytQp8Dz4Xp7uzcw605MocvI0gWuEOGNrHhOjGNQ",
+                "namespace": "",
+                "resourceVersion": "1453681",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/node-csr-TkefytQp8Dz4Xp7uzcw605MocvI0gWuEOGNrHhOjGNQ",
+                "uid": "b3686297-a565-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:serviceaccounts",
+                    "system:serviceaccounts:openshift-infra",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "uid": "3bdbaae3-9cf8-11e8-964a-525400650cba",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "client auth"
+                ],
+                "username": "system:serviceaccount:openshift-infra:node-bootstrapper"
+            },
+            "status": {}
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}
