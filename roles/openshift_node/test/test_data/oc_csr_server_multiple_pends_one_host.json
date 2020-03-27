@@ -1,0 +1,361 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T16:41:29Z",
+                "generateName": "csr-",
+                "name": "csr-2cxkp",
+                "namespace": "",
+                "resourceVersion": "1578087",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-2cxkp",
+                "uid": "381cfcae-a62a-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T15:50:12Z",
+                "generateName": "csr-",
+                "name": "csr-6bg7z",
+                "namespace": "",
+                "resourceVersion": "1573263",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-6bg7z",
+                "uid": "0e3111cd-a623-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T16:15:53Z",
+                "generateName": "csr-",
+                "name": "csr-6cz27",
+                "namespace": "",
+                "resourceVersion": "1575680",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-6cz27",
+                "uid": "a4961503-a626-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T17:45:29Z",
+                "generateName": "csr-",
+                "name": "csr-74txg",
+                "namespace": "",
+                "resourceVersion": "1584118",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-74txg",
+                "uid": "28ee9517-a633-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T17:32:41Z",
+                "generateName": "csr-",
+                "name": "csr-7pljj",
+                "namespace": "",
+                "resourceVersion": "1582914",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-7pljj",
+                "uid": "5f2b1a62-a631-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T16:54:17Z",
+                "generateName": "csr-",
+                "name": "csr-b47dt",
+                "namespace": "",
+                "resourceVersion": "1579291",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-b47dt",
+                "uid": "01e08f7c-a62c-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T17:07:05Z",
+                "generateName": "csr-",
+                "name": "csr-h2mtd",
+                "namespace": "",
+                "resourceVersion": "1580498",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-h2mtd",
+                "uid": "cba40b72-a62d-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T17:19:53Z",
+                "generateName": "csr-",
+                "name": "csr-hk4mn",
+                "namespace": "",
+                "resourceVersion": "1581711",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-hk4mn",
+                "uid": "956780ac-a62f-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T15:12:23Z",
+                "generateName": "csr-",
+                "name": "csr-jx6hb",
+                "namespace": "",
+                "resourceVersion": "1569679",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-jx6hb",
+                "uid": "c5baacbc-a61d-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T16:28:41Z",
+                "generateName": "csr-",
+                "name": "csr-ls6fn",
+                "namespace": "",
+                "resourceVersion": "1576883",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-ls6fn",
+                "uid": "6e59b171-a628-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T16:02:55Z",
+                "generateName": "csr-",
+                "name": "csr-trmmp",
+                "namespace": "",
+                "resourceVersion": "1574459",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-trmmp",
+                "uid": "d518971e-a624-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T15:37:33Z",
+                "generateName": "csr-",
+                "name": "csr-v5rwt",
+                "namespace": "",
+                "resourceVersion": "1572073",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-v5rwt",
+                "uid": "498742cb-a621-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        },
+        {
+            "apiVersion": "certificates.k8s.io/v1beta1",
+            "kind": "CertificateSigningRequest",
+            "metadata": {
+                "creationTimestamp": "2018-08-22T15:24:54Z",
+                "generateName": "csr-",
+                "name": "csr-x69qv",
+                "namespace": "",
+                "resourceVersion": "1570881",
+                "selfLink": "/apis/certificates.k8s.io/v1beta1/certificatesigningrequests/csr-x69qv",
+                "uid": "85478e3c-a61f-11e8-8a5d-525400650cba"
+            },
+            "spec": {
+                "groups": [
+                    "system:nodes",
+                    "system:authenticated"
+                ],
+                "request": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQzdqQ0NBZFlDQVFBd2daRXhDekFKQmdOVkJBWVRBbFZUTVFzd0NRWURWUVFJREFKT1F6RVFNQTRHQTFVRQpCd3dIVW1Gc1pXbG5hREVRTUE0R0ExVUVDZ3dIVW1Wa0lFaGhkREVTTUJBR0ExVUVDd3dKVDNCbGJsTm9hV1owCk1SMHdHd1lEVlFRRERCUm1aV1J2Y21FeExtOXdaVzV6YUdsbWRDNXBiekVlTUJ3R0NTcUdTSWIzRFFFSkFSWVAKZFhObGNrQnlaV1JvWVhRdVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQQpxK2NnS0lneHhPMXRsTjErTExidWpvWFc2ekM4dUxEUHcyRnAwQThTeUpCRTNSMGl5N2hNUTg0dGJFWTZzYTJMClZGcWwyd3FJRW83OVdZWXVOQjl6MkZrYThWZVl5QktOa1FYcmhCZ2FxSU5ySndWR0Q3cHI4RXU5YmNWbjd4WUgKWDg3V2xwcXhjL3hEdUhOcXpsMmJXZ3V5UVk0dFZBQkFzYWkvN0UvR1VSQzRKUTc0RnlJUGRURGx5KzgyT01jdgpwMFBIdWwxcFFybmpPWFo2enJWMWdmczJMUFFCbUpxUWdtWVc3VjBUZ2xzbk10YnUrMmRvLzVJUEptZ0lnemRXCmxUcTQwSEhFNm1mUVpiSjF5UDlGU092NnRTc09iNysza2RuU1dUSkE3S0RMMXg2RktxdUluUEs4NXFNMHdDNlQKdHh2N1hnNURDYW51VnA0OTZGRlNvUUlEQVFBQm9CY3dGUVlKS29aSWh2Y05BUWtITVFnTUJuSmxaR2hoZERBTgpCZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBRXhlOTZaelQ5ZzhBR0hVQ0xackx6OXhYNFUxTlVsUWhoaVZLUnZHCjM5WjNucm1xaHlodTdjYkVFUTVCZ0VvUFhxTVJCRElvengyTWVFNitRckxHeVZjbVZvd2F5WUs1Mm9ScFNtbmgKTllIbUFwRXFBeFlqUUVvUnhNb205dzZub0NNbWhBbkNVZW1ja1ZlblBCY1pJNEpkeXlrZ3JKNUVBcmxWTm5VUAoyS09rYVhUVzBTZFd2cWQwQ2NSMU9aU1BtTndMeUVSOS9KYlJZWk9veVltNlYzWkRCN2hrcFM1cmxZa3JNL3Y3Cm9hbUVVb04wZUhGYzZBY0RObUNPWDlkbTFDQmFWbFQ4bnQwV3R5Vk9BaUF4SFlVYU8zQ3BGSVJjTkdKZ2VmY3YKY0pkK2N1WG5zeDRUWnhKclBLNTMxRVNQNWtVRm01Wmg1UFIrQzNSaU84VFpoUT09Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=",
+                "usages": [
+                    "digital signature",
+                    "key encipherment",
+                    "server auth"
+                ],
+                "username": "system:node:fedora1.openshift.io"
+            },
+            "status": {}
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}
