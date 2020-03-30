@@ -16,6 +16,7 @@ RUN INSTALL_PKGS="python-lxml python-dns pyOpenSSL python2-cryptography openssl 
  && if [ "$(uname -m)" == "x86_64" ]; then yum install -y https://sdodson.fedorapeople.org/google-cloud-sdk-183.0.0-3.el7.x86_64.rpm ; fi \
  && yum install -y java-1.8.0-openjdk-headless \
  && rpm -V $INSTALL_PKGS $EPEL_PKGS $EPEL_TESTING_PKGS \
+ && pip install -U 'setuptools==44.0.0' 'wheel' \
  && pip install 'apache-libcloud~=2.2.1' 'SecretStorage<3' 'ansible[azure]' 'boto3==1.4.6' \
  && yum clean all
 
