@@ -86,7 +86,7 @@
   #  reboot_timeout: 600  # default, 10 minutes
 
 - block:
-  - name: Wait for nodes to report ready
+  - name: Wait for node to report ready
     command: >
       oc get node {{ ansible_nodename | lower }}
       --kubeconfig={{ openshift_node_kubeconfig_path }}
@@ -105,4 +105,3 @@
   - name: DEBUG - Node failed to report ready
     fail:
       msg: "Node failed to report ready"
-    delegate_to: localhost
