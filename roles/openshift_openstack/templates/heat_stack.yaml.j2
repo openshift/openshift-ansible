@@ -223,6 +223,16 @@ resources:
       # TODO(shadower): Make this configurable?
       lb_algorithm: ROUND_ROBIN
       loadbalancer: { get_resource: api_lb }
+
+  api_lb_health_monitor:
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::HealthMonitor
+    properties:
+      delay: 5
+      max_retries: 5
+      pool: { get_resource: api_lb_pool }
+      timeout: 2
+      type: HTTPS
+      url_path: /healthz
 {% endif %}
 
 {% if not openshift_openstack_provider_network_name %}
@@ -1164,6 +1174,15 @@ resources:
       protocol: HTTP
       listener: { get_resource: router_lb_listener_http }
 
+  router_lb_health_monitor_http:
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::HealthMonitor
+    properties:
+      delay: 5
+      max_retries: 5
+      pool: { get_resource: router_lb_pool_http }
+      timeout: 2
+      type: TCP
+
   router_lb_listener_https:
     type: OS::{{ openshift_openstack_lbaasv2_provider }}::Listener
     properties:
@@ -1178,4 +1197,13 @@ resources:
       lb_algorithm: ROUND_ROBIN
       protocol: HTTPS
       listener: { get_resource: router_lb_listener_https }
+
+  router_lb_health_monitor_https:
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::HealthMonitor
+    properties:
+      delay: 5
+      max_retries: 5
+      pool: { get_resource: router_lb_pool_https }
+      timeout: 2
+      type: TCP
 {% endif %}
