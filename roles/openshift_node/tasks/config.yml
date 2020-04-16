@@ -16,6 +16,13 @@
     sysctl_file: "/etc/sysctl.d/99-openshift.conf"
     reload: yes
 
+# runc dropped this setting
+# Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1823374#c17
+- name: Update fs.may_detach_mounts
+  sysctl:
+    name: fs.may_detach_mounts
+    value: 1
+
 # The base OS RHEL with "Minimal" installation option is
 # enabled firewalld serivce by default, it denies unexpected 10250 port.
 # Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1740439
