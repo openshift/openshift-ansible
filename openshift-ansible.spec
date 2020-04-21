@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.213
+Version:        3.11.214
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Apr 21 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.214-1
+- Install rh-operators in the correct namespace (agreene@redhat.com)
+
 * Mon Apr 20 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.213-1
 - 
 
