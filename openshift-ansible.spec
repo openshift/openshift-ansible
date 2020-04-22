@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.214
+Version:        3.11.215
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Apr 22 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.215-1
+- Update GCE image disk size (build_image) (rteague@redhat.com)
+- Update GCE image disk size (rteague@redhat.com)
+
 * Tue Apr 21 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.214-1
 - Install rh-operators in the correct namespace (agreene@redhat.com)
 
