@@ -7,7 +7,7 @@
 - name: Get worker machine current config name
   command: >
     oc get node {{ ansible_nodename | lower }}
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/desiredConfig}'
   delegate_to: localhost
   register: oc_get
@@ -24,7 +24,7 @@
 - name: Get worker ignition config
   command: >
     oc get machineconfig {{ l_worker_machine_config_name }}
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --output=json
   delegate_to: localhost
   register: oc_get
@@ -42,7 +42,7 @@
 - name: Get machine-config-operator image
   command: >
     oc get daemonset machine-config-daemon
-    --config={{ openshift_node_kubeconfig_path }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
     --namespace=openshift-machine-config-operator
     --output=jsonpath='{.spec.template.spec.containers[?(@.name=="machine-config-daemon")].image}'
   delegate_to: localhost
@@ -83,15 +83,23 @@
   reboot:
   #  reboot_timeout: 600  # default, 10 minutes
 
-- name: Wait for nodes to report ready
-  command: >
-    oc get node {{ ansible_nodename | lower }}
-    --config={{ openshift_node_kubeconfig_path }}
-    --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
-  delegate_to: localhost
-  run_once: true
-  register: oc_get
-  until:
-  - oc_get.stdout == "True"
-  retries: 36
-  delay: 5
+- block:
+  - name: Wait for node to report ready
+    command: >
+      oc get node {{ ansible_nodename | lower }}
+      --kubeconfig={{ openshift_node_kubeconfig_path }}
+      --output=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+    delegate_to: localhost
+    register: oc_get
+    until:
+    - oc_get.stdout == "True"
+    retries: 36
+    delay: 5
+    changed_when: false
+
+  rescue:
+  - import_tasks: gather_debug.yml
+
+  - name: DEBUG - Node failed to report ready
+    fail:
+      msg: "Node failed to report ready"
