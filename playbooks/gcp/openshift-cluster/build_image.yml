@@ -37,7 +37,7 @@
       name: "{{ openshift_gcp_prefix }}build-image-instance"
       disk_type: pd-ssd
       image: "{{ openshift_gcp_base_image }}"
-      size_gb: 10
+      size_gb: 20
       state: present
 
   - name: Launch the image build instance
