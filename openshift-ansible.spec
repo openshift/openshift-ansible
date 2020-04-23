@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.215
+Version:        3.11.216
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Apr 23 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.216-1
+- 
+
 * Wed Apr 22 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.215-1
 - Update GCE image disk size (build_image) (rteague@redhat.com)
 - Update GCE image disk size (rteague@redhat.com)
