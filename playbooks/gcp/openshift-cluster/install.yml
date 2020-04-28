@@ -7,6 +7,8 @@
     include_role:
       name: openshift_gcp
       tasks_from: setup_scale_group_facts.yml
+    vars:
+      all_nodes: true
 
 - name: run the init
   import_playbook: ../../init/main.yml
