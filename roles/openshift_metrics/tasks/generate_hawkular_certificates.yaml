@@ -32,9 +32,7 @@
   register: htpasswd_output
   when: openshift_metrics_hawkular_fips | default(False) | bool
 
-- copy:
-    content: "{{ htpasswd_output.stdout_lines | join('') }}"
-    dest: "{{ local_tmp.stdout }}/hawkular-metrics.htpasswd"
+- local_action: copy dest="{{ local_tmp.stdout }}/hawkular-metrics.htpasswd" content="{{ htpasswd_output.stdout_lines | join('') }}"
   when: openshift_metrics_hawkular_fips | default(False) | bool
 
 - name: copy local generated passwords to target
