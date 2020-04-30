@@ -16,8 +16,6 @@
   - import_role:
       name: openshift_certificate_expiry
       tasks_from: main.yml
-    vars:
-      openshift_certificate_expiry_warning_days: 183
 
 - name: Ensure firewall is not switched during upgrade
   hosts: "{{ l_upgrade_no_switch_firewall_hosts | default('oo_all_hosts') }}"
