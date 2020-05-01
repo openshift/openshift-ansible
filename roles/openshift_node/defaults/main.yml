@@ -89,6 +89,7 @@ openshift_node_support_packages_base:
   - container-storage-setup
   #- cloud-utils-growpart
   - ceph-common
+  - cifs-utils
 
 openshift_node_support_packages_by_arch:
   ppc64le:
