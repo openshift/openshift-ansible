@@ -11,8 +11,8 @@ openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config
 
 openshift_node_packages:
   - cri-o-{{ l_kubernetes_version }}.*
-  - openshift-clients-{{ l_cluster_version }}.*
-  - openshift-hyperkube-{{ l_cluster_version }}.*
+  - openshift-clients-{{ l_cluster_version }}*
+  - openshift-hyperkube-{{ l_cluster_version }}*
   - podman
 
 openshift_node_support_packages: "{{ openshift_node_support_packages_base + openshift_node_support_packages_by_arch[ansible_architecture] }}"
