@@ -1,0 +1,40 @@
+---
+# This playbook is intended to be included from playbooks/updates/cloud_provider.yml
+
+- name: Update cloud provider config
+  hosts: oo_nodes_to_config
+  tasks:
+  - import_role:
+      name: openshift_cloud_provider
+      tasks_from: main.yml
+
+- name: Restart nodes
+  hosts: oo_nodes_to_config
+  serial: "{{ openshift_restart_nodes_serial | default(1) }}"
+  roles:
+  - lib_openshift
+  - openshift_facts
+  tasks:
+  - name: restart node
+    service:
+      name: "{{ openshift_service_type }}-node"
+      state: restarted
+      daemon-reload: yes
+
+  - name: Wait for node to be ready
+    oc_obj:
+      state: list
+      kind: node
+      name: "{{ l_kubelet_node_name | lower }}"
+    register: node_output
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_config
+    until:
+    - node_output.module_results is defined
+    - node_output.module_results.returncode is defined
+    - node_output.module_results.results is defined
+    - node_output.module_results.returncode == 0
+    - node_output.module_results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+    # Give the node three minutes to come back online.
+    retries: 36
+    delay: 5
