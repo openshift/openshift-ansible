@@ -47,7 +47,6 @@
       - ansible_os_family == "RedHat"
       - ansible_distribution != "Fedora"
       - openshift_deployment_type == 'origin'
-      - openshift_enable_origin_repo | default(true) | bool
 
     - name: Ensure clean repo cache in the event repos have been changed manually
       debug:
