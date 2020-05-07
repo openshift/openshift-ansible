@@ -134,5 +134,6 @@
       openshift_master_cluster_hostname must be set when deploying multiple masters to ensure the loadbalancer name
       is used for accessing the cluster API
   when:
+    - groups.oo_masters_to_config is defined
     - groups.oo_masters_to_config | length > 1
     - openshift_master_cluster_hostname is not defined or openshift_master_cluster_hostname == ''
