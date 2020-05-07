@@ -11,7 +11,7 @@
   register: _disable_output
   changed_when:
     - "_disable_output.stdout != ''"
-    - (_disable_output.stdout | from_json)['acknowledged'] | bool
+    - (_disable_output.stdout | from_json).acknowledged | default(false) | bool
   failed_when: false
 
 - name: "Check if there is a rollout in progress for {{ _es_node }}"
@@ -70,7 +70,7 @@
   register: _enable_output
   changed_when:
     - "_enable_output.stdout != ''"
-    - (_enable_output.stdout | from_json)['acknowledged'] | bool
+    - (_enable_output.stdout | from_json).acknowledged | default(false) | bool
 
 # evaluate the RC for _dc_output
 - name: Evaluating status of rolled out pod
