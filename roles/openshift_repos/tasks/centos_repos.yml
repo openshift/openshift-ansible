@@ -4,16 +4,25 @@
 # This task matches the file names provided by the package so that they are
 # not installed twice in different files and remains idempotent.
 
-- name: Configure origin gpg keys
-  copy:
-    src: "origin/gpg_keys/openshift-ansible-CentOS-SIG-PaaS"
-    dest: "/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS"
-  notify: refresh cache
+- when:
+  - openshift_enable_origin_repo | default(true) | bool
+  block:
+  - name: Configure origin gpg keys
+    copy:
+      src: "origin/gpg_keys/openshift-ansible-CentOS-SIG-PaaS"
+      dest: "/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS"
+    notify: refresh cache
 
-# The version is hardcoded since we cannot use the openshift_version role
-# (it uses the installed packages to determine the version).
-- name: Configure correct origin release repository
-  template:
-    src: "CentOS-OpenShift-Origin311.repo.j2"
-    dest: "/etc/yum.repos.d/CentOS-OpenShift-Origin311.repo"
+  # The version is hardcoded since we cannot use the openshift_version role
+  # (it uses the installed packages to determine the version).
+  - name: Configure correct origin release repository
+    template:
+      src: "CentOS-OpenShift-Origin311.repo.j2"
+      dest: "/etc/yum.repos.d/CentOS-OpenShift-Origin311.repo"
+    notify: refresh cache
+
+- name: Enable the EPEL repo for installing Ansible
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
   notify: refresh cache
