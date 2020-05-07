@@ -2,9 +2,10 @@
 # tests with new APIs/semantics. We want to update versions deliberately.
 
 # flake8 must be listed before pylint to avoid dependency conflicts
-flake8==3.7.7
+flake8==3.7.9
 flake8-mutable==1.2.0
-flake8-print==3.1.0
-pylint==1.9.4
+flake8-print==3.1.4
+pylint==2.4.4
+pytest==5.4.1
 setuptools-lint==0.6.0
-yamllint==1.15.0
+yamllint==1.20.0
