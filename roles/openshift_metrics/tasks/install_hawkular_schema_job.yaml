@@ -1,4 +1,12 @@
 ---
+- name: Ensure that hawkular-metrics-schema job has nodes to run on
+  import_role:
+    name: openshift_control_plane
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ openshift_metrics_schema_job_nodeselector | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: Hawkular Metrics schema job
+
 - name: list installed jobs
   command: >
     {{ openshift_client_binary }} -n {{ openshift_metrics_project }} --config={{ mktemp.stdout }}/admin.kubeconfig
@@ -18,4 +26,6 @@
   template:
     src: hawkular_metrics_schema_job.j2
     dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_schema_job.yaml"
+  vars:
+    node_selector: "{{openshift_metrics_schema_job_nodeselector | default('') }}"
   changed_when: false

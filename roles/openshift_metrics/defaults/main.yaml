@@ -44,6 +44,8 @@ openshift_metrics_heapster_requests_cpu: null
 openshift_metrics_heapster_nodeselector: ""
 openshift_metrics_heapster_concurrency_limit: 5
 
+openshift_metrics_schema_job_nodeselector: ""
+
 openshift_metrics_install_hawkular_agent: False
 openshift_metrics_hawkular_agent_limits_memory: null
 openshift_metrics_hawkular_agent_limits_cpu: null

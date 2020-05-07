@@ -33,3 +33,9 @@ spec:
         secret:
           secretName: hawkular-metrics-account
       restartPolicy: OnFailure
+{% if node_selector is iterable and node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in node_selector.items() %}
+          {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
