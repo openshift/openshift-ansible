@@ -24,10 +24,17 @@ spec:
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         env:
+{% if os_firewall_use_firewalld is defined and os_firewall_use_firewalld.lower() == 'true' %}
+        - name: CONFIGURE_FIREWALLD
+          value: "true"
+        - name: FIREWALL_ZONE
+          value: "{{firewall_zone}}"
+{% else %}
         - name: CONFIGURE_IPTABLES
           value: "true"
         - name: IPTABLES_CHAIN
           value: "OS_FIREWALL_ALLOW"
+{% endif %}
         - name: NODE_TYPE
           value: "database"
         - name: CONTRAIL_STATUS_IMAGE

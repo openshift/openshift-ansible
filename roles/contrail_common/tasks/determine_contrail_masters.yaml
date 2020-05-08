@@ -13,9 +13,3 @@
     - hostvars[item]['openshift_node_group_name'] is defined
     - hostvars[item]['openshift_node_group_name'] == contrail_node_group
   with_items: "{{ groups.nodes }}"
-
-- name: Set contrail_masters from masters group if not set before
-  set_fact:
-    contrail_masters: "{{ contrail_masters }} {{ item }}"
-  with_items: "{{ groups.masters }}"
-  when: contrail_masters.split() | length < 1

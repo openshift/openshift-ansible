@@ -97,6 +97,14 @@
   - role: aci
     when: openshift_use_aci | default(false) | bool
 
+- name: Contrail Installation
+  hosts: oo_first_master
+  roles:
+  - role: contrail_master
+    when:
+    - openshift_use_contrail | default(false) | bool
+    - groups.new_nodes | default([]) | length == 0
+
 - import_playbook: contrail_sanitize.yml
 
 - name: Node Join Checkpoint End
