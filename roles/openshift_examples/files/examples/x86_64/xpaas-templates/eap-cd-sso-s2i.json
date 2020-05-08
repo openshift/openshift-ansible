@@ -5,8 +5,8 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss,hidden",
-            "version": "17.0",
-            "openshift.io/display-name": "JBoss EAP CD 17 + Single Sign-On with passthrough TLS",
+            "version": "18.0",
+            "openshift.io/display-name": "JBoss EAP CD 18 + Single Sign-On with passthrough TLS",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Enterprise Application Platform continuous delivery application Single Sign-On application. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap-cd/README.adoc",
             "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform continuous delivery based application, including a build configuration, application deployment configuration, integrated with Red Hat Single Sign-On and secure communication using passthrough TLS.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap-cd-sso-s2i",
-        "xpaas": "17.0"
+        "xpaas": "18.0"
     },
     "message": "A new JBoss EAP CD based application with SSL and SSO support has been created in your project. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -54,6 +54,19 @@
             "description": "Path within Git project to build; empty for root project directory.",
             "name": "CONTEXT_DIR",
             "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Galleon layers",
+            "description": "Comma separated list of Galleon layers to provision a server.",
+            "name": "GALLEON_PROVISION_LAYERS",
+            "required": false
+        },
+        {
+            "displayName": "Enable ExampleDS datasource",
+            "description": "Enable ExampleDS datasource.",
+            "name": "ENABLE_GENERATE_DEFAULT_DATASOURCE",
+            "value": "false",
             "required": false
         },
         {
@@ -463,10 +476,20 @@
             }
         },
         {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-build-artifacts",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
             "kind": "BuildConfig",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${APPLICATION_NAME}",
+                "name": "${APPLICATION_NAME}-build-artifacts",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 }
@@ -503,7 +526,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "eap-cd-openshift:17"
+                            "name": "eap-cd-openshift:18"
                         },
                         "env": [
                             {
@@ -521,6 +544,14 @@
                             {
                                 "name": "MAVEN_ARGS_APPEND",
                                 "value": "${MAVEN_ARGS_APPEND}"
+                            },
+                            {
+                                "name": "GALLEON_PROVISION_LAYERS",
+                                "value": "${GALLEON_PROVISION_LAYERS}"
+                            },
+                            {
+                                "name": "GALLEON_PROVISION_DEFAULT_FAT_SERVER",
+                                "value": "true"
                             }
                         ]
                     }
@@ -528,7 +559,7 @@
                 "output": {
                     "to": {
                         "kind": "ImageStreamTag",
-                        "name": "${APPLICATION_NAME}:latest"
+                        "name": "${APPLICATION_NAME}-build-artifacts:latest"
                     }
                 },
                 "triggers": [
@@ -547,6 +578,66 @@
                     {
                         "type": "ImageChange",
                         "imageChange": {}
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "BuildConfig",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            },
+            "spec": {
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}:latest"
+                    }
+                },
+                "source": {
+                    "dockerfile": "FROM eap-cd-runtime-openshift:18\nCOPY /server $JBOSS_HOME\nUSER root\nRUN chown -R jboss:root $JBOSS_HOME && chmod -R ug+rwX $JBOSS_HOME\nUSER jboss\nCMD $JBOSS_HOME/bin/openshift-launch.sh",
+                    "images": [
+                        {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}-build-artifacts:latest"
+                            },
+                            "paths": [
+                                {
+                                    "sourcePath": "/s2i-output/server/",
+                                    "destinationDir": "."
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "strategy": {
+                    "dockerStrategy": {
+                        "imageOptimizationPolicy": "SkipLayers",
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "eap-cd-runtime-openshift:18",
+                            "namespace": "${IMAGE_STREAM_NAMESPACE}"
+                        }
+                    },
+                    "type": "Docker"
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}-build-artifacts:latest"
+                            }
+                        }
                     },
                     {
                         "type": "ConfigChange"
@@ -829,6 +920,10 @@
                                     {
                                         "name": "SSO_TRUSTSTORE_PASSWORD",
                                         "value": "${SSO_TRUSTSTORE_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "ENABLE_GENERATE_DEFAULT_DATASOURCE",
+                                        "value": "${ENABLE_GENERATE_DEFAULT_DATASOURCE}"
                                     }
                                 ]
                             }
