@@ -78,13 +78,19 @@
   # lib_utils_oo_select_keys, lib_utils_oo_collect
   # are custom filter plugins in roles/lib_utils/filter_plugins/oo_filters.py
   - set_fact:
-      openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+      openshift_master_etcd_hosts_group: "{{ groups['oo_etcd_to_config'] | default([]) }}"
+
+  - set_fact:
+      openshift_master_etcd_hosts_group: "{{ [inventory_hostname] + ( openshift_master_etcd_hosts_group | difference(inventory_hostname) ) }}"
+    when: inventory_hostname in openshift_master_etcd_hosts_group
+
+  - set_fact:
+      openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(openshift_master_etcd_hosts_group)
                                                   | lib_utils_oo_collect('openshift.common.ip') | default([]) | join(',')
                                                   }}"
       openshift_master_etcd_port: "{{ etcd_client_port | default('2379') }}"
       openshift_master_etcd_hosts: "{{ hostvars
-                                       | lib_utils_oo_select_keys(groups['oo_etcd_to_config']
-                                                        | default([]))
+                                       | lib_utils_oo_select_keys(openshift_master_etcd_hosts_group)
                                        | lib_utils_oo_collect('openshift.common.hostname')
                                        | default(none, true) }}"
   # This fact requires the facts set above, so needs to happen in it's own task.
