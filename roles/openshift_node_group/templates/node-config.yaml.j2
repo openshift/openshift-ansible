@@ -50,6 +50,10 @@ kubeletArguments:
 {% endif %}
   enable-controller-attach-detach:
   - 'true'
+  runtime-cgroups:
+  - /systemd/system.slice
+  kubelet-cgroups:
+  - /systemd/system.slice
 masterClientConnectionOverrides:
   acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
   burst: 40
