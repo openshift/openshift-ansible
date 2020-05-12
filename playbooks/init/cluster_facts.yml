@@ -80,7 +80,8 @@
   - set_fact:
       openshift_master_etcd_hosts_group: "{{ groups['oo_etcd_to_config'] | default([]) }}"
 
-  - set_fact:
+  - name: Set the local etcd instance as primary entry to lower the etcd access latency
+    set_fact:
       openshift_master_etcd_hosts_group: "{{ [inventory_hostname] + ( openshift_master_etcd_hosts_group | difference(inventory_hostname) ) }}"
     when: inventory_hostname in openshift_master_etcd_hosts_group
 
