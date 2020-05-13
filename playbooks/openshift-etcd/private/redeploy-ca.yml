@@ -1,16 +1,4 @@
 ---
-- name: Check cert expirys
-  hosts: oo_etcd_to_config:oo_masters_to_config
-  vars:
-    openshift_certificate_expiry_show_all: yes
-  roles:
-  # Sets 'check_results' per host which contains health status for
-  # etcd, master and node certificates.  We will use 'check_results'
-  # to determine if any certificates were expired prior to running
-  # this playbook. Service restarts will be skipped if any
-  # certificates were previously expired.
-  - role: openshift_certificate_expiry
-
 - name: Backup existing etcd CA certificate directories
   hosts: oo_etcd_to_config
   tasks:
