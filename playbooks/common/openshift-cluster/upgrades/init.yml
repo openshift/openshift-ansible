@@ -13,9 +13,24 @@
   hosts: "{{ l_upgrade_cert_check_hosts }}"
   any_errors_fatal: true
   tasks:
+  # During upgrades we want to check if certificates are expiring within six months.
+  # The upgrade will stop if certificates are expiring, requiring the user to either
+  # deploy new certificates, override openshift_certificate_expiry_warning_days or
+  # openshift_certificate_expiry_fail_on_warn in the inventory.
+  - name: Upgrade - Override default openshift_certificate_expiry_warning_days
+    set_fact:
+      openshift_certificate_expiry_warning_days: 183
+    when:
+    - openshift_certificate_expiry_warning_days is undefined or
+      openshift_certificate_expiry_warning_days == ""
+  - name: Upgrade - Override default openshift_certificate_expiry_fail_on_warn
+    set_fact:
+      openshift_certificate_expiry_fail_on_warn: true
+    when:
+    - openshift_certificate_expiry_fail_on_warn is undefined or
+      openshift_certificate_expiry_fail_on_warn == ""
   - import_role:
       name: openshift_certificate_expiry
-      tasks_from: main.yml
 
 - name: Ensure firewall is not switched during upgrade
   hosts: "{{ l_upgrade_no_switch_firewall_hosts | default('oo_all_hosts') }}"
