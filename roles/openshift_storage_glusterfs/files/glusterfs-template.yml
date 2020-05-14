@@ -118,7 +118,8 @@ objects:
           hostPath:
             path: "/var/lib/heketi"
         - name: glusterfs-run
-          emptyDir: {}
+          emptyDir:
+            medium: Memory
         - name: glusterfs-lvm
           hostPath:
             path: "/run/lvm"
