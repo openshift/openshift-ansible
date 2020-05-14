@@ -23,6 +23,6 @@
 
 - name: Enable the EPEL repo for installing Ansible
   yum:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    name: "{{ openshift_epel_rpm_url }}"
     state: present
   notify: refresh cache

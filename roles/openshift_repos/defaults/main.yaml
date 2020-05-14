@@ -1,3 +1,4 @@
 ---
 openshift_additional_repos: {}
 openshift_repos_enable_testing: false
+openshift_epel_rpm_url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
