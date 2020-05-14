@@ -292,7 +292,7 @@ resources:
     type: OS::Neutron::SubnetPool
     properties:
       prefixes: [ {{ openshift_openstack_kuryr_pod_subnet_cidr }} ]
-      default_prefixlen: 24
+      default_prefixlen: {{ openshift_openstack_kuryr_pod_subnet_prefixlen }}
       name:
         str_replace:
           template: openshift-ansible-cluster_id-pod-subnet-pool
