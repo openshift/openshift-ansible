@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.217
+Version:        3.11.218
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,40 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon May 18 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.218-1
+- Add support to configure subnetpool prefixlen at Kuryr (ltomasbo@redhat.com)
+- Use variable for EPEL RPM URL for CentOS (rteague@redhat.com)
+- Generate htpaswd inside hawkular metrics container (ruben.vargas@aluxoft.com)
+- Add six month expiry check back to upgrades (rteague@redhat.com)
+- Remove cert expiry check during cert redeploy (rteague@redhat.com)
+- API server use the local etcd instance first (Scaleup)
+  (gabriel.mainberger@vshn.net)
+- Add a description to set the local etcd instance as primary entry
+  (gabriel.mainberger@vshn.net)
+- API server use the local etcd instance first (gabriel.mainberger@vshn.net)
+- Enable EPEL repo for openshift origin install on CentOS (rteague@redhat.com)
+- Remove hard coded openshift_certificate_expiry_warning_days
+  (rteague@redhat.com)
+- Copy the htpasswd using local action (ruben.vp8510@gmail.com)
+- Ensure all nodes are populated in inventory groups (rteague@redhat.com)
+- Add conditional to fix openshift_master_cluster_hostname check
+  (rteague@redhat.com)
+- Bug 1824056: fix task name for removal of openshift-monitoring project
+  (pawel@krupa.net.pl)
+- Add /usr/share/pki to sync pod (rteague@redhat.com)
+- use openshift3/registry-console instead of cockpit/kubernetes with origin
+  deployment (mostafa.hussein91@gmail.com)
+- Fix namespace for rh-operators.configmap.yaml (richardt@comcarde.com)
+- Remove OVS pod force grace-period 0 on upgrade (gabriel.mainberger@vshn.net)
+- Update EAP CD 18 imagestreams and templates (ken@zaptillion.net)
+- Added several features and fixed bugs (pvijayaragav@juniper.net)
+- Don't abort if ElasticSearch is slow (manuel@hutter.io)
+- fix failed to get stats (vanloswang@126.com)
+- Added output to master-restart. Avoid searchs and serves as doc
+  (sergioperez794@gmail.com)
+- Possibility to define nodeSelector for hawkular-metrics-schema job
+  (jmartisk@redhat.com)
+
 * Tue May 05 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.217-1
 - 
 
