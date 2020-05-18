@@ -758,6 +758,8 @@ To enable this new kuryr namespace isolation capability you need to uncomment:
 ```yaml
 openshift_kuryr_subnet_driver: namespace
 openshift_kuryr_sg_driver: namespace
+
+kuryr_openstack_global_namespaces: default,openshift-monitoring'
 ```
 
 When namespace isolation is enabled there is a new subnet per namespace being
@@ -777,6 +779,56 @@ enabled_handlers = vif,lb,lbaasspec,namespace,*kuryrnet*
 
 Note depending on the Kuryr controller image version, this feature (handler)
 may not be available.
+
+The `kuryr_openstack_global_namespace` defines the list of namespaces that are
+global and can be accessed from any other namespace, as well as access any
+namespace. By default only the `default` and the `openshift-monitoring`
+namespaces are included in the list.
+
+**NOTE**: After the installation, the global namespaces can also be extended by
+modifying the `kuryr-config` ConfigMap, adding the new ones, and restarting
+kuryr-controller. Note this should be done before creating the namespace to
+ensure the right rules are created for it. Additionally, the services created
+before adding new global namespace won't pick up the new config automatically
+and they will need to be recreated to ensure the associated Octavia load
+balancer gets its listeners properly configured. Finally, removing global
+namespaces is not supported either.
+
+```
+$ oc -n kuryr edit cm kuryr-config
+[namespace_sg]
+sg_allow_from_namespaces = 32ac59b0-be74-4592-a433-b4c762e2541e
+sg_allow_from_default = a1ab21f3-2176-4bb6-b98b-1f00a0a099ab
+global_namespaces = default,openshift-monitoring,NEW_NAMESPACE_TO_ADD
+
+$ oc new-project NEW_NAMESPACE_TO_ADD
+```
+
+### Remote_group_id removal
+
+Note the access to the other namespaces from the global ones is handled by
+the Security Group named `*-allow_from_default`. Although this can be handle
+with the default `remote_group_id` rule existing there, this has proven to
+cause scaling issues and some times even connectivity issues.
+To avoid those the next actions are highly recomended to upgrade to an env
+without remote_group_id usage:
+
+```
+# Add a rule per each namespace added into the kuryr_openstack_global_namespace
+# Get the new range:
+$ oc get kuryrnets ns-NAMESPACE_NAME -o yaml | grep subnetCIDR
+  subnetCIDR: 10.11.13.0/24
+￼
+# Create the associated rules (tcp and udp):
+$ openstack security group rule create --remote-ip 10.11.13.0/24 --protocol tcp
+openshift-ansible-openshift.example.com-allow_from_default
+$ openstack security group rule create --remote-ip 10.11.13.0/24 --protocol udp
+openshift-ansible-openshift.example.com-allow_from_default
+
+# Remove the security group rule with the remote_group_id
+$ openstack security group show *-allow_from_default | grep remote_group_id
+$ openstack security group rule delete REMOTE_GROUP_ID
+```
 
 ### Network Policies
 
