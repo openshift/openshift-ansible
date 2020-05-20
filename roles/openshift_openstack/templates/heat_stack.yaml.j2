@@ -322,15 +322,7 @@ resources:
       description: Give access to the services and pods on the default namespace from the other namespaces
       rules:
       - ethertype: IPv4
-        remote_group_id: { get_resource: sg_allow_from_default }
-        remote_mode: remote_group_id
-
-  sg_allow_from_default_rule:
-    type: OS::Neutron::SecurityGroupRule
-    properties:
-      security_group: { get_resource: sg_allow_from_default }
-      ethertype: IPv4
-      remote_group: { get_resource: sg_allow_from_namespace }
+        remote_ip_prefix: {{ openshift_openstack_kuryr_pod_subnet_cidr }}
 
   common-secgrp_namespace_rule:
     type: OS::Neutron::SecurityGroupRule

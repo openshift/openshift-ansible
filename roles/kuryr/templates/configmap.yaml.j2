@@ -338,6 +338,7 @@ data:
     [namespace_sg]
     sg_allow_from_namespaces = {{ kuryr_openstack_sg_allow_from_namespace_id }}
     sg_allow_from_default = {{ kuryr_openstack_sg_allow_from_default_id }}
+    global_namespaces = {{ kuryr_openstack_global_namespaces }}
 {% endif %}
 
     # Time (in seconds) that Kuryr controller waits for LBaaS to be activated
