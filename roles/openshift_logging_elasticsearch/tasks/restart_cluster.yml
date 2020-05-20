@@ -40,7 +40,7 @@
   until:
   - _pod_status.rc == 0
   - _pod_status.stdout is defined
-  - (_pod_status.stdout | from_json)['status'] == 'green'
+  - (_pod_status.stdout | from_json)['status'] in ['green', 'yellow']
   - (_pod_status.stdout | from_json)['number_of_nodes'] == _cluster_pods.stdout.split(' ') | count
   retries: "{{ __elasticsearch_ready_retries }}"
   delay: 10
@@ -50,7 +50,7 @@
 
 - when:
   - _pod_status.stdout is defined
-  - (_pod_status.stdout | from_json)['status'] in ['yellow', 'red'] or (_pod_status.stdout | from_json)['number_of_nodes'] != _cluster_pods.stdout.split(' ') | count
+  - (_pod_status.stdout | from_json)['status'] in ['red'] or (_pod_status.stdout | from_json)['number_of_nodes'] != _cluster_pods.stdout.split(' ') | count
   block:
   - name: Set Logging message to manually restart
     run_once: true
@@ -61,7 +61,7 @@
 
   - debug: msg="Elasticsearch cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} restart of cluster logging."
 
-- when: _pod_status.stdout is undefined or ( (_pod_status.stdout | from_json)['status'] in ['green'] and (_pod_status.stdout | from_json)['number_of_nodes'] == _cluster_pods.stdout.split(' ') | count )
+- when: _pod_status.stdout is undefined or ( (_pod_status.stdout | from_json)['status'] in ['green', 'yellow'] and (_pod_status.stdout | from_json)['number_of_nodes'] == _cluster_pods.stdout.split(' ') | count )
   block:
   - command: >
       {{ openshift_client_binary }}

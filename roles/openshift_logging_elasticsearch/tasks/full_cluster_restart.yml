@@ -31,7 +31,7 @@
     exec {{ _cluster_pods.stdout.split(' ')[0] }}
     -c elasticsearch
     -n {{ openshift_logging_elasticsearch_namespace }}
-    -- es_util --query=_cluster/settings -XPUT -d '{ "transient": { "cluster.routing.allocation.enable" : "none" } }'
+    -- es_util --query=_cluster/settings -XPUT -d '{ "persistent": { "cluster.routing.allocation.enable" : "primaries" } }'
   register: _disable_output
   changed_when:
   - "_disable_output.stdout != ''"
@@ -170,14 +170,14 @@
     exec {{ _cluster_pods.stdout.split(' ')[0] }}
     -c elasticsearch
     -n {{ openshift_logging_elasticsearch_namespace }}
-    -- es_util --query=_cluster/settings -XPUT -d '{ "transient": { "cluster.routing.allocation.enable" : "all" } }'
+    -- es_util --query=_cluster/settings -XPUT -d '{ "persistent": { "cluster.routing.allocation.enable" : "all" } }'
   register: _enable_output
   changed_when:
   - "_enable_output.stdout != ''"
   - (_enable_output.stdout | from_json)['acknowledged'] | bool
 
 # Skip healthcheck for a full cluster restart always since it could take a long time to recover?
-- name: "Waiting for ES node {{ _es_node }} health to be in ['green']"
+- name: "Waiting for ES node {{ _es_node }} health to be in ['green', 'yellow']"
   command: >
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
@@ -188,7 +188,7 @@
   register: _cluster_status
   until:
   - "_cluster_status.stdout != ''"
-  - (_cluster_status.stdout | from_json)['status'] in ['green']
+  - (_cluster_status.stdout | from_json)['status'] in ['green', 'yellow']
   retries: "{{ __elasticsearch_ready_retries }}"
   delay: 30
   changed_when: false
@@ -201,7 +201,7 @@
   set_stats:
     data:
       installer_phase_logging:
-        message: "Cluster logging-{{ _cluster_component }} was unable to recover to a green state. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
+        message: "Cluster logging-{{ _cluster_component }} was unable to recover to at least a yellow state. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
 
 # Reenable external communication for {{ _cluster_component }}
 - name: Reenable external communication for logging-{{ _cluster_component }}
