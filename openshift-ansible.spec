@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.218
+Version:        3.11.219
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed May 20 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.219-1
+- Add support for global namespaces and removal of remote_group_id
+  (ltomasbo@redhat.com)
+
 * Mon May 18 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.218-1
 - Add support to configure subnetpool prefixlen at Kuryr (ltomasbo@redhat.com)
 - Use variable for EPEL RPM URL for CentOS (rteague@redhat.com)
