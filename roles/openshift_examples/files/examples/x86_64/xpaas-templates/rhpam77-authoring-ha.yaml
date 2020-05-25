@@ -184,7 +184,7 @@ parameters:
 - displayName: DataGrid Image
   description: DataGrid image.
   name: DATAGRID_IMAGE
-  value: registry.redhat.io/jboss-datagrid-7/datagrid73-openshift:1.4
+  value: registry.redhat.io/jboss-datagrid-7/datagrid73-openshift:1.5
   required: true
 - displayName: DataGrid Container CPU Limit
   description: DataGrid Container CPU limit.
@@ -267,9 +267,9 @@ parameters:
   value: "rhpam-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.7.0".
+  description: A named pointer to an image in an image stream. Default is "7.7.1".
   name: IMAGE_STREAM_TAG
-  value: "7.7.0"
+  value: "7.7.1"
   required: true
 - displayName: Maven mirror URL
   description: Maven mirror that Business Central and KIE server must use. If you configure a mirror, this mirror must contain all artifacts that are required for building and deploying your services.
@@ -928,7 +928,7 @@ objects:
             value: "${KIE_MBEANS}"
 ## OpenShift Enhancement BEGIN
           - name: KIE_SERVER_CONTROLLER_OPENSHIFT_ENABLED
-            value: "false"
+            value: "true"
           - name: KIE_SERVER_CONTROLLER_OPENSHIFT_GLOBAL_DISCOVERY_ENABLED
             value: "${KIE_SERVER_CONTROLLER_OPENSHIFT_GLOBAL_DISCOVERY_ENABLED}"
           - name: KIE_SERVER_CONTROLLER_OPENSHIFT_PREFER_KIESERVER_SERVICE
@@ -1068,7 +1068,10 @@ objects:
   spec:
     revisionHistoryLimit: 10
     strategy:
-      type: Recreate
+      rollingParams:
+        maxSurge: 100%
+        maxUnavailable: 0
+      type: Rolling
     triggers:
     - type: ImageChange
       imageChangeParams:
@@ -1208,7 +1211,7 @@ objects:
           - name: KIE_SERVER_ROUTE_NAME
             value: "insecure-${APPLICATION_NAME}-kieserver"
           - name: KIE_SERVER_STARTUP_STRATEGY
-            value: "ControllerBasedStartupStrategy"
+            value: "OpenShiftStartupStrategy"
           - name: MAVEN_MIRROR_URL
             value: "${MAVEN_MIRROR_URL}"
           - name: MAVEN_MIRROR_OF

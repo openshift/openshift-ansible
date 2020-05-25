@@ -27,6 +27,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhpam-7/rhpam-businesscentral-rhel8:7.7.0
+    - name: '7.7.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.7 - Business Central image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.7
+        version: '7.7.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-rhel8:7.7.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -48,6 +60,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhpam-7/rhpam-businesscentral-monitoring-rhel8:7.7.0
+    - name: '7.7.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.7 - Business Central Monitoring image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.7
+        version: '7.7.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-monitoring-rhel8:7.7.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -69,6 +93,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhpam-7/rhpam-controller-rhel8:7.7.0
+    - name: '7.7.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.7 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.7
+        version: '7.7.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-controller-rhel8:7.7.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -90,6 +126,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhpam-7/rhpam-kieserver-rhel8:7.7.0
+    - name: '7.7.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.7 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.7
+        version: '7.7.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-kieserver-rhel8:7.7.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -111,6 +159,18 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhpam-7/rhpam-smartrouter-rhel8:7.7.0
+    - name: '7.7.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.7 - Smart Router image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.7
+        version: '7.7.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-smartrouter-rhel8:7.7.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -132,3 +192,15 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhpam-7/rhpam-process-migration-rhel8:7.7.0
+    - name: '7.7.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.7 - Process Migration image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.7
+        version: '7.7.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-process-migration-rhel8:7.7.1
