@@ -34,6 +34,18 @@
     state: yes
     persistent: yes
 
+- name: Setting sebool virt_use_samba
+  seboolean:
+    name: virt_use_samba
+    state: yes
+    persistent: yes
+
+- name: Setting sebool container_use_cephfs
+  seboolean:
+    name: container_use_cephfs
+    state: yes
+    persistent: yes
+
 - name: Create temp directory
   tempfile:
     state: directory
