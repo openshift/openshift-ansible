@@ -80,9 +80,9 @@ parameters:
   value: "rhpam-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.7.0".
+  description: A named pointer to an image in an image stream. Default is "7.7.1".
   name: IMAGE_STREAM_TAG
-  value: "7.7.0"
+  value: "7.7.1"
   required: true
 ## External database parameters BEGIN
 - displayName: KIE Server Persistence Schema
@@ -174,9 +174,9 @@ parameters:
   required: false
 ## Extension image configuration BEGIN
 - displayName: Drivers Extension Image
-  description: ImageStreamTag definition for the image containing the drivers and configuration. For example, custom-driver-image:7.7.0.
+  description: ImageStreamTag definition for the image containing the drivers and configuration. For example, custom-driver-image:7.7.1.
   name: EXTENSIONS_IMAGE
-  value: custom-driver-extension:7.7.0
+  value: custom-driver-extension:7.7.1
   required: true
 - displayName: Drivers ImageStream Namespace
   description: Namespace within which the ImageStream definition for the image containing the drivers and configuration is located.

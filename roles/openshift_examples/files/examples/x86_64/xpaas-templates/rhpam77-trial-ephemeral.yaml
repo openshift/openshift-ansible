@@ -134,9 +134,9 @@ parameters:
   value: "rhpam-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.7.0".
+  description: A named pointer to an image in an image stream. Default is "7.7.1".
   name: IMAGE_STREAM_TAG
-  value: "7.7.0"
+  value: "7.7.1"
   required: true
 - displayName: KIE Server Container Deployment
   description: 'KIE Server Container deployment configuration with optional alias. Format: containerId=groupId:artifactId:version|c2(alias2)=g2:a2:v2'
