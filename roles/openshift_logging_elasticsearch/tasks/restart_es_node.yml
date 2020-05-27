@@ -7,7 +7,7 @@
     --cert {{ _logging_handler_tempdir.stdout }}/admin-cert
     --key {{ _logging_handler_tempdir.stdout }}/admin-key
     -XPUT 'https://logging-{{ _cluster_component }}.{{ openshift_logging_elasticsearch_namespace }}.svc:9200/_cluster/settings'
-    -d '{ "transient": { "cluster.routing.allocation.enable" : "none" } }'
+    -d '{ "persistent": { "cluster.routing.allocation.enable" : "primaries" } }'
   register: _disable_output
   changed_when:
     - "_disable_output.stdout != ''"
@@ -66,7 +66,7 @@
     --cert {{ _logging_handler_tempdir.stdout }}/admin-cert
     --key {{ _logging_handler_tempdir.stdout }}/admin-key
     -XPUT 'https://logging-{{ _cluster_component }}.{{ openshift_logging_elasticsearch_namespace }}.svc:9200/_cluster/settings'
-    -d '{ "transient": { "cluster.routing.allocation.enable" : "all" } }'
+    -d '{ "persistent": { "cluster.routing.allocation.enable" : "all" } }'
   register: _enable_output
   changed_when:
     - "_enable_output.stdout != ''"
@@ -79,7 +79,7 @@
     msg: "Node {{ _es_node}} in cluster logging-{{ _cluster_component }} was unable to rollout. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
 
 - when: not _skip_healthcheck | bool
-  name: "Waiting for ES node {{ _es_node }} health to be in ['green']"
+  name: "Waiting for ES node {{ _es_node }} health to be in ['green', 'yellow']"
   command: >
     curl -s -k
     --cert {{ _logging_handler_tempdir.stdout }}/admin-cert
@@ -88,7 +88,7 @@
   register: _cluster_status
   until:
     - "_cluster_status.stdout != ''"
-    - (_cluster_status.stdout | from_json)['status'] in ['green']
+    - (_cluster_status.stdout | from_json)['status'] in ['green', 'yellow']
   retries: "{{ __elasticsearch_ready_retries }}"
   delay: 30
   changed_when: false
@@ -102,9 +102,9 @@
   set_stats:
     data:
       installer_phase_logging:
-        message: "Cluster logging-{{ _cluster_component }} was unable to recover to a green state. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
+        message: "Cluster logging-{{ _cluster_component }} was unable to recover to at least a yellow state. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
 
 - name: Evaluating cluster health
   assert:
     that: _cluster_status.failed is undefined or not _cluster_status.failed
-    msg: "Cluster logging-{{ _cluster_component }} was unable to recover to a green state. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
+    msg: "Cluster logging-{{ _cluster_component }} was unable to recover to at least a yellow state. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."

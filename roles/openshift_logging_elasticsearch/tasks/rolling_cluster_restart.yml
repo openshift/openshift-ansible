@@ -27,7 +27,7 @@
     --cert {{ _logging_handler_tempdir.stdout }}/admin-cert
     --key {{ _logging_handler_tempdir.stdout }}/admin-key
     -XPUT 'https://logging-{{ _cluster_component }}.{{ openshift_logging_elasticsearch_namespace }}.svc:9200/_cluster/settings'
-    -d '{ "transient": { "cluster.routing.allocation.enable" : "none" } }'
+    -d '{ "persistent": { "cluster.routing.allocation.enable" : "primaries" } }'
   register: _cluster_disable_output
   changed_when:
   - "_cluster_disable_output.stdout != ''"
@@ -71,7 +71,7 @@
     --cert {{ _logging_handler_tempdir.stdout }}/admin-cert
     --key {{ _logging_handler_tempdir.stdout }}/admin-key
     -XPUT 'https://logging-{{ _cluster_component }}.{{ openshift_logging_elasticsearch_namespace }}.svc:9200/_cluster/settings'
-    -d '{ "transient": { "cluster.routing.allocation.enable" : "all" } }'
+    -d '{ "persistent": { "cluster.routing.allocation.enable" : "all" } }'
   register: _cluster_enable_output
   until: _cluster_enable_output.rc == 0
   retries: "{{ __elasticsearch_ready_retries }}"
