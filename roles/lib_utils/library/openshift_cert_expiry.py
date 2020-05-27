@@ -559,6 +559,14 @@ an OpenShift Container Platform cluster
             if proxyClient:
                 cert_meta['proxyClient'] = os.path.join(cfg_path, proxyClient)
 
+            frontProxyCA = cfg.get('authConfig', {}).get('requestHeader', {}).get('clientCA')
+            if frontProxyCA:
+                cert_meta['frontProxyCA'] = os.path.join(cfg_path, frontProxyCA)
+
+            aggregatorProxyClient = cfg.get('aggregatorConfig', {}).get('proxyClientInfo', {}).get('certFile')
+            if aggregatorProxyClient:
+                cert_meta['aggregatorProxyClient'] = os.path.join(cfg_path, aggregatorProxyClient)
+
             namedCertificates = cfg.get('servingInfo', {}).get('namedCertificates', [])
             if namedCertificates:
                 for i, v in enumerate(namedCertificates):
