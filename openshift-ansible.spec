@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.219
+Version:        3.11.220
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu May 28 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.220-1
+- Added expiration checks for aggregator-proxy certs (lstanton@redhat.com)
+- [KIECLOUD-390] - Update RHPAM and RHDM templates adocs files and templates on
+  ocp catalog. (fspolti@redhat.com)
+- Update OpenStack and Kuryr reviewers/approvers (ltomasbo@redhat.com)
+- [Bug 1828433] Bump up etcd release to 3.2.28 (gabriel.mainberger@vshn.net)
+- Updating ES restart policy to allow primaries be placed and allow yellow
+  status before continuing (ewolinet@redhat.com)
+
 * Wed May 20 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.219-1
 - Add support for global namespaces and removal of remote_group_id
   (ltomasbo@redhat.com)
