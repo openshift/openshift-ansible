@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.220
+Version:        3.11.221
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri May 29 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.221-1
+- gluster: use memory (tmpfs) emptydir for glusterfs-run volume
+  (jmulligan@redhat.com)
+
 * Thu May 28 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.220-1
 - Added expiration checks for aggregator-proxy certs (lstanton@redhat.com)
 - [KIECLOUD-390] - Update RHPAM and RHDM templates adocs files and templates on
