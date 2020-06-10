@@ -28,5 +28,14 @@ openshift_logging_curator_script_log_level: INFO
 openshift_logging_curator_log_level: ERROR
 openshift_logging_curator_timeout: 300
 
-# following can be uncommented to provide values for configmaps -- take care when providing file contents as it may cause your cluster to not operate correctly
+# If this is set to true then the logging-curator configmap will be overridden
+# by the default values. If set to false, the existing logging-curator
+# configmap will be left in tact.
+# NOTE: if you would like to provide your own configmap you can provide
+# curator_config_contents below.
+openshift_logging_curator_replace_configmap: no
+
+# following can be uncommented to provide values for configmaps -- take care
+# when providing file contents as it may cause your cluster to not operate
+# correctly
 #curator_config_contents:
