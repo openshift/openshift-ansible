@@ -2,15 +2,9 @@
 - name: Build node config maps
   include_tasks: create_config.yml
   vars:
-    l_openshift_node_group_name: "{{ node_group }}"
-    l_openshift_node_group_edits: "{{ (openshift_node_groups | selectattr('name', 'match', '^' ~ node_group ~ '$') | list | first).edits | default([]) }}"
-    l_openshift_node_group_labels: "{{ (openshift_node_groups | selectattr('name', 'match', '^' ~ node_group ~ '$') | list | first).labels }}"
-    # Create a unique list of openshift_node_group_names for nodes in oo_nodes_to_config
-    l_active_node_group_names: "{{ hostvars
-                                    | lib_utils_oo_select_keys(groups.oo_nodes_to_config)
-                                    | lib_utils_oo_collect('openshift_node_group_name')
-                                    | unique
-                                }}"
-  loop: "{{ l_active_node_group_names }}"
+    l_openshift_node_group_name: "{{ node_group.name }}"
+    l_openshift_node_group_edits: "{{ node_group.edits | default([]) }}"
+    l_openshift_node_group_labels: "{{ node_group.labels }}"
+  loop: "{{ openshift_node_groups }}"
   loop_control:
     loop_var: node_group
