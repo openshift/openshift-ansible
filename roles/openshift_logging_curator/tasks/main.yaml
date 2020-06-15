@@ -123,6 +123,17 @@
           - current_file: "config.yaml"
             new_file: "{{ tempdir }}/curator.yml"
 
+    # Create config map
+    - name: Set Curator configmap
+      oc_configmap:
+        state: present
+        name: "logging-curator"
+        namespace: "{{ openshift_logging_namespace }}"
+        from_file:
+          actions.yaml: "{{ tempdir }}/actions.yaml"
+          curator5.yaml: "{{ tempdir }}/config.yaml"
+          config.yaml: "{{ tempdir }}/curator.yml"
+
 # Create cronjob
 - name: Set Curator Cronjob
   oc_obj:
@@ -133,17 +144,6 @@
     files:
       - "{{ tempdir }}/templates/curator-cj.yaml"
     delete_after: true
-
-# Create config map
-- name: Set Curator configmap
-  oc_configmap:
-    state: present
-    name: "logging-curator"
-    namespace: "{{ openshift_logging_namespace }}"
-    from_file:
-      actions.yaml: "{{ tempdir }}/actions.yaml"
-      curator5.yaml: "{{ tempdir }}/config.yaml"
-      config.yaml: "{{ tempdir }}/curator.yml"
 
 - name: Delete temp directory
   file:
