@@ -36,12 +36,15 @@ spec:
           httpGet:
             path: /ready
             port: {{ kuryr_controller_healthcheck_port }}
-          timeoutSeconds: 5
+          timeoutSeconds: 20
+          periodSeconds: 30
+          failureThreshold: 10
         livenessProbe:
           httpGet:
             path: /alive
             port: {{ kuryr_controller_healthcheck_port }}
           initialDelaySeconds: 15
+          failureThreshold: 10
 {% endif %}
         # FIXME(dulek): This shouldn't be required, but without it selinux is
         #               complaining about access to kuryr.conf.
