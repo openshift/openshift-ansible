@@ -323,20 +323,6 @@ resources:
       rules:
       - ethertype: IPv4
         remote_ip_prefix: {{ openshift_openstack_kuryr_pod_subnet_cidr }}
-
-  common-secgrp_namespace_rule:
-    type: OS::Neutron::SecurityGroupRule
-    properties:
-      security_group: { get_resource: common-secgrp }
-      ethertype: IPv4
-      remote_group: { get_resource: sg_allow_from_namespace }
-
-  common-secgrp_default_rule:
-    type: OS::Neutron::SecurityGroupRule
-    properties:
-      security_group: { get_resource: common-secgrp }
-      ethertype: IPv4
-      remote_group: { get_resource: sg_allow_from_default }
 {% endif %}
 
 
