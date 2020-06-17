@@ -1,11 +1,11 @@
 ---
 - name: Create machineset_name
   set_fact:
-    machineset_name: "{{ item.metadata.name ~ '-rhel'}}"
+    machineset_name: "{{ l_machineset.metadata.name ~ '-rhel'}}"
 
 - name: Update machineset definition
   set_fact:
-    machineset: "{{ item | combine(dict_edit, recursive=True) }}"
+    machineset: "{{ l_machineset | combine(dict_edit, recursive=True) }}"
   vars:
     dict_edit:
       metadata:

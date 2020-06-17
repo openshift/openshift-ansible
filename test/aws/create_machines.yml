@@ -11,9 +11,11 @@
 
   - include_tasks: tasks/create_machineset.yml
     loop: "{{ (machineset.stdout | from_json)['items'] }}"
+    loop_control:
+      loop_var: l_machineset
     when:
-    - item.status.replicas is defined
-    - item.status.replicas != 0
+    - l_machineset.status.replicas is defined
+    - l_machineset.status.replicas != 0
 
 - name: Prepare new nodes
   hosts: new_workers
