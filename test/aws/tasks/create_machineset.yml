@@ -86,7 +86,7 @@
   rescue:
   - name: Machine creation failed
     fail:
-      msg: "Machine creation failed, error: {{ new_machine.resources[0].status.errorMessage }}"
+      msg: "Machine creation failed"
 
 - name: Get ssh bastion address
   command: >
