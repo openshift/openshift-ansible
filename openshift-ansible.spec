@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.232
+Version:        3.11.233
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Jun 29 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.233-1
+- Adjust Kuryr probes (ltomasbo@redhat.com)
+- Fix #12187 (blockloop@users.noreply.github.com)
+- Bug 1841439: fix configmaps overriding curator.yaml
+  (blockloop@users.noreply.github.com)
+- Create configmaps for all items in openshift_node_groups (rteague@redhat.com)
+
 * Mon Jun 08 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.232-1
 - 
 
