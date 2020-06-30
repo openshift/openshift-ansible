@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.233
+Version:        3.11.234
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jun 30 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.234-1
+- 
+
 * Mon Jun 29 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.233-1
 - Adjust Kuryr probes (ltomasbo@redhat.com)
 - Fix #12187 (blockloop@users.noreply.github.com)
