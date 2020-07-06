@@ -327,6 +327,7 @@ data:
 {% if kuryr_openstack_public_subnet_id|default(false) %}
     external_svc_subnet = {{ kuryr_openstack_public_subnet_id }}
 {% endif %}
+    resource_tags = {{ openshift_openstack_clusterid }}
 
 {% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
     [namespace_subnet]
