@@ -51,23 +51,18 @@
     state: directory
   register: temp_dir
 
-- name: Wait for bootstrap endpoint to show up
-  uri:
-    url: "{{ openshift_node_bootstrap_endpoint }}"
-    validate_certs: false
-  delay: 10
-  retries: 60
-  register: result
-  until:
-  - result.status is defined
-  - result.status == 200
-
 - name: Fetch bootstrap ignition file locally
   uri:
     url: "{{ openshift_node_bootstrap_endpoint }}"
     dest: "{{ temp_dir.path }}/bootstrap.ign"
     validate_certs: false
+    http_agent: "Ignition/0.35.0"
+  delay: 10
+  retries: 60
   register: bootstrap_ignition
+  until:
+  - bootstrap_ignition.status is defined
+  - bootstrap_ignition.status == 200
 
 # registries.conf is listed twice in the config, the second one is the right one
 - name: Extract the last registries.conf file from bootstrap.ign
