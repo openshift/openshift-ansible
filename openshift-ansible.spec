@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.242
+Version:        3.11.243
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Jul 15 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.243-1
+- 
+
 * Tue Jul 14 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.242-1
 - Correct GCP group mapping for infra and compute (rteague@redhat.com)
 
