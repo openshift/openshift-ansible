@@ -63,6 +63,7 @@ Summary:       Openshift and Atomic Enterprise Ansible Test Playbooks
 Requires:      %{name} = %{version}-%{release}
 Requires:      ansible = 2.9.5
 Requires:      openssh-clients
+Requires:      python2-boto
 BuildArch:     noarch
 
 %description test
