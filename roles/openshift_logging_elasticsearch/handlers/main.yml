@@ -2,7 +2,7 @@
 - name: "Restarting logging cluster"
   listen: "restart elasticsearch"
   include_tasks: restart_cluster.yml
-  with_items: "{{ _restart_logging_components }}"
+  with_items: "{{ _restart_logging_components | unique }}"
   loop_control:
     loop_var: _cluster_component
   when: not logging_elasticsearch_rollout_override | default(false) | bool

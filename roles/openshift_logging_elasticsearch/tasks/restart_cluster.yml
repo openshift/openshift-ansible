@@ -84,7 +84,7 @@
   - name: "Performing rolling restart for Elasticsearch cluster {{ _cluster_component }} cluster"
     include_tasks: rolling_cluster_restart.yml
     vars:
-      logging_restart_cluster_dcs: "{{ _restart_logging_nodes | intersect(_cluster_dcs.stdout) }}"
+      logging_restart_cluster_dcs: "{{ _restart_logging_nodes | unique | intersect(_cluster_dcs.stdout) }}"
     when:
     - not full_restart_cluster | bool
 
