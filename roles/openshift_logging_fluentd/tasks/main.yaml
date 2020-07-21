@@ -91,44 +91,61 @@
     state: present
     user: "system:serviceaccount:{{ openshift_logging_fluentd_namespace }}:aggregated-logging-fluentd"
 
-# create Fluentd configmap
-- template:
-    src: "fluent.conf.j2"
-    dest: "{{ tempdir }}/fluent.conf"
-  vars:
-    deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
-
-- copy:
-    src: "fluentd-throttle-config.yaml"
-    dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
-
-- copy:
-    src: "secure-forward.conf"
-    dest: "{{ tempdir }}/secure-forward.conf"
-
-- include_role:
-    name: openshift_logging
-    tasks_from: patch_configmap_files.yaml
-  vars:
-    configmap_name: "logging-fluentd"
-    configmap_namespace: "{{ openshift_logging_namespace }}"
-    configmap_file_names:
-      - current_file: "fluent.conf"
-        new_file: "{{ tempdir }}/fluent.conf"
-      - current_file: "throttle-config.yaml"
-        new_file: "{{ tempdir }}/fluentd-throttle-config.yaml"
-      - current_file: "secure-forward.conf"
-        new_file: "{{ tempdir }}/secure-forward.conf"
-
-- name: Set Fluentd configmap
+- name: Get existing configmap logging-fluentd
   oc_configmap:
-    state: present
-    name: "logging-fluentd"
-    namespace: "{{ openshift_logging_fluentd_namespace }}"
-    from_file:
-      fluent.conf: "{{ tempdir }}/fluent.conf"
-      throttle-config.yaml: "{{ tempdir }}/fluentd-throttle-config.yaml"
-      secure-forward.conf: "{{ tempdir }}/secure-forward.conf"
+    state: list
+    name: logging-fluentd
+    namespace: "{{ openshift_logging_namespace }}"
+  register: __current_fluentd_configmap_output
+
+- set_fact:
+    __fluentd_configmap_missing: "{{ __current_fluentd_configmap_output.module_results.returncode != 0 }}"
+
+- name: create/update fluentd configmap
+  when: __fluentd_configmap_missing|bool or openshift_logging_fluentd_replace_configmap|bool
+  block:
+    # Generate config files
+    - template:
+        src: "fluent.conf.j2"
+        dest: "{{ tempdir }}/fluent.conf"
+      vars:
+        deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
+
+    # Copy config files
+    - copy:
+        src: "fluentd-throttle-config.yaml"
+        dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
+
+    # Copy config files
+    - copy:
+        src: "secure-forward.conf"
+        dest: "{{ tempdir }}/secure-forward.conf"
+
+    # Patch existing configuration, if present
+    - include_role:
+        name: openshift_logging
+        tasks_from: patch_configmap_files.yaml
+      vars:
+        configmap_name: "logging-fluentd"
+        configmap_namespace: "{{ openshift_logging_namespace }}"
+        configmap_file_names:
+          - current_file: "fluent.conf"
+            new_file: "{{ tempdir }}/fluent.conf"
+          - current_file: "throttle-config.yaml"
+            new_file: "{{ tempdir }}/fluentd-throttle-config.yaml"
+          - current_file: "secure-forward.conf"
+            new_file: "{{ tempdir }}/secure-forward.conf"
+
+    # create Fluentd configmap
+    - name: Set Fluentd configmap
+      oc_configmap:
+        state: present
+        name: "logging-fluentd"
+        namespace: "{{ openshift_logging_fluentd_namespace }}"
+        from_file:
+          fluent.conf: "{{ tempdir }}/fluent.conf"
+          throttle-config.yaml: "{{ tempdir }}/fluentd-throttle-config.yaml"
+          secure-forward.conf: "{{ tempdir }}/secure-forward.conf"
 
 # create Fluentd secret
 - include_tasks: generate_secret.yaml

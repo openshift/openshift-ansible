@@ -82,3 +82,8 @@ openshift_logging_fluentd_file_buffer_limit: 256Mi
 # Configure fluentd to tail audit log file and filter out container engine's logs from there
 # These logs are then stored in ES operation index
 openshift_logging_fluentd_audit_container_engine: False
+
+# If this is set to true then the logging-fluentd configmap will be overridden
+# by the default values. If set to false, the existing logging-fluentd
+# configmap will be left in tact.
+openshift_logging_fluentd_replace_configmap: no
