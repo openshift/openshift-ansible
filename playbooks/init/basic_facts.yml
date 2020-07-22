@@ -83,6 +83,10 @@
       - l_existing_config_master_config.networkConfig.clusterNetworks is defined
       # End block
 
+  - set_fact:
+      first_master_client_binary: "{{  openshift_client_binary }}"
+      openshift_client_binary: "{{ openshift_client_binary }}"
+
 - name: Initialize special first-master variables
   hosts: oo_first_master
   roles:
@@ -100,11 +104,6 @@
       - l_existing_config_master_config.projectConfig.defaultNodeSelector != ''
 
   - set_fact:
-      # We need to setup openshift_client_binary here for special uses of delegate_to in
-      # later roles and plays.
-      first_master_client_binary: "{{  openshift_client_binary }}"
-      #Some roles may require this to be set for first master
-      openshift_client_binary: "{{ openshift_client_binary }}"
       # we need to know if a default node selector has been manually set outside the installer
       l_osm_default_node_selector: '{{ osm_default_node_selector | default(openshift_master_config_node_selector) | default("node-role.kubernetes.io/compute=true") }}'
 
