@@ -94,7 +94,7 @@
   register: __current_curator_configmap_output
 
 - set_fact:
-    __curator_configmap_missing: "{{ __current_curator_configmap_output.module_results.returncode != 0 }}"
+    __curator_configmap_missing: "{{ __current_curator_configmap_output.module_results.stderr is defined }}"
 
 - name: create/update curator configuration
   when: __curator_configmap_missing|bool or openshift_logging_curator_replace_configmap|bool

@@ -99,7 +99,7 @@
   register: __current_fluentd_configmap_output
 
 - set_fact:
-    __fluentd_configmap_missing: "{{ __current_fluentd_configmap_output.module_results.returncode != 0 }}"
+    __fluentd_configmap_missing: "{{ __current_fluentd_configmap_output.module_results.stderr is defined }}"
 
 - name: create/update fluentd configmap
   when: __fluentd_configmap_missing|bool or openshift_logging_fluentd_replace_configmap|bool
