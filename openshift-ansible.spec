@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.248
+Version:        3.11.249
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Jul 27 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.249-1
+- allow bypassing of replacing fluentd configmap (ewolinet@redhat.com)
+- making lists unique for handler restarts (ewolinet@redhat.com)
+
 * Thu Jul 16 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.248-1
 - 
 
