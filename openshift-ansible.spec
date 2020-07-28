@@ -65,6 +65,7 @@ Requires:      ansible = 2.8.2
 Requires:      python2-openshift
 Requires:      openssh-clients
 Requires:      python2-boto
+Requires:      python-boto3
 BuildArch:     noarch
 
 %description test
