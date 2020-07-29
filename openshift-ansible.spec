@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.250
+Version:        3.11.251
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Jul 29 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.251-1
+- 
+
 * Tue Jul 28 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.250-1
 - addressing issue when doing fresh install (ewolinet@redhat.com)
 - Fix #12209 - regenerate logging certs (andrej.golis@gmail.com)
