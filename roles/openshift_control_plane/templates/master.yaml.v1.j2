@@ -33,10 +33,10 @@ controllers: '*'
 corsAllowedOrigins:
   # anchor with start (\A) and end (\z) of the string, make the check case insensitive ((?i)) and escape hostname
 {% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) | unique %}
-  - (?i)//{{ origin | regex_escape() }}(:|\z)
+  - ^(?i)https://{{ origin | regex_escape() }}(:|\z)
 {% endfor %}
 {% for custom_origin in osm_custom_cors_origins | default("") %}
-  - (?i)//{{ custom_origin | regex_escape() }}(:|\z)
+  - ^(?i)https://{{ custom_origin | regex_escape() }}(:|\z)
 {% endfor %}
 {% if 'disabled_features' in openshift.master %}
 disabledFeatures: {{ openshift.master.disabled_features | to_json }}
