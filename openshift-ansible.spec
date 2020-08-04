@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.256
+Version:        3.11.257
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Aug 04 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.257-1
+- 
+
 * Mon Aug 03 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.256-1
 - cors allowed origin to limit changing url protocol (jstuever@redhat.com)
 
