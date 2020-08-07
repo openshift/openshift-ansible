@@ -75,6 +75,7 @@ openshift_node_support_packages_base:
   - bash-completion
   - vim-minimal
   - nano
+  - openvswitch
   #- openshift-hyperkube
   #- openshift-clients
   #- pivot
