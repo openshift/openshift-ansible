@@ -22,6 +22,9 @@ resources:
       fixed_ips:
         - subnet: { get_param: subnet }
       device_owner: {{ openshift_kuryr_device_owner|default('compute:kuryr') }}
+{% if openshift_use_kuryr|default(false)|bool %}
+      tags: [{{ openshift_openstack_clusterid }}]
+{% endif %}
 
 outputs:
   subport_id:

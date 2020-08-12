@@ -294,6 +294,9 @@ resources:
         - subnet: { get_param: subnet }
 {% endif %}
       security_groups: { get_param: secgrp }
+{% if openshift_use_kuryr|default(false)|bool %}
+      tags: [{{ openshift_openstack_clusterid }}]
+{% endif %}
 
 {% if openshift_use_flannel|default(False)|bool %}
   data_port:
