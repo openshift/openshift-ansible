@@ -40,9 +40,6 @@ spec:
           #!/bin/bash
           set -euo pipefail
 
-          # cleanup old log files
-          rm -f /var/log/openvswitch-old/ovsdb-server.log /var/log/openvswitch-old/ovs-vswitchd.log
-
           mkdir -p /var/log/openvswitch
 
           # if another process is listening on the cni-server socket, wait until it exits
@@ -105,8 +102,6 @@ spec:
           readOnly: true
         - mountPath: /etc/openvswitch
           name: host-config-openvswitch
-        - mountPath: /var/log/openvswitch-old
-          name: log-openvswitch
         resources:
           requests:
             cpu: 100m
@@ -132,9 +127,5 @@ spec:
       - name: host-config-openvswitch
         hostPath:
           path: /etc/origin/openvswitch
-      - name: log-openvswitch
-        hostPath:
-          path: /var/log/openvswitch
-          type: DirectoryOrCreate
       tolerations:
       - operator: "Exists"
