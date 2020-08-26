@@ -323,6 +323,9 @@ objects:
         LookupDbusTimeout          5000
       </LocationMatch>
     external-auth-remote-user-conf: |
+      RequestHeader unset X-REMOTE-USER
+      RequestHeader unset X-REMOTE_USER
+      RequestHeader unset X_REMOTE-USER
       RequestHeader unset X_REMOTE_USER
 
       RequestHeader set X_REMOTE_USER           %{REMOTE_USER}e           env=REMOTE_USER
@@ -334,6 +337,9 @@ objects:
       RequestHeader set X_REMOTE_USER_GROUPS    %{REMOTE_USER_GROUPS}e    env=REMOTE_USER_GROUPS
       RequestHeader set X_REMOTE_USER_DOMAIN    %{REMOTE_USER_DOMAIN}e    env=REMOTE_USER_DOMAIN
     external-auth-openid-connect-remote-user-conf: |
+      RequestHeader unset X-REMOTE-USER
+      RequestHeader unset X-REMOTE_USER
+      RequestHeader unset X_REMOTE-USER
       RequestHeader unset X_REMOTE_USER
 
       RequestHeader set X_REMOTE_USER           %{OIDC_CLAIM_PREFERRED_USERNAME}e env=OIDC_CLAIM_PREFERRED_USERNAME
