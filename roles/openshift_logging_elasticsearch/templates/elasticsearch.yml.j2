@@ -1,6 +1,9 @@
 cluster:
   name: ${CLUSTER_NAME}
 
+bootstrap:
+  system_call_filter: {{ es_system_call_filter }}
+
 script:
   inline: true
   stored: true

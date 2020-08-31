@@ -227,6 +227,7 @@
   vars:
     allow_cluster_reader: "{{ openshift_logging_elasticsearch_ops_allow_cluster_reader | lower | default('false') }}"
     es_kibana_index_mode: "{{ openshift_logging_elasticsearch_kibana_index_mode | default('unique') }}"
+    es_system_call_filter: "{{ ansible_architecture == 'x86_64' }}"
     es_unicast_host: "logging-{{ es_component }}-cluster"
   changed_when: no
 
