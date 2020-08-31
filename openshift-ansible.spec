@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.273
+Version:        3.11.274
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Aug 31 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.274-1
+- 
+
 * Sun Aug 30 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.273-1
 - Pin dogpile.cache (rteague@redhat.com)
 - Bug 1867134: Remove log-openvswitch mount from ovs daemonset
