@@ -102,7 +102,7 @@
   - set_fact:
       # We need to setup openshift_client_binary here for special uses of delegate_to in
       # later roles and plays.
-      first_master_client_binary: "{{  openshift_client_binary }}"
+      first_master_client_binary: "{{ openshift_client_binary }}"
       #Some roles may require this to be set for first master
       openshift_client_binary: "{{ openshift_client_binary }}"
       # we need to know if a default node selector has been manually set outside the installer
