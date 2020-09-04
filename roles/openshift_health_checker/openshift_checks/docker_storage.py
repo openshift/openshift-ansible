@@ -44,7 +44,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         # attempt to get the docker info hash from the docker cli
         command = ' '.join(['docker', 'info', '--format', '"{{json .}}"'])
         command_args = dict(_raw_params=command)
-        command_result = self._execute_module('command', command_args)
+        command_result = self.execute_module('command', command_args)
         if command_result.get('rc', 0) != 0 or command_result.get('failed'):
             raise OpenShiftCheckException(
                 'RemoteCommandFailure',
