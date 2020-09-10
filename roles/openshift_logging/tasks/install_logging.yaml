@@ -86,7 +86,7 @@
 # the same length and do not get padded with Nones
 #
 - fail:
-    msg: There must be the same number of ES DeploymentConfigs, ES PVCs and ES indices. Found ES DeploymentConfigs - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() }}", ES PVCs - "{{ openshift_logging_facts.elasticsearch.pvcs }}" and ES indices - "{{ es_indices }}"
+    msg: There must be the same number of ES DeploymentConfigs, ES PVCs and ES indices. Found ES DeploymentConfigs - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() }}", ES DC count - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}", ES PVCs - "{{ openshift_logging_facts.elasticsearch.pvcs }}", ES PVC length - "{{ openshift_logging_facts.elasticsearch.pvcs | length  }}" and ES indices - "{{ es_indices }}", ES indices length - "{{ es_indices | length  }}"
   when: (openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count != openshift_logging_facts.elasticsearch.pvcs | length) or (openshift_logging_facts.elasticsearch.pvcs | length != es_indices | length) or (openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count != es_indices | length)
 
 - include_role:
