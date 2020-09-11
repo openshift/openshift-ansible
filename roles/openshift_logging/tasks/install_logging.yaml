@@ -153,7 +153,8 @@
   - openshift_logging_use_ops | bool
   - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
 
-- set_fact: es_ops_indices=[]
+- set_fact:
+    es_ops_indices: []
   when: openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count == 0
 
 - set_fact: openshift_logging_es_ops_pvc_prefix="logging-es-ops"
