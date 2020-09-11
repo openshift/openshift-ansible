@@ -65,7 +65,8 @@
   with_sequence: count={{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
   when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
 
-- set_fact: es_indices=[]
+- set_fact:
+    es_indices: []
   when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count == 0
 
 - set_fact: openshift_logging_es_pvc_prefix="logging-es"
