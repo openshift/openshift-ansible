@@ -48,9 +48,9 @@ parameters:
   value: "rhdm-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.8.0".
+  description: A named pointer to an image in an image stream. Default is "7.8.1".
   name: IMAGE_STREAM_TAG
-  value: "7.8.0"
+  value: "7.8.1"
   required: true
 - displayName: KIE MBeans
   description: KIE server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
