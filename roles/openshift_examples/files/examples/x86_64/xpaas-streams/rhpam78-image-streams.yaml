@@ -15,6 +15,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
+    - name: '7.8.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.8 - Business Central image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.8
+        version: '7.8.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-rhel8:7.8.1
     - name: '7.8.0'
       annotations:
         description: Red Hat Process Automation Manager 7.8 - Business Central image.
@@ -36,6 +48,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
+    - name: '7.8.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.8 - Business Central Monitoring image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.8
+        version: '7.8.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-monitoring-rhel8:7.8.1
     - name: '7.8.0'
       annotations:
         description: Red Hat Process Automation Manager 7.8 - Business Central Monitoring image.
@@ -57,6 +81,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
+    - name: '7.8.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.8 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.8
+        version: '7.8.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-controller-rhel8:7.8.1
     - name: '7.8.0'
       annotations:
         description: Red Hat Process Automation Manager 7.8 - Standalone Controller image.
@@ -78,6 +114,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
+    - name: '7.8.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.8 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.8
+        version: '7.8.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-kieserver-rhel8:7.8.1
     - name: '7.8.0'
       annotations:
         description: Red Hat Process Automation Manager 7.8 - KIE Server image.
@@ -99,6 +147,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
+    - name: '7.8.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.8 - Smart Router image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.8
+        version: '7.8.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-smartrouter-rhel8:7.8.1
     - name: '7.8.0'
       annotations:
         description: Red Hat Process Automation Manager 7.8 - Smart Router image.
@@ -120,6 +180,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
+    - name: '7.8.1'
+      annotations:
+        description: Red Hat Process Automation Manager 7.8 - Process Migration image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.8
+        version: '7.8.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-process-migration-rhel8:7.8.1
     - name: '7.8.0'
       annotations:
         description: Red Hat Process Automation Manager 7.8 - Process Migration image.

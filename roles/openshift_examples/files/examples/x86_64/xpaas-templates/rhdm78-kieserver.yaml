@@ -80,9 +80,9 @@ parameters:
   value: "rhdm-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.8.0".
+  description: A named pointer to an image in an image stream. Default is "7.8.1".
   name: IMAGE_STREAM_TAG
-  value: "7.8.0"
+  value: "7.8.1"
   required: true
 - displayName: KIE Server Mode
   description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. In production mode, you can not deploy SNAPSHOT versions of artifacts on the KIE server and can not change the version of an artifact in an existing container. (Sets the org.kie.server.mode system property)."

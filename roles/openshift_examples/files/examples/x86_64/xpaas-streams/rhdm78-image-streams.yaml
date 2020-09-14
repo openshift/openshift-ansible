@@ -15,6 +15,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
+    - name: '7.8.1'
+      annotations:
+        description: Red Hat Decision Manager 7.8 - Decision Central image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.8
+        version: '7.8.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-decisioncentral-rhel8:7.8.1
     - name: '7.8.0'
       annotations:
         description: Red Hat Decision Manager 7.8 - Decision Central image.
@@ -36,6 +48,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
+    - name: '7.8.1'
+      annotations:
+        description: Red Hat Decision Manager 7.8 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.8
+        version: '7.8.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-controller-rhel8:7.8.1
     - name: '7.8.0'
       annotations:
         description: Red Hat Decision Manager 7.8 - Standalone Controller image.
@@ -57,6 +81,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
+    - name: '7.8.1'
+      annotations:
+        description: Red Hat Decision Manager 7.8 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.8
+        version: '7.8.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-kieserver-rhel8:7.8.1
     - name: '7.8.0'
       annotations:
         description: Red Hat Decision Manager 7.8 - KIE Server image.

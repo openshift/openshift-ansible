@@ -267,9 +267,9 @@ parameters:
   value: "rhpam-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.8.0".
+  description: A named pointer to an image in an image stream. Default is "7.8.1".
   name: IMAGE_STREAM_TAG
-  value: "7.8.0"
+  value: "7.8.1"
   required: true
 - displayName: Maven mirror URL
   description: Maven mirror that Business Central and KIE server must use. If you configure a mirror, this mirror must contain all artifacts that are required for building and deploying your services.
