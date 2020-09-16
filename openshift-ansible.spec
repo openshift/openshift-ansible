@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.286
+Version:        3.11.287
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Sep 16 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.287-1
+- [KIECLOUD-418] - Update RHPAM and RHDM templates and imagestreams on
+  OpenShift Service Catalog for release 7.8.1 (fspolti@redhat.com)
+- Add --force and --grace-period options to SDN pod delete (rteague@redhat.com)
+- Use Ansible 2.9.13 for testing (rteague@redhat.com)
+- Fix docker_storage health check (rteague@redhat.com)
+
 * Fri Sep 11 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.286-1
 - 
 
