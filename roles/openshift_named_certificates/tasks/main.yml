@@ -13,6 +13,19 @@
     additive_facts_to_overwrite:
     - "{{ 'master.named_certificates' if overwrite_named_certs | bool else omit }}"
 
+- stat:
+    path: "{{ named_certs_dir }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
+  register: named_certs_dir_stat
+
+- name: Backup Named Certificates
+  command: >
+    tar -czvf /etc/origin/master-named-certificates-backup-{{ ansible_date_time.epoch }}.tgz
+    {{ named_certs_dir }}
+  when: named_certs_dir_stat.stat.exists
+
 - name: Clear named certificates
   file:
     path: "{{ named_certs_dir }}"
@@ -40,6 +53,9 @@
     mode: 0600
   with_items: "{{ named_certificates }}"
 
+- set_fact:
+    named_certificates_ca_file_defined: "{{ named_certificates | lib_utils_oo_collect('cafile')}}"
+  
 - name: Land named CA certificates
   copy:
     src: "{{ item }}"
@@ -47,3 +63,33 @@
     remote_src: "{{ openshift_named_certificates_from_remote | default(False) }}"
     mode: 0600
   with_items: "{{ named_certificates | lib_utils_oo_collect('cafile') }}"
+
+- name: Verify if the ca-bundle contains the CA to trust the named certificate
+  command: >
+    openssl verify -CAfile /etc/origin/master/ca-bundle.crt "{{ named_certs_dir }}{{ item.certfile | basename }}"
+  with_items: "{{ named_certificates }}"
+  ignore_errors: True
+  register: ca_bundle_result
+  when: named_certificates_ca_file_defined | length > 0
+
+- name: Append the custom ca to the bundle
+  block:
+  - command: mktemp -d /tmp/openshift-ansible-XXXXXX
+    register: openshift_ca_named_certificates_tmpdir
+  - copy:
+      src: /etc/origin/master/ca-bundle.crt
+      dest: "{{ openshift_ca_named_certificates_tmpdir.stdout }}"
+      remote_src: true
+  - copy:
+      src: "{{ named_certs_dir }}/{{ item | basename }}"
+      dest: "{{ openshift_ca_named_certificates_tmpdir.stdout }}"
+      remote_src: true
+    with_items: "{{ named_certificates | lib_utils_oo_collect('cafile') }}"
+  - assemble:
+      src: "{{ openshift_ca_named_certificates_tmpdir.stdout }}"
+      dest: "/etc/origin/master/ca-bundle.crt"
+      mode: 0644
+      owner: root
+      group: root
+  when: not ca_bundle_result and (named_certificates_ca_file_defined | length > 0)
+  
