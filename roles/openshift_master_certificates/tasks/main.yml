@@ -253,3 +253,12 @@
     state: link
     force: yes
   when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+
+- name: Update the default bootstrap kubeconfig for masters
+  copy:
+    remote_src: true
+    src: "/etc/origin/master/admin.kubeconfig"
+    dest: "{{ item }}"
+    mode: 0600
+  with_items:
+  - /etc/origin/node/bootstrap.kubeconfig
