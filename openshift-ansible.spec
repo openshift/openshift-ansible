@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.295
+Version:        3.11.296
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Sep 25 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.296-1
+- roles/openshift_master_certificates: Update bootstrap.kubeconfig
+  (rteague@redhat.com)
+
 * Thu Sep 24 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.295-1
 - 
 
