@@ -1,6 +1,8 @@
 ---
 - import_playbook: init/main.yml
 
+- import_playbook: openshift-master/private/check-client-ca.yml
+
 - import_playbook: openshift-etcd/private/redeploy-certificates.yml
 
 - import_playbook: openshift-master/private/redeploy-certificates.yml
