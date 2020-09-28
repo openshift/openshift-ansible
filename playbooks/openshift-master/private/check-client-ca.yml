@@ -1,0 +1,21 @@
+---
+- name: Detect incomplete OpenShift CA redeployment
+  hosts: oo_masters_to_config
+  tasks:
+  - name: Read master config
+    slurp:
+      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    register: g_master_config_output
+
+  # servingInfo.clientCA may be set as the client-ca-bundle.crt from
+  # CA redeployment and openshift_redeploy_openshift_ca must be set as true
+  # in the inventory to complete the redeployment
+  - name: Check servingInfo.clientCA = ca.crt in master config
+    fail:
+      msg: >
+        Detected an incomplete OpenShift CA redeployment.  Please set
+        openshift_redeploy_openshift_ca=true in the inventory and re-run
+        redeploy-certifcates.yml
+    when:
+    - (g_master_config_output.content|b64decode|from_yaml).servingInfo.clientCA != 'ca.crt'
+    - openshift_redeploy_openshift_ca is undefined or openshift_redeploy_openshift_ca | bool == false
