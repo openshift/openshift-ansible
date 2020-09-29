@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.299
+Version:        3.11.300
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,12 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Sep 29 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.300-1
+- roles/openshift_master_certificates: Update node.kubeconfig
+  (rteague@redhat.com)
+- Bug 1848454: OpenShift logging upgrade from 3.11.161 to 3.11.219 fails
+  (syedriko@redhat.com)
+
 * Mon Sep 28 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.299-1
 - Detect an incomplete OpenShift CA redeployment (rteague@redhat.com)
 
