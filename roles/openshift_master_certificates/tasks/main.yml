@@ -262,3 +262,4 @@
     mode: 0600
   with_items:
   - /etc/origin/node/bootstrap.kubeconfig
+  - /etc/origin/node/node.kubeconfig
