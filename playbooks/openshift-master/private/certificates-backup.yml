@@ -71,4 +71,4 @@
     with_items:
     - service-signer.crt
     - service-signer.key
-    when: openshift_redeploy_openshift_ca | default(false) | bool
+    when: (openshift_redeploy_openshift_ca | default(false) | bool) and (openshift_redeploy_service_signer | default(true) | bool)
