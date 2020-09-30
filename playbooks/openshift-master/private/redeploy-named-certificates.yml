@@ -1,4 +1,0 @@
----
-- import_playbook: named-certificates.yml
-  vars:
-    openshift_named_certificates_redeploy: true

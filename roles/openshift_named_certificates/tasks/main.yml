@@ -13,7 +13,8 @@
     additive_facts_to_overwrite:
     - "{{ 'master.named_certificates' if overwrite_named_certs | bool else omit }}"
 
-- stat:
+- name: Check if the named certificates directory exists
+  stat:
     path: "{{ named_certs_dir }}"
     get_checksum: false
     get_attributes: false
@@ -53,9 +54,10 @@
     mode: 0600
   with_items: "{{ named_certificates }}"
 
-- set_fact:
+- name: Check if the cafile is configured
+  set_fact:
     named_certificates_ca_file_defined: "{{ named_certificates | lib_utils_oo_collect('cafile')}}"
-  
+
 - name: Land named CA certificates
   copy:
     src: "{{ item }}"
@@ -74,22 +76,27 @@
 
 - name: Append the custom ca to the bundle
   block:
-  - command: mktemp -d /tmp/openshift-ansible-XXXXXX
+  - name: Create temp directory
+    command: mktemp -d /tmp/openshift-ansible-XXXXXX
     register: openshift_ca_named_certificates_tmpdir
-  - copy:
+  - name: Copy the ca-bundle.crt to temp directory
+    copy:
       src: /etc/origin/master/ca-bundle.crt
       dest: "{{ openshift_ca_named_certificates_tmpdir.stdout }}"
       remote_src: true
-  - copy:
+  - name: Copy the cafile named certificates to temp directory
+    copy:
       src: "{{ named_certs_dir }}/{{ item | basename }}"
       dest: "{{ openshift_ca_named_certificates_tmpdir.stdout }}"
       remote_src: true
     with_items: "{{ named_certificates | lib_utils_oo_collect('cafile') }}"
-  - assemble:
+  - name: Assemble all files into ca-bundle.crt in master directory
+    assemble:
       src: "{{ openshift_ca_named_certificates_tmpdir.stdout }}"
       dest: "/etc/origin/master/ca-bundle.crt"
       mode: 0644
       owner: root
       group: root
-  when: not ca_bundle_result and (named_certificates_ca_file_defined | length > 0)
-  
+  when:
+  - not ca_bundle_result
+  - named_certificates_ca_file_defined | length > 0
