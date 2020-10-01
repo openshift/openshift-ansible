@@ -1,0 +1,8 @@
+---
+- import_playbook: ../init/main.yml
+
+- import_playbook: private/named-certificates.yml
+  vars:
+    openshift_named_certificates_redeploy: true
+
+- import_playbook: private/restart.yml
