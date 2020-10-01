@@ -195,6 +195,7 @@
     openshift_logging_elasticsearch_cpu_request: "{{ openshift_logging_es_ops_cpu_request }}"
     openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_ops_nodeselector if outer_item.0.nodeSelector | default(None) is none else outer_item.0.nodeSelector }}"
     openshift_logging_elasticsearch_storage_group: "{{ [openshift_logging_es_ops_storage_group] if outer_item.0.storageGroups | default([]) | length == 0 else outer_item.0.storageGroups }}"
+    openshift_logging_es_cluster_size: "{{ openshift_logging_es_ops_cluster_size | int }}"
     openshift_logging_es_key: "{{ openshift_logging_es_ops_key }}"
     openshift_logging_es_cert: "{{ openshift_logging_es_ops_cert }}"
     openshift_logging_es_ca_ext: "{{ openshift_logging_es_ops_ca_ext }}"
