@@ -45,6 +45,7 @@ openshift_node_support_packages_base:
   #- toolbox
   - nfs-utils
   - NetworkManager
+  - NetworkManager-ovs
   - dnsmasq
   - lvm2
   - iscsi-initiator-utils
