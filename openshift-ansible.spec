@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.301
+Version:        3.11.302
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Oct 01 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.302-1
+- Bug 1882203 - fixes from PR (22072258+vwalek@users.noreply.github.com)
+- playbook for redeploy named certificates only
+  (22072258+vwalek@users.noreply.github.com)
+
 * Wed Sep 30 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.301-1
 - BZ-1883036 - adding option to not redeploy service signer even when
   openshift_redeploy_openshift_ca=true
