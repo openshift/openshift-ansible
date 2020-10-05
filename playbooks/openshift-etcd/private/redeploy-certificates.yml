@@ -1,4 +1,12 @@
 ---
+- name: Ensure etcd CA is present on first etcd host
+  hosts: oo_first_etcd
+  any_errors_fatal: true
+  tasks:
+  - import_role:
+      name: etcd
+      tasks_from: verify_ca_certificates.yml
+
 - import_playbook: certificates-backup.yml
 
 - import_playbook: certificates.yml
