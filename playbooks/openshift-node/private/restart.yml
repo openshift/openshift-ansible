@@ -8,10 +8,28 @@
   - openshift_facts
 
   tasks:
+  - name: Check for GlusterFS project
+    command: >
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} get project {{ openshift_storage_glusterfs_namespace }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --no-headers
+    register: glusterfs_check
+    ignore_errors: true
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when:
+    - openshift_storage_glusterfs_namespace is defined
+    - openshift_storage_glusterfs_namespace != ""
+    - groups.oo_glusterfs_to_config | default([]) | count > 0
+
   - name: Check Gluster Health Before Restart
     include_role:
       name: openshift_storage_glusterfs
       tasks_from: check_cluster_health.yml
+    when:
+    - openshift_storage_glusterfs_namespace is defined
+    - openshift_storage_glusterfs_namespace != ""
+    - groups.oo_glusterfs_to_config | default([]) | count > 0
+    - glusterfs_check.rc == 0
 
   - name: Mark node unschedulable
     oc_adm_manage_node:
@@ -108,4 +126,8 @@
     include_role:
       name: openshift_storage_glusterfs
       tasks_from: check_cluster_health.yml
-    when: groups.oo_glusterfs_to_config | default([]) | count > 0
+    when:
+    - openshift_storage_glusterfs_namespace is defined
+    - openshift_storage_glusterfs_namespace != ""
+    - groups.oo_glusterfs_to_config | default([]) | count > 0
+    - glusterfs_check.rc == 0
