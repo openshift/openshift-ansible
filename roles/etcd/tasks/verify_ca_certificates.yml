@@ -1,0 +1,26 @@
+---
+
+- name: Determine if CA certificate directory exists
+  stat:
+    path: "{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
+  with_items:
+  - "{{ etcd_ca_dir }}/ca.crt"
+  - "{{ etcd_ca_dir }}/ca.key"
+  register: etcd_ca_dir_stat
+
+- name: Set fact etcd_ca_certs_missing
+  set_fact:
+    etcd_ca_certs_missing: "{{ False in (etcd_ca_dir_stat.results | default({})
+                                         | lib_utils_oo_collect(attribute='stat.exists')
+                                         | list ) }}"
+
+- name: Fail during etcd certificate redeploy if CA certificate directory contents missing
+  fail:
+    msg: >
+      Required files are missing from {{ etcd_ca_dir }} on {{ etcd_ca_host }}.
+      Please run playbooks/openshift-etcd/redeploy-ca.yml to ensure the CA exists before
+      running redeploy-certificates.yml.
+  when: etcd_ca_certs_missing
