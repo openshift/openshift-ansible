@@ -1,0 +1,11 @@
+---
+
+- name: Install docker container runtime
+  include_tasks: package_docker.yml
+  when:
+    - not openshift_use_crio_only | bool
+
+- name: Install crio container runtime
+  include_tasks: package_crio.yml
+  when:
+    - openshift_use_crio | bool
