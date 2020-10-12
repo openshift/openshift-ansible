@@ -1,4 +1,37 @@
 ---
+- name: Retrieve rendered-worker name
+  command: >
+    oc get machineconfigpool worker
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
+    --output=jsonpath='{.status.configuration.name}'
+  delegate_to: localhost
+  run_once: true
+  register: rendered_worker
+  until:
+  - rendered_worker.stdout != ''
+  changed_when: false
+
+- name: Check cluster FIPS status
+  command: >
+    oc get machineconfig {{ rendered_worker.stdout }}
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
+    --output=jsonpath='{.spec.fips}'
+  delegate_to: localhost
+  run_once: true
+  register: cluster_fips
+  until:
+  - cluster_fips.stdout != ''
+  changed_when: false
+
+- name: Fail if host FIPS status does not match cluster FIPS status
+  fail:
+    msg: >
+      Host FIPS status of '{{ ansible_fips }}' does not match
+      cluster FIPS status of '{{ cluster_fips.stdout | bool }}'.
+      Please update the host configuration before proceeding.
+  when:
+  - ansible_fips != (cluster_fips.stdout | bool)
+
 - name: Install openshift support packages
   package:
     name: "{{ openshift_node_support_packages | join(',') }}"
