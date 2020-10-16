@@ -33,6 +33,6 @@
 
 - import_playbook: ../../../openshift-node-problem-detector/private/config.yml
   when: openshift_node_problem_detector_install | default(false) | bool
-  
+
 - import_playbook: ../../../openshift-master/private/enable_bootstrap.yml
-  when: openshift_master_bootstrap_auto_approve | default(false) | bool 
+  when: openshift_master_bootstrap_auto_approve | default(false) | bool
