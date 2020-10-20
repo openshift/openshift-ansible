@@ -65,8 +65,7 @@
   with_sequence: count={{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
   when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
 
-- set_fact:
-    es_indices: []
+- set_fact: es_indices=[]
   when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count == 0
 
 - set_fact: openshift_logging_es_pvc_prefix="logging-es"
@@ -82,13 +81,6 @@
 
 - set_fact:
     default_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_pvc_size | length > 0)  else 'emptydir' }}"
-
-# Pre-condition check for the following include_role, to make sure the lists in with_together are
-# the same length and do not get padded with Nones
-#
-- fail:
-    msg: There must be the same number of ES DeploymentConfigs, ES PVCs and ES indices. Found ES DeploymentConfigs - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() }}", ES DC count - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}", ES PVCs - "{{ openshift_logging_facts.elasticsearch.pvcs }}", ES PVC length - "{{ openshift_logging_facts.elasticsearch.pvcs | length  }}" and ES indices - "{{ es_indices }}", ES indices length - "{{ es_indices | length  }}"
-  when: (openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count != openshift_logging_facts.elasticsearch.pvcs | length) or (openshift_logging_facts.elasticsearch.pvcs | length != es_indices | length) or (openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count != es_indices | length)
 
 - include_role:
     name: openshift_logging_elasticsearch
@@ -153,8 +145,7 @@
   - openshift_logging_use_ops | bool
   - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
 
-- set_fact:
-    es_ops_indices: []
+- set_fact: es_ops_indices=[]
   when: openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count == 0
 
 - set_fact: openshift_logging_es_ops_pvc_prefix="logging-es-ops"
@@ -163,15 +154,6 @@
 - set_fact:
     default_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_ops_pvc_dynamic | bool or openshift_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_ops_pvc_size | length > 0)  else 'emptydir' }}"
   when:
-  - openshift_logging_use_ops | bool
-
-# Pre-condition check for the following include_role, to make sure the lists in with_together are
-# the same length and do not get padded with Nones
-#
-- fail:
-    msg: There must be the same number of ES DeploymentConfigs, ES PVCs and ES Ops indices. Found ES DeploymentConfigs - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() }}", ES PVCs - "{{ openshift_logging_facts.elasticsearch.pvcs }}" and ES Ops indices - "{{ es_ops_indices }}"
-  when:
-  - (openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count != openshift_logging_facts.elasticsearch.pvcs | length) or (openshift_logging_facts.elasticsearch.pvcs | length != es_ops_indices | length) or (openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count != es_ops_indices | length)
   - openshift_logging_use_ops | bool
 
 - include_role:
