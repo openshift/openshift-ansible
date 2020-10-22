@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.306
+Version:        3.11.307
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,18 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Oct 22 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.307-1
+- Revert "Bug 1848454: OpenShift logging upgrade from 3.11.161 to 3.11.219
+  fails" (syedriko@redhat.com)
+- roles/openshift_peristent_volumes: Correct persistent-volume.yml template
+  (rteague@redhat.com)
+- playbooks/openshift-etcd: Ensure etcd CA is present on first etcd host
+  (rteague@redhat.com)
+- playbooks/container-runtime: Combine role import into one task
+  (rteague@redhat.com)
+- playbooks/openshift-node: Check for GlusterFS project during restart
+  (rteague@redhat.com)
+
 * Mon Oct 05 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.306-1
 - 
 
