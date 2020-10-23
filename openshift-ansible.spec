@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.307
+Version:        3.11.308
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,13 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Oct 23 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.308-1
+- roles/openshift_control_plane: Verify local API health (rteague@redhat.com)
+- removed trailing spaces (47029841+a7vicky@users.noreply.github.com)
+- Update upgrade_components.yml (47029841+a7vicky@users.noreply.github.com)
+- added node bootstrap autoapprover as part of upgrade component
+  (abhishekvicky18dec@gmail.com)
+
 * Thu Oct 22 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.307-1
 - Revert "Bug 1848454: OpenShift logging upgrade from 3.11.161 to 3.11.219
   fails" (syedriko@redhat.com)
