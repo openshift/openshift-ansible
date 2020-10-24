@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.308
+Version:        3.11.309
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Oct 24 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.309-1
+- 
+
 * Fri Oct 23 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.308-1
 - roles/openshift_control_plane: Verify local API health (rteague@redhat.com)
 - removed trailing spaces (47029841+a7vicky@users.noreply.github.com)
