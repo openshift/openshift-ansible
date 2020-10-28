@@ -48,10 +48,9 @@
     - node_output.module_results.returncode is defined
     - node_output.module_results.results is defined
     - node_output.module_results.returncode == 0
-    - node_output.results.results is defined
-    - node_output.results.results | length  > 0
-    - node_output.results.results[0].status is defined
-    - node_output.results.results[0].status.conditions is defined
+    - node_output.module_results.results | length  > 0
+    - node_output.module_results.results[0].status is defined
+    - node_output.module_results.results[0].status.conditions is defined
     - node_output.module_results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
     # Give the node three minutes to come back online.
     retries: 36
