@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.313
+Version:        3.11.314
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Oct 29 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.314-1
+- 
+
 * Wed Oct 28 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.313-1
 - Update registry_auth.yml (47029841+a7vicky@users.noreply.github.com)
 - Wait for node to be ready' task should check that all vars are defined
