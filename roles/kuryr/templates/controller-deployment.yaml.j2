@@ -28,6 +28,9 @@ spec:
     spec:
       serviceAccountName: kuryr-controller
       hostNetwork: true
+      priorityClassName: system-node-critical
+      tolerations:
+      - operator: Exists
       containers:
       - image: {{ openshift_openstack_kuryr_controller_image }}
         name: controller

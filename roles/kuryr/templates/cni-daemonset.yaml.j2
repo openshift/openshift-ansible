@@ -23,10 +23,9 @@ spec:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       hostNetwork: true
+      priorityClassName: system-node-critical
       tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: Exists
-        effect: NoSchedule
+      - operator: Exists
       serviceAccountName: kuryr-controller
       initContainers:
       - name: install-cni-plugins
