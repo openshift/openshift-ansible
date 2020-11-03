@@ -1,0 +1,17 @@
+---
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1660880
+# Delete the SDN/OVS pods to allow any changes to the DaemonSets to be applied.
+- name: Delete OpenShift SDN/OVS pods prior to upgrade
+  shell: >
+    {{ openshift_client_binary }} get pods
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    --field-selector=spec.nodeName={{ l_kubelet_node_name | lower }}
+    -o json
+    -n openshift-sdn |
+    {{ openshift_client_binary }} delete
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    --force
+    --grace-period=0
+    -f -
+  delegate_to: "{{ groups.oo_first_master.0 }}"

@@ -74,6 +74,13 @@
     - openshift_node_restart_docker_required | default(True)
     - not openshift_use_crio_only | bool
 
+  - import_role:
+      name: openshift_node
+      tasks_from: sdn_delete.yml
+    when:
+    - openshift_use_crio | default(false) | bool
+    - openshift_node_restart_drain | default(false) | bool
+
   - name: Wait for master API to come back online
     wait_for:
       host: "{{ openshift.common.hostname }}"
