@@ -7,6 +7,8 @@
   until: result is succeeded
   vars:
     pkg_list:
+    - "{{ openshift_service_type }}{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+    - "{{ openshift_service_type }}-hyperkube{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
     - "{{ openshift_service_type }}-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
     - "{{ openshift_service_type }}-clients{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
     - conntrack-tools
