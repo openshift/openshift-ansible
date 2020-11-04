@@ -58,6 +58,14 @@
   set_fact:
     named_certificates_ca_file_defined: "{{ named_certificates | lib_utils_oo_collect('cafile')}}"
 
+- name: Show message if the cafile is not configured
+  fail:
+    msg: "The cafile is not configured in the openshift_named_certificates. With cafile the cluster's components will trust the named certificate signer."
+  when:
+  - named_certificates_ca_file_defined | length <= 0
+  - openshift_named_certificate_omit_cafile == false
+  run_once: true
+
 - name: Land named CA certificates
   copy:
     src: "{{ item }}"
