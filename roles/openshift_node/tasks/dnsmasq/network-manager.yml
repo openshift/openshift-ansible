@@ -20,6 +20,6 @@
   with_items:
     - key: dns
       value: none
-      present: "{{ openshift_node_dnsmasq_disable_network_manager_dns | default(false) | bool }}"
+      present: "{{ openshift_node_dnsmasq_disable_network_manager_dns | default(true) | bool }}"
 
 - meta: flush_handlers
