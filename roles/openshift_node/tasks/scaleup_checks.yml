@@ -18,6 +18,7 @@
   - oc_get.stdout != ''
   retries: 36
   delay: 5
+  changed_when: false
 
 - name: Check for nodes which are already part of the cluster
   set_fact:

@@ -51,15 +51,11 @@
   register: oc_get
   until:
   - oc_get.stdout != ''
+  changed_when: false
 
 - name: Set fact l_cluster_version
   set_fact:
     l_cluster_version: "{{ oc_get.stdout | regex_search('^\\d+\\.\\d+') }}"
-
-- name: Override cluster version when running CI
-  set_fact:
-    l_cluster_version: "*"
-  when: ci_version_override | default(false) | bool == true
 
 - name: Get kubernetes server version
   command: >
@@ -70,15 +66,28 @@
   register: oc_get
   until:
   - oc_get.stdout != ''
+  changed_when: false
 
-- name: Set fact l_kubernetes_version
+- name: Set fact l_kubernetes_server_version
   set_fact:
-    l_kubernetes_version: "{{ (oc_get.stdout | from_json).serverVersion.major ~ '.' ~  (oc_get.stdout | from_json).serverVersion.minor | regex_search('^\\d+') }}"
+    l_kubernetes_server_version: "{{ (oc_get.stdout | from_json).serverVersion.major ~ '.' ~  (oc_get.stdout | from_json).serverVersion.minor | regex_search('^\\d+') }}"
 
-- name: Override kubernetes version when running CI
+- name: Get available cri-o RPM versions
+  package:
+    list: cri-o
+  register: crio_version
+
+- name: Set fact crio_latest
   set_fact:
-    l_kubernetes_version: "*"
-  when: ci_version_override | default(false) | bool == true
+    crio_latest: "{{ crio_version.results | selectattr('yumstate', 'match', 'available') | map(attribute='version') | list | last }}"
+
+- name: Fail if cri-o is less than current kubernetes server version
+  fail:
+    msg: >
+      Latest available cri-o ({{ crio_latest }}) version is less than current
+      kubernetes server version ({{ l_kubernetes_server_version }}).
+  when:
+  - crio_latest is version(l_kubernetes_server_version, 'lt')
 
 - block:
   - name: Install openshift packages
