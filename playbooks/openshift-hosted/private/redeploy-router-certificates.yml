@@ -51,7 +51,7 @@
     when: l_router_svc.rc == 0
 
   - name: Update router environment variables
-    shell: >
+    command: >
       {{ openshift_client_binary }} set env dc/router
       OPENSHIFT_CA_DATA="$(cat /etc/origin/master/ca.crt)"
       OPENSHIFT_CERT_DATA="$(cat /etc/origin/master/openshift-router.crt)"

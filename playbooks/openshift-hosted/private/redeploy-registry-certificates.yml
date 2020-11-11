@@ -38,14 +38,18 @@
 
   # Replace dc/docker-registry environment variable certificate data if set.
   - name: Update docker-registry environment variables
-    shell: >
+    command: >
       {{ openshift_client_binary }} set env dc/docker-registry
       OPENSHIFT_CA_DATA="$(cat /etc/origin/master/ca.crt)"
       OPENSHIFT_CERT_DATA="$(cat /etc/origin/master/openshift-registry.crt)"
       OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-registry.key)"
       --config={{ mktemp.stdout }}/admin.kubeconfig
       -n default
-    when: l_docker_registry_dc.rc == 0 and 'OPENSHIFT_CA_DATA' in docker_registry_env_vars and 'OPENSHIFT_CERT_DATA' in docker_registry_env_vars and 'OPENSHIFT_KEY_DATA' in docker_registry_env_vars
+    when:
+    - l_docker_registry_dc.rc == 0
+    - ('OPENSHIFT_CA_DATA' in docker_registry_env_vars)
+    - ('OPENSHIFT_CERT_DATA' in docker_registry_env_vars)
+    - ('OPENSHIFT_KEY_DATA' in docker_registry_env_vars)
 
   # Replace dc/docker-registry certificate secret contents if set.
   - block:
