@@ -3,16 +3,6 @@
     msg: "Both 'certfile' and 'keyfile' keys must be supplied when configuring openshift_master_ca_certificate"
   when: openshift_master_ca_certificate is defined and ('certfile' not in openshift_master_ca_certificate or 'keyfile' not in openshift_master_ca_certificate)
 
-- name: Install the base package for admin tooling
-  package:
-    name: "{{ openshift_service_type }}{{ openshift_pkg_version | default('') | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-    state: present
-  when: not hostvars[openshift_ca_host].openshift_is_atomic | bool
-  register: install_result
-  until: install_result is succeeded
-  delegate_to: "{{ openshift_ca_host }}"
-  run_once: true
-
 - name: Reload generated facts
   openshift_facts:
     system_facts: "{{ vars_openshift_facts_system_facts }}"

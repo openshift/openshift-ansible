@@ -5,7 +5,7 @@
 # openshift_version already.
 - name: Use openshift_current_version fact as version to configure if already installed
   set_fact:
-    openshift_version: "{{ openshift_current_version }}"
+    openshift_version: "{{ openshift_current_version | regex_search('^\\d+\\.\\d+') }}"
   when:
   - openshift_current_version is defined
   - openshift_version is not defined or openshift_version == ""
