@@ -9,11 +9,15 @@ openshift_node_bootstrap_port: 22623
 openshift_node_bootstrap_server: "{{ openshift_node_kubeconfig.clusters.0.cluster.server.split(':')[0:-1] | join(':') | regex_replace('://api', '://api-int') }}:{{ openshift_node_bootstrap_port }}"
 openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config/{{ openshift_node_machineconfigpool }}"
 
+# Packages to be installed from the rhel-7-server-ose repo
 openshift_node_packages:
+  - conmon
   - cri-o-{{ crio_latest }}
+  - cri-tools
   - openshift-clients-{{ l_cluster_version }}*
   - openshift-hyperkube-{{ l_cluster_version }}*
-  - podman
+  - podman  # From of extras, but must be installed concurrently with cri-o
+  - runc
 
 openshift_node_support_packages: "{{ openshift_node_support_packages_base + openshift_node_support_packages_by_arch[ansible_architecture] }}"
 
@@ -38,10 +42,10 @@ openshift_node_support_packages_base:
   - openssh-server
   - openssh-clients
   - skopeo
-  - runc
+  #- runc
   - containernetworking-plugins
   #- cri-o
-  - cri-tools
+  #- cri-tools
   #- toolbox
   - nfs-utils
   - NetworkManager
@@ -103,6 +107,6 @@ openshift_node_support_packages_by_arch:
     - irqbalance
     - biosdevname
     # GlusterFS
-    # Temporaly only for x86_64 as were not shipping it for other arches atm
+    # Temporarily only for x86_64 as were not shipping it for other arches atm
     # Tracked in https://bugzilla.redhat.com/show_bug.cgi?id=1715175
     - glusterfs-fuse
