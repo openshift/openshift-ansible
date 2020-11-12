@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.317
+Version:        3.11.318
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,24 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Nov 12 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.318-1
+- openshift-cluster/upgrades: Allow short nodes names when filtering
+  (rteague@redhat.com)
+- playbooks/init: Refresh master facts during init (rteague@redhat.com)
+- [KIECLOUD-419] - Update RHPAM and RHDM templates and imagestreams on
+  OpenShift Service Catalog for 7.9.0 release (fspolti@redhat.com)
+- playbooks/openshift-hosted: Use 'command' and tidy conditionals
+  (rteague@redhat.com)
+- roles/openshift_node: Update NetworkManager conf.d default
+  (rteague@redhat.com)
+- add php 7.2 into 3.11 cause cuppet says 7.1 will no longer work with sclorg
+  /cakephp-ex (centos as with for CI/e2e testing) (gmontero@redhat.com)
+- openshift_node: Drain nodes and restart during join.yml (rteague@redhat.com)
+- roles/openshift_version: Use only x.y version from first master
+  (rteague@redhat.com)
+- add php 7.2 into 3.11 cause cuppet says 7.1 will no longer work with sclorg
+  /cakephp-ex (gmontero@redhat.com)
+
 * Sun Nov 01 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.317-1
 - 
 
