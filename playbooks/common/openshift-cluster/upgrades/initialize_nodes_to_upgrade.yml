@@ -31,16 +31,8 @@
       with_items: " {{ groups['oo_nodes_to_config'] }}"
       when:
       - hostvars[item].openshift is defined
-      # normalize on short name
-      - (hostvars[item].openshift.node.nodename | lower).split(".")[0] in nodes_to_upgrade.module_results.results[0]['items'] | map(attribute='metadata.name') | map("regex_replace","(^[^\.]+)(\..*$)?","\\1") | list
+      - hostvars[item].openshift.node.nodename | lower in nodes_to_upgrade.module_results.results[0]['items'] | map(attribute='metadata.name') | list
       changed_when: false
-
-    # Make sure the filtering based on hostname worked
-    # to avoid issues as seen in https://bugzilla.redhat.com/show_bug.cgi?id=1649074
-    - name: Fail if temp_nodes_to_upgrade is empty with openshift_upgrade_nodes_label
-      fail:
-        msg: "openshift_upgrade_nodes_label was specified but no nodes matched after filtering (check the hostnames of the node)"
-      when: ( groups["temp_nodes_to_upgrade"] | default([])) | length == 0
 
   # Build up the oo_nodes_to_upgrade group, use the list filtered by label if
   # present, otherwise hit all nodes:
