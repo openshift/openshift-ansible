@@ -40,6 +40,8 @@
 - import_playbook: validate_aci_params.yml
   when: openshift_use_aci | default(false) | bool
 
+- import_playbook: validate_cert_params.yml
+
 - name: Initialization Checkpoint End
   hosts: all
   gather_facts: false
