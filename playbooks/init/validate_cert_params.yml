@@ -1,0 +1,14 @@
+---
+- name: Validate certificate configuration
+  hosts: oo_first_master
+  tasks:
+  - name: Fail if the cafile is not configured when using openshift_master_named_certificates
+    fail:
+      msg: >
+        The cafile is not configured in openshift_named_certificates. The cafile must be
+        configured for the cluster's components to trust the named certificate signer. Set
+        'openshift_named_certificate_omit_cafile=true' to skip this error.
+    when:
+    - openshift_master_named_certificates | default([]) | length != 0
+    - openshift_master_named_certificates | default([]) | lib_utils_oo_collect('cafile') | length == 0
+    - not openshift_named_certificate_omit_cafile | default(false)
