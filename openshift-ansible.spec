@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.318
+Version:        3.11.319
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,16 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Nov 21 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.319-1
+- playbooks/init: Validate openshift_master_named_certificates
+  (rteague@redhat.com)
+- openshift-cluster/upgrades: Allow openshift_kubelet_name_override when
+  filtering (rteague@redhat.com)
+- Revert "Bug 1860906: openshift-cluster/upgrades: Allow short nodes names when
+  filtering" (rteague@redhat.com)
+- playbooks/init: Fix GCP job when oo_masters is not defined
+  (rteague@redhat.com)
+
 * Thu Nov 12 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.318-1
 - openshift-cluster/upgrades: Allow short nodes names when filtering
   (rteague@redhat.com)
