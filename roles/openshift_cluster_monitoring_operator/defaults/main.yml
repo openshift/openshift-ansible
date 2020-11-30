@@ -77,3 +77,7 @@ openshift_cluster_monitoring_operator_alertmanager_config: |+
   receivers:
   - name: default
   - name: deadmansswitch
+
+openshift_cluster_monitoring_prometheus_external_url: ""
+openshift_cluster_monitoring_alertmanager_external_url: ""
+openshift_cluster_monitoring_grafana_external_url: ""

@@ -38,6 +38,9 @@ data:
             requests:
               storage: {{ openshift_cluster_monitoring_operator_prometheus_storage_capacity }}
 {% endif %}
+{% if openshift_cluster_monitoring_prometheus_external_url %}
+      hostport: {{ openshift_cluster_monitoring_prometheus_external_url }}
+{% endif %}
     alertmanagerMain:
       baseImage: {{ openshift_cluster_monitoring_operator_alertmanager_repo }}
 {% if openshift_cluster_monitoring_operator_node_selector is iterable and openshift_cluster_monitoring_operator_node_selector | length > 0 %}
@@ -56,6 +59,9 @@ data:
             requests:
               storage: {{ openshift_cluster_monitoring_operator_alertmanager_storage_capacity }}
 {% endif %}
+{% if openshift_cluster_monitoring_alertmanager_external_url %}
+      hostport: {{ openshift_cluster_monitoring_alertmanager_external_url }}
+{% endif %}
     nodeExporter:
       baseImage: {{ openshift_cluster_monitoring_operator_node_exporter_repo }}
     grafana:
@@ -65,6 +71,9 @@ data:
 {% for key, value in openshift_cluster_monitoring_operator_node_selector.items() %}
         {{ key }}: "{{ value }}"
 {% endfor %}
+{% endif %}
+{% if openshift_cluster_monitoring_grafana_external_url %}
+      hostport: {{ openshift_cluster_monitoring_grafana_external_url }}
 {% endif %}
     kubeStateMetrics:
       baseImage: {{ openshift_cluster_monitoring_operator_kube_state_metrics_image }}

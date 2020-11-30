@@ -47,7 +47,7 @@ objects:
     resources: [daemonsets, deployments]
     verbs: [create, delete, get, list, update, watch]
   - apiGroups: [route.openshift.io]
-    resources: [routes]
+    resources: [routes, routes/custom-host]
     verbs: [create, delete, get, list, update, watch]
   - apiGroups: [security.openshift.io]
     resources: [securitycontextconstraints]
