@@ -47,6 +47,13 @@
     tls_termination: passthrough
   register: registry_console_cockpit_kube
 
+- name: Create /etc/rhsm/ca/redhat-uep.pem
+  file:
+    path: /etc/rhsm/ca/redhat-uep.pem
+    state: touch
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups.oo_masters_to_config | default([]) }}"
+
 - name: Deploy registry-console
   shell: >
     {{ openshift_client_binary }} process openshift//registry-console
