@@ -3,11 +3,11 @@ openshift_client_binary: "{{ (openshift_is_atomic | bool) | ternary('/usr/local/
 
 system_images_registry_dict:
   openshift-enterprise: "registry.redhat.io"
-  origin: "docker.io"
+  origin: "quay.io"
 system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"
 
 l_default_registry_url_dict:
-  origin: 'docker.io/openshift/origin-${component}:${version}'
+  origin: 'quay.io/openshift/origin-${component}:${version}'
   openshift-enterprise: 'registry.redhat.io/openshift3/ose-${component}:${version}'
 openshift_facts_default_registry_url: "{{ l_default_registry_url_dict[openshift_deployment_type] }}"
 

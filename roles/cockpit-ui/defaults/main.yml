@@ -5,7 +5,7 @@ l_os_cockpit_image_version_dict:
   openshift-enterprise: "{{ openshift_image_tag }}"
 l_os_cockpit_image_version: "{{ l_os_cockpit_image_version_dict[openshift_deployment_type] }}"
 
-l_os_cockpit_registry_url: "{{ openshift_facts_registry_url | replace('docker.io','registry.access.redhat.com') }}"
+l_os_cockpit_registry_url: "{{ openshift_facts_registry_url | replace('quay.io','registry.access.redhat.com') }}"
 
 l_os_cockpit_image_format: "{{ l_os_cockpit_registry_url | regex_replace('${version}' | regex_escape, l_os_cockpit_image_version) }}"
 
