@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.340
+Version:        3.11.341
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Dec 05 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.341-1
+- 
+
 * Fri Dec 04 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.340-1
 - roles/openshift_facts: Set quay.io as default registry (rteague@redhat.com)
 
