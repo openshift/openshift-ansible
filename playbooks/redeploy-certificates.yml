@@ -26,6 +26,12 @@
 - import_playbook: openshift-node/private/join.yml
   when: openshift_redeploy_openshift_ca | default(false) | bool
 
+- import_playbook: openshift-node/private/restart.yml
+  when: openshift_redeploy_openshift_ca | default(false) | bool
+  vars:
+    openshift_node_restart_docker_required: true
+    openshift_node_restart_drain: true
+
 - import_playbook: openshift-hosted/private/redeploy-router-certificates.yml
   when: openshift_hosted_manage_router | default(true) | bool
 
