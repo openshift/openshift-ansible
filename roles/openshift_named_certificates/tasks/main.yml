@@ -70,9 +70,10 @@
   command: >
     openssl verify -CAfile /etc/origin/master/ca-bundle.crt "{{ named_certs_dir }}{{ item.certfile | basename }}"
   with_items: "{{ named_certificates }}"
-  ignore_errors: True
   register: ca_bundle_result
   when: named_certificates_ca_file_defined | length > 0
+  changed_when: false
+  failed_when: false
 
 - name: Append the custom ca to the bundle
   block:
@@ -98,5 +99,6 @@
       owner: root
       group: root
   when:
-  - not ca_bundle_result
+  - ca_bundle_result.results[0].rc is defined
+  - ca_bundle_result.results[0].rc != 0
   - named_certificates_ca_file_defined | length > 0
