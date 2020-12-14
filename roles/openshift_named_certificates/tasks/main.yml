@@ -99,6 +99,6 @@
       owner: root
       group: root
   when:
+  - named_certificates_ca_file_defined | length > 0
   - ca_bundle_result.results[0].rc is defined
   - ca_bundle_result.results[0].rc != 0
-  - named_certificates_ca_file_defined | length > 0
