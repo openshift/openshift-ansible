@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.346
+Version:        3.11.347
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,15 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Dec 18 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.347-1
+- Bug 1904767: network: default openshift_master_external_ip_network_cidrs to
+  empty (cdc@redhat.com)
+- Reorder the when checks to take into account the case that the named
+  certificates are not used and avoid the failure (david.peman@sysdig.com)
+- playbooks/openshift-node: Remove restart from join.yml (rteague@redhat.com)
+- ignore failed msg when running task Verify if the ca-bundle contains the CA
+  to trust the named certificate (22072258+vwalek@users.noreply.github.com)
+
 * Fri Dec 11 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.346-1
 - 
 
