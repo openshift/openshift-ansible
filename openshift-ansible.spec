@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.347
+Version:        3.11.348
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Dec 18 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.348-1
+- 
+
 * Fri Dec 18 2020 AOS Automation Release Team <noreply@redhat.com> 3.11.347-1
 - Bug 1904767: network: default openshift_master_external_ip_network_cidrs to
   empty (cdc@redhat.com)
