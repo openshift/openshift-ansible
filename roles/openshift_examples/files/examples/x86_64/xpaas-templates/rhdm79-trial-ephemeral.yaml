@@ -42,22 +42,22 @@ parameters:
   value: adminUser
   required: false
 - displayName: KIE Server Bypass Auth User
-  description: Allows the KIE server to bypass the authenticated user for task-related operations, for example, queries. (Sets the org.kie.server.bypass.auth.user system property)
+  description: Allows the KIE Server to bypass the authenticated user for task-related operations, for example, queries. (Sets the org.kie.server.bypass.auth.user system property)
   name: KIE_SERVER_BYPASS_AUTH_USER
   value: 'false'
   required: false
 - displayName: KIE Server Mode
-  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. In production mode, you can not deploy SNAPSHOT versions of artifacts on the KIE server and can not change the version of an artifact in an existing container. (Sets the org.kie.server.mode system property)."
+  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. In production mode, you can not deploy SNAPSHOT versions of artifacts on the KIE Server and can not change the version of an artifact in an existing container. (Sets the org.kie.server.mode system property)."
   name: KIE_SERVER_MODE
   value: "DEVELOPMENT"
   required: false
 - displayName: KIE MBeans
-  description: KIE server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
+  description: KIE Server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
   name: KIE_MBEANS
   value: enabled
   required: false
 - displayName: Drools Server Filter Classes
-  description: KIE server class filtering. (Sets the org.drools.server.filter.classes system property)
+  description: KIE Server class filtering. (Sets the org.drools.server.filter.classes system property)
   name: DROOLS_SERVER_FILTER_CLASSES
   value: 'true'
   required: false
@@ -104,8 +104,8 @@ parameters:
   value: ''
   required: false
 ## OpenShift Enhancement BEGIN
-- displayName: Enable KIE server global discovery
-  description: "If set to true, turns on KIE server global discovery feature (Sets the org.kie.server.controller.openshift.global.discovery.enabled system property)"
+- displayName: Enable KIE Server global discovery
+  description: "If set to true, turns on KIE Server global discovery feature (Sets the org.kie.server.controller.openshift.global.discovery.enabled system property)"
   name: KIE_SERVER_CONTROLLER_OPENSHIFT_GLOBAL_DISCOVERY_ENABLED
   value: "false"
   required: false
@@ -129,14 +129,14 @@ parameters:
   value: openshift
   required: true
 - displayName: KIE Server ImageStream Name
-  description: The name of the image stream to use for KIE server. Default is "rhdm-kieserver-rhel8".
+  description: The name of the image stream to use for KIE Server. Default is "rhdm-kieserver-rhel8".
   name: KIE_SERVER_IMAGE_STREAM_NAME
   value: "rhdm-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.9.0".
+  description: A named pointer to an image in an image stream. Default is "7.9.1".
   name: IMAGE_STREAM_TAG
-  value: "7.9.0"
+  value: "7.9.1"
   required: true
 - displayName: KIE Server Container Deployment
   description: 'KIE Server Container deployment configuration with optional alias. Format: containerId=groupId:artifactId:version|c2(alias2)=g2:a2:v2'
@@ -172,7 +172,7 @@ parameters:
   value: 2Gi
   required: false
 - displayName: KIE Server Container Memory Limit
-  description: KIE server Container memory limit.
+  description: KIE Server Container memory limit.
   name: KIE_SERVER_MEMORY_LIMIT
   value: 1Gi
   required: false
@@ -383,7 +383,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver"
     annotations:
-      description: All the KIE server web server's ports.
+      description: All the KIE Server web server's ports.
 - kind: Route
   apiVersion: v1
   id: "insecure-${APPLICATION_NAME}-rhdmcentr-http"
@@ -410,7 +410,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver"
     annotations:
-      description: Route for KIE server's http service.
+      description: Route for KIE Server's http service.
       haproxy.router.openshift.io/balance: source
   spec:
     host: "${KIE_SERVER_HOSTNAME_HTTP}"
@@ -467,12 +467,13 @@ objects:
             initialDelaySeconds: 180
             timeoutSeconds: 2
             periodSeconds: 15
+            failureThreshold: 36
           readinessProbe:
             httpGet:
               path: /rest/ready
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             timeoutSeconds: 2
             periodSeconds: 5
             failureThreshold: 36

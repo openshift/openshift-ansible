@@ -22,7 +22,7 @@ message: |-
   The username/password needed for accessing the application are stored in "${CREDENTIALS_SECRET}" secret as
   KIE_ADMIN_USER and KIE_ADMIN_PWD
 
-  To create a new KIE server and connect to this monitoring console/router, use the following "oc" command:
+  To create a new KIE Server and connect to this monitoring console/router, use the following "oc" command:
   oc new-app -f rhpam79-prod-immutable-kieserver.yaml \
     -p CREDENTIALS_SECRET=${CREDENTIALS_SECRET} \
     -p KIE_SERVER_MONITOR_SERVICE=${APPLICATION_NAME}-rhpamcentrmon \
@@ -66,8 +66,8 @@ parameters:
   example: rhpam-credentials
   required: true
 ## OpenShift Enhancement BEGIN
-- displayName: Enable KIE server global discovery
-  description: "If set to true, turns on KIE server global discovery feature (Sets the org.kie.server.controller.openshift.global.discovery.enabled system property)"
+- displayName: Enable KIE Server global discovery
+  description: "If set to true, turns on KIE Server global discovery feature (Sets the org.kie.server.controller.openshift.global.discovery.enabled system property)"
   name: KIE_SERVER_CONTROLLER_OPENSHIFT_GLOBAL_DISCOVERY_ENABLED
   value: "false"
   required: false
@@ -91,9 +91,9 @@ parameters:
   value: openshift
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.9.0".
+  description: A named pointer to an image in an image stream. Default is "7.9.1".
   name: IMAGE_STREAM_TAG
-  value: "7.9.0"
+  value: "7.9.1"
   required: false
 - displayName: Smart Router Custom http Route Hostname
   description: 'Custom hostname for http service route.  Leave blank for default hostname,
@@ -113,7 +113,7 @@ parameters:
   value: kie-server-router
   required: true
 - displayName: Smart Router protocol
-  description: KIE server router protocol. (Used to build the org.kie.server.router.url.external property)
+  description: KIE Server router protocol. (Used to build the org.kie.server.router.url.external property)
   name: KIE_SERVER_ROUTER_PROTOCOL
   example: "http"
   required: false
@@ -147,7 +147,7 @@ parameters:
   value: mykeystorepass
   required: false
 - displayName: KIE Server Monitor Token
-  description: KIE server monitor token for bearer authentication. (Sets the org.kie.server.controller.token system property)
+  description: KIE Server monitor token for bearer authentication. (Sets the org.kie.server.controller.token system property)
   name: KIE_SERVER_MONITOR_TOKEN
   required: false
 - displayName: Business Central Custom http Route Hostname
@@ -186,7 +186,22 @@ parameters:
   description: Business Central Container memory limit.
   name: BUSINESS_CENTRAL_MEMORY_LIMIT
   value: 2Gi
-  required: false
+  required: true
+- displayName: Business Central Container Memory Request
+  description: Business Central Container memory request.
+  name: BUSINESS_CENTRAL_MEMORY_REQUEST
+  value: 1.5Gi
+  required: true
+- displayName: Business Central Container CPU Limit
+  description: Business Central Container CPU limit.
+  name: BUSINESS_CENTRAL_CPU_LIMIT
+  value: '1'
+  required: true
+- displayName: Business Central Container CPU Request
+  description: Business Central Container CPU request.
+  name: BUSINESS_CENTRAL_CPU_REQUEST
+  value: '750m'
+  required: true
 - displayName: Smart Router Container Memory Limit
   description: Smart Router Container memory limit.
   name: SMART_ROUTER_MEMORY_LIMIT
@@ -544,6 +559,10 @@ objects:
           resources:
             limits:
               memory: "${BUSINESS_CENTRAL_MEMORY_LIMIT}"
+              cpu: "${BUSINESS_CENTRAL_CPU_LIMIT}"
+            requests:
+              memory: "${BUSINESS_CENTRAL_MEMORY_REQUEST}"
+              cpu: "${BUSINESS_CENTRAL_CPU_REQUEST}"
           volumeMounts:
           - name: businesscentral-keystore-volume
             mountPath: "/etc/businesscentral-secret-volume"
@@ -558,12 +577,13 @@ objects:
             initialDelaySeconds: 180
             timeoutSeconds: 2
             periodSeconds: 15
+            failureThreshold: 36
           readinessProbe:
             httpGet:
               path: /rest/ready
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             timeoutSeconds: 2
             periodSeconds: 5
             failureThreshold: 36
