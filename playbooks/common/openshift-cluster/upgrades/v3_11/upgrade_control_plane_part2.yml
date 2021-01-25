@@ -90,6 +90,14 @@
   - role: openshift_sdn
     when: openshift_use_openshift_sdn | default(True) | bool
 
+- name: Configure kuryr components that must be available prior to upgrade
+  hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: kuryr
+      tasks_from: master.yaml
+    when: openshift_use_kuryr | default(False) | bool
+
 - import_playbook: ../upgrade_control_plane.yml
   vars:
     openshift_release: '3.11'

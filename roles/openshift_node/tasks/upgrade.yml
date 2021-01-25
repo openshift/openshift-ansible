@@ -9,6 +9,11 @@
 
 - import_tasks: sdn_delete.yml
 
+- import_role:
+    name: kuryr
+    tasks_from: upgrade.yaml
+  when: openshift_use_kuryr | default(False) | bool
+
 - name: stop services for upgrade
   import_tasks: upgrade/stop_services.yml
 
