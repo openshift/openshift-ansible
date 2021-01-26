@@ -32,11 +32,11 @@ parameters:
   value: myapp
   required: true
 - displayName: Maven mirror URL
-  description: Maven mirror that the KIE server must use. If you configure a mirror, this mirror must contain all artifacts that are required for deploying your services.
+  description: Maven mirror that the KIE Server must use. If you configure a mirror, this mirror must contain all artifacts that are required for deploying your services.
   name: MAVEN_MIRROR_URL
   required: false
 - displayName: Maven mirror of
-  description: Maven mirror configuration for KIE server.
+  description: Maven mirror configuration for KIE Server.
   name: MAVEN_MIRROR_OF
   value: "external:*"
   required: false
@@ -77,14 +77,14 @@ parameters:
   value: openshift
   required: true
 - displayName: KIE Server ImageStream Name
-  description: The name of the image stream to use for KIE server. Default is "rhpam-kieserver-rhel8".
+  description: The name of the image stream to use for KIE Server. Default is "rhpam-kieserver-rhel8".
   name: KIE_SERVER_IMAGE_STREAM_NAME
   value: "rhpam-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.9.0".
+  description: A named pointer to an image in an image stream. Default is "7.9.1".
   name: IMAGE_STREAM_TAG
-  value: "7.9.0"
+  value: "7.9.1"
   required: true
 - displayName: Smart Router Custom http Route Hostname
   description: Custom hostname for http service route.  Leave blank for default hostname, e.g. <application-name>-smartrouter-<project>.<default-domain-suffix>'
@@ -102,7 +102,7 @@ parameters:
   value: kie-server-router
   required: true
 - displayName: Smart Router protocol
-  description: KIE server router protocol. (Used to build the org.kie.server.router.url.external property)
+  description: KIE Server router protocol. (Used to build the org.kie.server.router.url.external property)
   name: KIE_SERVER_ROUTER_PROTOCOL
   example: "http"
   required: false
@@ -116,11 +116,11 @@ parameters:
   value: KIE Server Router
   required: true
 - displayName: KIE Server Controller Token
-  description: KIE server controller token for bearer authentication. (Sets the org.kie.server.controller.token system property)
+  description: KIE Server controller token for bearer authentication. (Sets the org.kie.server.controller.token system property)
   name: KIE_SERVER_CONTROLLER_TOKEN
   required: false
 - displayName: KIE Server Persistence DS
-  description: KIE server persistence datasource. (Sets the org.kie.server.persistence.ds system property)
+  description: KIE Server persistence datasource. (Sets the org.kie.server.persistence.ds system property)
   name: KIE_SERVER_PERSISTENCE_DS
   value: java:/jboss/datasources/rhpam
   required: false
@@ -139,18 +139,18 @@ parameters:
   value: "10"
   required: false
 - displayName: KIE Server PostgreSQL Database User
-  description: KIE server PostgreSQL database user name.
+  description: KIE Server PostgreSQL database user name.
   name: KIE_SERVER_POSTGRESQL_USER
   value: rhpam
   required: false
 - displayName: KIE Server PostgreSQL Database Password
-  description: KIE server PostgreSQL database password.
+  description: KIE Server PostgreSQL database password.
   name: KIE_SERVER_POSTGRESQL_PWD
   from: "[a-zA-Z]{6}[0-9]{1}!"
   generate: expression
   required: false
 - displayName: KIE Server PostgreSQL Database Name
-  description: KIE server PostgreSQL database name.
+  description: KIE Server PostgreSQL database name.
   name: KIE_SERVER_POSTGRESQL_DB
   value: rhpam7
   required: false
@@ -165,23 +165,23 @@ parameters:
   value: 1Gi
   required: true
 - displayName: KIE Server PostgreSQL Dialect
-  description: KIE server PostgreSQL Hibernate dialect.
+  description: KIE Server PostgreSQL Hibernate dialect.
   name: KIE_SERVER_POSTGRESQL_DIALECT
   value: org.hibernate.dialect.PostgreSQLDialect
   required: true
 ## PostgreSQL database parameters END
 - displayName: KIE Server Mode
-  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. In production mode, you can not deploy SNAPSHOT versions of artifacts on the KIE server and can not change the version of an artifact in an existing container. (Sets the org.kie.server.mode system property)."
+  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. In production mode, you can not deploy SNAPSHOT versions of artifacts on the KIE Server and can not change the version of an artifact in an existing container. (Sets the org.kie.server.mode system property)."
   name: KIE_SERVER_MODE
   value: "PRODUCTION"
   required: false
 - displayName: KIE MBeans
-  description: KIE server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
+  description: KIE Server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
   name: KIE_MBEANS
   value: enabled
   required: false
 - displayName: Drools Server Filter Classes
-  description: KIE server class filtering. (Sets the org.drools.server.filter.classes system property)
+  description: KIE Server class filtering. (Sets the org.drools.server.filter.classes system property)
   name: DROOLS_SERVER_FILTER_CLASSES
   value: 'true'
   required: false
@@ -215,7 +215,7 @@ parameters:
   value: ''
   required: false
 - displayName: Use the secure route name to link application requests to KIE_SERVER1_HOSTNAME_HTTPS vs KIE_SERVER1_HOSTNAME_HTTP.
-  description: 'If true, the KIE server will use secure-<application-name>-kieserver vs. <application-name>-kieserver as the KIE server route endpoint for Business Central to report. Therefore, Business Central displays the secure link to the user.'
+  description: 'If true, the KIE Server will use secure-<application-name>-kieserver vs. <application-name>-kieserver as the KIE Server route endpoint for Business Central to report. Therefore, Business Central displays the secure link to the user.'
   name: KIE_SERVER1_USE_SECURE_ROUTE_NAME
   value: 'false'
   required: false
@@ -297,7 +297,7 @@ parameters:
   value: mykeystorepass
   required: false
 - displayName: KIE Server Bypass Auth User
-  description: Allows the KIE server to bypass the authenticated user for task-related operations, for example, queries. (Sets the org.kie.server.bypass.auth.user system property)
+  description: Allows the KIE Server to bypass the authenticated user for task-related operations, for example, queries. (Sets the org.kie.server.bypass.auth.user system property)
   name: KIE_SERVER_BYPASS_AUTH_USER
   value: 'false'
   required: false
@@ -310,12 +310,42 @@ parameters:
   description: Business Central Monitoring Container memory limit.
   name: BUSINESS_CENTRAL_MEMORY_LIMIT
   value: 2Gi
-  required: false
+  required: true
+- displayName: Business Central Monitoring Container Memory Request
+  description: Business Central Monitoring Container memory request.
+  name: BUSINESS_CENTRAL_MEMORY_REQUEST
+  value: 1.5Gi
+  required: true
+- displayName: Business Central Monitoring Container CPU Limit
+  description: Business Central Monitoring Container CPU limit.
+  name: BUSINESS_CENTRAL_CPU_LIMIT
+  value: '1'
+  required: true
+- displayName: Business Central Monitoring Container CPU Request
+  description: Business Central Monitoring Container CPU request.
+  name: BUSINESS_CENTRAL_CPU_REQUEST
+  value: '750m'
+  required: true
 - displayName: KIE Server Container Memory Limit
-  description: KIE server Container memory limit.
+  description: KIE Server Container memory limit.
   name: KIE_SERVER_MEMORY_LIMIT
-  value: 1Gi
-  required: false
+  value: 2Gi
+  required: true
+- displayName: KIE Server Container Memory Request
+  description: KIE Server Container memory request.
+  name: KIE_SERVER_MEMORY_REQUEST
+  value: 1.5Gi
+  required: true
+- displayName: KIE Server Container CPU Limit
+  description: KIE Server Container CPU limit.
+  name: KIE_SERVER_CPU_LIMIT
+  value: '1'
+  required: true
+- displayName: KIE Server Container CPU Request
+  description: KIE Server Container CPU request.
+  name: KIE_SERVER_CPU_REQUEST
+  value: '750m'
+  required: true
 - displayName: Smart Router Container Memory Limit
   description: Smart Router Container memory limit
   name: SMART_ROUTER_MEMORY_LIMIT
@@ -590,7 +620,7 @@ objects:
       service: "${APPLICATION_NAME}-smartrouter"
     annotations:
       description: The smart router server http and https ports.
-## KIE server services 1 BEGIN
+## KIE Server services 1 BEGIN
 - kind: Service
   apiVersion: v1
   spec:
@@ -609,7 +639,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver-1"
     annotations:
-      description: All the KIE server web server's ports. (First KIE server)
+      description: All the KIE Server web server's ports. (First KIE Server)
 - kind: Service
   apiVersion: v1
   spec:
@@ -628,8 +658,8 @@ objects:
     annotations:
       service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
       description: "The JGroups ping port for clustering."
-## KIE server services 1 END
-## KIE server services 2 BEGIN
+## KIE Server services 1 END
+## KIE Server services 2 BEGIN
 - kind: Service
   apiVersion: v1
   spec:
@@ -648,7 +678,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver-2"
     annotations:
-      description: All the KIE server web server's ports. (Second KIE server)
+      description: All the KIE Server web server's ports. (Second KIE Server)
 - kind: Service
   apiVersion: v1
   spec:
@@ -667,7 +697,7 @@ objects:
     annotations:
       service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
       description: "The JGroups ping port for clustering."
-## KIE server services 2 END
+## KIE Server services 2 END
 ## PostgreSQL service 1 BEGIN
 - apiVersion: v1
   kind: Service
@@ -738,7 +768,7 @@ objects:
       targetPort: https
     tls:
       termination: passthrough
-## KIE server routes 1 BEGIN
+## KIE Server routes 1 BEGIN
 - kind: Route
   apiVersion: v1
   id: "${APPLICATION_NAME}-kieserver-1-http"
@@ -748,7 +778,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver-1"
     annotations:
-      description: Route for First KIE server's http service.
+      description: Route for First KIE Server's http service.
   spec:
     host: "${KIE_SERVER1_HOSTNAME_HTTP}"
     to:
@@ -764,7 +794,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver-1"
     annotations:
-      description: Route for First KIE server's https service.
+      description: Route for First KIE Server's https service.
   spec:
     host: "${KIE_SERVER1_HOSTNAME_HTTPS}"
     to:
@@ -773,8 +803,8 @@ objects:
       targetPort: https
     tls:
       termination: passthrough
-## KIE server routes 1 END
-## KIE server routes 2 BEGIN
+## KIE Server routes 1 END
+## KIE Server routes 2 BEGIN
 - kind: Route
   apiVersion: v1
   id: "${APPLICATION_NAME}-kieserver-2-http"
@@ -784,7 +814,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver-2"
     annotations:
-      description: Route for Second KIE server's http service.
+      description: Route for Second KIE Server's http service.
   spec:
     host: "${KIE_SERVER2_HOSTNAME_HTTP}"
     to:
@@ -800,7 +830,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver-2"
     annotations:
-      description: Route for Second KIE server's https service.
+      description: Route for Second KIE Server's https service.
   spec:
     host: "${KIE_SERVER2_HOSTNAME_HTTPS}"
     to:
@@ -809,7 +839,7 @@ objects:
       targetPort: https
     tls:
       termination: passthrough
-## KIE server routes 2 END
+## KIE Server routes 2 END
 - kind: Route
   apiVersion: v1
   id: "${APPLICATION_NAME}-smartrouter-http"
@@ -889,6 +919,10 @@ objects:
           resources:
             limits:
               memory: "${BUSINESS_CENTRAL_MEMORY_LIMIT}"
+              cpu: "${BUSINESS_CENTRAL_CPU_LIMIT}"
+            requests:
+              memory: "${BUSINESS_CENTRAL_MEMORY_REQUEST}"
+              cpu: "${BUSINESS_CENTRAL_CPU_REQUEST}"
           volumeMounts:
           - name: businesscentral-keystore-volume
             mountPath: "/etc/businesscentral-secret-volume"
@@ -903,12 +937,13 @@ objects:
             initialDelaySeconds: 180
             timeoutSeconds: 2
             periodSeconds: 15
+            failureThreshold: 36
           readinessProbe:
             httpGet:
               path: /rest/ready
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             timeoutSeconds: 2
             periodSeconds: 5
             failureThreshold: 36
@@ -1151,7 +1186,7 @@ objects:
         - name: smartrouter-keystore-volume
           secret:
             secretName: "${KIE_SERVER_ROUTER_HTTPS_SECRET}"
-## KIE server deployment config 1 BEGIN
+## KIE Server deployment config 1 BEGIN
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
@@ -1199,6 +1234,10 @@ objects:
           resources:
             limits:
               memory: "${KIE_SERVER_MEMORY_LIMIT}"
+              cpu: "${KIE_SERVER_CPU_LIMIT}"
+            requests:
+              memory: "${KIE_SERVER_MEMORY_REQUEST}"
+              cpu: "${KIE_SERVER_CPU_REQUEST}"
           volumeMounts:
           - name: kieserver-keystore-volume
             mountPath: "/etc/kieserver-secret-volume"
@@ -1419,7 +1458,7 @@ objects:
           imagePullPolicy: IfNotPresent
           name: ${APPLICATION_NAME}-postgresql-init-1
           terminationMessagePolicy: FallbackToLogsOnError
-## KIE server deployment config 1 END
+## KIE Server deployment config 1 END
 ## PostgreSQL deployment config 1 BEGIN
 - kind: DeploymentConfig
   apiVersion: v1
@@ -1493,7 +1532,7 @@ objects:
           persistentVolumeClaim:
             claimName: "${APPLICATION_NAME}-postgresql-claim-1"
 ## PostgreSQL deployment config 1 END
-## KIE server deployment config 2 BEGIN
+## KIE Server deployment config 2 BEGIN
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
@@ -1541,6 +1580,10 @@ objects:
           resources:
             limits:
               memory: "${KIE_SERVER_MEMORY_LIMIT}"
+              cpu: "${KIE_SERVER_CPU_LIMIT}"
+            requests:
+              memory: "${KIE_SERVER_MEMORY_REQUEST}"
+              cpu: "${KIE_SERVER_CPU_REQUEST}"
           volumeMounts:
           - name: kieserver-keystore-volume
             mountPath: "/etc/kieserver-secret-volume"
@@ -1761,7 +1804,7 @@ objects:
           imagePullPolicy: IfNotPresent
           name: ${APPLICATION_NAME}-postgresql-init-2
           terminationMessagePolicy: FallbackToLogsOnError
-## KIE server deployment config 2 END
+## KIE Server deployment config 2 END
 ## PostgreSQL deployment config 2 BEGIN
 - kind: DeploymentConfig
   apiVersion: v1

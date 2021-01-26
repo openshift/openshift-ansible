@@ -36,44 +36,44 @@ parameters:
   example: rhpam-credentials
   required: true
 - displayName: KIE Server Controller Token
-  description: KIE server controller token for bearer authentication. (Sets the org.kie.server.controller.token system property)
+  description: KIE Server controller token for bearer authentication. (Sets the org.kie.server.controller.token system property)
   name: KIE_SERVER_CONTROLLER_TOKEN
   required: false
 - displayName: KIE Server Bypass Auth User
-  description: Allows the KIE server to bypass the authenticated user for task-related operations, for example, queries. (Sets the org.kie.server.bypass.auth.user system property)
+  description: Allows the KIE Server to bypass the authenticated user for task-related operations, for example, queries. (Sets the org.kie.server.bypass.auth.user system property)
   name: KIE_SERVER_BYPASS_AUTH_USER
   value: 'false'
   required: false
 - displayName: KIE Server Persistence DS
-  description: KIE server persistence datasource. (Sets the org.kie.server.persistence.ds system property)
+  description: KIE Server persistence datasource. (Sets the org.kie.server.persistence.ds system property)
   name: KIE_SERVER_PERSISTENCE_DS
   value: java:/jboss/datasources/rhpam
   required: false
 ## H2 database parameters BEGIN
 - displayName: KIE Server H2 Database User
-  description: KIE server H2 database user name.
+  description: KIE Server H2 database user name.
   name: KIE_SERVER_H2_USER
   value: sa
   required: false
 - displayName: KIE Server H2 Database Password
-  description: KIE server H2 database password.
+  description: KIE Server H2 database password.
   name: KIE_SERVER_H2_PWD
   from: "[a-zA-Z]{6}[0-9]{1}!"
   generate: expression
   required: false
 ## H2 database parameters END
 - displayName: KIE Server Mode
-  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. In production mode, you can not deploy SNAPSHOT versions of artifacts on the KIE server and can not change the version of an artifact in an existing container. (Sets the org.kie.server.mode system property)"
+  description: "The KIE Server mode. Valid values are 'DEVELOPMENT' or 'PRODUCTION'. In production mode, you can not deploy SNAPSHOT versions of artifacts on the KIE Server and can not change the version of an artifact in an existing container. (Sets the org.kie.server.mode system property)"
   name: KIE_SERVER_MODE
   value: "DEVELOPMENT"
   required: false
 - displayName: KIE MBeans
-  description: KIE server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
+  description: KIE Server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
   name: KIE_MBEANS
   value: enabled
   required: false
 - displayName: Drools Server Filter Classes
-  description: KIE server class filtering. (Sets the org.drools.server.filter.classes system property)
+  description: KIE Server class filtering. (Sets the org.drools.server.filter.classes system property)
   name: DROOLS_SERVER_FILTER_CLASSES
   value: 'true'
   required: false
@@ -127,7 +127,7 @@ parameters:
   value: mykeystorepass
   required: false
 - displayName: KIE Server Keystore Secret Name
-  description: The name of the secret containing the keystore file for KIE server.
+  description: The name of the secret containing the keystore file for KIE Server.
   name: KIE_SERVER_HTTPS_SECRET
   example: kieserver-app-secret
   required: true
@@ -152,8 +152,8 @@ parameters:
   value: 1Gi
   required: true
 ## OpenShift Enhancement BEGIN
-- displayName: Enable KIE server global discovery
-  description: "If set to true, turns on KIE server global discovery feature (Sets the org.kie.server.controller.openshift.global.discovery.enabled system property)"
+- displayName: Enable KIE Server global discovery
+  description: "If set to true, turns on KIE Server global discovery feature (Sets the org.kie.server.controller.openshift.global.discovery.enabled system property)"
   name: KIE_SERVER_CONTROLLER_OPENSHIFT_GLOBAL_DISCOVERY_ENABLED
   value: "false"
   required: false
@@ -177,21 +177,21 @@ parameters:
   value: openshift
   required: true
 - displayName: KIE Server ImageStream Name
-  description: The name of the image stream to use for KIE server. Default is "rhpam-kieserver-rhel8".
+  description: The name of the image stream to use for KIE Server. Default is "rhpam-kieserver-rhel8".
   name: KIE_SERVER_IMAGE_STREAM_NAME
   value: "rhpam-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.9.0".
+  description: A named pointer to an image in an image stream. Default is "7.9.1".
   name: IMAGE_STREAM_TAG
-  value: "7.9.0"
+  value: "7.9.1"
   required: true
 - displayName: Maven mirror URL
-  description: Maven mirror that Business Central and KIE server must use. If you configure a mirror, this mirror must contain all artifacts that are required for building and deploying your services.
+  description: Maven mirror that Business Central and KIE Server must use. If you configure a mirror, this mirror must contain all artifacts that are required for building and deploying your services.
   name: MAVEN_MIRROR_URL
   required: false
 - displayName: Maven mirror of
-  description: Maven mirror configuration for KIE server.
+  description: Maven mirror configuration for KIE Server.
   name: MAVEN_MIRROR_OF
   value: "external:*,!repo-rhpamcentr"
   required: false
@@ -226,13 +226,43 @@ parameters:
 - displayName: Business Central Container Memory Limit
   description: Business Central Container memory limit.
   name: BUSINESS_CENTRAL_MEMORY_LIMIT
-  value: 2Gi
-  required: false
+  value: 4Gi
+  required: true
+- displayName: Business Central Container CPU Limit
+  description: Business Central Container CPU limit.
+  name: BUSINESS_CENTRAL_CPU_LIMIT
+  value: '2'
+  required: true
+- displayName: Business Central Container CPU Request
+  description: Business Central Container CPU Request.
+  name: BUSINESS_CENTRAL_CPU_REQUEST
+  value: '1500m'
+  required: true
+- displayName: Business Central Container Memory Request
+  description: Business Central Container Memory Request.
+  name: BUSINESS_CENTRAL_MEMORY_REQUEST
+  value: 3Gi
+  required: true
 - displayName: KIE Server Container Memory Limit
-  description: KIE server Container memory limit.
+  description: KIE Server Container memory limit.
   name: KIE_SERVER_MEMORY_LIMIT
-  value: 1Gi
-  required: false
+  value: 2Gi
+  required: true
+- displayName: KIE Server Container Memory Request
+  description: KIE Server Container memory Request.
+  name: KIE_SERVER_MEMORY_REQUEST
+  value: 1.5Gi
+  required: true
+- displayName: KIE Server Container CPU Limit
+  description: KIE Server Container CPU limit.
+  name: KIE_SERVER_CPU_LIMIT
+  value: "1"
+  required: true  
+- displayName: KIE Server Container CPU Request
+  description: KIE Server Container CPU Request.
+  name: KIE_SERVER_CPU_REQUEST
+  value: '750m'
+  required: true 
 - displayName: RH-SSO URL
   description: RH-SSO URL.
   name: SSO_URL
@@ -447,7 +477,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver"
     annotations:
-      description: All the KIE server web server's ports.
+      description: All the KIE Server web server's ports.
 ## Place to add database service
 - kind: Route
   apiVersion: v1
@@ -494,7 +524,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver"
     annotations:
-      description: Route for KIE server's http service.
+      description: Route for KIE Server's http service.
       haproxy.router.openshift.io/balance: source
   spec:
     host: "${KIE_SERVER_HOSTNAME_HTTP}"
@@ -511,7 +541,7 @@ objects:
       application: "${APPLICATION_NAME}"
       service: "${APPLICATION_NAME}-kieserver"
     annotations:
-      description: Route for KIE server's https service.
+      description: Route for KIE Server's https service.
   spec:
     host: "${KIE_SERVER_HOSTNAME_HTTPS}"
     to:
@@ -563,6 +593,10 @@ objects:
           resources:
             limits:
               memory: "${BUSINESS_CENTRAL_MEMORY_LIMIT}"
+              cpu: "${BUSINESS_CENTRAL_CPU_LIMIT}"
+            requests:
+              memory: "${BUSINESS_CENTRAL_MEMORY_REQUEST}"
+              cpu: "${BUSINESS_CENTRAL_CPU_REQUEST}"
           volumeMounts:
           - name: businesscentral-keystore-volume
             mountPath: "/etc/businesscentral-secret-volume"
@@ -577,12 +611,13 @@ objects:
             initialDelaySeconds: 180
             timeoutSeconds: 2
             periodSeconds: 15
+            failureThreshold: 36
           readinessProbe:
             httpGet:
               path: /rest/ready
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             timeoutSeconds: 2
             periodSeconds: 5
             failureThreshold: 36
@@ -784,6 +819,10 @@ objects:
           resources:
             limits:
               memory: "${KIE_SERVER_MEMORY_LIMIT}"
+              cpu: "${KIE_SERVER_CPU_LIMIT}"
+            requests:
+              memory: "${KIE_SERVER_MEMORY_REQUEST}"
+              cpu: "${KIE_SERVER_CPU_REQUEST}"
           volumeMounts:
           - name: kieserver-keystore-volume
             mountPath: "/etc/kieserver-secret-volume"
