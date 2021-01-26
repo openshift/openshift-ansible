@@ -1,4 +1,8 @@
 ---
+## determine which cluster size to use
+- set_fact:
+    _component_cluster_size: "{{ openshift_logging_es_ops_cluster_size if _cluster_component == 'es-ops' else openshift_logging_es_cluster_size }}"
+
 ## get all pods for the cluster
 - command: >
     {{ openshift_client_binary }}
@@ -12,7 +16,7 @@
   delay: 5
   until:
   - _cluster_pods.stdout is defined
-  - _cluster_pods.stdout == "" or _cluster_pods.stdout.split(' ') | count == openshift_logging_es_cluster_size
+  - _cluster_pods.stdout == "" or _cluster_pods.stdout.split(' ') | count == _component_cluster_size
 
 # make a temp dir for admin certs
 - command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
