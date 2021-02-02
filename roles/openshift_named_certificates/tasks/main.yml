@@ -66,12 +66,19 @@
     mode: 0600
   with_items: "{{ named_certificates | lib_utils_oo_collect('cafile') }}"
 
+- name: Check if the /etc/origin/master/ca-bundle.crt exists
+  stat:
+    path: /etc/origin/master/ca-bundle.crt
+  register: ca_bundle_named_exists
+
 - name: Verify if the ca-bundle contains the CA to trust the named certificate
   command: >
     openssl verify -CAfile /etc/origin/master/ca-bundle.crt "{{ named_certs_dir }}{{ item.certfile | basename }}"
   with_items: "{{ named_certificates }}"
   register: ca_bundle_result
-  when: named_certificates_ca_file_defined | length > 0
+  when:
+  - named_certificates_ca_file_defined | length > 0
+  - ca_bundle_named_exists.stat.exists
   changed_when: false
   failed_when: false
 
