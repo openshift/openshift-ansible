@@ -63,6 +63,8 @@ Requires:      %{name} = %{version}-%{release}
 Requires:      ansible = 2.7.10
 Requires:      python2-openshift
 Requires:      openssh-clients
+Requires:      python2-boto
+Requires:      python-boto3
 BuildArch:     noarch
 
 %description test
