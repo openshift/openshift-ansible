@@ -202,8 +202,8 @@
     register: oc_get
     until:
     - oc_get.stdout == "True"
-    retries: 36
-    delay: 5
+    retries: 30
+    delay: 20
     changed_when: false
 
   rescue:
