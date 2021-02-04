@@ -34,6 +34,8 @@
     # openshift_protect_installed_version is passed n via upgrade_control_plane.yml
     # l_openshift_version_set_hosts is passed via upgrade_control_plane.yml
 
+- import_playbook: ../../../../init/cluster_facts.yml
+
 - name: OpenShift Health Checks
   hosts: "{{ l_upgrade_health_check_hosts }}"
   any_errors_fatal: true
