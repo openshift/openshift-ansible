@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.380
+Version:        3.11.381
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,16 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Feb 04 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.381-1
+- BZ#1920567 - patch to check if the ca-bundle.crt exists
+  (22072258+vwalek@users.noreply.github.com)
+- Pin PyJWT==1.7.1, Fixes image build issue (rteague@redhat.com)
+- Support upgrades of Kuryr compoments (maysa.macedo95@gmail.com)
+- [KIECLOUD-460] - Update RHPAM and RHDM templates and imagestreams on
+  OpenShift Service Catalog for 7.9.1 release (fspolti@redhat.com)
+- Updating to correctly use ops cluster size if evaluating es-ops component
+  (ewolinet@redhat.com)
+
 * Mon Jan 25 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.380-1
 - 
 
