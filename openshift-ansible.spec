@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.381
+Version:        3.11.382
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Feb 05 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.382-1
+- Fix string handling when setting facts (rteague@redhat.com)
+
 * Thu Feb 04 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.381-1
 - BZ#1920567 - patch to check if the ca-bundle.crt exists
   (22072258+vwalek@users.noreply.github.com)
