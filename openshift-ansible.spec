@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.382
+Version:        3.11.383
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Feb 06 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.383-1
+- 
+
 * Fri Feb 05 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.382-1
 - Fix string handling when setting facts (rteague@redhat.com)
 
