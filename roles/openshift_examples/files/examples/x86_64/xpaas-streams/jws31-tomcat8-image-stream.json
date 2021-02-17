@@ -17,11 +17,11 @@
                 "annotations": {
                     "openshift.io/display-name": "JBoss Web Server 3.1 Apache Tomcat 8",
                     "openshift.io/provider-display-name": "Red Hat, Inc.",
-                    "version": "1.4.14"
+                    "version": "1.4.17"
                 }
             },
             "labels": {
-                "xpaas": "1.4.14"
+                "xpaas": "1.4.17"
             },
             "spec": {
                 "tags": [
@@ -83,6 +83,26 @@
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-webserver-3/webserver31-tomcat8-openshift:1.2"
+                        }
+                    },
+                    {
+                        "name": "1.3",
+                        "annotations": {
+                            "description": "JBoss Web Server 3.1 Apache Tomcat 8 S2I images.",
+                            "iconClass": "icon-rh-tomcat",
+                            "tags": "builder,tomcat,tomcat8,java,jboss,hidden",
+                            "supports": "tomcat8:3.1,tomcat:8,java:8",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
+                            "sampleContextDir": "tomcat-websocket-chat",
+                            "version": "1.3",
+                            "openshift.io/display-name": "Red Hat JBoss Web Server 3.1 Apache Tomcat 8"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-webserver-3/webserver31-tomcat8-openshift:1.3"
                         }
                     }
                 ]

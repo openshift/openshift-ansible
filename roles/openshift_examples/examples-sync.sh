@@ -8,8 +8,8 @@
 XPAAS_VERSION=ose-v1.4.18
 RHDS_6_TAG=6.4.12.GA
 RHIPS_6_TAG=6.4.12.GA
-RHDM_7_TAG=7.9.1.GA
-RHPAM_7_TAG=7.9.1.GAq
+RHDM_7_TAG=7.10.0.GA
+RHPAM_7_TAG=7.10.0.GA
 DG_VERSION=7.3-v1.0
 ORIGIN_VERSION=${1:-v3.11}
 ORIGIN_BRANCH=${2:-release-3.11}
@@ -45,8 +45,8 @@ mv origin-${ORIGIN_BRANCH}/examples/quickstarts/*.{yaml,json} ${EXAMPLES_BASE}/q
 mv origin-${ORIGIN_BRANCH}/examples/jenkins/jenkins-*template.json ${EXAMPLES_BASE}/quickstart-templates/
 mv origin-${ORIGIN_BRANCH}/examples/image-streams/*.{yaml,json} ${EXAMPLES_BASE}/image-streams/
 mv application-templates-${XPAAS_VERSION}/jboss-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/
-mv rhdm-7-openshift-image-${RHDM_7_TAG}/rhdm79-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
-mv rhpam-7-openshift-image-${RHPAM_7_TAG}/rhpam79-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
+mv rhdm-7-openshift-image-${RHDM_7_TAG}/rhdm710-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
+mv rhpam-7-openshift-image-${RHPAM_7_TAG}/rhpam710-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
 mv jboss-decisionserver-6-openshift-image-${RHDS_6_TAG}/templates/decisionserver64-image-stream.json ${EXAMPLES_BASE}/xpaas-streams/
 mv jboss-processserver-6-openshift-image-${RHIPS_6_TAG}/templates/processserver64-image-stream.json ${EXAMPLES_BASE}/xpaas-streams/
 mv jboss-datagrid-7-openshift-image-${DG_VERSION}/templates/datagrid73-image-stream.json ${EXAMPLES_BASE}/xpaas-streams/

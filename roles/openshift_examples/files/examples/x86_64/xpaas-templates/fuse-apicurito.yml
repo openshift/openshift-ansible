@@ -10,14 +10,14 @@ metadata:
     description: "Design beautiful, functional APIs with zero coding, using a visual designer for OpenAPI documents."
     tags: "fuse,apicurio,openapi,swagger,api"
     iconClass: "icon-rh-integration"
-    version: "1.5"
+    version: "1.8"
 message: |-
   Apicurito is now deployed to https://${ROUTE_HOSTNAME}.
 parameters:
 - name: APP_VERSION
   displayName: Application Version
   required: true
-  value: "1.5"
+  value: "1.8"
   description: The application version.
 - name: IMAGE_STREAM_NAMESPACE
   displayName: Image Stream Namespace
@@ -94,6 +94,11 @@ objects:
         labels:
           app: apicurito
           component: apicurito-ui
+          com.company: Red_Hat
+          rht.prod_name: Red_Hat_Integration
+          rht.prod_ver: "7.8"
+          rht.comp: apicurito-ui
+          rht.comp_ver: ${APP_VERSION}
       spec:
         containers:
         - name: apicurito-ui
@@ -192,26 +197,27 @@ objects:
         labels:
           app: apicurito
           component: fuse-apicurito-generator
+          com.company: Red_Hat
+          rht.prod_name: Red_Hat_Integration
+          rht.prod_ver: "7.8"
+          rht.comp: fuse-apicurito-generator
+          rht.comp_ver: ${APP_VERSION}
       spec:
         containers:
         - name: fuse-apicurito-generator
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
-            httpGet:
-              path: /health
-              port: 8181
-              scheme: HTTP
+            tcpSocket:
+              port: 8080
             initialDelaySeconds: 180
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
             failureThreshold: 3
-            httpGet:
-              path: /health
-              port: 8181
-              scheme: HTTP
+            tcpSocket:
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
             successThreshold: 1

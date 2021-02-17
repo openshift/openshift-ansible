@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.5 Camel CXF REST with Karaf",
+      "openshift.io/display-name": "Red Hat Fuse 7.8 Camel CXF REST with Karaf",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "REST example using CXF in Karaf container. This quickstart demonstrates how to create a RESTful (JAX-RS) web service using CXF and expose it through the OSGi HTTP Service",
       "tags": "quickstart,java,karaf,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.5"
+      "version": "1.8"
     },
-    "name": "s2i-fuse75-karaf-cxf-rest"
+    "name": "s2i-fuse78-karaf-cxf-rest"
   },
   "labels": {
-    "template": "s2i-fuse75-karaf-cxf-rest"
+    "template": "s2i-fuse78-karaf-cxf-rest"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse75-karaf-cxf-rest",
+      "value": "s2i-fuse78-karaf-cxf-rest",
       "description": "The name assigned to the application."
     },
     {
@@ -33,25 +33,25 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf-cxf-rest-1.0.0.fuse-750024-redhat-00002",
+      "value": "karaf-cxf-rest-7.8.0.fuse-sb2-780035-redhat-00002",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
       "name": "SERVICE_NAME",
       "displayName": "Service Name",
-      "value": "s2i-fuse75-karaf-cxf-rest",
+      "value": "s2i-fuse78-karaf-cxf-rest",
       "description": "Exposed Service name."
     },
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.5",
+      "value": "1.8",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-750024-redhat-00002",
+      "value": "7.8.0.fuse-sb2-780035-redhat-00002",
       "description": "The application version."
     },
     {
@@ -64,6 +64,12 @@
       "name": "MAVEN_ARGS_APPEND",
       "displayName": "Extra Maven Arguments",
       "description": "Extra arguments passed to mvn, e.g. for multi-module builds."
+    },
+    {
+      "displayName": "Maven mirror URL",
+      "description": "Maven mirror to use for S2I builds.",
+      "name": "MAVEN_MIRROR_URL",
+      "required": false
     },
     {
       "name": "ARTIFACT_DIR",
@@ -115,7 +121,7 @@
     {
       "name": "BUILD_MEMORY_LIMIT",
       "displayName": "Build Memory limit",
-      "value": "0.8G",
+      "value": "1G",
       "required": true,
       "description": "The amount of memory the build container is limited to use."
     }
@@ -267,6 +273,10 @@
               {
                 "name": "MAVEN_ARGS_APPEND",
                 "value": "${MAVEN_ARGS_APPEND}"
+              },
+              {
+                "name": "MAVEN_MIRROR_URL",
+                "value": "${MAVEN_MIRROR_URL}"
               }
             ]
           }
@@ -344,7 +354,12 @@
               "group": "quickstarts",
               "app": "${APP_NAME}",
               "provider": "s2i",
-              "version": "${APP_VERSION}"
+              "version": "${APP_VERSION}",
+              "com.company": "Red_Hat",
+              "rht.prod_name": "Red_Hat_Integration",
+              "rht.prod_ver": "7.8",
+              "rht.comp": "${APP_NAME}",
+              "rht.comp_ver": "${APP_VERSION}"
             }
           },
           "spec": {
