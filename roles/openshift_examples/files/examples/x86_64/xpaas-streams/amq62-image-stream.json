@@ -17,11 +17,11 @@
                 "annotations": {
                     "openshift.io/display-name": "Red Hat JBoss A-MQ 6.2",
                     "openshift.io/provider-display-name": "Red Hat, Inc.",
-                    "version": "1.4.14"
+                    "version": "1.4.17"
                 }
             },
             "labels": {
-                "xpaas": "1.4.14"
+                "xpaas": "1.4.17"
             },
             "spec": {
                 "tags": [
@@ -121,7 +121,7 @@
                             "description": "JBoss A-MQ 6.2 broker image.",
                             "iconClass": "icon-amq",
                             "tags": "messaging,amq,jboss,hidden",
-                            "supports": "amq:6.2,messaging",
+                            "supports":"amq:6.2,messaging",
                             "version": "1.6",
                             "openshift.io/display-name": "Red Hat JBoss A-MQ 6.2"
                         },
@@ -139,7 +139,7 @@
                             "description": "JBoss A-MQ 6.2 broker image.",
                             "iconClass": "icon-amq",
                             "tags": "messaging,amq,jboss,hidden",
-                            "supports": "amq:6.2,messaging",
+                            "supports":"amq:6.2,messaging",
                             "version": "1.7",
                             "openshift.io/display-name": "Red Hat JBoss A-MQ 6.2"
                         },
@@ -150,9 +150,10 @@
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-amq-6/amq62-openshift:1.7"
                         }
-                    }
+                     }
                 ]
             }
         }
     ]
 }
+

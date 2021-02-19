@@ -92,10 +92,6 @@
                                 "value": "${DOTNET_STARTUP_PROJECT}"
                             },
                             {
-                                "name": "DOTNET_SDK_VERSION",
-                                "value": "${DOTNET_SDK_VERSION}"
-                            },
-                            {
                                 "name": "DOTNET_ASSEMBLY_NAME",
                                 "value": "${DOTNET_ASSEMBLY_NAME}"
                             },
@@ -118,6 +114,14 @@
                             {
                                 "name": "DOTNET_TOOLS",
                                 "value": "${DOTNET_TOOLS}"
+                            },
+                            {
+                                "name": "DOTNET_PUBLISH_READYTORUN",
+                                "value": "${DOTNET_PUBLISH_READYTORUN}"
+                            },
+                            {
+                                "name": "DOTNET_RESTORE_CONFIGFILE",
+                                "value": "${DOTNET_RESTORE_CONFIGFILE}"
                             }
                         ]
                     }
@@ -253,7 +257,7 @@
             "displayName": ".NET builder",
             "required": true,
             "description": "The image stream tag which is used to build the code.",
-            "value": "dotnet:2.2"
+            "value": "dotnet:3.0"
         },
         {
             "name": "NAMESPACE",
@@ -273,7 +277,7 @@
             "name": "SOURCE_REPOSITORY_REF",
             "displayName": "Git Reference",
             "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch.",
-            "value": "dotnetcore-2.2"
+            "value": "dotnetcore-3.0"
         },
         {
             "name": "CONTEXT_DIR",
@@ -301,16 +305,15 @@
             "from": "[a-zA-Z0-9]{40}"
         },
         {
-            "name": "DOTNET_SDK_VERSION",
-            "displayName": "SDK Version",
-            "description": "Set this to configure the default SDK version. This can be set to a specific version, '' (lowest version) or 'latest' (highest version).",
-            "value": ""
-        },
-        {
             "name": "DOTNET_STARTUP_PROJECT",
             "displayName": "Startup Project",
             "description": "Set this to a project file (e.g. csproj) or a folder containing a single project file.",
             "value": "app"
+        },
+        {
+            "name": "DOTNET_PUBLISH_READYTORUN",
+            "displayName": "Ahead-of-time compilation",
+            "description": "Set this to 'true' to perform an ahead-of-time compilation."
         },
         {
             "name": "DOTNET_ASSEMBLY_NAME",
@@ -341,7 +344,12 @@
         {
             "name": "DOTNET_RESTORE_SOURCES",
             "displayName": "NuGet package sources",
-            "description": "Set this to override the NuGet.config sources."
+            "description": "Set this to override the NuGet.config sources. Cannot be combined with DOTNET_RESTORE_CONFIGFILE."
+        },
+        {
+            "name": "DOTNET_RESTORE_CONFIGFILE",
+            "displayName": "NuGet.Config file",
+            "description": "Set this to a Nuget.Config file. Cannot be combined with DOTNET_RESTORE_SOURCES."
         }
     ]
 }

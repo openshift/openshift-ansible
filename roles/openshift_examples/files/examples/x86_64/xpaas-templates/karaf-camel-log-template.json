@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.5 Camel log with Karaf",
+      "openshift.io/display-name": "Red Hat Fuse 7.8 Camel log with Karaf",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "A simple Camel route in Karaf container. This quickstart shows a simple Apache Camel application that logs a message to the server log every 5th second.",
       "tags": "quickstart,java,karaf,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.5"
+      "version": "1.8"
     },
-    "name": "s2i-fuse75-karaf-camel-log"
+    "name": "s2i-fuse78-karaf-camel-log"
   },
   "labels": {
-    "template": "s2i-fuse75-karaf-camel-log"
+    "template": "s2i-fuse78-karaf-camel-log"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse75-karaf-camel-log",
+      "value": "s2i-fuse78-karaf-camel-log",
       "description": "The name assigned to the application."
     },
     {
@@ -33,19 +33,19 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf-camel-log-1.0.0.fuse-750024-redhat-00002",
+      "value": "karaf-camel-log-7.8.0.fuse-sb2-780030-redhat-00002",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.5",
+      "value": "1.8",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-750024-redhat-00002",
+      "value": "7.8.0.fuse-sb2-780030-redhat-00002",
       "description": "The application version."
     },
     {
@@ -58,6 +58,12 @@
       "name": "MAVEN_ARGS_APPEND",
       "displayName": "Extra Maven Arguments",
       "description": "Extra arguments passed to mvn, e.g. for multi-module builds."
+    },
+    {
+      "displayName": "Maven mirror URL",
+      "description": "Maven mirror to use for S2I builds.",
+      "name": "MAVEN_MIRROR_URL",
+      "required": false
     },
     {
       "name": "ARTIFACT_DIR",
@@ -116,7 +122,7 @@
     {
       "name": "BUILD_MEMORY_LIMIT",
       "displayName": "Build Memory limit",
-      "value": "0.8G",
+      "value": "1G",
       "required": true,
       "description": "The amount of memory the build container is limited to use."
     }
@@ -212,6 +218,10 @@
               {
                 "name": "MAVEN_ARGS_APPEND",
                 "value": "${MAVEN_ARGS_APPEND}"
+              },
+              {
+                "name": "MAVEN_MIRROR_URL",
+                "value": "${MAVEN_MIRROR_URL}"
               }
             ]
           }
@@ -289,7 +299,12 @@
               "group": "quickstarts",
               "app": "${APP_NAME}",
               "provider": "s2i",
-              "version": "${APP_VERSION}"
+              "version": "${APP_VERSION}",
+              "com.company": "Red_Hat",
+              "rht.prod_name": "Red_Hat_Integration",
+              "rht.prod_ver": "7.8",
+              "rht.comp": "${APP_NAME}",
+              "rht.comp_ver": "${APP_VERSION}"
             }
           },
           "spec": {

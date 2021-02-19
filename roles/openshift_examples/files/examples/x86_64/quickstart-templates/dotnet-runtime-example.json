@@ -102,10 +102,6 @@
                                 "value": "${DOTNET_STARTUP_PROJECT}"
                             },
                             {
-                                "name": "DOTNET_SDK_VERSION",
-                                "value": "${DOTNET_SDK_VERSION}"
-                            },
-                            {
                                 "name": "DOTNET_ASSEMBLY_NAME",
                                 "value": "${DOTNET_ASSEMBLY_NAME}"
                             },
@@ -329,14 +325,14 @@
             "displayName": ".NET Runtime Imagestream Tag",
             "description": "The image stream tag which is used to run the application.",
             "required": true,
-            "value": "dotnet-runtime:2.2"
+            "value": "dotnet-runtime:3.0"
         },
         {
             "name": "DOTNET_BUILD_IMAGE_STREAM_TAG",
             "displayName": ".NET builder",
             "required": true,
             "description": "The image stream tag which is used to build the application.",
-            "value": "dotnet:2.2"
+            "value": "dotnet:3.0"
         },
         {
             "name": "NAMESPACE",
@@ -362,7 +358,7 @@
             "name": "SOURCE_REPOSITORY_REF",
             "displayName": "Git Reference",
             "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch.",
-            "value": "dotnetcore-2.2"
+            "value": "dotnetcore-3.0"
         },
         {
             "name": "CONTEXT_DIR",
@@ -388,12 +384,6 @@
             "displayName": "Startup Project",
             "description": "Set this to the folder containing your startup project.",
             "value": "app"
-        },
-        {
-            "name": "DOTNET_SDK_VERSION",
-            "displayName": "SDK Version",
-            "description": "Set this to configure the default SDK version. This can be set to a specific version, '' (lowest version) or 'latest' (highest version).",
-            "value": ""
         },
         {
             "name": "DOTNET_ASSEMBLY_NAME",
