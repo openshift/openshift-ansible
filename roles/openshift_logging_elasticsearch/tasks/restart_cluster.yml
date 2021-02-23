@@ -16,7 +16,7 @@
   delay: 5
   until:
   - _cluster_pods.stdout is defined
-  - _cluster_pods.stdout == "" or _cluster_pods.stdout.split(' ') | count == _component_cluster_size
+  - _cluster_pods.stdout == "" or _cluster_pods.stdout.split(' ') | count == _component_cluster_size | int
 
 # make a temp dir for admin certs
 - command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
