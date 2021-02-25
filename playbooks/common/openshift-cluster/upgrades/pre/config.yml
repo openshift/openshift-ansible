@@ -3,7 +3,6 @@
 # why may affect the tasks here and in imported playbooks.
 
 # Pre-upgrade
-- import_playbook: ../initialize_nodes_to_upgrade.yml
 
 - name: Update repos on upgrade hosts
   hosts: "{{ l_upgrade_repo_hosts }}"
