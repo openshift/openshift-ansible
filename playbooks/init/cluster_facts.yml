@@ -63,16 +63,6 @@
     - openshift_http_proxy is defined or openshift_https_proxy is defined
     - openshift_generate_no_proxy_hosts | default(True) | bool
 
-  - name: Initialize openshift.node.sdn_mtu
-    openshift_facts:
-      role: node
-      system_facts: "{{ vars_openshift_facts_system_facts }}"
-      local_facts:
-        sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
-  - name: set_fact l_kubelet_node_name
-    set_fact:
-      l_kubelet_node_name: "{{ openshift_kubelet_name_override | default(openshift.node.nodename) }}"
-
 - name: Initialize etcd host variables
   hosts: oo_masters_to_config
   roles:
