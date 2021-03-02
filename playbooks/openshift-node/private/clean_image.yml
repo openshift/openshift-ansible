@@ -1,7 +1,6 @@
 ---
 - name: Reboot instance
   hosts: localhost
-  connection: local
   gather_facts: no
   tasks:
   # After installing certain packages rebooting the instance is a must before all
