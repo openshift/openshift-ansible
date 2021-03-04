@@ -1,4 +1,7 @@
 ---
+- name: Gather some preliminary facts
+  import_playbook: ../../../init/cluster_facts.yml
+
 - name: Filter list of nodes to be upgraded if necessary
   hosts: oo_first_master
 
