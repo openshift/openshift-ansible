@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.395
+Version:        3.11.396
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Mar 06 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.396-1
+- 
+
 * Fri Mar 05 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.395-1
 - Adding int typecasting for _component_cluster_size in
   openshift_logging_elasticsearch handler task for restarting cluster
