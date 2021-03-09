@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.398
+Version:        3.11.399
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Mar 09 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.399-1
+- Do not use connection local with localhost (rteague@redhat.com)
+
 * Mon Mar 08 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.398-1
 - Pin zipp=3.4.0, Fixes image build issue (rteague@redhat.com)
 - Evaluate oo_nodes_to_upgrade before pre/config (rteague@redhat.com)
