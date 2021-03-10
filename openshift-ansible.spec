@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.399
+Version:        3.11.400
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Mar 10 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.400-1
+- Move node fact initialization to basic_facts.yml (rteague@redhat.com)
+
 * Tue Mar 09 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.399-1
 - Do not use connection local with localhost (rteague@redhat.com)
 
