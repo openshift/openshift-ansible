@@ -8,17 +8,17 @@ USER root
 COPY images/installer/origin-extra-root /
 
 # install ansible and deps
-RUN INSTALL_PKGS="python-lxml python-dns pyOpenSSL python2-cryptography openssl python2-passlib httpd-tools openssh-clients origin-clients iproute patch" \
+RUN INSTALL_PKGS="ansible-2.9.13 azure-cli-2.0.46 java-1.8.0-openjdk-headless python-lxml python-dns openssl python2-passlib httpd-tools openssh-clients origin-clients iproute patch which" \
+ && if [ "$(uname -m)" == "x86_64" ]; then INSTALL_PKGS+=" google-cloud-sdk" ; fi \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
- && EPEL_PKGS="ansible-2.9.13 python2-boto python2-crypto which python2-pip.noarch python2-scandir python2-packaging azure-cli-2.0.46" \
+ && EPEL_PKGS=" python2-pip.noarch python2-scandir python2-packaging" \
  && yum install -y epel-release \
  && yum install -y --setopt=tsflags=nodocs $EPEL_PKGS \
- && if [ "$(uname -m)" == "x86_64" ]; then yum install -y https://sdodson.fedorapeople.org/google-cloud-sdk-183.0.0-3.el7.x86_64.rpm ; fi \
- && yum install -y java-1.8.0-openjdk-headless \
- && rpm -V $INSTALL_PKGS $EPEL_PKGS $EPEL_TESTING_PKGS \
- && pip install -U 'setuptools==44.0.0' 'wheel' \
- && pip install 'apache-libcloud~=2.2.1' 'SecretStorage<3' 'ansible[azure]' 'PyJWT==1.7.1' 'zipp==3.4.0' 'boto3==1.4.6' \
+ && rpm -V $INSTALL_PKGS $EPEL_PKGS \
  && yum clean all
+
+RUN pip install --upgrade 'pip<21' 'setuptools<45' 'wheel' \
+ && pip install 'boto' 'pyOpenSSL' 'apache-libcloud' 'SecretStorage<3' 'ansible[azure]' 'boto3'
 
 LABEL name="openshift/origin-ansible" \
       summary="OpenShift's installation and configuration tool" \
