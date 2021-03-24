@@ -136,6 +136,9 @@ spec:
           mountPath: /host_proc
         - name: openvswitch
           mountPath: /var/run/openvswitch
+        - name: netns
+          mountPath: /run/netns
+          mountPropagation: HostToContainer
 {% if enable_kuryr_cni_probes|default(true)|bool %}
         readinessProbe:
           httpGet:
@@ -181,3 +184,6 @@ spec:
         - name: host-var-run
           hostPath:
             path: /var/run
+        - name: netns
+          hostPath:
+            path: /run/netns

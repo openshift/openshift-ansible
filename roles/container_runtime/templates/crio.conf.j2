@@ -115,6 +115,12 @@ pids_limit = 1024
 # Negative values indicate that no limit is imposed.
 log_size_max = 52428800
 
+{% if openshift_use_kuryr|default(false)|bool %}
+# manage_network_ns_lifecycle determines whether we pin and remove network namespaces
+# and manage their lifecycle
+manage_network_ns_lifecycle = true
+{% endif %}
+
 # The "crio.image" table contains settings pertaining to the
 # management of OCI images.
 [crio.image]
