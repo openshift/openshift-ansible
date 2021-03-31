@@ -91,9 +91,9 @@ parameters:
   value: openshift
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.10.0".
+  description: A named pointer to an image in an image stream. Default is "7.10.1".
   name: IMAGE_STREAM_TAG
-  value: "7.10.0"
+  value: "7.10.1"
   required: false
 - displayName: Smart Router Custom http Route Hostname
   description: 'Custom hostname for http service route.  Leave blank for default hostname,
@@ -190,7 +190,7 @@ parameters:
 - displayName: Business Central Container Memory Request
   description: Business Central Container memory request.
   name: BUSINESS_CENTRAL_MEMORY_REQUEST
-  value: 1.5Gi
+  value: 1536Mi
   required: true
 - displayName: Business Central Container CPU Limit
   description: Business Central Container CPU limit.

@@ -15,18 +15,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
-    - name: '7.10.0'
+    - name: '7.10.1'
       annotations:
         description: Red Hat Process Automation Manager 7.10 - Business Central image.
         iconClass: icon-jboss
         tags: rhpam
         supports: rhpam:7.10
-        version: '7.10.0'
+        version: '7.10.1'
       referencePolicy:
         type: Local
       from:
         kind: DockerImage
-        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-rhel8:7.10.0
+        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-rhel8:7.10.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -36,18 +36,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
-    - name: '7.10.0'
+    - name: '7.10.1'
       annotations:
         description: Red Hat Process Automation Manager 7.10 - Business Central Monitoring image.
         iconClass: icon-jboss
         tags: rhpam
         supports: rhpam:7.10
-        version: '7.10.0'
+        version: '7.10.1'
       referencePolicy:
         type: Local
       from:
         kind: DockerImage
-        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-monitoring-rhel8:7.10.0
+        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-monitoring-rhel8:7.10.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -57,18 +57,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
-    - name: '7.10.0'
+    - name: '7.10.1'
       annotations:
         description: Red Hat Process Automation Manager 7.10 - Standalone Controller image.
         iconClass: icon-jboss
         tags: rhpam
         supports: rhpam:7.10
-        version: '7.10.0'
+        version: '7.10.1'
       referencePolicy:
         type: Local
       from:
         kind: DockerImage
-        name: registry.redhat.io/rhpam-7/rhpam-controller-rhel8:7.10.0
+        name: registry.redhat.io/rhpam-7/rhpam-controller-rhel8:7.10.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -78,18 +78,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
-      - name: '7.10.0'
+      - name: '7.10.1'
         annotations:
           description: Red Hat Process Automation Manager 7.10 - Standalone Dashbuilder image.
           iconClass: icon-jboss
           tags: rhpam,dashbuilder
           supports: rhpam:7.10
-          version: '7.10.0'
+          version: '7.10.1'
         referencePolicy:
           type: Local
         from:
           kind: DockerImage
-          name: registry.redhat.io/rhpam-7/rhpam-dashbuilder-rhel8:7.10.0
+          name: registry.redhat.io/rhpam-7/rhpam-dashbuilder-rhel8:7.10.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -99,18 +99,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
-    - name: '7.10.0'
+    - name: '7.10.1'
       annotations:
         description: Red Hat Process Automation Manager 7.10 - KIE Server image.
         iconClass: icon-jboss
         tags: rhpam
         supports: rhpam:7.10
-        version: '7.10.0'
+        version: '7.10.1'
       referencePolicy:
         type: Local
       from:
         kind: DockerImage
-        name: registry.redhat.io/rhpam-7/rhpam-kieserver-rhel8:7.10.0
+        name: registry.redhat.io/rhpam-7/rhpam-kieserver-rhel8:7.10.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -120,18 +120,18 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
-    - name: '7.10.0'
+    - name: '7.10.1'
       annotations:
         description: Red Hat Process Automation Manager 7.10 - Smart Router image.
         iconClass: icon-jboss
         tags: rhpam
         supports: rhpam:7.10
-        version: '7.10.0'
+        version: '7.10.1'
       referencePolicy:
         type: Local
       from:
         kind: DockerImage
-        name: registry.redhat.io/rhpam-7/rhpam-smartrouter-rhel8:7.10.0
+        name: registry.redhat.io/rhpam-7/rhpam-smartrouter-rhel8:7.10.1
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -141,15 +141,15 @@ items:
       openshift.io/provider-display-name: Red Hat, Inc.
   spec:
     tags:
-    - name: '7.10.0'
+    - name: '7.10.1'
       annotations:
         description: Red Hat Process Automation Manager 7.10 - Process Migration image.
         iconClass: icon-jboss
         tags: rhpam
         supports: rhpam:7.10
-        version: '7.10.0'
+        version: '7.10.1'
       referencePolicy:
         type: Local
       from:
         kind: DockerImage
-        name: registry.redhat.io/rhpam-7/rhpam-process-migration-rhel8:7.10.0
+        name: registry.redhat.io/rhpam-7/rhpam-process-migration-rhel8:7.10.1
