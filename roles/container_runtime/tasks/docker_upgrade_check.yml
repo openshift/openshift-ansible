@@ -45,7 +45,7 @@
     - docker_version is not defined
     - docker_upgrade | bool
     - pkg_check.rc == 0
-    - avail_docker_version.stdout == "" or avail_docker_version.stdout is version(l_required_docker_version,'<')
+    - avail_docker_version.stdout == "" or avail_docker_version.stdout_lines[-1] is version(l_required_docker_version,'<')
 
 # Default l_docker_upgrade to False, we'll set to True if an upgrade is required:
 - set_fact:
