@@ -11,7 +11,7 @@ COPY images/installer/origin-extra-root /
 RUN INSTALL_PKGS="ansible-2.9.13 azure-cli-2.0.46 java-1.8.0-openjdk-headless python-lxml python-dns openssl python2-passlib httpd-tools openssh-clients origin-clients iproute patch which" \
  && if [ "$(uname -m)" == "x86_64" ]; then INSTALL_PKGS+=" google-cloud-sdk" ; fi \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
- && EPEL_PKGS=" python2-pip.noarch python2-scandir python2-packaging" \
+ && EPEL_PKGS=" python2-pip.noarch python2-crypto python2-scandir python2-packaging" \
  && yum install -y epel-release \
  && yum install -y --setopt=tsflags=nodocs $EPEL_PKGS \
  && rpm -V $INSTALL_PKGS $EPEL_PKGS \
