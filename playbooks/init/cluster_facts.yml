@@ -42,7 +42,7 @@
   - name: Gather Master facts
     include_role:
       name: openshift_master_facts
-    when: inventory_hostname in groups['oo_masters'] | default ([])
+    when: inventory_hostname in groups['oo_masters']
 
   - name: Set fact of no_proxy_internal_hostnames
     openshift_facts:
