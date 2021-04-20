@@ -24,7 +24,7 @@
     - "groups.oo_first_master | length > 0"
     - "'openshift_portal_net' in hostvars[groups.oo_first_master.0]"
 
-  - name: Gather Common Cluster facts
+  - name: Gather Cluster facts
     openshift_facts:
       role: common
       system_facts: "{{ vars_openshift_facts_system_facts }}"
@@ -38,11 +38,6 @@
         no_proxy: "{{ openshift_no_proxy | default(None) }}"
         generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
         cloudprovider: "{{ openshift_cloudprovider_kind | default(None) }}"
-
-  - name: Gather Master facts
-    include_role:
-      name: openshift_master_facts
-    when: inventory_hostname in groups['oo_masters']
 
   - name: Set fact of no_proxy_internal_hostnames
     openshift_facts:
