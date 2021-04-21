@@ -9,11 +9,11 @@ COPY images/installer/origin-extra-root /
 
 # install ansible and deps
 RUN INSTALL_PKGS="ansible-2.9.13 azure-cli-2.0.46 java-1.8.0-openjdk-headless python-lxml python-dns openssl python2-passlib httpd-tools openssh-clients origin-clients iproute patch which" \
- && if [ "$(uname -m)" == "x86_64" ]; then INSTALL_PKGS+=" google-cloud-sdk" ; fi \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
  && EPEL_PKGS=" python2-pip.noarch python2-crypto python2-scandir python2-packaging" \
  && yum install -y epel-release \
  && yum install -y --setopt=tsflags=nodocs $EPEL_PKGS \
+ && if [ "$(uname -m)" == "x86_64" ]; then yum install -y https://sdodson.fedorapeople.org/google-cloud-sdk-183.0.0-3.el7.x86_64.rpm ; fi \
  && rpm -V $INSTALL_PKGS $EPEL_PKGS \
  && yum clean all
 
