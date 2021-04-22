@@ -30,9 +30,9 @@
 - import_playbook: base_packages.yml
   when: l_install_base_packages | default(False) | bool
 
-- import_playbook: version.yml
-
 - import_playbook: cluster_facts.yml
+
+- import_playbook: version.yml
 
 - import_playbook: sanity_checks.yml
   when: not (skip_sanity_checks | default(False))

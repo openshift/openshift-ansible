@@ -16,17 +16,6 @@
     import_role:
       name: openshift_sanitize_inventory
 
-  - name: Initialize openshift.node.sdn_mtu
-    openshift_facts:
-      role: node
-      system_facts: "{{ vars_openshift_facts_system_facts }}"
-      local_facts:
-        sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
-
-  - name: set_fact l_kubelet_node_name
-    set_fact:
-      l_kubelet_node_name: "{{ openshift_kubelet_name_override | default(openshift.node.nodename) }}"
-
   - name: Detecting Operating System from ostree_booted
     stat:
       path: /run/ostree-booted

@@ -7,6 +7,7 @@
 
 - import_playbook: ../../../init/basic_facts.yml
 - import_playbook: ../../../init/base_packages.yml
+- import_playbook: ../../../init/cluster_facts.yml
 
 - name: Inspect cluster certificates
   hosts: "{{ l_upgrade_cert_check_hosts }}"
