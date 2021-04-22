@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.420
+Version:        3.11.421
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,21 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Apr 22 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.421-1
+- Revert to install old gcloud sdk from sdodson's repo (rteague@redhat.com)
+- Add python2-crypto to Dockerfile for GCP CI (rteague@redhat.com)
+- Ensure master facts are set for all masters (rteague@redhat.com)
+- Revert "playbooks/init: Refresh master facts during init"
+  (rteague@redhat.com)
+- Revert "playbooks/init: Fix GCP job when oo_masters is not defined"
+  (rteague@redhat.com)
+- Revert "Gather cluster_facts after version.yml during upgrade"
+  (rteague@redhat.com)
+- Revert "Move node fact initialization to basic_facts.yml"
+  (rteague@redhat.com)
+- Pin decorator due to yanked version in TravisCI (rteague@redhat.com)
+- Fix pip dependencies in Dockerfile (rteague@redhat.com)
+
 * Fri Apr 09 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.420-1
 - 
 
