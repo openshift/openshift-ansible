@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.421
+Version:        3.11.422
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Apr 23 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.422-1
+- 
+
 * Thu Apr 22 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.421-1
 - Revert to install old gcloud sdk from sdodson's repo (rteague@redhat.com)
 - Add python2-crypto to Dockerfile for GCP CI (rteague@redhat.com)
