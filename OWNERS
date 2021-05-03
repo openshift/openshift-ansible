@@ -2,15 +2,11 @@
 
 # approval == this is a good idea /approve
 approvers:
-  - mtnbikenc
-  - vrutkovs
   - jstuever
+  - mtnbikenc
   - patrickdillon
-  - jcpowermac
 # review == this code is good /lgtm
 reviewers:
-  - mtnbikenc
-  - vrutkovs
   - jstuever
+  - mtnbikenc
   - patrickdillon
-  - jcpowermac
