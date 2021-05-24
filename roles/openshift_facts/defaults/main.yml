@@ -46,7 +46,7 @@ osn_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${compone
 openshift_facts_pod_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
 openshift_facts_control_plane_image: "{{ openshift_facts_versioned_registry_url | regex_replace('${component}' | regex_escape, 'control-plane') }}"
 
-repoquery_cmd: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0', 'repoquery --plugins') }}"
+repoquery_cmd: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0', 'repoquery --plugins --setopt=showdupesfromrepos=0') }}"
 repoquery_installed: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed', 'repoquery --plugins --installed') }}"
 
 openshift_use_crio: False

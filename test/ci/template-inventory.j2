@@ -2,7 +2,7 @@
 ansible_python_interpreter="{{ python }}"
 ansible_user="{{ aws_user }}"
 aws_region="{{ aws_region }}"
-openshift_master_default_subdomain="{{ hostvars[groups[('lb' in groups) | ternary('lb', 'masters')][0]]["aws_ip"] }}.xip.io"
+openshift_master_default_subdomain="{{ hostvars[groups[('lb' in groups) | ternary('lb', 'masters')][0]]["aws_ip"] }}.sslip.io"
 
 [OSEv3:children]
 {% for group in groups %}
