@@ -48,9 +48,9 @@ parameters:
   value: "rhdm-kieserver-rhel8"
   required: true
 - displayName: ImageStream Tag
-  description: A named pointer to an image in an image stream. Default is "7.10.0".
+  description: A named pointer to an image in an image stream. Default is "7.10.1".
   name: IMAGE_STREAM_TAG
-  value: "7.10.0"
+  value: "7.10.1"
   required: true
 - displayName: KIE MBeans
   description: KIE Server mbeans enabled/disabled. (Sets the kie.mbeans and kie.scanner.mbeans system properties)
@@ -175,7 +175,7 @@ parameters:
 - displayName: KIE Server Container Memory Request
   description: KIE Server Container memory Request.
   name: KIE_SERVER_MEMORY_REQUEST
-  value: 1.5Gi
+  value: 1536Mi
   required: true
 - displayName: KIE Server Container CPU Limit
   description: KIE Server Container CPU limit.
