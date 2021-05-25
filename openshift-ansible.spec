@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.444
+Version:        3.11.445
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue May 25 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.445-1
+- cri-o+kuryr: Switch to proper netns management (mdulko@redhat.com)
+- [KIECLOUD-494] - Update RHPAM and RHDM templates and imagestreams on
+  OpenShift Service Catalog for 7.10.1 release (mmagnani@redhat.com)
+
 * Mon May 24 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.444-1
 - Use sslip.io service for name resolution (rteague@redhat.com)
 - roles/openshift_facts: Force repoquery option (rteague@redhat.com)
