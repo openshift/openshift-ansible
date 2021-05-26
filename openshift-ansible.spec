@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.445
+Version:        3.11.446
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed May 26 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.446-1
+- 
+
 * Tue May 25 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.445-1
 - cri-o+kuryr: Switch to proper netns management (mdulko@redhat.com)
 - [KIECLOUD-494] - Update RHPAM and RHDM templates and imagestreams on
