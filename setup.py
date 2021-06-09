@@ -323,10 +323,6 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         print('Ansible Playbook Entry Point Syntax Checks')
         # Evaluate the difference between all playbooks and included playbooks
         entrypoint_playbooks = sorted(all_playbooks.difference(included_playbooks))
-        # Add ci test playbooks
-        test_playbooks, test_included_playbooks = find_playbooks('test')
-        test_entrypoint_playbooks = sorted(test_playbooks.difference(test_included_playbooks))
-        entrypoint_playbooks.extend(test_entrypoint_playbooks)
         print('Entry point playbook count: {}'.format(len(entrypoint_playbooks)))
         for playbook in entrypoint_playbooks:
             print('-' * 60)
