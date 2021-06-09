@@ -46,6 +46,28 @@
     state: yes
     persistent: yes
 
+# conmon symlink required or crio will fail to start on RHEL8
+# https://bugzilla.redhat.com/show_bug.cgi?id=1965369
+- name: Check for /usr/libexec/crio/conmon
+  stat:
+    path: /usr/libexec/crio/conmon
+  register: conmon_result
+
+- name: Create /usr/libexec/crio directory
+  file:
+    path: /usr/libexec/crio
+    state: directory
+  when:
+  - not conmon_result.stat.exists
+
+- name: Symlink conmon binary
+  file:
+    src: /bin/conmon
+    dest: /usr/libexec/crio/conmon
+    state: link
+  when:
+  - not conmon_result.stat.exists
+
 - name: Create temp directory
   tempfile:
     state: directory
@@ -158,8 +180,8 @@
   - name: Apply ignition manifest
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
     vars:
-      podman_flags: "--privileged --rm --entrypoint=/usr/bin/machine-config-daemon -ti {{ release_image_mcd.stdout }}"
-      podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
+      podman_flags: "--pid=host --privileged --rm --entrypoint=/usr/bin/machine-config-daemon -ti {{ release_image_mcd.stdout }}"
+      podman_mounts: "-v /:/rootfs"
       mcd_command: "start --node-name {{ ansible_nodename | lower }} --once-from {{ temp_dir.path }}/bootstrap.ign --skip-reboot"
 
   - name: Remove temp directory

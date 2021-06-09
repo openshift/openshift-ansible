@@ -9,47 +9,36 @@ openshift_node_bootstrap_port: 22623
 openshift_node_bootstrap_server: "{{ openshift_node_kubeconfig.clusters.0.cluster.server.split(':')[0:-1] | join(':') | regex_replace('://api', '://api-int') }}:{{ openshift_node_bootstrap_port }}"
 openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config/{{ openshift_node_machineconfigpool }}"
 
-# Packages to be installed from the rhel-7-server-ose repo
+openshift_packages: "{{ (openshift_node_packages + openshift_node_support_packages) | join(',') }}"
+
 openshift_node_packages:
   - conmon
   - cri-o-{{ crio_latest }}
   - cri-tools
   - openshift-clients-{{ l_cluster_version }}*
   - openshift-hyperkube-{{ l_cluster_version }}*
-  - podman  # From of extras, but must be installed concurrently with cri-o
+  - podman
   - runc
 
-openshift_node_support_packages: "{{ openshift_node_support_packages_base + openshift_node_support_packages_by_arch[ansible_architecture] }}"
+openshift_node_support_packages: "{{
+  openshift_node_support_packages_base +
+  openshift_node_support_packages_by_os_major_version[ansible_distribution_major_version] +
+  openshift_node_support_packages_by_arch[ansible_architecture] }}"
 
 openshift_node_support_packages_base:
-  # Packages from redhat-coreos.git manifest-base.yaml
   - kernel
   - systemd
-  #- systemd-journal-gateway
-  #- rpm-ostree
-  #- nss-altfiles
   - selinux-policy-targeted
   - setools-console
-  #- ignition
-  #- ignition-dracut
   - dracut-network
   - passwd
-  #- grub2
-  #- grub2-efi
-  #- ostree-grub2
-  #- efibootmgr
-  #- shim
   - openssh-server
   - openssh-clients
   - skopeo
-  #- runc
   - containernetworking-plugins
-  #- cri-o
-  #- cri-tools
-  #- toolbox
   - nfs-utils
   - NetworkManager
-  - NetworkManager-ovs
+  - NetworkManager-ovs  # https://bugzilla.redhat.com/show_bug.cgi?id=1884095
   - dnsmasq
   - lvm2
   - iscsi-initiator-utils
@@ -60,7 +49,6 @@ openshift_node_support_packages_base:
   - mdadm
   - cryptsetup
   - chrony
-  #- coreos-metadata
   - logrotate
   - sssd
   - shadow-utils
@@ -80,22 +68,20 @@ openshift_node_support_packages_base:
   - bash-completion
   - vim-minimal
   - nano
-  - openvswitch2.13
-  #- openshift-hyperkube
-  #- openshift-clients
-  #- pivot
-  #- subscription-manager-rhsm-certificates
-  #
-  # Packages from redhat-coreos.git maipo/manifest.yaml
-  #- redhat-release-coreos
   - authconfig
-  - policycoreutils-python
   - iptables-services
-  - bridge-utils
-  - container-storage-setup
-  #- cloud-utils-growpart
-  - ceph-common
-  - cifs-utils
+  - cifs-utils  # https://bugzilla.redhat.com/show_bug.cgi?id=1827982
+
+openshift_node_support_packages_by_os_major_version:
+  "7":
+    - openvswitch2.13
+    - policycoreutils-python
+    - bridge-utils
+    - container-storage-setup
+    - ceph-common
+  "8":
+    - openvswitch2.15
+    - policycoreutils-python-utils
 
 openshift_node_support_packages_by_arch:
   ppc64le:
