@@ -11,6 +11,9 @@ language: python
 python:
   - "3.6"
 
+before_install:
+  - python -m pip install --upgrade virtualenv
+
 install:
   - pip install --upgrade pip
   - pip install tox-travis
