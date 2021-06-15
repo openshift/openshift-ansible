@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.453
+Version:        3.11.454
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Jun 15 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.454-1
+- 
+
 * Mon Jun 14 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.453-1
 - Added entrypoint playbook for service catalog certificate redeployment
   (palonsoro@gmail.com)
