@@ -11,7 +11,5 @@
     -n openshift-sdn |
     {{ openshift_client_binary }} delete
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    --force
-    --grace-period=0
     -f -
   delegate_to: "{{ groups.oo_first_master.0 }}"
