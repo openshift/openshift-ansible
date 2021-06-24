@@ -68,8 +68,8 @@
   - name: Apply machine config
     command: "podman run {{ podman_mounts }} {{ podman_flags }} {{ mcd_command }}"
     vars:
-      podman_flags: "--privileged --rm --entrypoint=/usr/bin/machine-config-daemon -ti {{ l_mcd_image }}"
-      podman_mounts: "-v /:/rootfs -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd"
+      podman_flags: "--pid=host --privileged --rm --entrypoint=/usr/bin/machine-config-daemon -ti {{ l_mcd_image }}"
+      podman_mounts: "-v /:/rootfs"
       mcd_command: "start --node-name {{ ansible_nodename | lower }} --once-from {{ temp_dir.path }}/worker_ignition_config.json --skip-reboot"
   environment:
     http_proxy: "{{ http_proxy | default('')}}"

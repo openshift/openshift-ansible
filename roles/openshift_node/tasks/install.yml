@@ -32,16 +32,6 @@
   when:
   - ansible_fips != (cluster_fips.stdout | bool)
 
-- name: Install openshift support packages
-  package:
-    name: "{{ openshift_node_support_packages | join(',') }}"
-    state: latest
-    update_cache: true
-  async: 3600
-  poll: 30
-  register: result
-  until: result is succeeded
-
 - name: Get cluster version
   command: >
     oc get clusterversion
@@ -92,7 +82,7 @@
 - block:
   - name: Install openshift packages
     package:
-      name: "{{ openshift_node_packages | join(',') }}"
+      name: "{{ openshift_packages }}"
       state: latest
     async: 3600
     poll: 30
@@ -103,7 +93,7 @@
   - name: Package install failure message
     fail:
       msg: >
-        Unable to install {{ openshift_node_packages | join(', ') }}.
+        Unable to install {{ openshift_packages }}.
         Please ensure repos are configured properly to provide these packages
         and indicated versions.
 
