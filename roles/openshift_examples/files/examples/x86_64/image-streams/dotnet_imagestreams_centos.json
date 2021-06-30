@@ -57,7 +57,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/ubi8/dotnet-50:5.0"
+                            "name": "registry.redhat.io/ubi8/dotnet-50:5.0"
                         }
                     },
                     {
@@ -78,7 +78,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/ubi8/dotnet-50:5.0"
+                            "name": "registry.redhat.io/ubi8/dotnet-50:5.0"
                         }
                     },
                     {
@@ -99,7 +99,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/ubi8/dotnet-31:3.1"
+                            "name": "registry.redhat.io/ubi8/dotnet-31:3.1"
                         }
                     },
                     {
@@ -162,7 +162,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/ubi8/dotnet-21:2.1"
+                            "name": "registry.redhat.io/ubi8/dotnet-21:2.1"
                         }
                     },
                     {
@@ -253,7 +253,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/ubi8/dotnet-50-runtime:5.0"
+                            "name": "registry.redhat.io/ubi8/dotnet-50-runtime:5.0"
                         }
                     },
                     {
@@ -271,7 +271,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/ubi8/dotnet-50-runtime:5.0"
+                            "name": "registry.redhat.io/ubi8/dotnet-50-runtime:5.0"
                         }
                     },
                     {
@@ -289,7 +289,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/ubi8/dotnet-31-runtime:3.1"
+                            "name": "registry.redhat.io/ubi8/dotnet-31-runtime:3.1"
                         }
                     },
                     {
@@ -343,7 +343,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/ubi8/dotnet-21-runtime:2.1"
+                            "name": "registry.redhat.io/ubi8/dotnet-21-runtime:2.1"
                         }
                     },
                     {
