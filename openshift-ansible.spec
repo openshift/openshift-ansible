@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.464
+Version:        3.11.465
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jul 01 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.465-1
+- 
+
 * Wed Jun 30 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.464-1
 - [BZ-1964084] - OpenShift-ansible playbook tries to pull image from
   'registry.access.redhat.com' in a disconnected env (fspolti@redhat.com)
