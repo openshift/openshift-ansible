@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.467
+Version:        3.11.468
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Thu Jul 08 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.468-1
+- Bug 1968411: do not specify `force` and `grace-period 0` for SDN deleted
+  (aconstan@redhat.com)
+
 * Wed Jul 07 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.467-1
 - 
 
