@@ -67,6 +67,10 @@ find jboss-datagrid-7-openshift-image-${DG_VERSION}/templates/ -name '*.json' -e
 find jboss-datagrid-7-openshift-image-${DG_VERSION}/services/ -name '*.yaml' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
 popd
 
+# these were dropped from v1.4.18, but pulling from their new location would add java:11 and change java:latest 
+wget https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.4.17/openjdk/openjdk18-image-stream.json   -O ${EXAMPLES_BASE}/xpaas-streams/openjdk18-image-stream.json
+wget https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.4.17/openjdk/openjdk18-web-basic-s2i.json  -O ${EXAMPLES_BASE}/xpaas-templates/openjdk18-web-basic-s2i.json
+
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/dotnet_imagestreams.json         -O ${EXAMPLES_BASE}/image-streams/dotnet_imagestreams.json
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/dotnet_imagestreams_centos.json         -O ${EXAMPLES_BASE}/image-streams/dotnet_imagestreams_centos.json
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/templates/dotnet-example.json           -O ${EXAMPLES_BASE}/quickstart-templates/dotnet-example.json
