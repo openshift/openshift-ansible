@@ -44,9 +44,9 @@ parameters:
     value: "rhpam-kieserver-rhel8"
     required: true
   - displayName: ImageStream Tag
-    description: A named pointer to an image in an image stream. Default is "7.11.0".
+    description: A named pointer to an image in an image stream. Default is "7.11.1".
     name: IMAGE_STREAM_TAG
-    value: "7.11.0"
+    value: "7.11.1"
     required: true
   - displayName: KIE Server Persistence DS
     description: KIE Server persistence datasource. (Sets the org.kie.server.persistence.ds system property)
