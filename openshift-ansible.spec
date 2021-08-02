@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.487
+Version:        3.11.488
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Mon Aug 02 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.488-1
+- [KIECLOUD-568] - Update RHPAM and RHDM templates and imagestreams on
+  OpenShift Service Catalog for 7.11.1 releas (msmagnanijr@gmail.com)
+
 * Mon Jul 26 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.487-1
 - 
 
