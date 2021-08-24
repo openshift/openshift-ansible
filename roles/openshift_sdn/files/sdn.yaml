@@ -166,17 +166,9 @@ spec:
         ports:
         - name: healthz
           containerPort: 10256
-        # TODO: Temporarily disabled until we determine how to wait for clean default
-        # config
-        # livenessProbe:
-        #   initialDelaySeconds: 10
-        #   httpGet:
-        #     path: /healthz
-        #     port: 10256
-        #     scheme: HTTP
-        # force node to be notready when sdn is gone.
         tolerations:
         - operator: "Exists"
+        # force node to be notready when sdn is gone.
         lifecycle:
           preStop:
             exec:
