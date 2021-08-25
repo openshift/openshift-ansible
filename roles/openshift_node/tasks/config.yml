@@ -46,28 +46,6 @@
     state: yes
     persistent: yes
 
-# conmon symlink required or crio will fail to start on RHEL8
-# https://bugzilla.redhat.com/show_bug.cgi?id=1965369
-- name: Check for /usr/libexec/crio/conmon
-  stat:
-    path: /usr/libexec/crio/conmon
-  register: conmon_result
-
-- name: Create /usr/libexec/crio directory
-  file:
-    path: /usr/libexec/crio
-    state: directory
-  when:
-  - not conmon_result.stat.exists
-
-- name: Symlink conmon binary
-  file:
-    src: /bin/conmon
-    dest: /usr/libexec/crio/conmon
-    state: link
-  when:
-  - not conmon_result.stat.exists
-
 - name: Create temp directory
   tempfile:
     state: directory
