@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.509
+Version:        3.11.510
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Aug 25 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.510-1
+- 
+
 * Tue Aug 24 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.509-1
 - Drop liveness probe on OVS pods (danwinship@redhat.com)
 
