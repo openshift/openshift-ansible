@@ -328,6 +328,8 @@ data:
     external_svc_subnet = {{ kuryr_openstack_public_subnet_id }}
 {% endif %}
     resource_tags = {{ openshift_openstack_clusterid }}
+    # Time (in seconds) that Kuryr controller waits for LBaaS to be activated
+    lbaas_activation_timeout = 1200
 
 {% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
     [namespace_subnet]
@@ -341,9 +343,6 @@ data:
     sg_allow_from_default = {{ kuryr_openstack_sg_allow_from_default_id }}
     global_namespaces = {{ kuryr_openstack_global_namespaces }}
 {% endif %}
-
-    # Time (in seconds) that Kuryr controller waits for LBaaS to be activated
-    lbaas_activation_timeout = 1200
 
     [pod_vif_nested]
 
