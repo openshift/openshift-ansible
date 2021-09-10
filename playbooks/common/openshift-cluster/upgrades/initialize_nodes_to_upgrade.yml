@@ -30,7 +30,6 @@
         ansible_become: "{{ g_sudo | default(omit) }}"
       with_items: " {{ groups['oo_nodes_to_config'] }}"
       when:
-      - hostvars[item].l_kubelet_node_name is defined
       - hostvars[item].l_kubelet_node_name | lower in nodes_to_upgrade.module_results.results[0]['items'] | map(attribute='metadata.name') | list
       changed_when: false
 
