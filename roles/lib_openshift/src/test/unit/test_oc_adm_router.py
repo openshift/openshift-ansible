@@ -828,6 +828,22 @@ class RouterTest(unittest.TestCase):
                         "action": "append",
                         "key": "spec.template.spec.containers[0].env",
                         "value": {
+                            "name": "VARIABLE3",
+                            "value": "value in first edit"
+                        }
+                    },
+                    {
+                        "action": "update",
+                        "key": "spec.template.spec.containers[0].env",
+                        "value": {
+                            "name": "VARIABLE3",
+                            "value": "value in second edit"
+                        }
+                    },
+                    {
+                        "action": "append",
+                        "key": "spec.template.spec.containers[0].env",
+                        "value": {
                             "name": "ROUTER_SUBDOMAIN",
                             "value": "${name}-${namespace}.domain.tld"
                         }
@@ -851,6 +867,8 @@ class RouterTest(unittest.TestCase):
                              "expected to find {} 1 time, found it {} times: {}".format(var, len(matches), matches))
 
         var = dc.get_env_var('VARIABLE1')
+        self.assertEqual(var['value'], 'value in second edit')
+        var = dc.get_env_var('VARIABLE3')
         self.assertEqual(var['value'], 'value in second edit')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
