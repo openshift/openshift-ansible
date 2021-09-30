@@ -86,6 +86,8 @@ spec:
           # Take over network functions on the node
           rm -Rf /etc/cni/net.d/80-openshift-network.conf
           cp -Rf /opt/cni/bin/* /host/opt/cni/bin/
+          cp -f /opt/cni/bin/openshift-sdn /host/opt/cni/bin/openshift-sdn-${OPENSHIFT_SDN_POD}
+
 
           # Load DEBUG_LOGLEVEL
           if [[ -f /etc/sysconfig/origin-node ]]; then
@@ -161,6 +163,8 @@ spec:
             cpu: 100m
             memory: 200Mi
         env:
+        - name: OPENSHIFT_SDN_POD
+          value: metadata.name
         - name: OPENSHIFT_DNS_DOMAIN
           value: cluster.local
         ports:
@@ -172,7 +176,7 @@ spec:
         lifecycle:
           preStop:
             exec:
-              command: ["rm","-Rf","/etc/cni/net.d/80-openshift-network.conf", "/host/opt/cni/bin/openshift-sdn"]
+              command: ["rm","-Rf","/etc/cni/net.d/80-openshift-network.conf", "/host/opt/cni/bin/openshift-sdn", "/host/opt/cni/bin/openshift-sdn-${OPENSHIFT_SDN_POD}"]
 
       volumes:
       # In bootstrap mode, the host config contains information not easily available
