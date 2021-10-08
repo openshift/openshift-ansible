@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.527
+Version:        3.11.528
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Oct 08 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.528-1
+- 
+
 * Thu Oct 07 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.527-1
 - Avoid duplicate env vars in router deploymentconfig
   (miciah.masters@gmail.com)
