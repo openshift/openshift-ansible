@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.532
+Version:        3.11.533
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Wed Oct 13 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.533-1
+- 
+
 * Tue Oct 12 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.532-1
 - change the openshift-sdn to be tagged with the name of the pod
   (jtanenba@redhat.com)
