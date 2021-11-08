@@ -164,7 +164,9 @@ spec:
             memory: 200Mi
         env:
         - name: OPENSHIFT_SDN_POD
-          value: metadata.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: OPENSHIFT_DNS_DOMAIN
           value: cluster.local
         ports:
