@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.572
+Version:        3.11.573
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sat Dec 11 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.573-1
+- 
+
 * Fri Dec 10 2021 AOS Automation Release Team <noreply@redhat.com> 3.11.572-1
 - 
 
