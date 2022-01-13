@@ -6,6 +6,22 @@
 - name: Disable swap
   swapoff: {}
 
+#### Use keyfile as primary plugin for NetworkManager ####
+# In RHCOS, the plugin field is unset in NetworkManager.conf, which makes
+# keyfile to be the primary plugin.
+# Reference: https://fedoraproject.org/wiki/Changes/NetworkManager_keyfile_instead_of_ifcfg_rh
+- name: Creating NM config file
+  copy:
+    dest: "/etc/NetworkManager/conf.d/99-keyfile.conf"
+    content: |
+      [main]
+      plugins=keyfile,ifcfg-rh
+
+- name: Restart service NetworkManager
+  service:
+    name: NetworkManager
+    state: restarted
+
 # The atomic-openshift-node service will set this parameter on
 # startup, but if the network service is restarted this setting is
 # lost. Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1372388
