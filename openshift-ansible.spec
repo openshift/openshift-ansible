@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.617
+Version:        3.11.618
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,10 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri Jan 28 2022 AOS Automation Release Team <noreply@redhat.com> 3.11.618-1
+- KIECLOUD-584-Update RHPAM and RHDM templates and imagestreams on OpenShift
+  Service Catalog for 7.12.0 release (msmagnanijr@gmail.com)
+
 * Wed Jan 26 2022 AOS Automation Release Team <noreply@redhat.com> 3.11.617-1
 - Fix EFS provisioner image name (jsafrane@redhat.com)
 
