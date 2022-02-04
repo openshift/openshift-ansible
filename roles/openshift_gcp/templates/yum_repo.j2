@@ -17,4 +17,8 @@ sslclientkey={{ "/var/lib/yum/custom_secret_" + (loop.index-1)|string + "_key" i
 {{ key }}={{ value }}
 {% endif %}
 {% endfor %}
+{% if 'user_pass_auth' in repo %}
+username={{ lookup('env', 'MIRROR_USERNAME') }}
+password={{ lookup('env', 'MIRROR_PASSWORD') }}
+{% endif %}
 {% endfor %}
