@@ -386,7 +386,7 @@ This is very useful when developing and debugging new tasks. It can also signifi
 |===
 
 .Context
-* http://docs.ansible.com/playbooks_best_practices.html#directory-layout[Ansible Suggested Directory Layout]
+* https://docs.ansible.com/ansible/latest/user_guide/sample_setup.html#sample-ansible-setup[Ansible Suggested Directory Layout]
 
 .The purpose of this rule is to:
 * Comply with the upstream best practices
