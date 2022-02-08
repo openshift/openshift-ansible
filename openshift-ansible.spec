@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.627
+Version:        3.11.628
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Feb 08 2022 AOS Automation Release Team <noreply@redhat.com> 3.11.628-1
+- 
+
 * Mon Feb 07 2022 AOS Automation Release Team <noreply@redhat.com> 3.11.627-1
 - Get username and pass from env variables take from setup pod
   (dperique@redhat.com)
