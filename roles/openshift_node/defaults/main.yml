@@ -72,6 +72,7 @@ openshift_node_support_packages_base:
   - iptables-services
   - cifs-utils  # https://bugzilla.redhat.com/show_bug.cgi?id=1827982
   - jq
+  - libseccomp
 
 openshift_node_support_packages_by_os_major_version:
   "7":
