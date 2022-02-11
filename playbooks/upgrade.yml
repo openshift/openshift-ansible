@@ -4,24 +4,24 @@
   connection: local
   gather_facts: no
   tasks:
-  - name: Ensure [workers] group is populated
-    fail:
-      msg: >
-        Detected no workers in inventory. Please add hosts to the
-        workers host group to upgrade nodes
-    when: groups.workers | default([]) | length == 0
+    - name: Ensure [workers] group is populated
+      fail:
+        msg: >
+          Detected no workers in inventory. Please add hosts to the
+          workers host group to upgrade nodes
+      when: groups.workers | default([]) | length == 0
 
 - name: Pre-upgrade checks
   hosts: workers
   tasks:
-  - import_role:
-      name: openshift_node
-      tasks_from: version_checks.yml
+    - import_role:
+        name: openshift_node
+        tasks_from: version_checks.yml
 
 - name: upgrade nodes
   hosts: workers
   serial: 1
   tasks:
-  - import_role:
-      name: openshift_node
-      tasks_from: upgrade.yml
+    - import_role:
+        name: openshift_node
+        tasks_from: upgrade.yml

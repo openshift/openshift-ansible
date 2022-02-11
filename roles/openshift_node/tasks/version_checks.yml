@@ -20,6 +20,6 @@
   fail:
     msg: "As of v4.10, RHEL nodes must be at least version 8.4"
   when:
-    - l_cluster_version is version('4.10', '>=')
-    - ansible_facts['distribution'] == "RedHat"
-    - ansible_facts['distribution_version'] is version('8.4', '<')
+  - l_cluster_version is version('4.10', '>=')
+  - ansible_facts['distribution'] == "RedHat"
+  - ansible_facts['distribution_version'] is version('8.4', '<')
