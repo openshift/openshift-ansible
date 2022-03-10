@@ -1,0 +1,25 @@
+---
+# This task file is run with import_role for localhost from scaleup.yml and upgrade.yml
+
+- name: Get cluster version
+  command: >
+    oc get clusterversion
+    --kubeconfig={{ openshift_node_kubeconfig_path }}
+    --output=jsonpath='{.items[0].status.desired.version}'
+  delegate_to: localhost
+  register: oc_get
+  until:
+  - oc_get.stdout != ''
+  changed_when: false
+
+- name: Set fact l_cluster_version
+  set_fact:
+    l_cluster_version: "{{ oc_get.stdout | regex_search('^\\d+\\.\\d+') }}"
+
+- name: Fail if not using RHEL8 beginning with version 4.10
+  fail:
+    msg: "As of v4.10, RHEL nodes must be at least version 8.4"
+  when:
+  - l_cluster_version is version('4.10', '>=')
+  - ansible_facts['distribution'] == "RedHat"
+  - ansible_facts['distribution_version'] is version('8.4', '<')
