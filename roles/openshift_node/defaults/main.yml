@@ -98,3 +98,5 @@ openshift_node_support_packages_by_arch:
     # Temporarily only for x86_64 as were not shipping it for other arches atm
     # Tracked in https://bugzilla.redhat.com/show_bug.cgi?id=1715175
     - glusterfs-fuse
+  aarch64:
+    - irqbalance
