@@ -71,6 +71,27 @@ def check_swap_in_fstab(module):
     return check_result
 
 
+def check_swap_in_systemd(module):
+    '''Check for active .swap systemd units'''
+    res = subprocess.run(['systemctl', '--all', '--type=swap', '--no-legend'], check=False, stdout=subprocess.PIPE)
+
+    if res.returncode != 0:
+        # There was an error executing systemctl
+        result = {'failed': True,
+                  'changed': False,
+                  'msg': 'unknown problem with systemctl --all --type=swap --no-legend',
+                  'state': 'unknown'}
+        module.fail_json(**result)
+
+    units = []
+    for line in res.stdout.decode().splitlines():
+        unit = line.split()[0]
+        if unit.endswith(".swap"):
+            units.append(unit)
+
+    return units
+
+
 def check_swapon_status(module):
     '''Check if swap is actually in use.'''
     try:
@@ -96,6 +117,18 @@ def comment_swap_fstab(module):
         module.fail_json(**result)
 
 
+def disable_systemd_units(module, units):
+    '''Disable units in systemd'''
+    for unit in units:
+        res = subprocess.call(['systemctl', 'disable', unit])
+        if res:
+            result = {'failed': True,
+                      'changed': False,
+                      'msg': 'systemct failed to disable ' + unit,
+                      'state': 'unknown'}
+            module.fail_json(**result)
+
+
 def run_swapoff(module, changed):
     '''Run swapoff command'''
     res = subprocess.call(['swapoff', '--all'])
@@ -117,6 +150,7 @@ def run_module():
 
     swap_fstab_res = check_swap_in_fstab(module)
     swap_is_inuse_res = check_swapon_status(module)
+    swap_systemd_units = check_swap_in_systemd(module)
 
     if swap_fstab_res:
         comment_swap_fstab(module)
@@ -124,6 +158,10 @@ def run_module():
 
     if swap_is_inuse_res:
         run_swapoff(module, changed)
+        changed = True
+
+    if swap_systemd_units:
+        disable_systemd_units(module, swap_systemd_units)
         changed = True
 
     result = {'changed': changed}
