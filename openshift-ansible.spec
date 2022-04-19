@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.684
+Version:        3.11.685
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,11 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Tue Apr 19 2022 AOS Automation Release Team <noreply@redhat.com> 3.11.685-1
+- [release-3.11] - Disable GPG checking for gcloud (padillon@redhat.com)
+- [KIECLOUD-585] Update RHPAM and RHDM templates and imagestreams on OpenShift
+  Service Catalog for 7.12.1 release (dsalerno@redhat.com)
+
 * Mon Apr 18 2022 AOS Automation Release Team <noreply@redhat.com> 3.11.684-1
 - 
 
