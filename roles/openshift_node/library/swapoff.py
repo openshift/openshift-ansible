@@ -149,16 +149,18 @@ def run_module():
     changed = False
 
     swap_fstab_res = check_swap_in_fstab(module)
-    swap_is_inuse_res = check_swapon_status(module)
-    swap_systemd_units = check_swap_in_systemd(module)
 
     if swap_fstab_res:
         comment_swap_fstab(module)
         changed = True
 
+    swap_is_inuse_res = check_swapon_status(module)
+
     if swap_is_inuse_res:
         run_swapoff(module, changed)
         changed = True
+
+    swap_systemd_units = check_swap_in_systemd(module)
 
     if swap_systemd_units:
         disable_systemd_units(module, swap_systemd_units)
