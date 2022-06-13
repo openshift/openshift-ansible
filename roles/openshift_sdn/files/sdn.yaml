@@ -178,7 +178,7 @@ spec:
         lifecycle:
           preStop:
             exec:
-              command: ["rm","-Rf","/etc/cni/net.d/80-openshift-network.conf", "/host/opt/cni/bin/openshift-sdn", "/host/opt/cni/bin/openshift-sdn-${OPENSHIFT_SDN_POD}"]
+              command: ["sh","-c","rm -Rf /etc/cni/net.d/80-openshift-network.conf /host/opt/cni/bin/openshift-sdn /host/opt/cni/bin/openshift-sdn-${OPENSHIFT_SDN_POD}"]
 
       volumes:
       # In bootstrap mode, the host config contains information not easily available
