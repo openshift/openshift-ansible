@@ -220,7 +220,7 @@
     register: oc_get
     until:
     - oc_get.stdout == "True"
-    retries: 30
+    retries: 60
     delay: 20
     changed_when: false
 
