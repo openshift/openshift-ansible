@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013 Google Inc.
 #
 # This file is part of Ansible
@@ -98,7 +98,7 @@ import sys
 import os
 import time
 import argparse
-import ConfigParser
+import configparser
 
 import logging
 logging.getLogger('libcloud.common.google').addHandler(logging.NullHandler())
@@ -143,7 +143,7 @@ class GceInventory(object):
 
     def get_config(self):
         """
-        Populates a SafeConfigParser object with defaults and
+        Populates a ConfigParser object with defaults and
         attempts to read an .ini-style configuration from the filename
         specified in GCE_INI_PATH. If the environment variable is
         not present, the filename defaults to gce.ini in the current
@@ -157,7 +157,7 @@ class GceInventory(object):
         # This provides empty defaults to each key, so that environment
         # variable configuration (as opposed to INI configuration) is able
         # to work.
-        config = ConfigParser.SafeConfigParser(defaults={
+        config = configparser.ConfigParser(defaults={
             'gce_service_account_email_address': '',
             'gce_service_account_pem_file_path': '',
             'gce_project_id': '',
@@ -276,7 +276,7 @@ class GceInventory(object):
         if inst is None:
             return {}
 
-        if inst.extra['metadata'].has_key('items'):
+        if 'items' in inst.extra['metadata']:
             for entry in inst.extra['metadata']['items']:
                 md[entry['key']] = entry['value']
 
@@ -360,7 +360,7 @@ class GceInventory(object):
             if zones and zone not in zones:
                 continue
 
-            if groups.has_key(zone): groups[zone].append(name)
+            if zone in groups: groups[zone].append(name)
             else: groups[zone] = [name]
 
             tags = node.extra['tags']
@@ -369,25 +369,25 @@ class GceInventory(object):
                     tag = t[6:]
                 else:
                     tag = 'tag_%s' % t
-                if groups.has_key(tag): groups[tag].append(name)
+                if tag in groups: groups[tag].append(name)
                 else: groups[tag] = [name]
 
             net = node.extra['networkInterfaces'][0]['network'].split('/')[-1]
             net = 'network_%s' % net
-            if groups.has_key(net): groups[net].append(name)
+            if net in groups: groups[net].append(name)
             else: groups[net] = [name]
 
             machine_type = node.size
-            if groups.has_key(machine_type): groups[machine_type].append(name)
+            if machine_type in groups: groups[machine_type].append(name)
             else: groups[machine_type] = [name]
 
             image = node.image and node.image or 'persistent_disk'
-            if groups.has_key(image): groups[image].append(name)
+            if image in groups: groups[image].append(name)
             else: groups[image] = [name]
 
             status = node.extra['status']
             stat = 'status_%s' % status.lower()
-            if groups.has_key(stat): groups[stat].append(name)
+            if stat in groups: groups[stat].append(name)
             else: groups[stat] = [name]
 
         groups["_meta"] = meta
