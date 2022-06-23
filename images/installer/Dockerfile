@@ -22,12 +22,18 @@ ENV USER_UID=1001 \
 # Add image scripts and files for running as a system container
 COPY images/installer/root /
 # Install openshift-ansible RPMs
-RUN yum install -y centos-release-ansible-29 epel-release && \
+RUN yum install -y epel-release && \
     yum config-manager --enable built > /dev/null && \
     yum install --setopt=tsflags=nodocs -y \
-      'ansible < 2.10' \
+      'ansible-core < 2.14' \
+      python38-dateutil python38-urllib3 \
       openshift-ansible-test && \
     yum clean all
+
+# for ec2_ami_info (in workers-rhel-aws-provision CI step) which requires boto3
+RUN ansible-galaxy collection install -p /usr/share/ansible/collections amazon.aws && \
+    find $HOME/.ansible -delete && \
+    pip3 install boto3
 
 RUN /usr/local/bin/user_setup \
  && rm /usr/local/bin/usage.ocp

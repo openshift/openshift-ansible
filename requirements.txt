@@ -1,3 +1,3 @@
 # Versions are pinned to prevent pypi releases arbitrarily breaking
 # tests with new APIs/semantics. We want to update versions deliberately.
-ansible<2.10
+ansible-core<2.14
