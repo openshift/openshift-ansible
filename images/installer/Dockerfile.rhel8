@@ -1,0 +1,56 @@
+FROM registry.access.redhat.com/ubi8/ubi:latest
+
+MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
+
+USER root
+
+RUN echo $'[google-cloud-cli] \n\
+name=Google Cloud CLI \n\
+baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el8-x86_64 \n\
+enabled=1 \n\
+gpgcheck=1 \n\
+repo_gpgcheck=0 \n\
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg \n\
+       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg \n\
+' >> /etc/yum.repos.d/google-cloud-sdk.repo
+
+# Playbooks, roles, and their dependencies are installed from packages.
+RUN INSTALL_PKGS="ansible-core ansible-collection-community-general ansible-collection-ansible-posix openssl iproute httpd-tools java-1.8.0-openjdk-headless" \
+ && x86_EXTRA_RPMS=$(if [ "$(uname -m)" == "x86_64" ]; then echo -n google-cloud-sdk ; fi) \
+ && yum repolist > /dev/null \
+ && yum config-manager --enable rhel-8-for-x86_64-appstream-rpms \
+ && yum config-manager --enable ubi-8-appstream \
+ && yum config-manager --enable rhel-8-for-x86_64-baseos-rpms \
+ && yum config-manager --enable ubi-8-baseos \
+ && yum config-manager --enable CSB_repo-rhel-8-csb_Extra_Packages_for_Enterprise_Linux_8_-_x86_64 \
+ && yum install -y --setopt=skip_missing_names_on_install=False --setopt=tsflags=nodocs $INSTALL_PKGS $x86_EXTRA_RPMS \
+ && yum clean all
+
+LABEL name="openshift3/ose-ansible" \
+      summary="OpenShift's installation and configuration tool" \
+      description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      url="https://github.com/openshift/openshift-ansible" \
+      io.k8s.display-name="openshift-ansible" \
+      io.k8s.description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      io.openshift.expose-services="" \
+      io.openshift.tags="openshift,install,upgrade,ansible" \
+      com.redhat.component="aos3-installation-docker" \
+      atomic.run="once"
+
+ENV USER_UID=1001 \
+    HOME=/opt/app-root/src \
+    WORK_DIR=/usr/share/ansible/openshift-ansible \
+    ANSIBLE_CONFIG=/usr/share/ansible/openshift-ansible/ansible.cfg \
+    OPTS="-v"
+
+# Add image scripts and files for running as a system container
+COPY root /
+
+RUN /usr/local/bin/user_setup \
+ && mv /usr/local/bin/usage{.ocp,}
+
+USER ${USER_UID}
+
+WORKDIR ${WORK_DIR}
+ENTRYPOINT [ "/usr/local/bin/entrypoint" ]
+CMD [ "/usr/local/bin/run" ]
