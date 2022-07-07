@@ -2,7 +2,9 @@
 approvers:
   - jstuever
   - patrickdillon
+  - barbacbd
 # review == this code is good /lgtm
 reviewers:
   - jstuever
   - patrickdillon
+  - barbacbd
