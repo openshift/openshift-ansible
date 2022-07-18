@@ -1,6 +1,0 @@
-
-[openshift-origin-4.0-ci]
-name=OpenShift Origin 4.0 CI packages
-baseurl=https://artifacts-rpms-openshift-origin-ci-rpms.apps.ci.l2s4.p1.openshiftapps.com/openshift-origin-v4.0
-enabled=1
-gpgcheck=0
