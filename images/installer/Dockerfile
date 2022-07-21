@@ -21,8 +21,6 @@ ENV USER_UID=1001 \
 
 # Add image scripts and files for running as a system container
 COPY images/installer/root /
-# Add origin repo for including the oc client
-COPY images/installer/origin-extra-root /
 # Install openshift-ansible RPMs
 RUN yum install -y epel-release && \
     yum config-manager --enable built > /dev/null && \
