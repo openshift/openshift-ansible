@@ -22,7 +22,7 @@ OpenShift environment. The inventory and ssh keys are mounted as volumes
 in the key file via :Z so they can be accessed) and the PLAYBOOK_FILE
 environment variable is set to point to the playbook within the image:
 
-docker run -tu `id -u` \
+podman run -tu `id -u` \
        -v $HOME/.ssh/id_rsa:/opt/app-root/src/.ssh/id_rsa:Z,ro \
        -v /etc/ansible/hosts:/tmp/inventory:Z,ro \
        -e INVENTORY_FILE=/tmp/inventory \

@@ -1,4 +1,4 @@
-FROM centos:7
+FROM quay.io/centos/centos:stream8
 
 MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
@@ -21,12 +21,11 @@ ENV USER_UID=1001 \
 
 # Add image scripts and files for running as a system container
 COPY images/installer/root /
-# Add origin repo for including the oc client
-COPY images/installer/origin-extra-root /
 # Install openshift-ansible RPMs
-RUN yum install -y epel-release && \
-    yum-config-manager --enable built > /dev/null && \
+RUN yum install -y centos-release-ansible-29 epel-release && \
+    yum config-manager --enable built > /dev/null && \
     yum install --setopt=tsflags=nodocs -y \
+      'ansible < 2.10' \
       openshift-ansible-test && \
     yum clean all
 
