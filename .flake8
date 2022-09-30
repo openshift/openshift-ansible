@@ -1,7 +1,7 @@
 [flake8]
 # TODO: cleanup flake8 issues with utils/test/*
 # bundled ansible modules are copied as-is, have their own standards
-exclude=.tox,inventory,ini_file.py,seboolean.py,sysctl.py
+exclude=.tox,inventory,ini_file.py,profile_tasks.py,seboolean.py,sysctl.py
 max_line_length = 120
 ignore = E501,T003
 per-file-ignores =
