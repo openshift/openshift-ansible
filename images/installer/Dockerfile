@@ -33,7 +33,7 @@ RUN yum install -y epel-release && \
 # for ec2_ami_info (in workers-rhel-aws-provision CI step) which requires boto3
 RUN ansible-galaxy collection install -p /usr/share/ansible/collections amazon.aws && \
     find $HOME/.ansible -delete && \
-    pip3 install boto3
+    pip3 install --no-cache-dir boto3
 
 RUN /usr/local/bin/user_setup \
  && rm /usr/local/bin/usage.ocp
