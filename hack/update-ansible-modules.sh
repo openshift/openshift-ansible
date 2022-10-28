@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 ANSIBLE_POSIX_REPO="https://raw.githubusercontent.com/ansible-collections/ansible.posix"
-ANSIBLE_POSIX_MODULES=(seboolean.py sysctl.py)
+ANSIBLE_POSIX_MODULES=(callback/profile_tasks.py modules/seboolean.py modules/sysctl.py)
 ANSIBLE_POSIX_VERSION=1.4.0
 
 COMMUNITY_GENERAL_REPO="https://raw.githubusercontent.com/ansible-collections/community.general"
@@ -18,7 +18,7 @@ pushd ${srcdir}/roles/openshift_node/library
 
 for ap in ${ANSIBLE_POSIX_MODULES[*]} ; do
 echo "*** Updating ${ap##*/} from ${ANSIBLE_POSIX_REPO##*/} ${ANSIBLE_POSIX_VERSION}"
-curl -sO ${ANSIBLE_POSIX_REPO}/${ANSIBLE_POSIX_VERSION}/plugins/modules/${ap}
+curl -sO ${ANSIBLE_POSIX_REPO}/${ANSIBLE_POSIX_VERSION}/plugins/${ap}
 done
 
 for cg in ${COMMUNITY_GENERAL_MODULES[*]} ; do
