@@ -32,6 +32,14 @@
   when:
   - ansible_fips != (cluster_fips.stdout | bool)
 
+# Update the yum cache to ensure that the newest available packages can be
+# installed in the tasks below.
+- name: Update Yum Cache
+  yum:
+    state: latest
+    update_cache: true
+  become: true
+
 - name: Get cluster version
   command: >
     oc get clusterversion
