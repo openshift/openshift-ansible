@@ -88,12 +88,13 @@ def csr_present_check(nodename, csr_dict):
 class CSRapprove(object):  # pylint: disable=useless-object-inheritance
     """Approves node CSRs"""
 
-    def __init__(self, module, oc_bin, kubeconfig, nodename):
+    def __init__(self, module, oc_bin, kubeconfig, nodename, run_attempts=1):  # pylint: disable=too-many-arguments
         """init method"""
         self.module = module
         self.oc_bin = oc_bin
         self.kubeconfig = kubeconfig
         self.nodename = nodename
+        self.run_attempts = run_attempts
         # Build a dictionary to hold all of our output information so nothing
         # is lost when we fail.
         self.result = {'changed': False,
@@ -243,7 +244,7 @@ class CSRapprove(object):  # pylint: disable=useless-object-inheritance
 
         # # Client Cert Section # #
         mode = "client"
-        attempts = 1
+        attempts = self.run_attempts
         while True:
             # If the node is in the list of all nodes, we do not need to approve client CSRs
             if self.nodename not in self.get_nodes():
@@ -255,7 +256,7 @@ class CSRapprove(object):  # pylint: disable=useless-object-inheritance
 
         # # Server Cert Section # #
         mode = "server"
-        attempts = 1
+        attempts = self.run_attempts
         while True:
             # If the node API is healthy, we do not need to approve server CSRs
             if not self.node_is_ready(self.nodename):
@@ -274,6 +275,7 @@ def run_module():
         oc_bin=dict(type='path', required=False, default='oc'),
         kubeconfig=dict(type='path', required=True),
         nodename=dict(type='str', required=True),
+        run_attempts=dict(type='int', required=False, default='1'),
     )
     module = AnsibleModule(
         supports_check_mode=False,
@@ -282,8 +284,9 @@ def run_module():
     oc_bin = module.params['oc_bin']
     kubeconfig = '--kubeconfig={}'.format(module.params['kubeconfig'])
     nodename = module.params['nodename']
+    run_attempts = module.params["run_attempts"]
 
-    approver = CSRapprove(module, oc_bin, kubeconfig, nodename)
+    approver = CSRapprove(module, oc_bin, kubeconfig, nodename, run_attempts)
     approver.run()
 
 
