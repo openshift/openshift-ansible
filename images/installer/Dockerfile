@@ -17,7 +17,7 @@ RUN INSTALL_PKGS="ansible-2.9.13 azure-cli-2.0.46 java-1.8.0-openjdk-headless py
  && rpm -V $INSTALL_PKGS $EPEL_PKGS \
  && yum clean all
 
-RUN pip install --upgrade 'pip<21' 'setuptools<45' 'wheel' \
+RUN pip install --upgrade 'pip<21' 'setuptools<45' 'wheel<0.38' \
  && pip install 'boto' 'pyOpenSSL' 'apache-libcloud' 'SecretStorage<3' 'ansible[azure]' 'boto3'
 
 LABEL name="openshift/origin-ansible" \
