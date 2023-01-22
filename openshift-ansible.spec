@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.920
+Version:        3.11.921
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -190,6 +190,9 @@ BuildArch:     noarch
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Sun Jan 22 2023 AOS Automation Release Team <noreply@redhat.com> 3.11.921-1
+- 
+
 * Sat Jan 21 2023 AOS Automation Release Team <noreply@redhat.com> 3.11.920-1
 - Remove the checks against master url (barbacbd@dukes.jmu.edu)
 - ** Update Dockerfile for testing (barbacbd@dukes.jmu.edu)
