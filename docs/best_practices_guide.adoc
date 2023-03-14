@@ -360,7 +360,7 @@ Therefore, we SHOULD use pre_tasks and post_tasks to make it more clear when the
 |===
 
 .Context
-* http://docs.ansible.com/playbooks_tags.html[Ansible doc explaining tags]
+* https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html[Ansible doc explaining tags]
 
 Ansible tasks can be tagged, and then these tags can be used to either _run_ or _skip_ the tagged tasks using the `--tags` and `--skip-tags` ansible-playbook options respectively.
 
