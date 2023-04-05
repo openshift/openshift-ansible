@@ -21,8 +21,9 @@ ENV USER_UID=1001 \
 
 # Add image scripts and files for running as a system container
 COPY images/installer/root /
+
 # Install openshift-ansible RPMs
-RUN yum install -y epel-release && \
+RUN yum install -y epel-release 'dnf-command(config-manager)' && \
     yum config-manager --enable built > /dev/null && \
     yum install --setopt=tsflags=nodocs -y \
       'ansible-core < 2.14' \
