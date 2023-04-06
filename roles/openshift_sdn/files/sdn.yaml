@@ -86,6 +86,8 @@ spec:
           # Take over network functions on the node
           rm -Rf /etc/cni/net.d/80-openshift-network.conf
           cp -Rf /opt/cni/bin/* /host/opt/cni/bin/
+          # remove versions of the sdn binaries for old pods
+          rm -f /host/opt/cni/bin/openshift-sdn-*
           cp -f /opt/cni/bin/openshift-sdn /host/opt/cni/bin/openshift-sdn-${OPENSHIFT_SDN_POD}
 
 
