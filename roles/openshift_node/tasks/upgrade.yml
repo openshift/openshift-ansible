@@ -50,3 +50,6 @@
       msg: "Running node openshift_node_post_upgrade_hook {{ openshift_node_post_upgrade_hook }}"
   - include_tasks: "{{ openshift_node_post_upgrade_hook }}"
   when: openshift_node_post_upgrade_hook is defined
+
+# Preserve SE Linux data
+- import_tasks: selinux.yml

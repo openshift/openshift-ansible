@@ -1,0 +1,7 @@
+---
+# Exclude kubelet from fixfiles to prevent cluster components from
+# changing the selinux context: https://issues.redhat.com/browse/OCPBUGS-5255
+- name: Exclude kubelet dir from fixfiles
+  copy:
+    dest: /etc/selinux/fixfiles_exclude_dirs
+    content: /var/lib/kubelet
