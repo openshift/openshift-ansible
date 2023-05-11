@@ -7,7 +7,7 @@
   ignore_errors: true
   register: systemctl_status
   loop:
-  - cri-o
+  - crio
   - kubelet
 
 - name: Gather Debug - Get complete node objects
