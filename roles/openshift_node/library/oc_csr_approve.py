@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 """oc_csr_approve module"""
 # Copyright 2020 Red Hat, Inc. and/or its affiliates
 # and other contributors as indicated by the @author tags.

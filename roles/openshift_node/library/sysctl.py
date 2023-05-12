@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # (c) 2012, David "DaviXX" CHANIAL <david.chanial@gmail.com>

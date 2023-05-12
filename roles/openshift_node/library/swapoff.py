@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # pylint: disable=missing-docstring
 #
 # Copyright 2017 Red Hat, Inc. and/or its affiliates

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # Copyright: (c) 2012, Jan-Piet Mens <jpmens () gmail.com>
