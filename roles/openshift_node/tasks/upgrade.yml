@@ -25,6 +25,9 @@
   - include_tasks: "{{ openshift_node_pre_upgrade_hook }}"
   when: openshift_node_pre_upgrade_hook is defined
 
+# Manually upgrade challenging packages that may have conflicts during normal upgrade
+- import_tasks: package_conflicts.yml
+
 # Upgrade Node Packages
 - import_tasks: install.yml
 
