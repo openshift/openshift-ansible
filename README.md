@@ -58,7 +58,7 @@ ansible-playbook -i inventory/hosts playbooks/upgrade.yml
 # Further reading
 
 ## Complete Production Installation Documentation:
-- [OpenShift Container Platform](https://docs.openshift.com/container-platform/4.13/installing/index.html)
+- [OpenShift Container Platform](https://docs.openshift.com/container-platform/latest/installing/index.html)
 - [OKD](https://docs.okd.io/latest/installing/index.html) (formerly OpenShift Origin)
 
 ## Containerized OpenShift Ansible
