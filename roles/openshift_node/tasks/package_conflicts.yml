@@ -1,0 +1,49 @@
+---
+- name: Install manager to download packages
+  yum:
+    name: "yum-utils"
+    state: latest
+
+- name: Create a temporary directory for packages
+  file:
+    path: "{{ openshift_package_directory }}"
+    state: directory
+
+# not all packages can be safely or easily upgraded due to conflicts
+# Download the rpms and then remove conflicting packages and install the new ones.
+# A particular issue is openvswitch which conflicts with itself, but removing
+# older versions of the package causes network issues.
+- name: Download rpms for conflicting packages
+  command: "yumdownloader --destdir {{ openshift_package_directory }} {{ item }}"
+  with_items: "{{ openshift_node_support_packages_by_os_major_version[ansible_distribution_major_version] }}"
+
+- name: Find all downloaded rpms
+  find:
+    paths: "{{ openshift_package_directory }}"
+    patterns: "*.rpm"
+  register: rpms
+
+- name: Setting list of rpms
+  set_fact:
+    rpm_list: "{{ rpms.files | map(attribute='path') | list}}"
+
+- name: Remove known conflicts
+  yum:
+    name: "{{ item }}*"
+    state: absent
+  with_items: "{{ openshift_conflict_packages }}"
+
+- name: Install downloaded packages
+  yum:
+    name: "{{ rpm_list }}"
+    state: present
+
+- name: Remove temporary directory
+  file:
+    path: "{{ openshift_package_directory }}"
+    state: absent
+
+- name: Remove temporary manager for downloaded packages
+  yum:
+    name: "yum-utils"
+    state: absent
