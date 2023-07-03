@@ -1,4 +1,4 @@
-FROM centos:7
+FROM quay.io/centos/centos:stream8
 
 MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
@@ -21,14 +21,20 @@ ENV USER_UID=1001 \
 
 # Add image scripts and files for running as a system container
 COPY images/installer/root /
-# Add origin repo for including the oc client
-COPY images/installer/origin-extra-root /
+
 # Install openshift-ansible RPMs
-RUN yum install -y epel-release && \
-    yum-config-manager --enable built > /dev/null && \
+RUN yum install -y epel-release 'dnf-command(config-manager)' && \
+    yum config-manager --enable built > /dev/null && \
     yum install --setopt=tsflags=nodocs -y \
+      'ansible-core < 2.14' \
+      python38-dateutil python38-urllib3 \
       openshift-ansible-test && \
     yum clean all
+
+# for ec2_ami_info (in workers-rhel-aws-provision CI step) which requires boto3
+RUN ansible-galaxy collection install -p /usr/share/ansible/collections amazon.aws && \
+    find $HOME/.ansible -delete && \
+    pip3 install boto3
 
 RUN /usr/local/bin/user_setup \
  && rm /usr/local/bin/usage.ocp

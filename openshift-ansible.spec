@@ -17,7 +17,7 @@ URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:      ansible >= 2.9.5
+Requires:      ansible-core
 Requires:      openshift-clients
 Requires:      openssl
 
@@ -61,10 +61,8 @@ cp -rp test %{buildroot}%{_datadir}/ansible/%{name}/
 %package test
 Summary:       Openshift and Atomic Enterprise Ansible Test Playbooks
 Requires:      %{name} = %{version}-%{release}
-Requires:      ansible >= 2.9.5
+Requires:      ansible-core
 Requires:      openssh-clients
-Requires:      python2-boto
-Requires:      python-boto3
 BuildArch:     noarch
 
 %description test

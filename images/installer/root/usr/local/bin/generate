@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/libexec/platform-python
 
 """
 Attempts to read 'master-config.yaml' and extract remote
@@ -17,7 +17,7 @@ import yaml
 try:
     HOME = os.environ['HOME']
 except KeyError:
-    print 'A required environment variable "$HOME" has not been set'
+    print('A required environment variable "$HOME" has not been set')
     exit(1)
 
 DEFAULT_USER_CONFIG_PATH = '/etc/inventory-generator-config.yaml'
@@ -222,7 +222,7 @@ def main():
         if not user_config:
             user_config = dict()
     except IOError as err:
-        print "Unable to find or read user configuration file '{}': {}".format(USER_CONFIG, err)
+        print("Unable to find or read user configuration file '{}': {}".format(USER_CONFIG, err))
         exit(1)
 
     master_config_path = user_config.get('master_config_path', DEFAULT_MASTER_CONFIG_PATH)
@@ -236,14 +236,14 @@ def main():
     try:
         file_obj = open(master_config_path, 'r')
     except IOError as err:
-        print "Unable to find or read host master configuration file '{}': {}".format(master_config_path, err)
+        print("Unable to find or read host master configuration file '{}': {}".format(master_config_path, err))
         exit(1)
 
     raw_text = file_obj.read()
 
     y = yaml.load(raw_text)
     if y.get("kind", "") != "MasterConfig":
-        print "Bind-mounted host master configuration file is not of 'kind' MasterConfig. Aborting..."
+        print("Bind-mounted host master configuration file is not of 'kind' MasterConfig. Aborting...")
         exit(1)
 
     # finish reading config file and begin gathering
@@ -272,13 +272,13 @@ def main():
     # gather enough information to generate the rest of the inventory file.
     if not master_config:
         msg = "'kubernetesMasterConfig' missing from '{}'; unable to gather all necessary host information..."
-        print msg.format(master_config_path)
+        print(msg.format(master_config_path))
         exit(1)
 
     master_public_url = y.get("masterPublicURL")
     if not master_public_url:
         msg = "'kubernetesMasterConfig.masterPublicURL' missing from '{}'; Unable to connect to master host..."
-        print msg.format(master_config_path)
+        print(msg.format(master_config_path))
         exit(1)
 
     oc = OpenShiftClient(admin_kubeconfig_path)
@@ -290,7 +290,7 @@ def main():
         msg = ("Unable to obtain user information using the provided kubeconfig file. "
                "Current context does not appear to be able to authenticate to the server. "
                "Error returned from server:\n\n{}")
-        print msg.format(str(err))
+        print(msg.format(str(err)))
         exit(1)
 
     # connect to remote host using the provided config and extract all possible node information
@@ -350,7 +350,7 @@ def main():
         try:
             inv_file_obj = open(INVENTORY_FULL_PATH, 'w+')
         except IOError as err:
-            print "Unable to create or open generated inventory file: {}".format(err)
+            print("Unable to create or open generated inventory file: {}".format(err))
             exit(1)
 
     inv_file_obj.write("[OSEv3:children]\n")

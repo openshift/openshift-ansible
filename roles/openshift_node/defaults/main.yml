@@ -8,6 +8,7 @@ openshift_node_kubeconfig: "{{ lookup('file', openshift_node_kubeconfig_path) | 
 openshift_node_bootstrap_port: 22623
 openshift_node_bootstrap_server: "{{ openshift_node_kubeconfig.clusters.0.cluster.server.split(':')[0:-1] | join(':') | regex_replace('://api', '://api-int') }}:{{ openshift_node_bootstrap_port }}"
 openshift_node_bootstrap_endpoint: "{{ openshift_node_bootstrap_server }}/config/{{ openshift_node_machineconfigpool }}"
+openshift_package_directory: '/tmp/openshift-ansible-packages'
 
 openshift_packages: "{{ (openshift_node_packages + openshift_node_support_packages) | join(',') }}"
 
@@ -82,8 +83,11 @@ openshift_node_support_packages_by_os_major_version:
     - container-storage-setup
     - ceph-common
   "8":
-    - openvswitch2.15
+    - openvswitch2.17
     - policycoreutils-python-utils
+
+openshift_conflict_packages:
+  - openvswitch
 
 openshift_node_support_packages_by_arch:
   ppc64le:

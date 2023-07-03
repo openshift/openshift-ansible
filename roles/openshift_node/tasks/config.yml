@@ -72,6 +72,8 @@
     url: "{{ openshift_node_bootstrap_endpoint }}"
     dest: "{{ temp_dir.path }}/bootstrap.ign"
     validate_certs: false
+    headers:
+      Accept: application/vnd.coreos.ignition+json; version=3.2.0
     http_agent: "Ignition/0.35.0"
   delay: 10
   retries: 60
@@ -218,7 +220,7 @@
     register: oc_get
     until:
     - oc_get.stdout == "True"
-    retries: 30
+    retries: 60
     delay: 20
     changed_when: false
 
