@@ -37,6 +37,7 @@
   yum:
     name: "{{ rpm_list }}"
     state: present
+    disable_gpg_check: true
 
 - name: Remove temporary directory
   file:
