@@ -89,9 +89,11 @@
 
 - block:
   - name: Install openshift packages
-    package:
+    dnf:
       name: "{{ openshift_packages }}"
       state: latest
+      allowerasing: true
+      disable_gpg_check: true
     async: 3600
     poll: 30
     register: result
