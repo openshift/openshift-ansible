@@ -40,6 +40,8 @@ openshift_node_support_packages_base:
   - nfs-utils
   - NetworkManager
   - NetworkManager-ovs  # https://bugzilla.redhat.com/show_bug.cgi?id=1884095
+  - NetworkManager-libreswan
+  - libreswan
   - dnsmasq
   - lvm2
   - iscsi-initiator-utils
