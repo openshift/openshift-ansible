@@ -28,6 +28,7 @@ RUN yum install -y epel-release 'dnf-command(config-manager)' && \
     yum install --setopt=tsflags=nodocs -y \
       'ansible-core < 2.16' \
       python38-dateutil python38-urllib3 \
+      python3-pip \
       openshift-ansible-test && \
     yum clean all
 
