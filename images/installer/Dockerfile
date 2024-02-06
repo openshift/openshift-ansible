@@ -35,7 +35,7 @@ RUN yum install -y epel-release 'dnf-command(config-manager)' && \
 # for ec2_ami_info (in workers-rhel-aws-provision CI step) which requires boto3
 RUN ansible-galaxy collection install -p /usr/share/ansible/collections amazon.aws && \
     find $HOME/.ansible -delete && \
-    pip3 install --no-cache-dir boto3
+    pip3 install --no-cache-dir boto3 botocore
 
 RUN /usr/local/bin/user_setup \
  && rm /usr/local/bin/usage.ocp
