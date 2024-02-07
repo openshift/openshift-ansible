@@ -117,6 +117,17 @@
     name: "ipsec"
     enabled: yes
 
+- name: add nssdir to ipsec.conf
+  ansible.builtin.lineinfile:
+    path: /etc/ipsec.conf
+    insertafter: 'config setup'
+    line: "\tnssdir=/var/lib/ipsec/nss"
+
+- name: create nssdir
+  file:
+    path: /var/lib/ipsec/nss
+    state: directory
+
 # persistent storage in journal is needed for MachineConfig to work
 - name: Enable persistent storage on journal
   ini_file:
