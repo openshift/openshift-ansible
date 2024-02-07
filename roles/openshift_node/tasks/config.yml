@@ -199,6 +199,12 @@
   - fail:
       msg: "Ignition apply failed"
 
+- name: Restart service kubelet, in all cases, also issue daemon-reload to pick up config changes
+  ansible.builtin.systemd_service:
+    state: restarted
+    daemon_reload: true
+    name: kubelet
+
 - block:
   - name: Approve node CSRs
     oc_csr_approve:
