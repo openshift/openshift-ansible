@@ -1,3 +1,4 @@
+---
 - name: Enable ipsec service
   systemd:
     name: "ipsec"
@@ -22,3 +23,6 @@
 
 - name: initialize nss db
   command: ipsec initnss --nssdir /var/lib/ipsec/nss
+
+- name: make sure proper selinux label on nss db
+  command: chcon -R -t ipsec_key_file_t /var/lib/ipsec/nss
