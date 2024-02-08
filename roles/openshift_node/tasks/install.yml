@@ -128,6 +128,15 @@
     path: /var/lib/ipsec/nss
     state: directory
 
+- name: set nss selinux context
+  command: semanage fcontext -a -t ipsec_key_file_t /var/lib/ipsec/nss
+
+- name: restore nss selinux context so it will be active
+  command: restorecon -r /var/lib/ipsec/nss
+
+- name: initialize nss db
+  command: ipsec initnss --nssdir /var/lib/ipsec/nss
+
 # persistent storage in journal is needed for MachineConfig to work
 - name: Enable persistent storage on journal
   ini_file:
