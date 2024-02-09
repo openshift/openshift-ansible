@@ -1,0 +1,28 @@
+---
+- name: Enable ipsec service
+  systemd:
+    name: "ipsec"
+    enabled: yes
+
+- name: add nssdir to ipsec.conf
+  ansible.builtin.lineinfile:
+    path: /etc/ipsec.conf
+    insertafter: 'config setup'
+    line: "\tnssdir=/var/lib/ipsec/nss"
+
+- name: create nssdir
+  file:
+    path: /var/lib/ipsec/nss
+    state: directory
+
+- name: set nss selinux context
+  command: semanage fcontext -a -t ipsec_key_file_t /var/lib/ipsec/nss
+
+- name: restore nss selinux context so it will be active
+  command: restorecon -r /var/lib/ipsec/nss
+
+- name: initialize nss db
+  command: ipsec initnss --nssdir /var/lib/ipsec/nss
+
+- name: make sure proper selinux label on nss db
+  command: chcon -R -t ipsec_key_file_t /var/lib/ipsec/nss
