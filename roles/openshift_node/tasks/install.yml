@@ -112,6 +112,9 @@
     name: "crio"
     enabled: yes
 
+# handle ipsec installation
+- import_tasks: ipsec.yml
+
 # persistent storage in journal is needed for MachineConfig to work
 - name: Enable persistent storage on journal
   ini_file:
