@@ -20,6 +20,7 @@ openshift_node_packages:
   - openshift-hyperkube-{{ l_cluster_version }}*
   - podman
   - runc
+  - ose-aws-ecr-image-credential-provider
 
 openshift_node_support_packages: "{{
   openshift_node_support_packages_base +
