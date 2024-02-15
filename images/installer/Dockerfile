@@ -30,6 +30,9 @@ RUN yum install -y epel-release 'dnf-command(config-manager)' && \
       openshift-ansible-test && \
     yum clean all
 
+# ensure that the python3.x pip is set as python3
+RUN unlink /usr/bin/pip3 && ln -s /usr/bin/pip3.11 /usr/bin/pip3
+
 # for ec2_ami_info (in workers-rhel-aws-provision CI step) which requires boto3
 RUN pip3 install --no-cache-dir boto3 botocore ansible-core
 
