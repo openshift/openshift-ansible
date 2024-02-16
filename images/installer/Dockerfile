@@ -30,6 +30,10 @@ RUN yum install -y epel-release 'dnf-command(config-manager)' && \
       openshift-ansible-test && \
     yum clean all
 
+# Add a symlink to pip3.x.
+# Any future use of pip3 can be used after this link is set, rather than specifically calling pip3.x.
+RUN ln -s /usr/bin/pip3.11 /usr/bin/pip3
+
 # for ec2_ami_info (in workers-rhel-aws-provision CI step) which requires boto3
 RUN pip3 install --no-cache-dir boto3 botocore ansible-core
 
