@@ -26,8 +26,7 @@ COPY images/installer/root /
 RUN yum install -y epel-release 'dnf-command(config-manager)' && \
     yum config-manager --enable built > /dev/null && \
     yum install --setopt=tsflags=nodocs -y \
-      'ansible-core < 2.14' \
-      python38-dateutil python38-urllib3 \
+      python3.11 python3.11-pip python3.11-urllib3 \
       openshift-ansible-test && \
     yum clean all
 
@@ -36,9 +35,11 @@ RUN yum install -y epel-release 'dnf-command(config-manager)' && \
 RUN ln -s /usr/bin/pip3.11 /usr/bin/pip3
 
 # for ec2_ami_info (in workers-rhel-aws-provision CI step) which requires boto3
+RUN pip3 install --no-cache-dir boto3 botocore ansible-core
+
+# ansible-galaxy will not be available until ansible-core is installed
 RUN ansible-galaxy collection install -p /usr/share/ansible/collections amazon.aws && \
-    find $HOME/.ansible -delete && \
-    pip3 install --no-cache-dir boto3
+    find $HOME/.ansible -delete
 
 RUN /usr/local/bin/user_setup \
  && rm /usr/local/bin/usage.ocp
