@@ -17,7 +17,7 @@ openshift_node_packages:
   - cri-o-{{ crio_latest }}
   - cri-tools
   - openshift-clients-{{ l_cluster_version }}*
-  - openshift-hyperkube-{{ l_cluster_version }}*
+  - openshift-kubelet-{{ l_cluster_version }}*
   - podman
   - runc
   - ose-aws-ecr-image-credential-provider
