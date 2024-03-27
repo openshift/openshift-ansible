@@ -15,14 +15,27 @@
     path: /var/lib/ipsec/nss
     state: directory
 
+- name: check if ipsec dir is empty
+  find:
+    paths: /var/lib/ipsec/nss
+    file_type: any
+    hidden: true
+  register: findFiles
+
+- name: determine if selinux context is set
+  shell: semanage fcontext -l ipsec_key_file_t | grep "/var/lib/ipsec/nss" | wc -l
+  register: numContextEntries
+
 - name: set nss selinux context
-  command: semanage fcontext -a -t ipsec_key_file_t /var/lib/ipsec/nss
+  shell: semanage fcontext -a -t ipsec_key_file_t /var/lib/ipsec/nss
+  when: numContextEntries.stdout | int < 1
 
 - name: restore nss selinux context so it will be active
   command: restorecon -r /var/lib/ipsec/nss
 
 - name: initialize nss db
   command: ipsec initnss --nssdir /var/lib/ipsec/nss
+  when: findFiles.matched == 0
 
 - name: make sure proper selinux label on nss db
   command: chcon -R -t ipsec_key_file_t /var/lib/ipsec/nss
