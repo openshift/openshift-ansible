@@ -25,6 +25,17 @@
   - include_tasks: "{{ openshift_node_pre_upgrade_hook }}"
   when: openshift_node_pre_upgrade_hook is defined
 
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Remove conflicts from openshift-hyperkube
+  dnf:
+    name: openshift-hyperkube
+    state: absent
+  when:
+  - "'openshift-hyperkube' in ansible_facts.packages"
+
 # Upgrade Node Packages
 - import_tasks: install.yml
 
