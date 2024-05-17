@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.11.1159
+Version:        3.11.1306
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -36,6 +36,7 @@ Requires:      pyOpenSSL
 Requires:      openssh-clients
 
 %description
+%global __python /usr/bin/python3
 Openshift and Atomic Enterprise Ansible
 
 This repo contains Ansible code and playbooks
@@ -101,6 +102,7 @@ Requires:      %{name} = %{version}-%{release}
 BuildArch:     noarch
 
 %description docs
+%global __python /usr/bin/python3
 %{summary}.
 
 %files docs
@@ -116,6 +118,7 @@ Requires:      %{name}-roles = %{version}-%{release}
 BuildArch:     noarch
 
 %description playbooks
+%global __python /usr/bin/python3
 %{summary}.
 
 %files playbooks
@@ -159,6 +162,7 @@ Obsoletes:      %{name}-callback-plugins
 BuildArch:     noarch
 
 %description roles
+%global __python /usr/bin/python3
 %{summary}.
 
 %files roles
@@ -184,12 +188,16 @@ Requires:      python-boto3
 BuildArch:     noarch
 
 %description test
+%global __python /usr/bin/python3
 %{summary}.
 
 %files test
 %{_datadir}/ansible/%{name}/test
 
 %changelog
+* Fri May 17 2024 AOS Automation Release Team <noreply@redhat.com> 3.11.1306-1
+- 
+
 * Wed Sep 20 2023 AOS Automation Release Team <noreply@redhat.com> 3.11.1159-1
 - 
 
