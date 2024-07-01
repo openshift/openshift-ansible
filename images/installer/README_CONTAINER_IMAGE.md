@@ -2,7 +2,7 @@ ORIGIN-ANSIBLE IMAGE INSTALLER
 ===============================
 
 Contains Dockerfile information for building an openshift/origin-ansible image
-based on `quay.io/centos/centos:stream8` or `registry.access.redhat.com/ubi8`.
+based on `quay.io/centos/centos:stream9` or `registry.access.redhat.com/ubi9`.
 
 Read additional setup information for this image at: https://hub.docker.com/r/openshift/origin-ansible/
 

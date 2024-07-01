@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream8
+FROM quay.io/centos/centos:stream9
 
 MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
@@ -29,6 +29,9 @@ RUN yum install -y epel-release 'dnf-command(config-manager)' && \
       python3.11 python3.11-pip python3.11-urllib3 \
       openshift-ansible-test && \
     yum clean all
+
+RUN unlink /usr/bin/python3
+RUN ln -s /usr/bin/python3.11 /usr/bin/python3
 
 # Add a symlink to pip3.x.
 # Any future use of pip3 can be used after this link is set, rather than specifically calling pip3.x.
