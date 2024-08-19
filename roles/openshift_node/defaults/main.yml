@@ -90,6 +90,9 @@ openshift_node_support_packages_by_os_major_version:
   "8":
     - openvswitch3.1
     - policycoreutils-python-utils
+  "9":
+    - openvswitch3.1
+    - policycoreutils-python-utils
 
 openshift_node_support_packages_by_arch:
   ppc64le:
