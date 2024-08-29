@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream8
+FROM quay.io/centos/centos:stream9
 
 MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
@@ -30,12 +30,15 @@ RUN yum install -y epel-release 'dnf-command(config-manager)' && \
       openshift-ansible-test && \
     yum clean all
 
+RUN unlink /usr/bin/python3
+RUN ln -s /usr/bin/python3.11 /usr/bin/python3
+
 # Add a symlink to pip3.x.
 # Any future use of pip3 can be used after this link is set, rather than specifically calling pip3.x.
 RUN ln -s /usr/bin/pip3.11 /usr/bin/pip3
 
 # for ec2_ami_info (in workers-rhel-aws-provision CI step) which requires boto3
-RUN pip3 install --no-cache-dir boto3 botocore ansible-core
+RUN pip3 install --no-cache-dir boto3 botocore 'ansible-core<2.17'
 
 # ansible-galaxy will not be available until ansible-core is installed
 RUN ansible-galaxy collection install -p /usr/share/ansible/collections amazon.aws && \
