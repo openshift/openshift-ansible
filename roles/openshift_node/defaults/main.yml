@@ -19,6 +19,7 @@ openshift_node_packages:
   - openshift-clients-{{ l_cluster_version }}*
   - openshift-kubelet-{{ l_cluster_version }}*
   - podman
+  - netavark
   - runc
   - ose-aws-ecr-image-credential-provider
   - ose-azure-acr-image-credential-provider
