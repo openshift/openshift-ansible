@@ -139,3 +139,15 @@
     option: Storage
     value: "persistent"
     no_extra_spaces: yes
+
+- name: set package facts
+  ansible.builtin.package_facts:
+
+# since podman-5.0, cni is not supported anymore, update the network backend to netavark
+- name: Update the network backend to Netavark
+  lineinfile:
+    path: /usr/share/containers/containers.conf
+    regexp: '^network_backend.*'
+    line: 'network_backend = "netavark"'
+    backrefs: yes
+  when: ansible_facts.packages.podman[0].version.split(".")[0] | int >= 5
