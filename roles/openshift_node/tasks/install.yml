@@ -107,6 +107,21 @@
         Please ensure repos are configured properly to provide these packages
         and indicated versions.
 
+# Changes are possible to daemons on update. Reload for the most updated state
+- name: reload systemd daemons
+  systemd:
+    daemon_reload: yes
+
+# gather facts to ensure that openvswitch is defined for the next task
+- name: gather service facts
+  ansible.builtin.service_facts:
+
+- name: Restart openvswitch
+  systemd:
+    name: openvswitch
+    state: restarted
+  when: ansible_facts.services['openvswitch.service'] is defined
+
 - name: Enable the CRI-O service
   systemd:
     name: "crio"
