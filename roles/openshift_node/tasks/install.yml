@@ -87,6 +87,10 @@
   when:
   - crio_latest is version(l_kubernetes_server_version, 'lt')
 
+- name: Disable container-tools:rhel{{ ansible_distribution_major_version }} modularity appstream
+  command: dnf module disable container-tools:rhel{{ ansible_distribution_major_version }} -y
+  ignore_errors: true
+
 - block:
   - name: Install openshift packages
     dnf:
