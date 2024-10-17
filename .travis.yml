@@ -16,7 +16,7 @@ before_install:
 
 install:
   - pip install --upgrade pip
-  - pip install setuptools==57.5.0
+  - pip install setuptools==70.0.0
   - pip install tox-travis
 
 script:
