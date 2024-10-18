@@ -16,6 +16,7 @@ openshift_node_packages:
   - conmon
   - cri-o-{{ crio_latest }}
   - cri-tools
+  - crun
   - openshift-clients-{{ l_cluster_version }}*
   - openshift-kubelet-{{ l_cluster_version }}*
   - podman

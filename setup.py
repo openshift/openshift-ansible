@@ -380,6 +380,18 @@ class UnsupportedCommand(Command):
         print("Unsupported command for openshift-ansible")
 
 
+test_requirements_file = os.path.abspath(os.path.dirname(__file__)) + "/test-requirements.txt"
+with open(test_requirements_file, "r") as file:
+    test_requirements = [
+        line.rstrip() for line in file if not line.startswith("#")
+    ]
+
+requirements_file = os.path.abspath(os.path.dirname(__file__)) + "/requirements.txt"
+with open(requirements_file, "r") as file:
+    test_requirements.extend([
+        line.rstrip() for line in file if not line.startswith("#")
+    ])
+
 setup(
     name='openshift-ansible',
     license="Apache 2.0",
@@ -396,4 +408,8 @@ setup(
         'ansible_syntax': OpenShiftAnsibleSyntaxCheck,
     },
     packages=[],
+    tests_require=test_requirements,
+    extras_require={
+        "test": test_requirements,
+    }
 )

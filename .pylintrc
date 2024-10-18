@@ -4,11 +4,12 @@
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-#init-hook=
+init-hook="import sys; sys.path.append('roles/openshift_node/library');sys.path.append('roles/openshift_node/callback_plugins')"
 
 # Add files or directories to the ignore list. They should be base names, not
 # paths.
 ignore=CVS,setup.py,ini_file.py,profile_tasks.py,seboolean.py,sysctl.py
+ignore-paths=^.*test/.*$, ^tests/.*$, ^git/.*$, ^.tox/.*$
 
 # Pickle collected data for later comparisons.
 persistent=no
@@ -60,7 +61,7 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-disable=fixme,locally-disabled,file-ignored,duplicate-code
+disable=fixme,locally-disabled,file-ignored,duplicate-code,consider-using-f-string,use-dict-literal,unnecessary-negation
 
 
 [REPORTS]
@@ -359,6 +360,8 @@ max-public-methods=20
 # Maximum number of boolean expressions in a if statement
 max-bool-expr=5
 
+# Maximum number of arguments for a function (default=5)
+max-positional-arguments=10
 
 [IMPORTS]
 
