@@ -15,7 +15,7 @@
   command: >
     oc adm drain {{ ansible_nodename | lower }}
     --kubeconfig={{ openshift_node_kubeconfig_path }}
-    --force --delete-local-data --ignore-daemonsets
+    --force --delete-emptydir-data --ignore-daemonsets
   delegate_to: localhost
 
 # Run the openshift_node_pre_upgrade_hook if defined
