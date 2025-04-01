@@ -26,5 +26,5 @@
 
 - name: Fail if cluster version is greater than or equal to 4.19
   fail:
-    msg: "Cluster version {{ l_cluster_version }} is >= 4.19 and is not supported anymore"
+    msg: "RHEL nodes in version 4.19 and above are no longer supported"
   when: l_cluster_version is version('4.19', '>=')
