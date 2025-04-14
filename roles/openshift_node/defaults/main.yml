@@ -13,6 +13,7 @@ openshift_package_directory: '/tmp/openshift-ansible-packages'
 openshift_packages: "{{ (openshift_node_packages + openshift_node_support_packages) | join(',') }}"
 
 openshift_node_packages:
+  - afterburn
   - conmon
   - cri-o-{{ crio_latest }}
   - cri-tools
