@@ -91,8 +91,8 @@
   - name: Install openshift packages
     dnf:
       name: "{{ openshift_packages }}"
-      disablerepo: "container-tools"
       state: latest
+      exclude: "containers-common" 
       allowerasing: true
       disable_gpg_check: true
     async: 3600
