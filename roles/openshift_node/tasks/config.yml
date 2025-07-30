@@ -114,6 +114,23 @@
     state: restarted
   when: update_registries is changed
 
+#Update the Default OCI runtime to runc of Podman
+- name: Check if crun is currently the default runtime
+  command: podman info --format '{{"{{"}}.Host.OCIRuntime.Name{{"}}"}}'
+  register: current_runtime
+  changed_when: false
+  ignore_errors: true
+
+- name: Modify Podman configuration to use runc
+  ini_file:
+    path: /usr/share/containers/containers.conf
+    section: engine
+    option: runtime
+    value: '"runc"'
+    create: yes
+    mode: 0644
+  when: "'crun' in current_runtime.stdout"
+
 - name: Get cluster pull-secret
   command: >
     oc get secret pull-secret
