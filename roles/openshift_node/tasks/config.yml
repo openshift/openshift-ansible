@@ -277,3 +277,6 @@
   - name: DEBUG - Node failed to report ready
     fail:
       msg: "Node failed to report ready"
+
+- name: Upgrade at the end to make sure everything is sane
+  command: dnf upgrade -y
