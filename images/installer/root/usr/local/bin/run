@@ -8,6 +8,30 @@
 
 # SOURCE and HOME DIRECTORY: /opt/app-root/src
 
+validate_url_scheme() {
+  local url="$1"
+  local varname="$2"
+  if [[ "${url}" != https://* ]]; then
+    echo "Error: ${varname} must use HTTPS. Refusing to fetch '${url}'." >&2
+    exit 1
+  fi
+}
+
+verify_checksum() {
+  local file="$1"
+  local expected="$2"
+  local varname="$3"
+  local actual
+  actual="$(sha256sum "${file}" | awk '{print $1}')"
+  if [[ "${actual}" != "${expected}" ]]; then
+    echo "Error: checksum verification failed for ${varname}." >&2
+    echo "  expected: ${expected}" >&2
+    echo "  got:      ${actual}" >&2
+    rm -f "${file}"
+    exit 1
+  fi
+}
+
 if [[ -z "${PLAYBOOK_FILE}" ]]; then
   echo
   echo "PLAYBOOK_FILE must be provided."
@@ -18,18 +42,28 @@ INVENTORY="$(mktemp)"
 if [[ -v INVENTORY_FILE ]]; then
   # Make a copy so that ALLOW_ANSIBLE_CONNECTION_LOCAL below
   # does not attempt to modify the original
-  cp ${INVENTORY_FILE} ${INVENTORY}
+  cp "${INVENTORY_FILE}" "${INVENTORY}"
 elif [[ -v INVENTORY_DIR ]]; then
   INVENTORY="$(mktemp -d)"
-  cp -RL ${INVENTORY_DIR}/* ${INVENTORY}
+  cp -RL "${INVENTORY_DIR}"/* "${INVENTORY}"
 elif [[ -v INVENTORY_URL ]]; then
-  curl -o ${INVENTORY} ${INVENTORY_URL}
+  validate_url_scheme "${INVENTORY_URL}" "INVENTORY_URL"
+  curl --fail --silent --show-error --proto '=https' -o "${INVENTORY}" "${INVENTORY_URL}"
+  if [[ -v INVENTORY_SHA256 ]]; then
+    verify_checksum "${INVENTORY}" "${INVENTORY_SHA256}" "INVENTORY_URL"
+  fi
 elif [[ -v DYNAMIC_SCRIPT_URL ]]; then
-  curl -o ${INVENTORY} ${DYNAMIC_SCRIPT_URL}
-  chmod 755 ${INVENTORY}
+  validate_url_scheme "${DYNAMIC_SCRIPT_URL}" "DYNAMIC_SCRIPT_URL"
+  if [[ ! -v DYNAMIC_SCRIPT_SHA256 ]]; then
+    echo "Error: DYNAMIC_SCRIPT_SHA256 is required when using DYNAMIC_SCRIPT_URL." >&2
+    exit 1
+  fi
+  curl --fail --silent --show-error --proto '=https' -o "${INVENTORY}" "${DYNAMIC_SCRIPT_URL}"
+  verify_checksum "${INVENTORY}" "${DYNAMIC_SCRIPT_SHA256}" "DYNAMIC_SCRIPT_URL"
+  chmod 755 "${INVENTORY}"
 elif [[ -v GENERATE_INVENTORY ]]; then
   # dynamically generate inventory file using bind-mounted info
-  /usr/local/bin/generate ${INVENTORY}
+  /usr/local/bin/generate "${INVENTORY}"
 else
   echo
   echo "One of INVENTORY_FILE, INVENTORY_DIR, INVENTORY_URL, GENERATE_INVENTORY, or DYNAMIC_SCRIPT_URL must be provided."
@@ -38,15 +72,15 @@ fi
 INVENTORY_ARG="-i ${INVENTORY}"
 
 if [[ "$ALLOW_ANSIBLE_CONNECTION_LOCAL" = false ]]; then
-  sed -i s/ansible_connection=local// ${INVENTORY}
+  sed -i s/ansible_connection=local// "${INVENTORY}"
 fi
 
 if [[ -v VAULT_PASS ]]; then
   VAULT_PASS_FILE="$(mktemp)"
-  echo ${VAULT_PASS} > ${VAULT_PASS_FILE}
+  echo "${VAULT_PASS}" > "${VAULT_PASS_FILE}"
   VAULT_PASS_ARG="--vault-password-file ${VAULT_PASS_FILE}"
 fi
 
-cd ${WORK_DIR}
+cd "${WORK_DIR}"
 
 exec ansible-playbook ${INVENTORY_ARG} ${VAULT_PASS_ARG} ${OPTS} ${PLAYBOOK_FILE}
