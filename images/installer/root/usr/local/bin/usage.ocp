@@ -12,7 +12,10 @@ At a minimum, when running a container using this image you must provide:
   /opt/app-root/src/.ssh
 * An inventory file. This can be mounted inside the container as a volume and specified with the
   INVENTORY_FILE environment variable. Alternatively you can serve the inventory file from a web
-  server and use the INVENTORY_URL environment variable to fetch it.
+  server and use the INVENTORY_URL environment variable to fetch it (HTTPS required), or use
+  DYNAMIC_SCRIPT_URL to download a dynamic inventory script (HTTPS required, and
+  DYNAMIC_SCRIPT_SHA256 must be set to the script's SHA-256 hex digest).
+  You may optionally set INVENTORY_SHA256 when using INVENTORY_URL.
 * The playbook to run. This is set using the PLAYBOOK_FILE environment variable.
 
 Here is an example of how to run a containerized ose-ansible with
