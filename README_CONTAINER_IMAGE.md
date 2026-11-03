@@ -18,6 +18,8 @@ At the very least, when running a container you must specify:
 
 1. An **inventory**. This can be a location inside the container (possibly mounted as a volume) with a path referenced via the `INVENTORY_FILE` environment variable. Alternatively you can serve the inventory file from a web server and use the `INVENTORY_URL` environment variable to fetch it, or `DYNAMIC_SCRIPT_URL` to download a script that provides a dynamic inventory.
 
+   When using remote URLs (`INVENTORY_URL` or `DYNAMIC_SCRIPT_URL`), the URL must use HTTPS. When using `DYNAMIC_SCRIPT_URL`, you must also set `DYNAMIC_SCRIPT_SHA256` to the SHA-256 hex digest of the script (e.g. `sha256sum myscript.sh`). You may optionally set `INVENTORY_SHA256` when using `INVENTORY_URL` for integrity verification.
+
 1. **ssh keys** so that Ansible can reach your hosts. These should be mounted as a volume under `/opt/app-root/src/.ssh` under normal usage (i.e. when running the container as non-root).
 
 1. The **playbook** to run. This is set using the `PLAYBOOK_FILE` environment variable. If you don't specify a playbook the [`openshift_facts`](playbooks/byo/openshift_facts.yml) playbook will be run to collect and show facts about your OpenShift environment.
